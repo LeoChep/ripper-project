@@ -5,7 +5,8 @@
 </template>
 
 <script setup>
-import testImg from '@/assets/logo.svg'
+import testImg from '@/assets/wolf/walk.png'
+import wolfJson from "@/assets/wolf/wolf_walk.json"
 import * as PIXI from 'pixi.js'
 import { onMounted } from 'vue'
 onMounted(async () => {
@@ -15,7 +16,7 @@ onMounted(async () => {
         height: 600,
         antialias: true,
         background: 0x262626, // 设置canvas背景颜色
-        backgroundAlpha: 0,   // 设置背景颜色透明度
+        backgroundAlpha: 1,   // 设置背景颜色透明度
         resolution: 1,
         // transparent: false, // backgroundAlpha 已控制透明度
     });
@@ -23,11 +24,26 @@ onMounted(async () => {
     document.getElementById("game-pannel").appendChild(app.canvas);
 
     // TODO 路径暂时写死
-    await PIXI.Assets.load(testImg);
-    let bear = PIXI.Sprite.from(testImg);
-    bear.x = 400;
-    bear.y = 300;
-    app.stage.addChild(bear);
+    const sheetTexture = await PIXI.Assets.load(testImg);
+
+
+    console.log(wolfJson)
+    const spritesheet = new PIXI.Spritesheet(
+       sheetTexture,
+        wolfJson
+    );
+    await spritesheet.parse();
+    console.log(spritesheet);
+    // spritesheet is ready to use!
+    const anim = new PIXI.AnimatedSprite(spritesheet.animations.walk);
+    anim.animationSpeed = 0.1666;
+    anim.textures = spritesheet.animations.walk
+    // play the animation on a loop
+    anim.play();
+    // let bear = new PIXI.AnimatedSprite(sheet.animations['walk_1']);
+    // bear.x = 400;
+    // bear.y = 300;
+    app.stage.addChild(anim);
     app.stage.interactive = true;
 })
 
