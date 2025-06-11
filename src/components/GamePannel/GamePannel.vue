@@ -35,9 +35,9 @@ onMounted(async () => {
     await spritesheet.parse();
     console.log(spritesheet);
     // spritesheet is ready to use!
-    const anim = new PIXI.AnimatedSprite(spritesheet.animations.walk);
+    const anim = new PIXI.AnimatedSprite(spritesheet.animations.walk_w);
     anim.animationSpeed = 0.1666;
-    anim.textures = spritesheet.animations.walk
+    anim.textures = spritesheet.animations.walk_w
     // play the animation on a loop
     anim.play();
     // let bear = new PIXI.AnimatedSprite(sheet.animations['walk_1']);
