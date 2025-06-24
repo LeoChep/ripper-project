@@ -6,9 +6,9 @@
 
 <script setup>
 import testImg from '@/assets/wolf/walk.png'
-import mapImg from '@/assets/map/desert.png'
+import mapImg from '@/assets/map/A.png'
 import wolfJson from "@/assets/wolf/wolf_walk.json"
-import mapPassiableFile from "@/assets/map/desert.tmj?raw"
+import mapPassiableFile from "@/assets/map/A.tmj?raw"
 import * as PIXI from 'pixi.js'
 import { UnitRightEvent } from '@/core/UnitRightEvent'
 import { onMounted } from 'vue'
@@ -39,6 +39,56 @@ onMounted(async () => {
     const mapTexture = await PIXI.Assets.load(mapImg);
     // const mapPassiableFile= require('@/assets/map/desert.tmj');
     const mapPassiable = JSON.parse(mapPassiableFile)
+    const layers = mapPassiable.layers;
+    const objectsGroup = layers.find((layer) => layer.type === "objectgroup");
+    const edges = [];
+    if (objectsGroup && objectsGroup.objects) {
+        objectsGroup.objects.forEach((object) => {
+            // 检查对象是否有polygon属性
+            let polys = null
+            let type = null
+            if (object.polygon && object.polygon.length >= 0) {
+                polys = object.polygon;
+                type = "polygon";
+            }
+
+            if (object.polyline && object.polyline.length >= 0) {
+                // 检查对象是否有polyline属性
+                type = "polyline";
+                polys = object.polyline;
+            }
+
+            if (polys && polys.length >= 2) {
+                //根据polygon建立边数组,每条边为相邻两个点的连线
+                for (let i = 0; i < polys.length - 1; i++) {
+                    const start = polys[i];
+                    const end = polys[(i + 1)];
+                    edges.push({
+                        x1: start.x + object.x,
+                        y1: start.y + object.y,
+                        x2: end.x + object.x,
+                        y2: end.y + object.y
+                    });
+                }
+                // 处理最后一个点与第一个点的连线
+                if (type === "polygon") {
+                    const start = polys[object.polygon.length - 1];
+                    const end = polys[0];
+                    edges.push({
+                        x1: start.x + object.x,
+                        y1: start.y + object.y,
+                        x2: end.x + object.x,
+                        y2: end.y + object.y
+                    });
+                }
+
+
+            }
+        });
+    } else {
+        console.error("No passable objects found in the map.");
+    }
+    mapPassiable.edges = edges;
     console.log(mapPassiable);
     const sheetTexture = await PIXI.Assets.load(testImg);
 
@@ -73,7 +123,7 @@ onMounted(async () => {
     rect.fill({ color: 'black' }); // 黑色填充
     container.addChild(rect);
     const map = new PIXI.Sprite(mapTexture);
-    map.scale = 2;
+    //map.scale = 2;
     container.addChild(map);
     container.eventMode = 'static';
     basicLayer.attach(container);
@@ -133,7 +183,7 @@ onMounted(async () => {
     lineLayer.attach(lineContainer);
     anim.eventMode = 'dynamic';
     anim.on('rightdown', (event) => {
-        UnitRightEvent(event, anim, container,selectLayer,mapPassiable);
+        UnitRightEvent(event, anim, container, selectLayer, mapPassiable);
     });
 
 })

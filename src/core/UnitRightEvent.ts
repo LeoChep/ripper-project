@@ -129,10 +129,56 @@ export const moveSelect = (
       { dx: -1, dy: 1 },
     ];
     for (const dir of dirs) {
+      if (dir.dx*dir.dx + dir.dy*dir.dy > 1) {
+        // 如果是对角线方向，检查是否是拐角
+        if (dir.dx < 0 && dir.dy < 0) {
+          // 左上角
+          if (
+            path[`${x - 1},${y}`] === undefined ||
+            path[`${x},${y - 1}`] === undefined
+          ) {
+            continue; // 如果左或上不可通行，则跳过
+          }
+        }
+        if (dir.dx > 0 && dir.dy < 0) {
+          // 右上角
+          if (
+            path[`${x + 1},${y}`] === undefined ||
+            path[`${x},${y - 1}`] === undefined
+          ) {
+            continue; // 如果右或上不可通行，则跳过
+          }
+        }
+        if (dir.dx < 0 && dir.dy > 0) {
+          // 左下角
+          if (
+            path[`${x - 1},${y}`] === undefined ||
+            path[`${x},${y + 1}`] === undefined
+          ) {
+            continue; // 如果左或下不可通行，则跳过
+          }
+        }
+        if (dir.dx > 0 && dir.dy > 0) {
+          // 右下角
+          if (
+            path[`${x + 1},${y}`] === undefined ||
+            path[`${x},${y + 1}`] === undefined
+          ) {
+            continue; // 如果右或下不可通行，则跳过
+          }
+        }
+        
+      }
       const nx = x + dir.dx;
       const ny = y + dir.dy;
       const key = `${nx},${ny}`;
-      const passiable = checkPassiable(x*tileSize,y*tileSize,nx* tileSize, ny* tileSize, mapPassiable);
+      const passiable = checkPassiable(
+        x * tileSize,
+        y * tileSize,
+        nx * tileSize,
+        ny * tileSize,
+        mapPassiable
+      );
       if (passiable) {
         if (!visited.has(key)) {
           queue.push({ x: nx, y: ny, step: step + 1 });
@@ -264,87 +310,82 @@ const girdMoveMovement = (
   return girdMovePromise;
 };
 const checkPassiable = (
-  prex:number,
-  prey:number,
+  prex: number,
+  prey: number,
   x: number,
   y: number,
   mapPassiable: TiledMap | null
 ) => {
   let passiable = true;
   if (mapPassiable) {
-    const layers = mapPassiable.layers;
-    const objectsGroup = layers.find((layer) => layer.type === "objectgroup");
-    if (objectsGroup && objectsGroup.objects) {
+    const edges = mapPassiable.edges;
+    if (edges) {
+      // console.log(edges)
       // 检查是否有对象在指定位置
       // 遍历对象组中的所有对象
-
-      objectsGroup?.objects.forEach((object) => {
-        
-        console.log(x, y, object);
+      edges.forEach((edge) => {
         let testx = x;
         let testy = y;
-        const x1 = object.x ;
-        const y1 = object.y ;
-        const x2 = x1 + object.width ;
-        const y2 = y1 + object.height ;
-        // 判断线段 (prex,prey)-(x,y) 是否与矩形 [x1,x2,y1,y2] 相交或进入
-        // 先判断终点是否在矩形内
-        if (
-          testx >= x1 &&
-          testx <= x2 &&
-          testy >= y1 &&
-          testy <= y2
-        ) {
-          passiable = false;
-        }
-        // 判断线段是否与矩形四条边相交
-        const rectEdges = [
-          // 上边
-          { x1: x1, y1: y1, x2: x2, y2: y1 },
-          // 下边
-          { x1: x1, y1: y2, x2: x2, y2: y2 },
-          // 左边
-          { x1: x1, y1: y1, x2: x1, y2: y2 },
-          // 右边
-          { x1: x2, y1: y1, x2: x2, y2: y2 },
+
+        // 获取两个格子的四个顶点
+        const pointsA = [
+             { x: prex+32, y: prey+32 },
+          { x: prex, y: prey },
+          { x: prex + 64, y: prey },
+          { x: prex + 64, y: prey + 64 },
+          { x: prex, y: prey + 64 },
         ];
-        for (const edge of rectEdges) {
+        const pointsB = [
+            { x: testx+32, y: testy+32 },
+          { x: testx, y: testy },
+          { x: testx + 64, y: testy },
+          { x: testx + 64, y: testy + 64 },
+          { x: testx, y: testy + 64 },
+        ];
+        // 检查所有顶点对的连线
+        let intersectCount = 0;
+        for (let i = 0; i < 1; i++) {
           if (
             segmentsIntersect(
-              prex,
-              prey,
-              testx,
-              testy,
+              pointsA[i].x,
+              pointsA[i].y,
+              pointsB[i].x,
+              pointsB[i].y,
               edge.x1,
               edge.y1,
               edge.x2,
               edge.y2
             )
           ) {
-            passiable = false;
+            intersectCount++;
+        
           }
         }
-      
+          if (intersectCount >= 1) {
+              passiable = false;
+              //终止遍历
+            }
       });
     }
   }
 
   return passiable;
 };
-const segmentsIntersect = (x1: number,
-  y1: number,       
+const segmentsIntersect = (
+  x1: number,
+  y1: number,
   x2: number,
   y2: number,
   x3: number,
   y3: number,
   x4: number,
-  y4: number) => {              
+  y4: number
+) => {
   const denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
-  if (denom === 0) {    
+  if (denom === 0) {
     return false; // 平行或重合
-  } 
+  }
   const ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom;
-  const ub = ((x2 - x1) * (y1 - y3)
-    - (y2 - y1) * (x1 - x3)) / denom;
+  const ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denom;
   return ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1; // 判断是否在有效范围内
-}
+};

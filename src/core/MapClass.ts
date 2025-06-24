@@ -1,37 +1,67 @@
-export interface TiledMapLayer {
-  compression?: string;
-  data?: string;
-  encoding?: string;
-  height?: number;
+// 单个区块（chunk）
+export interface TiledMapChunk {
+  data: number[];
+  height: number;
+  width: number;
+  x: number;
+  y: number;
+}
+
+// 对象层中的对象
+export interface TiledMapObject {
+  height: number;
   id: number;
   name: string;
-  opacity: number;
+  polygon?: Array<{ x: number; y: number }>;
+  polyline?: Array<{ x: number; y: number }>;
+
+  rotation: number;
   type: string;
   visible: boolean;
+  width: number;
+  x: number;
+  y: number;
+}
+
+// 图层
+export interface TiledMapLayer {
+  // tilelayer
+  chunks?: TiledMapChunk[];
+  data?: number[];
+  height?: number;
   width?: number;
+  id: number;
+  name: string;
+  offsetx?: number;
+  offsety?: number;
+  opacity: number;
+  startx?: number;
+  starty?: number;
+  type: string;
+  visible: boolean;
   x: number;
   y: number;
   // objectgroup
-  class?: string;
   draworder?: string;
-  objects?: Array<{
-    height: number;
-    id: number;
-    name: string;
-    rotation: number;
-    type: string;
-    visible: boolean;
-    width: number;
-    x: number;
-    y: number;
-  }>;
+  objects?: TiledMapObject[];
 }
 
+// tileset
 export interface TiledMapTileset {
+  columns: number;
   firstgid: number;
-  source: string;
+  image: string;
+  imageheight: number;
+  imagewidth: number;
+  margin: number;
+  name: string;
+  spacing: number;
+  tilecount: number;
+  tileheight: number;
+  tilewidth: number;
 }
 
+// 主地图类
 export class TiledMap {
   compressionlevel: number;
   height: number;
@@ -48,7 +78,7 @@ export class TiledMap {
   type: string;
   version: string;
   width: number;
-
+  edges: Array<{ x1: number; y1: number; x2: number; y2: number; }> = [];
   constructor(data: any) {
     this.compressionlevel = data.compressionlevel;
     this.height = data.height;
