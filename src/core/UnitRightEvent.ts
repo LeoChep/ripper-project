@@ -157,8 +157,8 @@ export const moveMovement = (
   // 获取点击位置
   const pos = event.data.global;
   // 计算点击位置相对于动画精灵的偏移
-  const offsetX = pos.x;
-  const offsetY = pos.y;
+  const offsetX = pos.x-container.x;
+  const offsetY = pos.y-container.y;
   // 计算点击位置对应的格子坐标
   const tileX = Math.floor(offsetX / tileSize);
   const tileY = Math.floor(offsetY / tileSize);

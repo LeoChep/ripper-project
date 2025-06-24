@@ -51,8 +51,8 @@ onMounted(async () => {
     anim.animationSpeed = 0.1666;
     anim.textures = spritesheet.animations.walk_w
     // play the animation on a loop
-     anim.play();
-   
+    anim.play();
+
     const basicLayer = new PIXI.RenderLayer()
     const spriteLayer = new PIXI.RenderLayer();
     const lineLayer = new PIXI.RenderLayer();
@@ -60,8 +60,8 @@ onMounted(async () => {
     app.stage.addChildAt(basicLayer, 0);
     app.stage.addChildAt(spriteLayer, 1);
     app.stage.addChildAt(lineLayer, 2);
-      app.stage.addChildAt(selectLayer, 3);
-     app.stage.interactive = true;
+    app.stage.addChildAt(selectLayer, 3);
+    app.stage.interactive = true;
     const container = new PIXI.Container();
     // 创建一个 800x600 的矩形图形作为底盘
     const rect = new PIXI.Graphics();
@@ -69,17 +69,41 @@ onMounted(async () => {
     rect.fill({ color: 'black' }); // 黑色填充
     container.addChild(rect);
     const map = new PIXI.Sprite(mapTexture);
+    map.scale = 2;
     container.addChild(map);
     container.eventMode = 'static';
     basicLayer.attach(container);
     app.stage.addChild(container);
-
+    //监听键盘S键
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 's') {
+            container.y -= 64
+        }
+    });
+    //监听键盘A键
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'a') {
+            container.x += 64
+        }
+    });
+    //监听键盘D键
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'd') {
+            container.x -= 64
+        }
+    });
+    //监听键盘W键
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'w') {
+            container.y += 64
+        }
+    });
     spriteLayer.attach(anim);
-  
+
     container.addChild(anim);
 
     //格子
-     const lineContainer = new PIXI.Container();
+    const lineContainer = new PIXI.Container();
     const gridSize = 64;
     const cols = Math.floor(appSetting.width / gridSize);
     const rows = Math.floor(appSetting.height / gridSize);
@@ -93,7 +117,7 @@ onMounted(async () => {
     }
 
     // 画横线
-   
+
     for (let j = 1; j < rows; j++) {
         const line = new PIXI.Graphics();
         line.moveTo(0, j * gridSize);
@@ -101,11 +125,11 @@ onMounted(async () => {
         line.stroke({ width: 1, color: 0x444444, alpha: 0.5 });
         lineContainer.addChild(line);
     }
-    container.addChild(lineContainer);
+    app.stage.addChild(lineContainer);
     lineLayer.attach(lineContainer);
     anim.eventMode = 'dynamic';
     anim.on('rightdown', (event) => {
-        UnitRightEvent(event, anim, container,selectLayer);
+        UnitRightEvent(event, anim, container, selectLayer);
     });
 
 })
