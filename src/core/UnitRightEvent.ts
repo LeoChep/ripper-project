@@ -86,7 +86,7 @@ export const moveSelect = (
   mapPassiable: TiledMap | null
 ) => {
   //显示红色的可移动范围
-  const range = 5;
+  const range = 6;
   const tileSize = 64;
   const graphics = new PIXI.Graphics();
   graphics.alpha = 0.4;
@@ -94,45 +94,55 @@ export const moveSelect = (
 
   const centerX = anim.x + anim.width;
   const centerY = anim.y + anim.height;
-  //欧几里得距离
-  // for (let dx = -range; dx <= range; dx++) {
-  //     for (let dy = -range; dy <= range; dy++) {
-  //         const dist = Math.sqrt(dx * dx + dy * dy);
-  //         if (dist <= range) {
-  //             const x = centerX + dx * tileSize - tileSize / 2;
-  //             const y = centerY + dy * tileSize - tileSize / 2;
-  //             graphics.rect(x, y, tileSize, tileSize);
-  //             graphics.fill({ color: 0xff0000 });
-  //         }
-  //     }
-  // }
-  //使用棋盘距离绘制
-  // for (let dx = -range; dx <= range; dx++) {
-  //     for (let dy = -range; dy <= range; dy++) {
-  //         if (Math.abs(dx) + Math.abs(dy) <= range) {
-  //             const x = centerX + dx * tileSize - tileSize / 2;
-  //             const y = centerY + dy * tileSize - tileSize / 2;
-  //             graphics.rect(x, y, tileSize, tileSize);
-  //             graphics.fill({ color: 0xff0000 });
-  //         }
-  //     }
-  // }
   //使用切比雪夫距离绘制
-  for (let dx = -range; dx <= range; dx++) {
-    for (let dy = -range; dy <= range; dy++) {
-      if (Math.max(Math.abs(dx), Math.abs(dy)) <= range) {
+  // 使用广度优先搜索(BFS)绘制可移动范围，并记录路径
+  const visited = new Set<string>();
+  const queue: { x: number; y: number; step: number }[] = [];
+  const startX = Math.floor((centerX - tileSize) / tileSize);
+  const startY = Math.floor((centerY - tileSize) / tileSize);
 
-        const x = centerX + dx * tileSize - tileSize;
-        const y = centerY + dy * tileSize - tileSize;
-        const passiable = checkPassiable(x, y, mapPassiable);
-        if (passiable) {
-          graphics.rect(x, y, tileSize, tileSize);
-          graphics.fill({ color: 0xff0000 });
+  // 用二维数组记录每个格子的前驱节点
+  const path: { [key: string]: { x: number; y: number } | null } = {};
+
+  queue.push({ x: startX, y: startY, step: 0 });
+  visited.add(`${startX},${startY}`);
+  path[`${startX},${startY}`] = null;
+
+  while (queue.length > 0) {
+    const { x, y, step } = queue.shift()!;
+    if (step > range) continue;
+
+    const drawX = x * tileSize;
+    const drawY = y * tileSize;
+
+    graphics.rect(drawX, drawY, tileSize, tileSize);
+    graphics.fill({ color: 0xff0000 });
+    // 八方向扩展
+    const dirs = [
+      { dx: 1, dy: 0 },
+      { dx: -1, dy: 0 },
+      { dx: 0, dy: 1 },
+      { dx: 0, dy: -1 },
+      { dx: 1, dy: 1 },
+      { dx: -1, dy: -1 },
+      { dx: 1, dy: -1 },
+      { dx: -1, dy: 1 },
+    ];
+    for (const dir of dirs) {
+      const nx = x + dir.dx;
+      const ny = y + dir.dy;
+      const key = `${nx},${ny}`;
+      const passiable = checkPassiable(x*tileSize,y*tileSize,nx* tileSize, ny* tileSize, mapPassiable);
+      if (passiable) {
+        if (!visited.has(key)) {
+          queue.push({ x: nx, y: ny, step: step + 1 });
+          visited.add(key);
+          path[key] = { x, y }; // 记录前驱
         }
-
       }
     }
   }
+  // path 是一个以 "x,y" 为 key 的对象，记录每个格子的前驱节点
   graphics.eventMode = "static";
 
   container.addChild(graphics);
@@ -147,15 +157,17 @@ export const moveSelect = (
   graphics.on("pointerdown", (e) => {
     e.stopPropagation();
     removeGraphics();
-    moveMovement(e, anim, container);
+
+    moveMovement(e, anim, container, path);
   });
   container.on("pointerdown", removeGraphics);
 };
 
-export const moveMovement = (
+export const moveMovement = async (
   event: PIXI.FederatedPointerEvent,
   anim: PIXI.AnimatedSprite,
-  container: PIXI.Container<PIXI.ContainerChild>
+  container: PIXI.Container<PIXI.ContainerChild>,
+  path: { [key: string]: { x: number; y: number } | null }
 ) => {
   const tileSize = 64; // 格子大小
   //计算出动画精灵所在的格子
@@ -165,16 +177,56 @@ export const moveMovement = (
   // 获取点击位置
   const pos = event.data.global;
   // 计算点击位置相对于动画精灵的偏移
-  const offsetX = pos.x-container.x;
-  const offsetY = pos.y-container.y;
+  const offsetX = pos.x - container.x;
+  const offsetY = pos.y - container.y;
   // 计算点击位置对应的格子坐标
   const tileX = Math.floor(offsetX / tileSize);
   const tileY = Math.floor(offsetY / tileSize);
   console.log(`点击位置所在格子: (${tileX}, ${tileY})`);
+  let pathCuror = path[`${tileX},${tileY}`];
+  console.log(pathCuror);
+  const pathWay = [] as { x: number; y: number }[];
+  while (pathCuror) {
+    pathWay.push({ x: pathCuror.x, y: pathCuror.y });
+    // 获取前驱节点
+    const prevX = pathCuror.x;
+    const prevY = pathCuror.y;
+    console.log(`前驱节点: (${prevX}, ${prevY})`);
+    // 更新前驱节点
+    pathCuror = path[`${prevX},${prevY}`];
+  }
+  // 反转路径
+  pathWay.reverse();
+  pathWay.push({ x: tileX, y: tileY });
+  //合并路径中的直线
+  for (let i = pathWay.length - 2; i > 0; i--) {
+    const prev = pathWay[i - 1];
+    const curr = pathWay[i];
+    const next = pathWay[i + 1];
+    // 判断三点是否共线（即方向向量相同）
+    if (
+      (curr.x - prev.x) * (next.y - curr.y) ===
+      (curr.y - prev.y) * (next.x - curr.x)
+    ) {
+      pathWay.splice(i, 1);
+    }
+  }
+  for (const step of pathWay) {
+    // 执行移动
+    await girdMoveMovement(step.x, step.y, anim, tileSize);
+  }
+  // girdMoveMovement(tileX, tileY, anim, tileSize);
+};
+const girdMoveMovement = (
+  tileX: number,
+  tileY: number,
+  anim: PIXI.AnimatedSprite,
+  tileSize: number
+) => {
   // 计算实际的移动位置
   const targetX = tileX * tileSize;
   const targetY = tileY * tileSize;
-  console.log(`目标位置: (${targetX}, ${targetY})`);
+  // console.log(`目标位置: (${targetX}, ${targetY})`);
   // 设置动画精灵的新位置
   const moveFunc = () => {
     console.log(`目标位置: (${targetX}, ${targetY})`);
@@ -200,49 +252,99 @@ export const moveMovement = (
       }
     }
   };
-  const timer = setInterval(() => {
-    moveFunc();
-    if (Math.abs(anim.x - targetX) < 1 && Math.abs(anim.y - targetY) < 1) {
-      clearInterval(timer);
-      console.log("移动完成");
-    }
-  }, 160);
+  const girdMovePromise = new Promise<void>((resolve) => {
+    const timer = setInterval(() => {
+      moveFunc();
+      if (Math.abs(anim.x - targetX) < 1 && Math.abs(anim.y - targetY) < 1) {
+        clearInterval(timer);
+        resolve();
+      }
+    }, 160);
+  });
+  return girdMovePromise;
 };
-
-const checkPassiable = (x: number, y: number, mapPassiable: TiledMap | null) => {
+const checkPassiable = (
+  prex:number,
+  prey:number,
+  x: number,
+  y: number,
+  mapPassiable: TiledMap | null
+) => {
+  let passiable = true;
   if (mapPassiable) {
     const layers = mapPassiable.layers;
-    const objectsGroup = layers.find(layer => layer.type === "objectgroup");
+    const objectsGroup = layers.find((layer) => layer.type === "objectgroup");
     if (objectsGroup && objectsGroup.objects) {
       // 检查是否有对象在指定位置
-      // 遍历对象组中的所有对象   
-      objectsGroup?.objects.forEach(object => {
-        let testx=x;
-        let testy=y;  
-        const x1 = object.x
-        const y1 = object.y
-        const x2 = x1 + object.width
-        const y2 = y1 + object.height
-        let count = 0;
-        const vertices = [
-          { x: testx, y: testy },
-          { x: testx + 64, y: testy },
-          { x: testx, y: testy + 64 },
-          { x: testx + 64, y: testy + 64 },
-        ];
-        vertices.forEach(v => {
-          if (v.x >= x1 && v.x <= x2 && v.y >= y1 && v.y <= y2) {
-            count++;
-          }
-        });
-        if (count >= 2) {
-          return false;
+      // 遍历对象组中的所有对象
+
+      objectsGroup?.objects.forEach((object) => {
+        
+        console.log(x, y, object);
+        let testx = x;
+        let testy = y;
+        const x1 = object.x ;
+        const y1 = object.y ;
+        const x2 = x1 + object.width ;
+        const y2 = y1 + object.height ;
+        // 判断线段 (prex,prey)-(x,y) 是否与矩形 [x1,x2,y1,y2] 相交或进入
+        // 先判断终点是否在矩形内
+        if (
+          testx >= x1 &&
+          testx <= x2 &&
+          testy >= y1 &&
+          testy <= y2
+        ) {
+          passiable = false;
         }
-     
+        // 判断线段是否与矩形四条边相交
+        const rectEdges = [
+          // 上边
+          { x1: x1, y1: y1, x2: x2, y2: y1 },
+          // 下边
+          { x1: x1, y1: y2, x2: x2, y2: y2 },
+          // 左边
+          { x1: x1, y1: y1, x2: x1, y2: y2 },
+          // 右边
+          { x1: x2, y1: y1, x2: x2, y2: y2 },
+        ];
+        for (const edge of rectEdges) {
+          if (
+            segmentsIntersect(
+              prex,
+              prey,
+              testx,
+              testy,
+              edge.x1,
+              edge.y1,
+              edge.x2,
+              edge.y2
+            )
+          ) {
+            passiable = false;
+          }
+        }
+      
       });
     }
-    return true
   }
-  else
-    return true
+
+  return passiable;
+};
+const segmentsIntersect = (x1: number,
+  y1: number,       
+  x2: number,
+  y2: number,
+  x3: number,
+  y3: number,
+  x4: number,
+  y4: number) => {              
+  const denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+  if (denom === 0) {    
+    return false; // 平行或重合
+  } 
+  const ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom;
+  const ub = ((x2 - x1) * (y1 - y3)
+    - (y2 - y1) * (x1 - x3)) / denom;
+  return ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1; // 判断是否在有效范围内
 }
