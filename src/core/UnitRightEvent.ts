@@ -1,10 +1,12 @@
 import * as PIXI from "pixi.js";
+import type { TiledMap } from "./MapClass";
 let oldselectionBox: PIXI.Graphics | null = null;
 export const UnitRightEvent = (
   event: PIXI.FederatedPointerEvent,
   anim: PIXI.AnimatedSprite,
   container: PIXI.Container<PIXI.ContainerChild>,
   selectLayer: PIXI.IRenderLayer,
+  mapPassiable: TiledMap | null
 ) => {
   // alert('click');
   // 如果之前有选择框，先移除它
@@ -58,7 +60,7 @@ export const UnitRightEvent = (
     label.on("pointertap", () => {
       alert(`选择了: ${text}`);
       if (text == "移动") {
-        moveSelect(anim, container);
+        moveSelect(anim, container, mapPassiable);
       }
       container.removeChild(selectionBox);
     });
@@ -80,7 +82,8 @@ export const UnitRightEvent = (
 };
 export const moveSelect = (
   anim: PIXI.AnimatedSprite,
-  container: PIXI.Container<PIXI.ContainerChild>
+  container: PIXI.Container<PIXI.ContainerChild>,
+  mapPassiable: TiledMap | null
 ) => {
   //显示红色的可移动范围
   const range = 5;
@@ -89,8 +92,8 @@ export const moveSelect = (
   graphics.alpha = 0.4;
   graphics.zIndex = 1000;
 
-  const centerX = anim.x + anim.width / 2;
-  const centerY = anim.y + anim.height / 2;
+  const centerX = anim.x + anim.width;
+  const centerY = anim.y + anim.height;
   //欧几里得距离
   // for (let dx = -range; dx <= range; dx++) {
   //     for (let dy = -range; dy <= range; dy++) {
@@ -118,10 +121,15 @@ export const moveSelect = (
   for (let dx = -range; dx <= range; dx++) {
     for (let dy = -range; dy <= range; dy++) {
       if (Math.max(Math.abs(dx), Math.abs(dy)) <= range) {
-        const x = centerX + dx * tileSize - tileSize / 2;
-        const y = centerY + dy * tileSize - tileSize / 2;
-        graphics.rect(x, y, tileSize, tileSize);
-        graphics.fill({ color: 0xff0000 });
+
+        const x = centerX + dx * tileSize - tileSize;
+        const y = centerY + dy * tileSize - tileSize;
+        const passiable = checkPassiable(x, y, mapPassiable);
+        if (passiable) {
+          graphics.rect(x, y, tileSize, tileSize);
+          graphics.fill({ color: 0xff0000 });
+        }
+
       }
     }
   }
@@ -200,3 +208,41 @@ export const moveMovement = (
     }
   }, 160);
 };
+
+const checkPassiable = (x: number, y: number, mapPassiable: TiledMap | null) => {
+  if (mapPassiable) {
+    const layers = mapPassiable.layers;
+    const objectsGroup = layers.find(layer => layer.type === "objectgroup");
+    if (objectsGroup && objectsGroup.objects) {
+      // 检查是否有对象在指定位置
+      // 遍历对象组中的所有对象   
+      objectsGroup?.objects.forEach(object => {
+        let testx=x;
+        let testy=y;  
+        const x1 = object.x
+        const y1 = object.y
+        const x2 = x1 + object.width
+        const y2 = y1 + object.height
+        let count = 0;
+        const vertices = [
+          { x: testx, y: testy },
+          { x: testx + 64, y: testy },
+          { x: testx, y: testy + 64 },
+          { x: testx + 64, y: testy + 64 },
+        ];
+        vertices.forEach(v => {
+          if (v.x >= x1 && v.x <= x2 && v.y >= y1 && v.y <= y2) {
+            count++;
+          }
+        });
+        if (count >= 2) {
+          return false;
+        }
+     
+      });
+    }
+    return true
+  }
+  else
+    return true
+}
