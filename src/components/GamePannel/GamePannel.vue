@@ -8,6 +8,7 @@
 import testImg from '@/assets/wolf/walk.png'
 import mapImg from '@/assets/map/desert.png'
 import wolfJson from "@/assets/wolf/wolf_walk.json"
+import mapPassiableFile from "@/assets/map/desert.tmj?raw"
 import * as PIXI from 'pixi.js'
 import { UnitRightEvent } from '@/core/UnitRightEvent'
 import { onMounted } from 'vue'
@@ -36,6 +37,9 @@ onMounted(async () => {
 
     // TODO 路径暂时写死
     const mapTexture = await PIXI.Assets.load(mapImg);
+    // const mapPassiableFile= require('@/assets/map/desert.tmj');
+    const mapPassiable = JSON.parse(mapPassiableFile)
+    console.log(mapPassiable);
     const sheetTexture = await PIXI.Assets.load(testImg);
 
 
@@ -105,7 +109,7 @@ onMounted(async () => {
     lineLayer.attach(lineContainer);
     anim.eventMode = 'dynamic';
     anim.on('rightdown', (event) => {
-        UnitRightEvent(event, anim, container,selectLayer);
+        UnitRightEvent(event, anim, container,selectLayer,mapPassiable);
     });
 
 })
