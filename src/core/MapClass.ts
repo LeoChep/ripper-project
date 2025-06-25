@@ -1,3 +1,5 @@
+import * as PIXI from 'pixi.js';
+
 // 单个区块（chunk）
 export interface TiledMapChunk {
   data: number[];
@@ -79,7 +81,8 @@ export class TiledMap {
   version: string;
   width: number;
   edges: Array<{ x1: number; y1: number; x2: number; y2: number; }> = [];
-  constructor(data: any) {
+  textures?: PIXI.Sprite;
+  constructor(data: any,textures: any) {
     this.compressionlevel = data.compressionlevel;
     this.height = data.height;
     this.infinite = data.infinite;
@@ -95,5 +98,62 @@ export class TiledMap {
     this.type = data.type;
     this.version = data.version;
     this.width = data.width;
+    this.initEdges();
+    if (textures) {
+     this.textures=new PIXI.Sprite(textures);
+    }
+  
+  }
+  initEdges(){
+     const layers = this.layers;
+    const objectsGroup = layers.find((layer) => layer.type === "objectgroup");
+    const edges: { x1: number; y1: number; x2: number; y2: number; }[] = [];
+    if (objectsGroup && objectsGroup.objects) {
+        objectsGroup.objects.forEach((object) => {
+            // 检查对象是否有polygon属性
+            let polys = null
+            let type = null
+            if (object.polygon && object.polygon.length >= 0) {
+                polys = object.polygon;
+                type = "polygon";
+            }
+
+            if (object.polyline && object.polyline.length >= 0) {
+                // 检查对象是否有polyline属性
+                type = "polyline";
+                polys = object.polyline;
+            }
+
+            if (polys && polys.length >= 2) {
+                //根据polygon建立边数组,每条边为相邻两个点的连线
+                for (let i = 0; i < polys.length - 1; i++) {
+                    const start = polys[i];
+                    const end = polys[(i + 1)];
+                    edges.push({
+                        x1: start.x + object.x,
+                        y1: start.y + object.y,
+                        x2: end.x + object.x,
+                        y2: end.y + object.y
+                    });
+                }
+                // 处理最后一个点与第一个点的连线
+                if (type === "polygon" &&object.polygon && object.polygon.length > 0) {
+                    const start = polys[object.polygon.length - 1];
+                    const end = polys[0];
+                    edges.push({
+                        x1: start.x + object.x,
+                        y1: start.y + object.y,
+                        x2: end.x + object.x,
+                        y2: end.y + object.y
+                    });
+                }
+
+
+            }
+        });
+    } else {
+        console.error("No passable objects found in the map.");
+    }
+    this.edges = edges;
   }
 }

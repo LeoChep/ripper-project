@@ -5,13 +5,13 @@
 </template>
 
 <script setup>
-import testImg from '@/assets/wolf/walk.png'
-import mapImg from '@/assets/map/A.png'
-import wolfJson from "@/assets/wolf/wolf_walk.json"
-import mapPassiableFile from "@/assets/map/A.tmj?raw"
+import { getJsonFile, getUnitFile,getMapAssetFile } from '@/utils/utils'
+
 import * as PIXI from 'pixi.js'
 import { UnitRightEvent } from '@/core/UnitRightEvent'
 import { onMounted } from 'vue'
+import { TiledMap } from '@/core/MapClass'
+import { SpriteUnit } from '@/core/SpriteUnit'
 const appSetting = {
     width: 800,
     height: 600,
@@ -36,85 +36,44 @@ onMounted(async () => {
     document.getElementById("game-pannel").appendChild(app.canvas);
 
     // TODO 路径暂时写死
-    const mapTexture = await PIXI.Assets.load(mapImg);
-    // const mapPassiableFile= require('@/assets/map/desert.tmj');
-    const mapPassiable = JSON.parse(mapPassiableFile)
-    const layers = mapPassiable.layers;
-    const objectsGroup = layers.find((layer) => layer.type === "objectgroup");
-    const edges = [];
-    if (objectsGroup && objectsGroup.objects) {
-        objectsGroup.objects.forEach((object) => {
-            // 检查对象是否有polygon属性
-            let polys = null
-            let type = null
-            if (object.polygon && object.polygon.length >= 0) {
-                polys = object.polygon;
-                type = "polygon";
-            }
+    //加载地图内容
 
-            if (object.polyline && object.polyline.length >= 0) {
-                // 检查对象是否有polyline属性
-                type = "polyline";
-                polys = object.polyline;
-            }
+    const mapPassiable = await loadMap('A')
 
-            if (polys && polys.length >= 2) {
-                //根据polygon建立边数组,每条边为相邻两个点的连线
-                for (let i = 0; i < polys.length - 1; i++) {
-                    const start = polys[i];
-                    const end = polys[(i + 1)];
-                    edges.push({
-                        x1: start.x + object.x,
-                        y1: start.y + object.y,
-                        x2: end.x + object.x,
-                        y2: end.y + object.y
-                    });
-                }
-                // 处理最后一个点与第一个点的连线
-                if (type === "polygon") {
-                    const start = polys[object.polygon.length - 1];
-                    const end = polys[0];
-                    edges.push({
-                        x1: start.x + object.x,
-                        y1: start.y + object.y,
-                        x2: end.x + object.x,
-                        y2: end.y + object.y
-                    });
-                }
+    //初始化容器
+    const rlayers = createRenderLayers(app)
+    const container = createContainer(app, rlayers)
 
+    //绘制地图
+    const mapView = mapPassiable.textures;
+    drawMap(mapView, container, rlayers);
 
-            }
-        });
-    } else {
-        console.error("No passable objects found in the map.");
-    }
-    mapPassiable.edges = edges;
-    console.log(mapPassiable);
-    const sheetTexture = await PIXI.Assets.load(testImg);
+    //创建test单位
 
+    const animSpriteUnit = await createSpriteUnit('wolf')
+    addAnimSpriteUnit(animSpriteUnit, container, rlayers, mapPassiable)
 
-    console.log(wolfJson)
-    const spritesheet = new PIXI.Spritesheet(
-        sheetTexture,
-        wolfJson
-    );
-    await spritesheet.parse();
-    console.log(spritesheet);
-    // spritesheet is ready to use!
-    const anim = new PIXI.AnimatedSprite(spritesheet.animations.walk_w);
-    anim.animationSpeed = 0.1666;
-    anim.textures = spritesheet.animations.walk_w
-    // play the animation on a loop
-    anim.play();
+    //绘制格子
+    drawGrid(app, rlayers);
+    //增加键盘监听
+    addListenKeyboard(container);
 
-    const basicLayer = new PIXI.RenderLayer()
-    const spriteLayer = new PIXI.RenderLayer();
-    const lineLayer = new PIXI.RenderLayer();
-    const selectLayer = new PIXI.RenderLayer();
-    app.stage.addChildAt(basicLayer, 0);
-    app.stage.addChildAt(spriteLayer, 1);
-    app.stage.addChildAt(lineLayer, 2);
-    app.stage.addChildAt(selectLayer, 3);
+})
+
+const createRenderLayers = (app) => {
+    const rlayers = {}
+    rlayers.basicLayer = new PIXI.RenderLayer()
+    rlayers.spriteLayer = new PIXI.RenderLayer();
+    rlayers.lineLayer = new PIXI.RenderLayer();
+    rlayers.selectLayer = new PIXI.RenderLayer();
+    app.stage.addChildAt(rlayers.basicLayer, 0);
+    app.stage.addChildAt(rlayers.spriteLayer, 1);
+    app.stage.addChildAt(rlayers.lineLayer, 2);
+    app.stage.addChildAt(rlayers.selectLayer, 3);
+    return rlayers
+}
+
+const createContainer = (app, rlayers) => {
     app.stage.interactive = true;
     const container = new PIXI.Container();
     // 创建一个 800x600 的矩形图形作为底盘
@@ -122,12 +81,52 @@ onMounted(async () => {
     rect.rect(0, 0, 800, 600);
     rect.fill({ color: 'black' }); // 黑色填充
     container.addChild(rect);
-    const map = new PIXI.Sprite(mapTexture);
-    //map.scale = 2;
-    container.addChild(map);
     container.eventMode = 'static';
-    basicLayer.attach(container);
+    rlayers.basicLayer.attach(container);
     app.stage.addChild(container);
+    return container
+}
+
+const loadMap =async (mapName)=>{
+    const url = getMapAssetFile(mapName)
+    const mapTexture = await PIXI.Assets.load(url);
+    const mapPassiablePOJO =await getJsonFile('map',mapName,'tmj')
+    const mapPassiable = new TiledMap(mapPassiablePOJO, mapTexture);
+    return mapPassiable
+}
+
+const drawMap = (mapView, container, rlayers) => {
+    container.addChild(mapView);
+    rlayers.basicLayer.attach(mapView)
+}
+
+const createSpriteUnit = async (unitTypeName) => {
+    const url = getUnitFile(unitTypeName)
+    console.log(url)
+    const sheetTexture = await PIXI.Assets.load(url);
+    const jsonFetchPromise=getJsonFile(unitTypeName,'wolf_walk')
+    console.log(await jsonFetchPromise)
+    const spritesheet = new PIXI.Spritesheet(
+        sheetTexture,
+        await jsonFetchPromise
+    );
+    await spritesheet.parse();
+    console.log(spritesheet);
+    // spritesheet is ready to use!
+    const animSpriteUnit = new SpriteUnit(spritesheet)
+    return animSpriteUnit;
+}
+
+const addAnimSpriteUnit = (animSpriteUnit, container, rlayers, mapPassiable) => {
+    rlayers.spriteLayer.attach(animSpriteUnit);
+    animSpriteUnit.eventMode = 'dynamic';
+    animSpriteUnit.on('rightdown', (event) => {
+        UnitRightEvent(event, animSpriteUnit, container, rlayers.selectLayer, rlayers.lineLayer, mapPassiable);
+    });
+    container.addChild(animSpriteUnit);
+}
+
+const addListenKeyboard = (container) => {
     //监听键盘S键
     document.addEventListener('keydown', (event) => {
         if (event.key === 's') {
@@ -152,10 +151,8 @@ onMounted(async () => {
             container.y += 64
         }
     });
-    spriteLayer.attach(anim);
-
-    container.addChild(anim);
-
+};
+const drawGrid = (app, rlayers) => {
     //格子
     const lineContainer = new PIXI.Container();
     const gridSize = 64;
@@ -180,15 +177,8 @@ onMounted(async () => {
         lineContainer.addChild(line);
     }
     app.stage.addChild(lineContainer);
-    lineLayer.attach(lineContainer);
-    anim.eventMode = 'dynamic';
-    anim.on('rightdown', (event) => {
-        UnitRightEvent(event, anim, container, selectLayer, mapPassiable);
-    });
-
-})
-
-
+    rlayers.lineLayer.attach(lineContainer);
+}
 </script>
 
 <style scoped>

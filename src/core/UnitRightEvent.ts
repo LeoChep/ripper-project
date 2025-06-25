@@ -1,11 +1,14 @@
 import * as PIXI from "pixi.js";
 import type { TiledMap } from "./MapClass";
+import type { SpriteUnit } from "./SpriteUnit";
 let oldselectionBox: PIXI.Graphics | null = null;
+
 export const UnitRightEvent = (
   event: PIXI.FederatedPointerEvent,
-  anim: PIXI.AnimatedSprite,
+  spriteUnit: SpriteUnit,
   container: PIXI.Container<PIXI.ContainerChild>,
   selectLayer: PIXI.IRenderLayer,
+  lineLayer: PIXI.IRenderLayer,
   mapPassiable: TiledMap | null
 ) => {
   // alert('click');
@@ -21,12 +24,12 @@ export const UnitRightEvent = (
   const boxWidth = 40;
   const boxHeight = 80;
 
-  let boxX = anim.x + anim.width + 10;
+  let boxX = spriteUnit.x + spriteUnit.width + 10;
   if (boxX + boxWidth > container.width) {
     // 如果选择框超出右边界，则调整位置
-    boxX = anim.x - boxWidth - 10;
+    boxX = spriteUnit.x - boxWidth - 10;
   }
-  let boxY = anim.y - boxHeight / 2 + anim.height / 2;
+  let boxY = spriteUnit.y - boxHeight / 2 + spriteUnit.height / 2;
   if (boxY < 0) {
     // 如果选择框超出上边界，则调整位置
     boxY = 0;
@@ -60,7 +63,7 @@ export const UnitRightEvent = (
     label.on("pointertap", () => {
       alert(`选择了: ${text}`);
       if (text == "移动") {
-        moveSelect(anim, container, mapPassiable);
+        moveSelect(spriteUnit, container,lineLayer, mapPassiable);
       }
       container.removeChild(selectionBox);
     });
@@ -81,8 +84,9 @@ export const UnitRightEvent = (
   // alert("取消选择");
 };
 export const moveSelect = (
-  anim: PIXI.AnimatedSprite,
+  spriteUnit: SpriteUnit,
   container: PIXI.Container<PIXI.ContainerChild>,
+  lineLayer: PIXI.IRenderLayer,
   mapPassiable: TiledMap | null
 ) => {
   //显示红色的可移动范围
@@ -92,8 +96,8 @@ export const moveSelect = (
   graphics.alpha = 0.4;
   graphics.zIndex = 1000;
 
-  const centerX = anim.x + anim.width;
-  const centerY = anim.y + anim.height;
+  const centerX = spriteUnit.x + spriteUnit.width;
+  const centerY = spriteUnit.y + spriteUnit.height;
   //使用切比雪夫距离绘制
   // 使用广度优先搜索(BFS)绘制可移动范围，并记录路径
   const visited = new Set<string>();
@@ -129,7 +133,7 @@ export const moveSelect = (
       { dx: -1, dy: 1 },
     ];
     for (const dir of dirs) {
-      if (dir.dx*dir.dx + dir.dy*dir.dy > 1) {
+      if (dir.dx * dir.dx + dir.dy * dir.dy > 1) {
         // 如果是对角线方向，检查是否是拐角
         if (dir.dx < 0 && dir.dy < 0) {
           // 左上角
@@ -167,7 +171,6 @@ export const moveSelect = (
             continue; // 如果右或下不可通行，则跳过
           }
         }
-        
       }
       const nx = x + dir.dx;
       const ny = y + dir.dy;
@@ -192,7 +195,7 @@ export const moveSelect = (
   graphics.eventMode = "static";
 
   container.addChild(graphics);
-
+  lineLayer.attach(graphics);
   // 点击其他地方移除移动范围
   const removeGraphics = () => {
     if (graphics.parent) {
@@ -204,21 +207,21 @@ export const moveSelect = (
     e.stopPropagation();
     removeGraphics();
 
-    moveMovement(e, anim, container, path);
+    moveMovement(e, spriteUnit, container, path);
   });
   container.on("pointerdown", removeGraphics);
 };
 
 export const moveMovement = async (
   event: PIXI.FederatedPointerEvent,
-  anim: PIXI.AnimatedSprite,
+  spriteUnit: SpriteUnit,
   container: PIXI.Container<PIXI.ContainerChild>,
   path: { [key: string]: { x: number; y: number } | null }
 ) => {
   const tileSize = 64; // 格子大小
   //计算出动画精灵所在的格子
-  const centerX = Math.floor(anim.x / tileSize);
-  const centerY = Math.floor(anim.y / tileSize);
+  const centerX = Math.floor(spriteUnit.x / tileSize);
+  const centerY = Math.floor(spriteUnit.y / tileSize);
   console.log(`动画精灵所在格子: (${centerX}, ${centerY})`);
   // 获取点击位置
   const pos = event.data.global;
@@ -259,28 +262,67 @@ export const moveMovement = async (
   }
   for (const step of pathWay) {
     // 执行移动
-    await girdMoveMovement(step.x, step.y, anim, tileSize);
+    await girdMoveMovement(step.x, step.y, spriteUnit, tileSize);
   }
   // girdMoveMovement(tileX, tileY, anim, tileSize);
 };
 const girdMoveMovement = (
   tileX: number,
   tileY: number,
-  anim: PIXI.AnimatedSprite,
+  spriteUnit: SpriteUnit,
   tileSize: number
 ) => {
+  // 更新状态
+  spriteUnit.state = "walking";
   // 计算实际的移动位置
   const targetX = tileX * tileSize;
   const targetY = tileY * tileSize;
-  // console.log(`目标位置: (${targetX}, ${targetY})`);
   // 设置动画精灵的新位置
+  const dx = targetX - spriteUnit.x;
+  const dy = targetY - spriteUnit.y;
+  //转向
+  let direction = spriteUnit.direction;
+  //设置朝向
+  if (Math.abs(dx) >= Math.abs(dy) && Math.abs(dx) > 0) {
+    // 水平移动
+    direction = dx > 0 ? 0 : 1; // 0向右, 1向左
+  } else if (Math.abs(dy) > Math.abs(dx)) {
+    // 垂直移动
+    direction = dy > 0 ? 2 : 3; // 2向下, 3向上
+  }
+
+  if (spriteUnit.direction !== direction) {
+    spriteUnit.direction = direction;
+    // 如果有行走动画，则播放
+    if (spriteUnit.walking_anim && spriteUnit.walkingSpritesheet) {
+      let dirString = "";
+      switch (direction) {
+        case 0:
+          dirString = "d";
+          break;
+        case 1:
+          dirString = "a";
+          break;
+        case 2:
+          dirString = "s";
+          break;
+        case 3:
+          dirString = "w";
+          break;
+      }
+      spriteUnit.walking_anim.textures =
+        spriteUnit.walkingSpritesheet.animations["walk_" + dirString];
+      spriteUnit.walking_anim.play();
+    }
+  }
   const moveFunc = () => {
     console.log(`目标位置: (${targetX}, ${targetY})`);
     // 如果精灵已经在目标
-    if (anim.x !== targetX || anim.y !== targetY) {
+    if (spriteUnit.x !== targetX || spriteUnit.y !== targetY) {
+      const dx = targetX - spriteUnit.x;
+      const dy = targetY - spriteUnit.y;
+
       // 计算移动步长
-      const dx = targetX - anim.x;
-      const dy = targetY - anim.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
       const step = 64;
       const stepX =
@@ -288,12 +330,16 @@ const girdMoveMovement = (
       const stepY =
         distance === 0 ? 0 : (dy / distance) * Math.min(step, Math.abs(dy));
       // 更新动画精灵的位置
-      anim.x += stepX;
-      anim.y += stepY;
+      spriteUnit.x += stepX;
+      spriteUnit.y += stepY;
+
       // 如果接近目标位置，则直接设置到目标位置
-      if (Math.abs(anim.x - targetX) < 1 && Math.abs(anim.y - targetY) < 1) {
-        anim.x = targetX;
-        anim.y = targetY;
+      if (
+        Math.abs(spriteUnit.x - targetX) < 1 &&
+        Math.abs(spriteUnit.y - targetY) < 1
+      ) {
+        spriteUnit.x = targetX;
+        spriteUnit.y = targetY;
         // 停止动画更新
       }
     }
@@ -301,7 +347,10 @@ const girdMoveMovement = (
   const girdMovePromise = new Promise<void>((resolve) => {
     const timer = setInterval(() => {
       moveFunc();
-      if (Math.abs(anim.x - targetX) < 1 && Math.abs(anim.y - targetY) < 1) {
+      if (
+        Math.abs(spriteUnit.x - targetX) < 1 &&
+        Math.abs(spriteUnit.y - targetY) < 1
+      ) {
         clearInterval(timer);
         resolve();
       }
@@ -329,14 +378,14 @@ const checkPassiable = (
 
         // 获取两个格子的四个顶点
         const pointsA = [
-             { x: prex+32, y: prey+32 },
+          { x: prex + 32, y: prey + 32 },
           { x: prex, y: prey },
           { x: prex + 64, y: prey },
           { x: prex + 64, y: prey + 64 },
           { x: prex, y: prey + 64 },
         ];
         const pointsB = [
-            { x: testx+32, y: testy+32 },
+          { x: testx + 32, y: testy + 32 },
           { x: testx, y: testy },
           { x: testx + 64, y: testy },
           { x: testx + 64, y: testy + 64 },
@@ -358,13 +407,12 @@ const checkPassiable = (
             )
           ) {
             intersectCount++;
-        
           }
         }
-          if (intersectCount >= 1) {
-              passiable = false;
-              //终止遍历
-            }
+        if (intersectCount >= 1) {
+          passiable = false;
+          //终止遍历
+        }
       });
     }
   }
