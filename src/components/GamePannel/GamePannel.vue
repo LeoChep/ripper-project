@@ -101,19 +101,17 @@ const drawMap = (mapView, container, rlayers) => {
 }
 
 const createSpriteUnit = async (unitTypeName) => {
-    const url = getUnitFile(unitTypeName)
-    console.log(url)
-    const sheetTexture = await PIXI.Assets.load(url);
-    const jsonFetchPromise=getJsonFile(unitTypeName,'wolf_walk')
+    const walkUrl = getUnitFile(unitTypeName, 'walk');
+    const sheetTexture = await PIXI.Assets.load(walkUrl);
+    const jsonFetchPromise=getJsonFile(unitTypeName,'walk')
     console.log(await jsonFetchPromise)
-    const spritesheet = new PIXI.Spritesheet(
+    const walkSpritesheet = new PIXI.Spritesheet(
         sheetTexture,
         await jsonFetchPromise
     );
-    await spritesheet.parse();
-    console.log(spritesheet);
+    await walkSpritesheet.parse();
     // spritesheet is ready to use!
-    const animSpriteUnit = new SpriteUnit(spritesheet)
+    const animSpriteUnit = new SpriteUnit(walkSpritesheet)
     return animSpriteUnit;
 }
 
