@@ -306,6 +306,7 @@ export const moveMovement = async (
   console.log(`点击位置所在格子: (${tileX}, ${tileY})`);
   let pathCuror = path[`${tileX},${tileY}`];
   console.log(pathCuror);
+   //获取路径
   const pathWay = [] as { x: number; y: number }[];
   while (pathCuror) {
     pathWay.push({ x: pathCuror.x, y: pathCuror.y });
@@ -332,8 +333,9 @@ export const moveMovement = async (
       pathWay.splice(i, 1);
     }
   }
+  // 执行移动
   for (const step of pathWay) {
-    // 执行移动
+    
     await girdMoveMovement(step.x, step.y, unit, tileSize);
   }
  
