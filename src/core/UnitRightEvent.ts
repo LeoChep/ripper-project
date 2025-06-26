@@ -75,7 +75,45 @@ export const UnitRightEvent = (
 
     selectionBox.addChild(label);
   });
+  //如果附近有门，那么增加开门选择
+  console.log("mapPassiable", mapPassiable);
+  if (mapPassiable && mapPassiable.doors) {
+    const doors = mapPassiable.doors;
 
+    if (doors.length > 0) {
+      doors.forEach((door, i) => {
+        // 检查门是否在选择框范围内
+        const doorX = door.x1 + (door.x2 - door.x1) / 2;
+        const doorY = door.y1 + (door.y2 - door.y1) / 2;
+        if (distance(doorX, doorY, spriteUnit.x + 32, spriteUnit.y + 32) > 64) {
+          return; // 如果门不在选择框范围内，则跳过
+        }
+        let text = "开门";
+        if (door.useable === false) {
+          text = "关门";
+        }
+        const label = new PIXI.Text({
+          text: `${text} ${i + 1}`,
+          style: {
+            fontFamily: "Arial",
+            fontSize: 12,
+            fill: 0xffffff,
+            align: "center",
+          },
+        });
+        label.x = boxWidth / 2 - label.width / 2;
+        label.y = 8 + (options.length + i) * 20;
+        label.eventMode = "static";
+        label.cursor = "pointer";
+        label.on("pointertap", () => {
+          alert(`选择了: ${text} ${i + 1}`);
+          door.useable = !door.useable; // 设置边不再阻挡
+          container.removeChild(selectionBox);
+        });
+        selectionBox.addChild(label);
+      });
+    }
+  }
   container.addChild(selectionBox);
   selectLayer.attach(selectionBox);
   oldselectionBox = selectionBox;
@@ -125,13 +163,8 @@ export const moveSelect = (
 
   while (queue.length > 0) {
     const { x, y, step } = queue.shift()!;
-    if (step > range) continue;
+    if (step >= range) continue;
 
-    const drawX = x * tileSize;
-    const drawY = y * tileSize;
-
-    graphics.rect(drawX, drawY, tileSize, tileSize);
-    graphics.fill({ color: 0xff0000 });
     // 八方向扩展
     const dirs = [
       { dx: 1, dy: 0 },
@@ -144,8 +177,9 @@ export const moveSelect = (
       { dx: -1, dy: 1 },
     ];
     for (const dir of dirs) {
+      // 检查是否是对角线方向
       if (dir.dx * dir.dx + dir.dy * dir.dy > 1) {
-        // 如果是对角线方向，检查是否是拐角
+        // 如果是对角线方向，检查是否是拐角,拐角则不可对角线移动
         if (dir.dx < 0 && dir.dy < 0) {
           // 左上角
           if (
@@ -202,6 +236,17 @@ export const moveSelect = (
       }
     }
   }
+  // 绘制可移动范围
+  graphics.clear();
+  if (path) {
+    Object.keys(path).forEach((key) => {
+      const [x, y] = key.split(",").map(Number);
+      const drawX = x * tileSize;
+      const drawY = y * tileSize;
+      graphics.rect(drawX, drawY, tileSize, tileSize);
+      graphics.fill({ color: 0xff0000 });
+    });
+  }
   // path 是一个以 "x,y" 为 key 的对象，记录每个格子的前驱节点
   graphics.eventMode = "static";
 
@@ -212,15 +257,26 @@ export const moveSelect = (
     if (graphics.parent) {
       graphics.parent.removeChild(graphics);
     }
-    container.off("pointerdown", removeGraphics);
+    container.off("pointerup", removeGraphics);
   };
-  graphics.on("pointerdown", (e) => {
+  let cannel = false;
+  graphics.on("rightdown", (e) => {
+    e.stopPropagation();
+    console.log("rightdown");
+    cannel = true;
+    removeGraphics();
+  });
+  graphics.on("pointerup", (e) => {
+    console.log("pointerup");
     e.stopPropagation();
     removeGraphics();
-
+    if (cannel) {
+      return;
+    }
     moveMovement(e, unit, container, path);
   });
-  container.on("pointerdown", removeGraphics);
+
+  container.on("pointerup", removeGraphics);
 };
 
 export const moveMovement = async (
@@ -280,8 +336,9 @@ export const moveMovement = async (
     // 执行移动
     await girdMoveMovement(step.x, step.y, unit, tileSize);
   }
-  // girdMoveMovement(tileX, tileY, anim, tileSize);
+ 
 };
+
 const girdMoveMovement = (
   tileX: number,
   tileY: number,
@@ -312,8 +369,8 @@ const girdMoveMovement = (
     direction = dy > 0 ? 2 : 3; // 2向下, 3向上
   }
 
-  unit.direction= direction;
-  
+  unit.direction = direction;
+
   const moveFunc = () => {
     console.log(`目标位置: (${targetX}, ${targetY})`);
     // 如果精灵已经在目标
@@ -374,10 +431,13 @@ const checkPassiable = (
       // 检查是否有对象在指定位置
       // 遍历对象组中的所有对象
       edges.forEach((edge) => {
+        if (edge.useable === false) {
+          return; // 如果边不可用，则跳过
+        }
         let testx = x;
         let testy = y;
 
-        // 获取两个格子的四个顶点
+        // 获取两个格子的四个顶点和中点
         const pointsA = [
           { x: prex + 32, y: prey + 32 },
           { x: prex, y: prey },
@@ -392,7 +452,7 @@ const checkPassiable = (
           { x: testx + 64, y: testy + 64 },
           { x: testx, y: testy + 64 },
         ];
-        // 检查所有顶点对的连线
+        // 检查所有中点的连线
         let intersectCount = 0;
         for (let i = 0; i < 1; i++) {
           if (
@@ -412,7 +472,7 @@ const checkPassiable = (
         }
         if (intersectCount >= 1) {
           passiable = false;
-          //终止遍历
+          return;
         }
       });
     }
@@ -437,4 +497,8 @@ const segmentsIntersect = (
   const ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom;
   const ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denom;
   return ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1; // 判断是否在有效范围内
+};
+//计算两点间距离的函数
+export const distance = (x1: number, y1: number, x2: number, y2: number) => {
+  return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
 };
