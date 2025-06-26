@@ -106,7 +106,7 @@ export class TiledMap {
   }
   initEdges(){
      const layers = this.layers;
-    const objectsGroup = layers.find((layer) => layer.type === "objectgroup");
+    const objectsGroup = layers.find((layer) => layer.type === "objectgroup"&& layer.name==='wall');
     const edges: { x1: number; y1: number; x2: number; y2: number; }[] = [];
     if (objectsGroup && objectsGroup.objects) {
         objectsGroup.objects.forEach((object) => {
