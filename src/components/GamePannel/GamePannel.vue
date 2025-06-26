@@ -5,13 +5,14 @@
 </template>
 
 <script setup>
-import { getJsonFile, getUnitFile,getMapAssetFile } from '@/utils/utils'
+import { getJsonFile, getUnitFile, getMapAssetFile } from '@/utils/utils'
 
 import * as PIXI from 'pixi.js'
 import { UnitRightEvent } from '@/core/UnitRightEvent'
 import { onMounted } from 'vue'
 import { TiledMap } from '@/core/MapClass'
-import { SpriteUnit } from '@/core/SpriteUnit'
+import { UnitAnimSpirite } from '@/core/UnitAnimSpirite'
+import { Unit, createUnitsFromMapSprites } from '@/core/Unit'
 const appSetting = {
     width: 800,
     height: 600,
@@ -48,10 +49,13 @@ onMounted(async () => {
     const mapView = mapPassiable.textures;
     drawMap(mapView, container, rlayers);
 
-    //创建test单位
-
-    const animSpriteUnit = await createSpriteUnit('wolf')
-    addAnimSpriteUnit(animSpriteUnit, container, rlayers, mapPassiable)
+    //创建单位
+    const spritesOBJ = mapPassiable.sprites
+    const units = createUnitsFromMapSprites(spritesOBJ, mapPassiable);
+    console.log(units)
+    units.forEach(async (unit) => {
+        await generateAnimSprite(unit, container, rlayers, mapPassiable)
+    });
 
     //绘制格子
     drawGrid(app, rlayers);
@@ -87,10 +91,10 @@ const createContainer = (app, rlayers) => {
     return container
 }
 
-const loadMap =async (mapName)=>{
+const loadMap = async (mapName) => {
     const url = getMapAssetFile(mapName)
     const mapTexture = await PIXI.Assets.load(url);
-    const mapPassiablePOJO =await getJsonFile('map',mapName,'tmj')
+    const mapPassiablePOJO = await getJsonFile('map', mapName, 'tmj')
     const mapPassiable = new TiledMap(mapPassiablePOJO, mapTexture);
     return mapPassiable
 }
@@ -100,10 +104,19 @@ const drawMap = (mapView, container, rlayers) => {
     rlayers.basicLayer.attach(mapView)
 }
 
-const createSpriteUnit = async (unitTypeName) => {
+const generateAnimSprite = async (unit, container, rlayers, mapPassiable) => {
+    const animSpriteUnit = await createAnimSpriteUnit(unit.unitTypeName);
+    unit.animUnit = animSpriteUnit;
+    addAnimSpriteUnit(unit, container, rlayers, mapPassiable);
+    animSpriteUnit.x = Math.round(unit.x / 64) * 64;
+    animSpriteUnit.y = Math.round(unit.y / 64) * 64 - 64;
+
+}
+
+const createAnimSpriteUnit = async (unitTypeName) => {
     const walkUrl = getUnitFile(unitTypeName, 'walk');
     const sheetTexture = await PIXI.Assets.load(walkUrl);
-    const jsonFetchPromise=getJsonFile(unitTypeName,'walk')
+    const jsonFetchPromise = getJsonFile(unitTypeName, 'walk')
     console.log(await jsonFetchPromise)
     const walkSpritesheet = new PIXI.Spritesheet(
         sheetTexture,
@@ -111,15 +124,17 @@ const createSpriteUnit = async (unitTypeName) => {
     );
     await walkSpritesheet.parse();
     // spritesheet is ready to use!
-    const animSpriteUnit = new SpriteUnit(walkSpritesheet)
+    const animSpriteUnit = new UnitAnimSpirite(walkSpritesheet)
     return animSpriteUnit;
 }
 
-const addAnimSpriteUnit = (animSpriteUnit, container, rlayers, mapPassiable) => {
+const addAnimSpriteUnit = (unit, container, rlayers, mapPassiable) => {
+    const animSpriteUnit = unit.animUnit;
+    console.log('addAnimSpriteUnit',unit)
     rlayers.spriteLayer.attach(animSpriteUnit);
     animSpriteUnit.eventMode = 'dynamic';
     animSpriteUnit.on('rightdown', (event) => {
-        UnitRightEvent(event, animSpriteUnit, container, rlayers.selectLayer, rlayers.lineLayer, mapPassiable);
+        UnitRightEvent(event, unit, container, rlayers.selectLayer, rlayers.lineLayer, mapPassiable);
     });
     container.addChild(animSpriteUnit);
 }

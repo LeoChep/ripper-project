@@ -175,6 +175,29 @@
                  "gid":739,
                  "height":64,
                  "id":7,
+                 "name":"wolf2",
+                 "properties":[
+                        {
+                         "name":"party",
+                         "type":"string",
+                         "value":"player"
+                        }, 
+                        {
+                         "name":"unitTypeName",
+                         "type":"string",
+                         "value":"wolf"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":316.666666666667,
+                 "y":252.666666666667
+                }, 
+                {
+                 "gid":739,
+                 "height":64,
+                 "id":9,
                  "name":"wolf",
                  "properties":[
                         {
@@ -191,9 +214,11 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":126.666666666667,
-                 "y":65.3333333333333
+                 "x":60.6666666666667,
+                 "y":125.333333333333
                 }],
+         "offsetx":4,
+         "offsety":0,
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -201,7 +226,7 @@
          "y":0
         }],
  "nextlayerid":4,
- "nextobjectid":9,
+ "nextobjectid":10,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

@@ -1,25 +1,30 @@
 import * as PIXI from "pixi.js";
 import type { TiledMap } from "./MapClass";
-import type { SpriteUnit } from "./SpriteUnit";
+import type { UnitAnimSpirite } from "./UnitAnimSpirite";
+import type { Unit } from "@/core/Unit";
 let oldselectionBox: PIXI.Graphics | null = null;
 
 export const UnitRightEvent = (
   event: PIXI.FederatedPointerEvent,
-  spriteUnit: SpriteUnit,
+  unit: Unit,
   container: PIXI.Container<PIXI.ContainerChild>,
   selectLayer: PIXI.IRenderLayer,
   lineLayer: PIXI.IRenderLayer,
   mapPassiable: TiledMap | null
 ) => {
-  // alert('click');
-  // 如果之前有选择框，先移除它
-  console.log(oldselectionBox);
   event.stopPropagation();
+
+  const spriteUnit = unit.animUnit;
+  if (!spriteUnit) {
+    console.error("动画精灵不存在");
+    return;
+  }
+  // 如果之前有选择框，先移除它
   if (oldselectionBox) {
     container.removeChild(oldselectionBox);
     oldselectionBox = null;
-    // alert("取消选择");
   }
+
   const selectionBox = new PIXI.Graphics();
   const boxWidth = 40;
   const boxHeight = 80;
@@ -63,7 +68,7 @@ export const UnitRightEvent = (
     label.on("pointertap", () => {
       alert(`选择了: ${text}`);
       if (text == "移动") {
-        moveSelect(spriteUnit, container,lineLayer, mapPassiable);
+        moveSelect(unit, container, lineLayer, mapPassiable);
       }
       container.removeChild(selectionBox);
     });
@@ -84,7 +89,7 @@ export const UnitRightEvent = (
   // alert("取消选择");
 };
 export const moveSelect = (
-  spriteUnit: SpriteUnit,
+  unit: Unit,
   container: PIXI.Container<PIXI.ContainerChild>,
   lineLayer: PIXI.IRenderLayer,
   mapPassiable: TiledMap | null
@@ -95,7 +100,13 @@ export const moveSelect = (
   const graphics = new PIXI.Graphics();
   graphics.alpha = 0.4;
   graphics.zIndex = 1000;
-
+  const spriteUnit = unit.animUnit;
+  console.log("spriteUnits", unit);
+  if (!spriteUnit) {
+    return;
+  }
+  console.log(`动画精灵位置: (${spriteUnit.x}, ${spriteUnit.y})`);
+  //
   const centerX = spriteUnit.x + spriteUnit.width;
   const centerY = spriteUnit.y + spriteUnit.height;
   //使用切比雪夫距离绘制
@@ -207,19 +218,24 @@ export const moveSelect = (
     e.stopPropagation();
     removeGraphics();
 
-    moveMovement(e, spriteUnit, container, path);
+    moveMovement(e, unit, container, path);
   });
   container.on("pointerdown", removeGraphics);
 };
 
 export const moveMovement = async (
   event: PIXI.FederatedPointerEvent,
-  spriteUnit: SpriteUnit,
+  unit: Unit,
   container: PIXI.Container<PIXI.ContainerChild>,
   path: { [key: string]: { x: number; y: number } | null }
 ) => {
   const tileSize = 64; // 格子大小
   //计算出动画精灵所在的格子
+  const spriteUnit = unit.animUnit;
+  if (!spriteUnit) {
+    console.error("动画精灵不存在");
+    return;
+  }
   const centerX = Math.floor(spriteUnit.x / tileSize);
   const centerY = Math.floor(spriteUnit.y / tileSize);
   console.log(`动画精灵所在格子: (${centerX}, ${centerY})`);
@@ -262,16 +278,21 @@ export const moveMovement = async (
   }
   for (const step of pathWay) {
     // 执行移动
-    await girdMoveMovement(step.x, step.y, spriteUnit, tileSize);
+    await girdMoveMovement(step.x, step.y, unit, tileSize);
   }
   // girdMoveMovement(tileX, tileY, anim, tileSize);
 };
 const girdMoveMovement = (
   tileX: number,
   tileY: number,
-  spriteUnit: SpriteUnit,
+  unit: Unit,
   tileSize: number
 ) => {
+  const spriteUnit = unit.animUnit;
+  if (!spriteUnit) {
+    console.error("动画精灵不存在");
+    return;
+  }
   // 更新状态
   spriteUnit.state = "walking";
   // 计算实际的移动位置
@@ -342,6 +363,8 @@ const girdMoveMovement = (
         spriteUnit.y = targetY;
         // 停止动画更新
       }
+      unit.x = spriteUnit.x;
+      unit.y = spriteUnit.y;
     }
   };
   const girdMovePromise = new Promise<void>((resolve) => {

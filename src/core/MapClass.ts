@@ -82,7 +82,8 @@ export class TiledMap {
   width: number;
   edges: Array<{ x1: number; y1: number; x2: number; y2: number; }> = [];
   textures?: PIXI.Sprite;
-  constructor(data: any,textures: any) {
+  sprites: any[] = [];
+  constructor(data: any, textures: any) {
     this.compressionlevel = data.compressionlevel;
     this.height = data.height;
     this.infinite = data.infinite;
@@ -101,6 +102,11 @@ export class TiledMap {
     this.initEdges();
     if (textures) {
      this.textures=new PIXI.Sprite(textures);
+    }
+    // 初始化 sprites 属性
+    const spriteLayer = this.layers.find(l => l.type === "objectgroup" && l.name === "sprite");
+    if (spriteLayer && spriteLayer.objects) {
+      this.sprites = spriteLayer.objects;
     }
   
   }

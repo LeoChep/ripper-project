@@ -2,7 +2,7 @@
 
 import { Container } from "pixi.js";
 import * as PIXI from "pixi.js";
-export class SpriteUnit extends Container {
+export class UnitAnimSpirite extends Container {
   // 单位的朝向，单位为弧度，0 表示向右
   private _direction: number = 0;
 
