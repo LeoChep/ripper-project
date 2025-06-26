@@ -1,0 +1,182 @@
+{
+  "bodyTypeName": "male",
+  "url": "https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/#?body=Skeleton_skeleton&head=Skeleton_skeleton&weapon=Arming_Sword_brass&shield=Shield_round_green",
+  "spritesheets": "https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/spritesheets/",
+  "version": 1,
+  "datetime": "2025/6/27 00:50:58",
+  "credits": [
+    {
+      "fileName": "body/bodies/skeleton/skeleton.png",
+      "licenses": "OGA-BY 3.0,CC-BY-SA 3.0,GPL 3.0",
+      "authors": "bluecarrot16,Johannes Sjölund (wulax),Stephen Challener (Redshrike)",
+      "urls": "https://opengameart.org/content/liberated-pixel-cup-lpc-base-assets-sprites-map-tiles,https://opengameart.org/content/lpc-medieval-fantasy-character-sprites,https://opengameart.org/content/lpc-skeleton,https://opengameart.org/content/lpc-character-bases",
+      "notes": ""
+    },
+    {
+      "fileName": "head/heads/skeleton/adult/skeleton.png",
+      "licenses": "OGA-BY 3.0,CC-BY-SA 3.0,GPL 3.0",
+      "authors": "bluecarrot16,Johannes Sjölund (wulax),Stephen Challener (Redshrike)",
+      "urls": "https://opengameart.org/content/liberated-pixel-cup-lpc-base-assets-sprites-map-tiles,https://opengameart.org/content/lpc-medieval-fantasy-character-sprites,https://opengameart.org/content/lpc-skeleton,https://opengameart.org/content/lpc-character-bases",
+      "notes": ""
+    },
+    {
+      "fileName": "shield/male/round_green.png",
+      "licenses": "CC-BY-SA 3.0,GPL 3.0",
+      "authors": "Johannes Sjölund (wulax),Michael Whitlock (bigbeargames),DarkwallLKE,Tuomo Untinen (reemax)",
+      "urls": "https://opengameart.org/content/lpc-medieval-fantasy-character-sprites,https://opengameart.org/content/lpc-shields-pack",
+      "notes": "?"
+    },
+    {
+      "fileName": "weapon/sword/arming/universal/fg/brass.png",
+      "licenses": "OGA-BY 3.0",
+      "authors": "ElizaWy; walk and down by JaidynReiman",
+      "urls": "https://github.com/ElizaWy/LPC/tree/main/Characters/Props/Sword%2001%20-%20Arming%20Sword,https://opengameart.org/content/lpc-expanded-sit-run-jump-more",
+      "notes": ""
+    },
+    {
+      "fileName": "weapon/sword/arming/universal/bg/brass.png",
+      "licenses": "OGA-BY 3.0",
+      "authors": "ElizaWy; walk and down by JaidynReiman",
+      "urls": "https://github.com/ElizaWy/LPC/tree/main/Characters/Props/Sword%2001%20-%20Arming%20Sword,https://opengameart.org/content/lpc-expanded-sit-run-jump-more",
+      "notes": ""
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_slash/bg/brass.png",
+      "licenses": "OGA-BY 3.0",
+      "authors": "ElizaWy; walk and down by JaidynReiman",
+      "urls": "https://github.com/ElizaWy/LPC/tree/main/Characters/Props/Sword%2001%20-%20Arming%20Sword,https://opengameart.org/content/lpc-expanded-sit-run-jump-more",
+      "notes": ""
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_slash/fg/brass.png",
+      "licenses": "OGA-BY 3.0",
+      "authors": "ElizaWy; walk and down by JaidynReiman",
+      "urls": "https://github.com/ElizaWy/LPC/tree/main/Characters/Props/Sword%2001%20-%20Arming%20Sword,https://opengameart.org/content/lpc-expanded-sit-run-jump-more",
+      "notes": ""
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_backslash/bg/brass.png",
+      "licenses": "OGA-BY 3.0",
+      "authors": "ElizaWy; walk and down by JaidynReiman",
+      "urls": "https://github.com/ElizaWy/LPC/tree/main/Characters/Props/Sword%2001%20-%20Arming%20Sword,https://opengameart.org/content/lpc-expanded-sit-run-jump-more",
+      "notes": ""
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_backslash/fg/brass.png",
+      "licenses": "OGA-BY 3.0",
+      "authors": "ElizaWy; walk and down by JaidynReiman",
+      "urls": "https://github.com/ElizaWy/LPC/tree/main/Characters/Props/Sword%2001%20-%20Arming%20Sword,https://opengameart.org/content/lpc-expanded-sit-run-jump-more",
+      "notes": ""
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_halfslash/bg/brass.png",
+      "licenses": "OGA-BY 3.0",
+      "authors": "ElizaWy; walk and down by JaidynReiman",
+      "urls": "https://github.com/ElizaWy/LPC/tree/main/Characters/Props/Sword%2001%20-%20Arming%20Sword,https://opengameart.org/content/lpc-expanded-sit-run-jump-more",
+      "notes": ""
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_halfslash/fg/brass.png",
+      "licenses": "OGA-BY 3.0",
+      "authors": "ElizaWy; walk and down by JaidynReiman",
+      "urls": "https://github.com/ElizaWy/LPC/tree/main/Characters/Props/Sword%2001%20-%20Arming%20Sword,https://opengameart.org/content/lpc-expanded-sit-run-jump-more",
+      "notes": ""
+    }
+  ],
+  "layers": [
+    {
+      "fileName": "weapon/sword/arming/attack_slash/bg/brass.png",
+      "zPos": 8,
+      "custom_animation": "slash_128",
+      "parentName": "weapon",
+      "name": "Arming_Sword",
+      "variant": "brass",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_backslash/bg/brass.png",
+      "zPos": 8,
+      "custom_animation": "backslash_128",
+      "parentName": "weapon",
+      "name": "Arming_Sword",
+      "variant": "brass",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_halfslash/bg/brass.png",
+      "zPos": 8,
+      "custom_animation": "halfslash_128",
+      "parentName": "weapon",
+      "name": "Arming_Sword",
+      "variant": "brass",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "weapon/sword/arming/universal/bg/brass.png",
+      "zPos": 9,
+      "parentName": "weapon",
+      "name": "Arming_Sword",
+      "variant": "brass",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "body/bodies/skeleton/skeleton.png",
+      "zPos": 10,
+      "parentName": "body",
+      "name": "Skeleton",
+      "variant": "skeleton",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering"
+    },
+    {
+      "fileName": "head/heads/skeleton/adult/skeleton.png",
+      "zPos": 100,
+      "parentName": "head",
+      "name": "Skeleton",
+      "variant": "skeleton",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "shield/male/round_green.png",
+      "zPos": 110,
+      "parentName": "shield",
+      "name": "Shield",
+      "variant": "round green",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering"
+    },
+    {
+      "fileName": "weapon/sword/arming/universal/fg/brass.png",
+      "zPos": 140,
+      "parentName": "weapon",
+      "name": "Arming_Sword",
+      "variant": "brass",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_slash/fg/brass.png",
+      "zPos": 150,
+      "custom_animation": "slash_128",
+      "parentName": "weapon",
+      "name": "Arming_Sword",
+      "variant": "brass",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_backslash/fg/brass.png",
+      "zPos": 150,
+      "custom_animation": "backslash_128",
+      "parentName": "weapon",
+      "name": "Arming_Sword",
+      "variant": "brass",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_halfslash/fg/brass.png",
+      "zPos": 150,
+      "custom_animation": "halfslash_128",
+      "parentName": "weapon",
+      "name": "Arming_Sword",
+      "variant": "brass",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    }
+  ]
+}

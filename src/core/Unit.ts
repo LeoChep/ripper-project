@@ -10,6 +10,7 @@ export interface UnitOptions {
     party: string;
     unitTypeName: string;
     gid?: number;
+    direction: number; // 方向，0-3 分别表示上、右、下、左
 }
 
 export class Unit  {
@@ -33,6 +34,7 @@ export class Unit  {
         this.width = options.width;
         this.height = options.height;
         this.party = options.party;
+        this.direction = options.direction 
         this.unitTypeName = options.unitTypeName;
         this.gid = options.gid;
     }
@@ -43,6 +45,7 @@ export function createUnitsFromMapSprites(sprites: any[]): Unit[] {
     return sprites.map(obj => {
         const partyProp = obj.properties?.find((p: any) => p.name === 'party');
         const unitTypeNameProp = obj.properties?.find((p: any) => p.name === 'unitTypeName');
+        const directionProp = obj.properties?.find((p: any) => p.name === 'direction');
         return new Unit({
             id: obj.id,
             name: obj.name,
@@ -53,7 +56,7 @@ export function createUnitsFromMapSprites(sprites: any[]): Unit[] {
             party: partyProp ? partyProp.value : '',
             unitTypeName: unitTypeNameProp ? unitTypeNameProp.value : '',
             gid: obj.gid,
-        
+            direction: directionProp? directionProp.value : 2 // 默认方向为 0
         });
     });
 }
@@ -62,6 +65,7 @@ export function createUnitsFromMapSprites(sprites: any[]): Unit[] {
 export function createUnitFromSprite(obj: any): Unit {
     const partyProp = obj.properties?.find((p: any) => p.name === 'party');
     const unitTypeNameProp = obj.properties?.find((p: any) => p.name === 'unitTypeName');
+     const directionProp = obj.properties?.find((p: any) => p.name === 'direction');
     return new Unit({
         id: obj.id,
         name: obj.name,
@@ -71,6 +75,7 @@ export function createUnitFromSprite(obj: any): Unit {
         height: obj.height,
         party: partyProp ? partyProp.value : '',
         unitTypeName: unitTypeNameProp ? unitTypeNameProp.value : '',
+         direction: directionProp? directionProp.value : 2, // 默认方向为 0
         gid: obj.gid
     });
 }

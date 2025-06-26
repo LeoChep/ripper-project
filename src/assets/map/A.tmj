@@ -213,8 +213,8 @@
                 {
                  "gid":739,
                  "height":64,
-                 "id":7,
-                 "name":"wolf2",
+                 "id":11,
+                 "name":"",
                  "properties":[
                         {
                          "name":"party",
@@ -230,31 +230,36 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":316.666666666667,
-                 "y":252.666666666667
+                 "x":316,
+                 "y":124
                 }, 
                 {
-                 "gid":739,
+                 "gid":785,
                  "height":64,
-                 "id":9,
-                 "name":"wolf",
+                 "id":20,
+                 "name":"",
                  "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"party",
                          "type":"string",
-                         "value":"player"
+                         "value":"skeletons"
                         }, 
                         {
                          "name":"unitTypeName",
                          "type":"string",
-                         "value":"wolf"
+                         "value":"skeleton"
                         }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":61.3333333333333,
-                 "y":125.333333333333
+                 "x":118,
+                 "y":320
                 }],
          "offsetx":4,
          "offsety":0,
@@ -265,7 +270,7 @@
          "y":0
         }],
  "nextlayerid":5,
- "nextobjectid":11,
+ "nextobjectid":21,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
@@ -287,7 +292,20 @@
         {
          "columns":9,
          "firstgid":721,
-         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/wolf\/walk.png",
+         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/wolf\/anim\/standard\/walk.png",
+         "imageheight":256,
+         "imagewidth":576,
+         "margin":0,
+         "name":"walk",
+         "spacing":0,
+         "tilecount":36,
+         "tileheight":64,
+         "tilewidth":64
+        }, 
+        {
+         "columns":9,
+         "firstgid":757,
+         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/skeleton\/anim\/standard\/walk.png",
          "imageheight":256,
          "imagewidth":576,
          "margin":0,

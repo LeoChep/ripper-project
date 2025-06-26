@@ -110,7 +110,7 @@ const generateAnimSprite = async (unit, container, rlayers, mapPassiable) => {
     const animSpriteUnit =await createAnimSpriteUnits(unit.unitTypeName, unit);
    // const animSpriteUnit = await createAnimSpriteUnit(unit.unitTypeName);
     unit.animUnit = animSpriteUnit;
-    unit.direction = 2;
+    //unit.direction = 2;
     console.log('generateAnimSprite', unit, animSpriteUnit)
     addAnimSpriteUnit(unit, container, rlayers, mapPassiable);
     animSpriteUnit.x = Math.round(unit.x / 64) * 64;
@@ -122,7 +122,7 @@ const createAnimSpriteUnits = async (unitTypeName,unit) => {
     // 这里可以根据 unitTypeName 创建不同的动画精灵
     // 例如，如果 unitTypeName 是 'wolf'，则加载对应的动画精    
     //读取animation meta json
-    const testJsonFetchPromise = getAnimMetaJsonFile("wolf")
+    const testJsonFetchPromise = getAnimMetaJsonFile(unitTypeName)
     const animMetaJson = new AnimMetaJson(await testJsonFetchPromise);
     //遍历获取所有动画组
     const animSpriteUnit = new UnitAnimSpirite(unit)
