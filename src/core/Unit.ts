@@ -23,6 +23,7 @@ export class Unit  {
     width: number;
     height: number;
     animUnit : UnitAnimSpirite | undefined;
+    direction: number = 0; // 方向，0-3 分别表示上、右、下、左
     constructor(options: UnitOptions) {
       
         this.id = options.id;
@@ -51,7 +52,8 @@ export function createUnitsFromMapSprites(sprites: any[]): Unit[] {
             height: obj.height,
             party: partyProp ? partyProp.value : '',
             unitTypeName: unitTypeNameProp ? unitTypeNameProp.value : '',
-            gid: obj.gid
+            gid: obj.gid,
+        
         });
     });
 }

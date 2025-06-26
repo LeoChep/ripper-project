@@ -1,48 +1,34 @@
-
-
 import { Container } from "pixi.js";
 import * as PIXI from "pixi.js";
+import type { Unit } from "./Unit";
 export class UnitAnimSpirite extends Container {
   // 单位的朝向，单位为弧度，0 表示向右
-  private _direction: number = 0;
+  private _direction: number = -1;
 
   // 单位的状态
-  private _state: string = "walking"; // 例如 'walking', 'attacking', 'idle' 等
+  private _state: string = "walk"; // 例如 'walking', 'attacking', 'idle' 等
 
-  // 单位的行走动画
-  private _walkingSpritesheet?: PIXI.Spritesheet;
+  private owner: Unit | undefined;
+
   // 动画执行状态
   private _animationState: string = "";
+  public anims: { [key: string]: PIXI.AnimatedSprite } = {};
+  public animsSheet: { [key: string]: PIXI.Spritesheet } = {};
 
-  // 行走动画
-  public walking_anim?: PIXI.AnimatedSprite;
-
-  constructor(walkingSpritesheet:PIXI.Spritesheet) {
+  constructor(unit: Unit | undefined) {
     super();
-    this.walkingSpritesheet=walkingSpritesheet;
-    this.walking_anim = new PIXI.AnimatedSprite(walkingSpritesheet.animations.walk_w);
-    this.walking_anim.animationSpeed = 0.1666;
-    this.walking_anim.textures = walkingSpritesheet.animations.walk_d
-    this.direction=0;
-    this.walking_anim.renderable = false;
-    // play the animation on a loop
-    this.walking_anim.play();
-    this.walking_anim.label= 'walking';
-    this.addChild(this.walking_anim);
+    this.owner = unit;
     // 可以在这里初始化你的自定义属性
     this.onRender = () => {
       this.update();
     };
   }
-
-  // 获取行走动画Spritesheet
-  public get walkingSpritesheet(): PIXI.Spritesheet | undefined {
-    return this._walkingSpritesheet;
+  public get ownerUnit(): Unit | undefined {
+    return this.owner;
   }
 
-  // 设置行走动画Spritesheet
-  public set walkingSpritesheet(value: PIXI.Spritesheet | undefined) {
-    this._walkingSpritesheet = value;
+  public set ownerUnit(unit: Unit | undefined) {
+    this.owner = unit;
   }
 
   // 获取单位朝向
@@ -77,17 +63,80 @@ export class UnitAnimSpirite extends Container {
 
   // 可以添加自定义方法
   public update(): void {
+    // 如果当前状态与动画状态不一致，则更新渲染状态
     if (this._state !== this._animationState)
       this.children.forEach((child) => {
-        if (child.label !== "walking") {
+        if (child.label !== this._state) {
           child.renderable = false;
         }
       });
-    if (this._state === "walking") {
-      if (this.walking_anim) {
-        this.walking_anim.renderable = true;
+    let dirctionWASD = this.getWASDDirection();
+    // 如果当前状态是行走状态，则渲染行走动画
+    if (this._state === "walk") {
+      if (this.anims["walk"]) {
+        this.anims["walk"].renderable = true;
       }
-      this._animationState= "walking";
     }
+    //是否切换转向
+    if (this.direction !== this.owner?.direction) {
+      if (this.anims[this._state] && this.animsSheet[this._state]) {
+        this.anims[this._state].textures =
+          this.animsSheet[this._state].animations[
+            this._state + "_" + dirctionWASD
+          ];
+      }
+    }
+    //存在切换则调整并播放动画
+    if (this.anims[this._state])
+      if (
+        this._state !== this._animationState ||
+        this.direction !== this.owner?.direction
+      ) {
+        if (this.owner?.direction != null) {
+          this.direction = this.owner.direction;
+        }
+        this._animationState = this._state;
+        this.anims[this._state].play();
+      }
+  }
+
+  public getWASDDirection(): string {
+    let dirctionWASD = "";
+    switch (this.owner?.direction) {
+      case 0:
+        dirctionWASD = "d";
+        break;
+      case 1:
+        dirctionWASD = "a";
+        break;
+      case 2:
+        dirctionWASD = "s";
+        break;
+      case 3:
+        dirctionWASD = "w";
+        break;
+    }
+    return dirctionWASD;
+  }
+  public addAnimation(name: string, animation: PIXI.AnimatedSprite): void {
+    this.anims[name] = animation;
+    this.addChild(animation);
+    animation.renderable = false; // 默认不渲染
+  }
+  public addAnimationSheet(name: string, spritesheet: PIXI.Spritesheet): void {
+    this.animsSheet[name] = spritesheet;
+    const animKeys = Object.keys(spritesheet.animations);
+    console.log(animKeys[0]);
+    console.log(spritesheet.animations);
+    const animSprite = new PIXI.AnimatedSprite(
+      spritesheet.animations[animKeys[0]]
+    );
+    animSprite.animationSpeed = 0.1666;
+    animSprite.textures = spritesheet.animations[animKeys[0]];
+    animSprite.renderable = false;
+    // play the animation on a loop
+    // animSprite.play();
+    animSprite.label = name;
+    this.addAnimation(name, animSprite);
   }
 }

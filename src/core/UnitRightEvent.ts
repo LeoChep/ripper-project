@@ -294,7 +294,7 @@ const girdMoveMovement = (
     return;
   }
   // 更新状态
-  spriteUnit.state = "walking";
+  spriteUnit.state = "walk";
   // 计算实际的移动位置
   const targetX = tileX * tileSize;
   const targetY = tileY * tileSize;
@@ -302,7 +302,7 @@ const girdMoveMovement = (
   const dx = targetX - spriteUnit.x;
   const dy = targetY - spriteUnit.y;
   //转向
-  let direction = spriteUnit.direction;
+  let direction = unit.direction;
   //设置朝向
   if (Math.abs(dx) >= Math.abs(dy) && Math.abs(dx) > 0) {
     // 水平移动
@@ -312,30 +312,8 @@ const girdMoveMovement = (
     direction = dy > 0 ? 2 : 3; // 2向下, 3向上
   }
 
-  if (spriteUnit.direction !== direction) {
-    spriteUnit.direction = direction;
-    // 如果有行走动画，则播放
-    if (spriteUnit.walking_anim && spriteUnit.walkingSpritesheet) {
-      let dirString = "";
-      switch (direction) {
-        case 0:
-          dirString = "d";
-          break;
-        case 1:
-          dirString = "a";
-          break;
-        case 2:
-          dirString = "s";
-          break;
-        case 3:
-          dirString = "w";
-          break;
-      }
-      spriteUnit.walking_anim.textures =
-        spriteUnit.walkingSpritesheet.animations["walk_" + dirString];
-      spriteUnit.walking_anim.play();
-    }
-  }
+  unit.direction= direction;
+  
   const moveFunc = () => {
     console.log(`目标位置: (${targetX}, ${targetY})`);
     // 如果精灵已经在目标

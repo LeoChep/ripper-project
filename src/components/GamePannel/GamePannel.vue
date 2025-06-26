@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import { getJsonFile, getUnitFile, getMapAssetFile } from '@/utils/utils'
+import { getJsonFile, getUnitFile, getMapAssetFile, getAnimMetaJsonFile, getAnimActionSpriteJsonFile, getAnimSpriteImgUrl } from '@/utils/utils'
 
 import * as PIXI from 'pixi.js'
 import { UnitRightEvent } from '@/core/UnitRightEvent'
@@ -13,6 +13,7 @@ import { onMounted } from 'vue'
 import { TiledMap } from '@/core/MapClass'
 import { UnitAnimSpirite } from '@/core/UnitAnimSpirite'
 import { Unit, createUnitsFromMapSprites } from '@/core/Unit'
+import { AnimMetaJson } from '@/core/AnimMetaJson'
 const appSetting = {
     width: 800,
     height: 600,
@@ -105,32 +106,52 @@ const drawMap = (mapView, container, rlayers) => {
 }
 
 const generateAnimSprite = async (unit, container, rlayers, mapPassiable) => {
-    const animSpriteUnit = await createAnimSpriteUnit(unit.unitTypeName);
+  
+    const animSpriteUnit =await createAnimSpriteUnits(unit.unitTypeName, unit);
+   // const animSpriteUnit = await createAnimSpriteUnit(unit.unitTypeName);
     unit.animUnit = animSpriteUnit;
+    unit.direction = 2;
+    console.log('generateAnimSprite', unit, animSpriteUnit)
     addAnimSpriteUnit(unit, container, rlayers, mapPassiable);
     animSpriteUnit.x = Math.round(unit.x / 64) * 64;
     animSpriteUnit.y = Math.round(unit.y / 64) * 64 - 64;
 
 }
 
-const createAnimSpriteUnit = async (unitTypeName) => {
-    const walkUrl = getUnitFile(unitTypeName, 'walk');
-    const sheetTexture = await PIXI.Assets.load(walkUrl);
-    const jsonFetchPromise = getJsonFile(unitTypeName, 'walk')
-    console.log(await jsonFetchPromise)
-    const walkSpritesheet = new PIXI.Spritesheet(
-        sheetTexture,
-        await jsonFetchPromise
-    );
-    await walkSpritesheet.parse();
+const createAnimSpriteUnits = async (unitTypeName,unit) => {
+    // 这里可以根据 unitTypeName 创建不同的动画精灵
+    // 例如，如果 unitTypeName 是 'wolf'，则加载对应的动画精    
+    //读取animation meta json
+    const testJsonFetchPromise = getAnimMetaJsonFile("wolf")
+    const animMetaJson = new AnimMetaJson(await testJsonFetchPromise);
+    //遍历获取所有动画组
+    const animSpriteUnit = new UnitAnimSpirite(unit)
+    animMetaJson.getAllExportedAnimations().forEach(async (anim) => {
+        console.log(anim)
+        const spriteUrl = getAnimSpriteImgUrl(unitTypeName, anim, 'standard');
+        const sheetTexture = await PIXI.Assets.load(spriteUrl);
+        console.log(anim)
+        const jsonFetchPromise = getAnimActionSpriteJsonFile(unitTypeName, anim, 'standard');
+        const json = await jsonFetchPromise;
+        if (json && json.frames) {
+            const spritesheet = new PIXI.Spritesheet(
+                sheetTexture,
+                json
+            );
+            await spritesheet.parse();
+            animSpriteUnit.addAnimationSheet(anim, spritesheet);
+        }
+
+    })
     // spritesheet is ready to use!
-    const animSpriteUnit = new UnitAnimSpirite(walkSpritesheet)
+
     return animSpriteUnit;
 }
 
+
 const addAnimSpriteUnit = (unit, container, rlayers, mapPassiable) => {
     const animSpriteUnit = unit.animUnit;
-    console.log('addAnimSpriteUnit',unit)
+    console.log('addAnimSpriteUnit', unit)
     rlayers.spriteLayer.attach(animSpriteUnit);
     animSpriteUnit.eventMode = 'dynamic';
     animSpriteUnit.on('rightdown', (event) => {
