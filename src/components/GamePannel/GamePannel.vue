@@ -57,7 +57,7 @@ onMounted(async () => {
     units.forEach(async (unit) => {
         await generateAnimSprite(unit, container, rlayers, mapPassiable)
     });
-
+    mapPassiable.sprites = units;
     //绘制格子
     drawGrid(app, rlayers);
     //增加键盘监听
@@ -71,10 +71,12 @@ const createRenderLayers = (app) => {
     rlayers.spriteLayer = new PIXI.RenderLayer();
     rlayers.lineLayer = new PIXI.RenderLayer();
     rlayers.selectLayer = new PIXI.RenderLayer();
+    rlayers.controllerLayer = new PIXI.RenderLayer();
     app.stage.addChildAt(rlayers.basicLayer, 0);
     app.stage.addChildAt(rlayers.spriteLayer, 1);
     app.stage.addChildAt(rlayers.lineLayer, 2);
     app.stage.addChildAt(rlayers.selectLayer, 3);
+    app.stage.addChildAt(rlayers.controllerLayer, 4);
     return rlayers
 }
 
@@ -115,7 +117,7 @@ const generateAnimSprite = async (unit, container, rlayers, mapPassiable) => {
     addAnimSpriteUnit(unit, container, rlayers, mapPassiable);
     animSpriteUnit.x = Math.round(unit.x / 64) * 64;
     animSpriteUnit.y = Math.round(unit.y / 64) * 64 - 64;
-
+    return unit
 }
 
 const createAnimSpriteUnits = async (unitTypeName,unit) => {
@@ -155,7 +157,7 @@ const addAnimSpriteUnit = (unit, container, rlayers, mapPassiable) => {
     rlayers.spriteLayer.attach(animSpriteUnit);
     animSpriteUnit.eventMode = 'dynamic';
     animSpriteUnit.on('rightdown', (event) => {
-        UnitRightEvent(event, unit, container, rlayers.selectLayer, rlayers.lineLayer, mapPassiable);
+        UnitRightEvent(event, unit, container, rlayers, mapPassiable);
     });
     container.addChild(animSpriteUnit);
 }

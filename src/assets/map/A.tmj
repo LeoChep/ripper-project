@@ -260,6 +260,29 @@
                  "width":64,
                  "x":118,
                  "y":320
+                }, 
+                {
+                 "gid":721,
+                 "height":64,
+                 "id":21,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"party",
+                         "type":"string",
+                         "value":"player"
+                        }, 
+                        {
+                         "name":"unitTypeName",
+                         "type":"string",
+                         "value":"wolf"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":380,
+                 "y":190
                 }],
          "offsetx":4,
          "offsety":0,
@@ -270,7 +293,7 @@
          "y":0
         }],
  "nextlayerid":5,
- "nextobjectid":21,
+ "nextobjectid":22,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
