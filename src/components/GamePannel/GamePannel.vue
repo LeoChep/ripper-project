@@ -1,19 +1,20 @@
 <template>
-    <div class="game-pannel" id="game-pannel">
-
-    </div>
+    <div class="game-pannel" id="game-pannel"></div>
+    <CreatureInfo :creature="selectedCreature" v-if="selectedCreature" @close="selectedCreature = null" />
 </template>
 
 <script setup>
+import CreatureInfo from '../CreatureInfo.vue'
+import { ref, onMounted } from 'vue'
 import { getJsonFile, getUnitFile, getMapAssetFile, getAnimMetaJsonFile, getAnimActionSpriteJsonFile, getAnimSpriteImgUrl } from '@/utils/utils'
 
 import * as PIXI from 'pixi.js'
 import { UnitRightEvent } from '@/core/UnitRightEvent'
-import { onMounted } from 'vue'
 import { TiledMap } from '@/core/MapClass'
 import { UnitAnimSpirite } from '@/core/UnitAnimSpirite'
 import { Unit, createUnitsFromMapSprites } from '@/core/Unit'
 import { AnimMetaJson } from '@/core/AnimMetaJson'
+import { createCreature } from '@/units/Creature'
 const appSetting = {
     width: 800,
     height: 600,
@@ -65,6 +66,8 @@ onMounted(async () => {
 
 })
 
+const selectedCreature = ref(null) // 新增
+
 const createRenderLayers = (app) => {
     const rlayers = {}
     rlayers.basicLayer = new PIXI.RenderLayer()
@@ -108,19 +111,34 @@ const drawMap = (mapView, container, rlayers) => {
 }
 
 const generateAnimSprite = async (unit, container, rlayers, mapPassiable) => {
-  
-    const animSpriteUnit =await createAnimSpriteUnits(unit.unitTypeName, unit);
-   // const animSpriteUnit = await createAnimSpriteUnit(unit.unitTypeName);
+
+    const animSpriteUnit = await createAnimSpriteUnits(unit.unitTypeName, unit);
+    const unitCreature = await createUnitCreature(unit.unitTypeName, unit);
+    // const animSpriteUnit = await createAnimSpriteUnit(unit.unitTypeName);
     unit.animUnit = animSpriteUnit;
+    unit.creature = unitCreature;
     //unit.direction = 2;
     console.log('generateAnimSprite', unit, animSpriteUnit)
     addAnimSpriteUnit(unit, container, rlayers, mapPassiable);
     animSpriteUnit.x = Math.round(unit.x / 64) * 64;
     animSpriteUnit.y = Math.round(unit.y / 64) * 64 - 64;
+    unit.x= animSpriteUnit.x;
+    unit.y = animSpriteUnit.y ;
     return unit
 }
 
-const createAnimSpriteUnits = async (unitTypeName,unit) => {
+const createUnitCreature = async (unitTypeName, unit) => {
+    const json = await getJsonFile(unitTypeName, unitTypeName, 'json');
+    if (!json) {
+        console.error(`Creature JSON file for ${unitTypeName} not found.`);
+        return null;
+    }
+    // console.log('createUnitCreature', unitTypeName, jsonStr)
+    // const jsonObj = JSON.parse(jsonStr);
+    const creature = createCreature(json);
+    return creature;
+}
+const createAnimSpriteUnits = async (unitTypeName, unit) => {
     // 这里可以根据 unitTypeName 创建不同的动画精灵
     // 例如，如果 unitTypeName 是 'wolf'，则加载对应的动画精    
     //读取animation meta json
@@ -158,6 +176,12 @@ const addAnimSpriteUnit = (unit, container, rlayers, mapPassiable) => {
     animSpriteUnit.eventMode = 'dynamic';
     animSpriteUnit.on('rightdown', (event) => {
         UnitRightEvent(event, unit, container, rlayers, mapPassiable);
+    });
+    animSpriteUnit.on('click', (event) => {
+        // alert(`Clicked on unit: ${unit.unitTypeName}`);
+        if (unit.creature) {
+            selectedCreature.value = unit.creature
+        }
     });
     container.addChild(animSpriteUnit);
 }

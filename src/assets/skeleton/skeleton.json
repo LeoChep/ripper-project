@@ -1,0 +1,58 @@
+{
+  "name": "朽坏骷髅 (Decrepit Skeleton)",
+  "level": 1,
+  "role": "杂兵 游击",
+  "xp": 25,
+  "size": "中型",
+  "type": "自然界 活化生物（不死生物）",
+  "hp": 1,
+  "bloodied": 0,
+  "ac": 16,
+  "fortitude": 13,
+  "reflex": 14,
+  "will": 13,
+  "speed": 6,
+  "fly": null,
+  "initiative": 0,
+  "senses": "",
+  "immunities": [ "疾病", "毒素" ],
+  "resistances": [ { "type": "黯蚀", "value": 10 } ],
+  "alignment": "无",
+  "languages": [ "-" ],
+  "skills": [],
+  "abilities": [
+    { "name": "Strength", "value": 15, "modifier": 2 },
+    { "name": "Dexterity", "value": 17, "modifier": 3 },
+    { "name": "Constitution", "value": 13, "modifier": 1 },
+    { "name": "Intelligence", "value": 3, "modifier": -4 },
+    { "name": "Wisdom", "value": 14, "modifier": 2 },
+    { "name": "Charisma", "value": 3, "modifier": -4 }
+  ],
+  "equipment": [ "长剑", "短弓", "20 支箭" ],
+  "attacks": [
+    {
+      "name": "长剑",
+      "type": "Melee",
+      "action": "武器",
+      "range": 1,
+      "attackBonus": 6,
+      "target": "AC",
+      "damage": "",
+      "effect": "该骷髅可以在该攻击前快步一格。攻击：射程 20（一个生物）+6vs.AC",
+      "missEffect": null
+    },
+    {
+      "name": "短弓",
+      "type": "Ranged",
+      "action": "武器",
+      "range": 20,
+      "attackBonus": 6,
+      "target": "AC",
+      "damage": "",
+      "effect": null,
+      "missEffect": null
+    }
+  ],
+  "traits": [],
+  "notes": [ "Equipment: 长剑, 短弓, 20 支箭" ]
+}

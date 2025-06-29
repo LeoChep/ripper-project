@@ -22,14 +22,14 @@ export const moveSelect = (
   }
   console.log(`动画精灵位置: (${spriteUnit.x}, ${spriteUnit.y})`);
   //
-  const centerX = spriteUnit.x + spriteUnit.width;
-  const centerY = spriteUnit.y + spriteUnit.height;
+  const centerX = spriteUnit.x 
+  const centerY = spriteUnit.y 
   //使用切比雪夫距离绘制
   // 使用广度优先搜索(BFS)绘制可移动范围，并记录路径
   const visited = new Set<string>();
   const queue: { x: number; y: number; step: number }[] = [];
-  const startX = Math.floor((centerX - tileSize) / tileSize);
-  const startY = Math.floor((centerY - tileSize) / tileSize);
+  const startX = Math.floor((centerX ) / tileSize);
+  const startY = Math.floor((centerY ) / tileSize);
 
   // 用二维数组记录每个格子的前驱节点
   const path: { [key: string]: { x: number; y: number } | null } = {};

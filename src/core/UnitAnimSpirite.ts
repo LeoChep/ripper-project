@@ -71,12 +71,8 @@ export class UnitAnimSpirite extends Container {
         }
       });
     let dirctionWASD = this.getWASDDirection();
-    // 如果当前状态是行走状态，则渲染行走动画
-    if (this._state === "walk") {
-      if (this.anims["walk"]) {
-        this.anims["walk"].renderable = true;
-      }
-    }
+    // console.log(`当前状态: ${this._state}, 当前方向: ${this.direction}, WASD方向: ${dirctionWASD}`);
+
     //是否切换转向
     if (this.direction !== this.owner?.direction) {
       if (this.anims[this._state] && this.animsSheet[this._state]) {
@@ -84,20 +80,57 @@ export class UnitAnimSpirite extends Container {
           this.animsSheet[this._state].animations[
             this._state + "_" + dirctionWASD
           ];
+        console.log("切换动画状态转向: " + this._state + "_" + dirctionWASD);
       }
     }
     //存在切换则调整并播放动画
-    if (this.anims[this._state])
+    if (this.anims[this._state] && this.animsSheet[this._state])
       if (
         this._state !== this._animationState ||
         this.direction !== this.owner?.direction
       ) {
+        this.anims[this._state].x =0-
+          (this.anims[this._state].width - (this.owner?.width ?? 0)) / 2;
+        this.anims[this._state].y =0-
+          (this.anims[this._state].height - (this.owner?.height ?? 0)) / 2;
         if (this.owner?.direction != null) {
           this.direction = this.owner.direction;
+          this.anims[this._state].textures =
+            this.animsSheet[this._state].animations[
+              this._state + "_" + dirctionWASD
+            ];
+          console.log("切换动画状态转向: " + this._state + "_" + dirctionWASD);
         }
         this._animationState = this._state;
         this.anims[this._state].play();
       }
+    // 如果当前状态是行走状态，则渲染行走动画
+    if (this._state === "walk") {
+      if (this.anims["walk"]) {
+        this.anims["walk"].renderable = true;
+      }
+    }
+    if (this._state === "slash") {
+      if (this.anims["slash"]) {
+        this.anims["slash"].renderable = true;
+        if (
+          this.anims["slash"].currentFrame ===
+          this.anims["slash"].textures.length - 1
+        ) {
+          // 如果当前帧是最后一帧，则停止动画
+          this.anims["slash"].stop();
+          //this.anims["slash"].renderable = false;
+          setTimeout(() => {
+            // 延时一段时间后恢复为行走状态
+            if (this.anims["walk"]) {
+                    this._state = "walk"; // 恢复为行走状态
+            }
+          }, 100); // 延时100毫秒
+
+         
+        }
+      }
+    }
   }
 
   public getWASDDirection(): string {

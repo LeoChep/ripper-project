@@ -1,0 +1,279 @@
+{
+    "frames": {
+        "slash_w_0.png": {
+            "frame": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_w_1.png": {
+            "frame": { "x": 192, "y": 0, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_w_2.png": {
+            "frame": { "x": 384, "y": 0, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_w_3.png": {
+            "frame": { "x": 576, "y": 0, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_w_4.png": {
+            "frame": { "x": 768, "y": 0, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_w_5.png": {
+            "frame": { "x": 960, "y": 0, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_w_6.png": {
+            "frame": { "x": 1152, "y": 0, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_w_7.png": {
+            "frame": { "x": 1344, "y": 0, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+
+        "slash_a_0.png": {
+            "frame": { "x": 0, "y": 192, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_a_1.png": {
+            "frame": { "x": 192, "y": 192, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_a_2.png": {
+            "frame": { "x": 384, "y": 192, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_a_3.png": {
+            "frame": { "x": 576, "y": 192, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_a_4.png": {
+            "frame": { "x": 768, "y": 192, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_a_5.png": {
+            "frame": { "x": 960, "y": 192, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_a_6.png": {
+            "frame": { "x": 1152, "y": 192, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_a_7.png": {
+            "frame": { "x": 1344, "y": 192, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+
+        "slash_s_0.png": {
+            "frame": { "x": 0, "y": 384, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_s_1.png": {
+            "frame": { "x": 192, "y": 384, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_s_2.png": {
+            "frame": { "x": 384, "y": 384, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_s_3.png": {
+            "frame": { "x": 576, "y": 384, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_s_4.png": {
+            "frame": { "x": 768, "y": 384, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_s_5.png": {
+            "frame": { "x": 960, "y": 384, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_s_6.png": {
+            "frame": { "x": 1152, "y": 384, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_s_7.png": {
+            "frame": { "x": 1344, "y": 384, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+
+        "slash_d_0.png": {
+            "frame": { "x": 0, "y": 576, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_d_1.png": {
+            "frame": { "x": 192, "y": 576, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_d_2.png": {
+            "frame": { "x": 384, "y": 576, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_d_3.png": {
+            "frame": { "x": 576, "y": 576, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_d_4.png": {
+            "frame": { "x": 768, "y": 576, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_d_5.png": {
+            "frame": { "x": 960, "y": 576, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_d_6.png": {
+            "frame": { "x": 1152, "y": 576, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        },
+        "slash_d_7.png": {
+            "frame": { "x": 1344, "y": 576, "w": 192, "h": 192 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+            "sourceSize": { "w": 192, "h": 192 }
+        }
+    },
+    "animations": {
+        "slash_w": [
+            "slash_w_0.png",
+            "slash_w_1.png",
+            "slash_w_2.png",
+            "slash_w_3.png",
+            "slash_w_4.png",
+            "slash_w_5.png",
+            "slash_w_6.png",
+            "slash_w_7.png"
+        ],
+        "slash_s": [
+            "slash_s_0.png",
+            "slash_s_1.png",
+            "slash_s_2.png",
+            "slash_s_3.png",
+            "slash_s_4.png",
+            "slash_s_5.png",
+            "slash_s_6.png",
+            "slash_s_7.png"
+        ],
+        "slash_a": [
+            "slash_a_0.png",
+            "slash_a_1.png",
+            "slash_a_2.png",
+            "slash_a_3.png",
+            "slash_a_4.png",
+            "slash_a_5.png",
+            "slash_a_6.png",
+            "slash_a_7.png"
+        ],
+        "slash_d": [
+            "slash_d_0.png",
+            "slash_d_1.png",
+            "slash_d_2.png",
+            "slash_d_3.png",
+            "slash_d_4.png",
+            "slash_d_5.png",
+            "slash_d_6.png",
+            "slash_d_7.png"
+        ]
+    },
+    "meta": {
+        "version": "1.0",
+        "format": "RGBA8888",
+        "size": { "w": 1536, "h": 768 },
+        "scale": "1"
+    }
+}

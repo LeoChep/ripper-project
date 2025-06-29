@@ -1,3 +1,4 @@
+import * as AttackController from "./AttackController";
 import * as PIXI from "pixi.js";
 import type { TiledMap } from "./MapClass";
 import type { Unit } from "@/core/Unit";
@@ -30,12 +31,12 @@ export const UnitRightEvent = (
   const boxWidth = 40;
   const boxHeight = 80;
 
-  let boxX = spriteUnit.x + spriteUnit.width + 10;
+  let boxX = unit.x + unit.width + 10;
   if (boxX + boxWidth > container.width) {
     // 如果选择框超出右边界，则调整位置
-    boxX = spriteUnit.x - boxWidth - 10;
+    boxX = unit.x - boxWidth - 10;
   }
-  let boxY = spriteUnit.y - boxHeight / 2 + spriteUnit.height / 2;
+  let boxY = unit.y - boxHeight / 2 + unit.height / 2;
   if (boxY < 0) {
     // 如果选择框超出上边界，则调整位置
     boxY = 0;
@@ -51,7 +52,7 @@ export const UnitRightEvent = (
   selectionBox.fill({ color: 0x333366, alpha: 0.9 });
 
   // 示例：添加三个选项
-  const options = ["攻击", "移动", "取消"];
+  const options = ["移动", "取消"];
   options.forEach((text, i) => {
     const label = new PIXI.Text({
       text,
@@ -66,19 +67,69 @@ export const UnitRightEvent = (
     label.y = 8 + i * 20;
     label.eventMode = "static";
     label.cursor = "pointer";
-    label.on("pointertap", () => {
-     // alert(`选择了: ${text}`);
-      if (text == "移动") {
-        MoveController.moveSelect(unit, container, rlayers.lineLayer, mapPassiable);
+    label.on("pointerenter", () => {
+      const childSelectionBox =
+        selectionBox.getChildByLabel("childSelectionBox");
+      if (childSelectionBox) {
+        if (childSelectionBox instanceof PIXI.Graphics) {
+          childSelectionBox.clear();
+        }
+        if (childSelectionBox.children){
+          childSelectionBox.children.forEach((child) => {
+            if (child instanceof PIXI.Text) {
+              child.destroy();
+            }
+          });
+        }
+        selectionBox.removeChild(childSelectionBox);
       }
+    });
+    label.on("pointertap", () => {
+      // alert(`选择了: ${text}`);
+      if (text == "移动") {
+        MoveController.moveSelect(
+          unit,
+          container,
+          rlayers.lineLayer,
+          mapPassiable
+        );
+      }
+      const childSelectionBox =
+        selectionBox.getChildByLabel("childSelectionBox");
+      if (childSelectionBox) {
+        if (childSelectionBox instanceof PIXI.Graphics) {
+          childSelectionBox.clear();
+        }
+        selectionBox.removeChild(childSelectionBox);
+      }
+      selectionBox.clear();
       container.removeChild(selectionBox);
     });
 
     selectionBox.addChild(label);
   });
+  const attackControlLabels = AttackController.getAttackControlLabels(
+    unit,
+    container,
+    mapPassiable,
+    options,
+    selectionBox,
+    rlayers
+  );
+  attackControlLabels.forEach((label) => {
+    selectionBox.addChild(label);
+    options.push(label.text);
+  });
   //如果附近有门，那么增加开门选择
   console.log("mapPassiable", mapPassiable);
-  const doorControlLabels=DoorController.getDoorControlLabels(unit,container,mapPassiable,options,selectionBox,rlayers);
+  const doorControlLabels = DoorController.getDoorControlLabels(
+    unit,
+    container,
+    mapPassiable,
+    options,
+    selectionBox,
+    rlayers
+  );
   doorControlLabels.forEach((label) => {
     selectionBox.addChild(label);
   });
@@ -87,14 +138,24 @@ export const UnitRightEvent = (
   rlayers.selectLayer.attach(selectionBox);
   oldselectionBox = selectionBox;
   // 监听右键点击事件，取消选择
-  container.once("rightdown", () => {
+  const removeSelection = () => {
     if (oldselectionBox) {
+      const childSelectionBox =
+        selectionBox.getChildByLabel("childSelectionBox");
+
+      console.log("selectionBox", selectionBox);
+      console.log("childSelectionBox", childSelectionBox);
+      if (childSelectionBox) {
+        if (childSelectionBox instanceof PIXI.Graphics) {
+          childSelectionBox.clear();
+        }
+        oldselectionBox.removeChild(childSelectionBox);
+        childSelectionBox.destroy();
+      }
       container.removeChild(oldselectionBox);
+      container.off("rightdown", removeSelection);
       oldselectionBox = null;
     }
-  });
-
+  };
+  container.on("rightdown", removeSelection);
 };
-
-
-

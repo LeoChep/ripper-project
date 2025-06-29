@@ -1,0 +1,47 @@
+{
+  "name": "狼人",
+  "level": 1,
+  "role": "德鲁伊",
+  "xp": 25,
+  "size": "中型",
+  "type": "",
+  "hp": 10,
+  "bloodied": 5,
+  "ac": 16,
+  "fortitude": 13,
+  "reflex": 14,
+  "will": 13,
+  "speed": 6,
+  "fly": null,
+  "initiative": 0,
+  "senses": "",
+  "immunities": [],
+  "resistances": [],
+  "alignment": "无",
+  "languages": [ "-" ],
+  "skills": [],
+  "abilities": [
+    { "name": "Strength", "value": 15, "modifier": 2 },
+    { "name": "Dexterity", "value": 17, "modifier": 3 },
+    { "name": "Constitution", "value": 13, "modifier": 1 },
+    { "name": "Intelligence", "value": 3, "modifier": -4 },
+    { "name": "Wisdom", "value": 14, "modifier": 2 },
+    { "name": "Charisma", "value": 3, "modifier": -4 }
+  ],
+  "equipment": [ "长剑", "短弓", "20 支箭" ],
+  "attacks": [
+    {
+      "name": "长剑",
+      "type": "Melee",
+      "action": "武器",
+      "range": 1,
+      "attackBonus": 6,
+      "target": "AC",
+      "damage": "",
+      "effect": "",
+      "missEffect": null
+    }
+  ],
+  "traits": [],
+  "notes": [ "Equipment: 长剑, 短弓, 20 支箭" ]
+}
