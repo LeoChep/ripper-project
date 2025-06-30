@@ -263,7 +263,7 @@ async function attackMovement(
   e: PIXI.FederatedPointerEvent,
   unit: Unit,
   attack: CreatureAttack,
-  lineLayer: any,
+  lineLayer: PIXI.IRenderLayer,
   container: PIXI.Container<PIXI.ContainerChild>,
   mapPassiable: TiledMap | null
 ) {
@@ -300,6 +300,10 @@ async function attackMovement(
     if (target) {
       hitFlag = await checkHit(unit, target, attack);
       createMissOrHitAnimation(unit, target, hitFlag, container, lineLayer);
+      if (hitFlag){
+        const damage=await getDamage(unit,target,attack)
+          createDamageAnim(damage.toString(),unit,target,hitFlag,container,lineLayer);
+      }
     }
     // hitFlag = true;
 
@@ -311,6 +315,7 @@ async function attackMovement(
     if (target) {
       if (hitFlag) {
         //  alert("攻击命中!");
+       
       } else {
         // alert("攻击未命中!");
       }
@@ -373,10 +378,9 @@ async function checkHit(unit: Unit, target: any, attack: CreatureAttack) {
 
   const roll = parseInt(await diceRoll("1d20+" + attackBonus));
   console.log(`攻击掷骰: ${roll} vs AC ${targetAC}`);
-
   if (roll >= targetAC) {
     console.log("攻击命中!");
-
+   
     return true; // 命中
   } else {
     console.log("攻击未命中!");
@@ -389,16 +393,16 @@ async function createMissOrHitAnimation(
   target: { x: number; y: number },
   hitFlag: boolean,
   container: PIXI.Container<PIXI.ContainerChild>,
-  lineLayer: { attach: (arg0: PIXI.Sprite) => void }
+  lineLayer: PIXI.IRenderLayer
 ) {
   let texture: PIXI.Texture;
   let video: HTMLVideoElement | null = null;
 
   video = document.createElement("video");
-  if (hitFlag){
-  video.src = hitURL;
-  }else{
-    video.src=missHRL
+  if (hitFlag) {
+    video.src = hitURL;
+  } else {
+    video.src = missHRL;
   }
 
   video.loop = false;
@@ -406,7 +410,6 @@ async function createMissOrHitAnimation(
   video.muted = true;
   await video.play(); // 兼容自动播放策略
   texture = PIXI.Texture.from(video);
-
   if (video) {
     console.log("重播");
     video.currentTime = 0;
@@ -422,11 +425,74 @@ async function createMissOrHitAnimation(
     sprite.x = target.x - 32;
     sprite.y = target.y - 90;
   }
-
+  // alert(video.width)
   sprite.scale = (1 / (sprite.width / 64)) * 2;
+  // sprite.width=64
+  // sprite.height=64
+  // alert(sprite.width)
   container.addChild(sprite);
   lineLayer.attach(sprite);
   setTimeout(() => {
     container.removeChild(sprite);
   }, 1000);
+}
+
+async function createDamageAnim(
+  damage:string,
+  unit: Unit,
+  target: { x: number; y: number },
+  hitFlag: boolean,
+  container: PIXI.Container<PIXI.ContainerChild>,
+  lineLayer: PIXI.IRenderLayer
+) {
+  const damageText = new PIXI.Text({
+    text: `-${damage}`,
+    style: {
+      fontFamily: "Arial",
+      fontSize: 24,
+      fill: 0xffffff,
+      // align: "center",
+    },
+  });
+
+  damageText.x = target.x + 32- damageText.width/2;
+  damageText.y = target.y ;
+
+  container.addChild(damageText);
+  lineLayer.attach(damageText);
+
+  const duration = 800;
+  const startY = damageText.y;
+  const endY = startY - 40;
+  const startAlpha = 1;
+  const endAlpha = 0;
+
+  let startTime: number | null = null;
+
+  function animateDamageText(ts: number) {
+    if (startTime === null) startTime = ts;
+    const elapsed = ts - startTime;
+    const t = Math.min(elapsed / duration, 1);
+
+    damageText.y = startY + (endY - startY) * t;
+    damageText.alpha = startAlpha + (endAlpha - startAlpha) * t;
+
+    if (t < 1.2) {
+      requestAnimationFrame(animateDamageText);
+    } else {
+      container.removeChild(damageText);
+    }
+  }
+
+  requestAnimationFrame(animateDamageText);
+}
+
+async function getDamage(unit: Unit, target: any, attack: CreatureAttack) {
+  // 检查攻击是否命中
+  const attackBonus = attack.attackBonus || 0; // 攻击加值
+  const targetAC = target.creature?.ac || 10; // 目标护甲等级，默认10
+
+  const roll = parseInt(await diceRoll(attack.damage));
+  console.log(`攻击掷骰: ${roll} vs AC ${targetAC}`);
+  return roll;
 }

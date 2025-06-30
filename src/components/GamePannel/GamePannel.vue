@@ -44,7 +44,8 @@ onMounted(async () => {
     // TODO 路径暂时写死
     //加载地图内容
 
-    const assets=await PIXI.Assets.load(hitURL)
+
+    // const assets=await PIXI.Assets.load(hitURL)
     console.log()
     const mapPassiable = await loadMap('A')
 

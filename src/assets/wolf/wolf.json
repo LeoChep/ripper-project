@@ -37,7 +37,7 @@
       "range": 1,
       "attackBonus": 6,
       "target": "ac",
-      "damage": "",
+      "damage": "1d8+2",
       "effect": "",
       "missEffect": null
     }
