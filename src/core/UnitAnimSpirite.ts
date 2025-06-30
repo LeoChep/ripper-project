@@ -121,15 +121,11 @@ export class UnitAnimSpirite extends Container {
     if (this._state === "slash") {
       if (this.anims["slash"]) {
         this.anims["slash"].renderable = true;
-        if (
-          this.anims["slash"].currentFrame ===
-          this.anims["slash"].textures.length - 1
-        ) {
-          // 如果当前帧是最后一帧，则停止动画
-          // this.anims["slash"].stop();
-          //this.anims["slash"].renderable = false;
-
-        }
+      }
+    }
+        if (this._state === "hurt") {
+      if (this.anims["hurt"]) {
+        this.anims["hurt"].renderable = true;
       }
     }
       if ( this.anims[this.state]&&

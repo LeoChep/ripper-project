@@ -8,6 +8,7 @@ import { DiceCommand } from "./dice_modules/dices/commandMoudle/DiceCommand";
 import { diceRoll } from "./DiceTryer";
 import hitURL from "@/assets/effect/Impact_03_Regular_Yellow_400x400.webm";
 import missHRL from "@/assets/effect/Miss_02_White_200x200.webm";
+import { takeDamage } from "./DamageController";
 export const getAttackControlLabels = (
   unit: Unit,
   container: PIXI.Container<PIXI.ContainerChild>,
@@ -205,7 +206,14 @@ const attackSelect = (
       const nx = x + dir.dx;
       const ny = y + dir.dy;
       const key = `${nx},${ny}`;
-      const passiable = checkPassiable(unit,startX*64,startX*64,nx*64,ny*64,mapPassiable)
+      const passiable = checkPassiable(
+        unit,
+        startX * 64,
+        startX * 64,
+        nx * 64,
+        ny * 64,
+        mapPassiable
+      );
       if (passiable) {
         if (!visited.has(key)) {
           queue.push({ x: nx, y: ny, step: step + 1 });
@@ -274,12 +282,11 @@ async function attackMovement(
     return;
   }
   // 获取点击位置
-    // 获取点击位置
+  // 获取点击位置
   const pos = e.data.global;
   // 计算点击位置相对于动画精灵的偏移
   const clickX = pos.x - container.x;
   const clickY = pos.y - container.y;
-
 
   // 检查点击位置是否在可攻击范围内
   const targetX = Math.floor(clickX / 64);
@@ -301,12 +308,21 @@ async function attackMovement(
     console.log(target);
     // if (target) alert("attack " + target?.name);
     let hitFlag = false;
+    let damage = 0;
     if (target) {
       hitFlag = await checkHit(unit, target, attack);
       createMissOrHitAnimation(unit, target, hitFlag, container, lineLayer);
-      if (hitFlag){
-        const damage=await getDamage(unit,target,attack)
-          createDamageAnim(damage.toString(),unit,target,hitFlag,container,lineLayer);
+
+      if (hitFlag) {
+        damage = await getDamage(unit, target, attack);
+        createDamageAnim(
+          damage.toString(),
+          unit,
+          target,
+          hitFlag,
+          container,
+          lineLayer
+        );
       }
     }
     // hitFlag = true;
@@ -319,7 +335,7 @@ async function attackMovement(
     if (target) {
       if (hitFlag) {
         //  alert("攻击命中!");
-       
+        takeDamage(damage, target, container);
       } else {
         // alert("攻击未命中!");
       }
@@ -384,7 +400,7 @@ async function checkHit(unit: Unit, target: any, attack: CreatureAttack) {
   console.log(`攻击掷骰: ${roll} vs AC ${targetAC}`);
   if (roll >= targetAC) {
     console.log("攻击命中!");
-   
+
     return true; // 命中
   } else {
     console.log("攻击未命中!");
@@ -442,7 +458,7 @@ async function createMissOrHitAnimation(
 }
 
 async function createDamageAnim(
-  damage:string,
+  damage: string,
   unit: Unit,
   target: { x: number; y: number },
   hitFlag: boolean,
@@ -459,8 +475,8 @@ async function createDamageAnim(
     },
   });
 
-  damageText.x = target.x + 32- damageText.width/2;
-  damageText.y = target.y ;
+  damageText.x = target.x + 32 - damageText.width / 2;
+  damageText.y = target.y;
 
   container.addChild(damageText);
   lineLayer.attach(damageText);
@@ -485,7 +501,7 @@ async function createDamageAnim(
       requestAnimationFrame(animateDamageText);
     } else {
       container.removeChild(damageText);
-      damageText.destroy()
+      damageText.destroy();
     }
   }
 
@@ -565,7 +581,6 @@ export const checkPassiable = (
       });
     }
     // 检查是否被敌人阻挡
-    
   }
 
   return passiable;
