@@ -36,7 +36,7 @@
       "action": "武器",
       "range": 1,
       "attackBonus": 6,
-      "target": "AC",
+      "target": "ac",
       "damage": "",
       "effect": "",
       "missEffect": null

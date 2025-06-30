@@ -1,5 +1,7 @@
 <template>
-    <div class="game-pannel" id="game-pannel"></div>
+
+   <div class="game-pannel" id="game-pannel"></div> 
+        <!-- <img :src="hitURL"> -->
     <CreatureInfo :creature="selectedCreature" v-if="selectedCreature" @close="selectedCreature = null" />
 </template>
 
@@ -15,6 +17,7 @@ import { UnitAnimSpirite } from '@/core/UnitAnimSpirite'
 import { Unit, createUnitsFromMapSprites } from '@/core/Unit'
 import { AnimMetaJson } from '@/core/AnimMetaJson'
 import { createCreature } from '@/units/Creature'
+import hitURL from "@/assets/effect/Impact_03_Regular_Yellow_400x400.webm";
 const appSetting = {
     width: 800,
     height: 600,
@@ -41,6 +44,8 @@ onMounted(async () => {
     // TODO 路径暂时写死
     //加载地图内容
 
+    const assets=await PIXI.Assets.load(hitURL)
+    console.log()
     const mapPassiable = await loadMap('A')
 
     //初始化容器

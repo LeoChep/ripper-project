@@ -4,7 +4,10 @@ import type { TiledMap } from "./MapClass";
 import type { RLayers } from "./RLayersInterface";
 import type { Unit } from "./Unit";
 import * as PIXI from "pixi.js";
-
+import { DiceCommand } from "./dice_modules/dices/commandMoudle/DiceCommand";
+import { diceRoll } from "./DiceTryer";
+import hitURL from "@/assets/effect/Impact_03_Regular_Yellow_400x400.webm";
+import missHRL from "@/assets/effect/Miss_02_White_200x200.webm";
 export const getAttackControlLabels = (
   unit: Unit,
   container: PIXI.Container<PIXI.ContainerChild>,
@@ -65,7 +68,7 @@ export const getAttackControlLabels = (
     selectionBox.addChild(childSelectionBox);
     childSelectionBox.label = "childSelectionBox";
 
-    // 示例：添加三个选项
+    // 添加选项
     const attacks = unit.creature?.attacks;
     if (attacks) {
       attacks.forEach((attack, i) => {
@@ -86,7 +89,6 @@ export const getAttackControlLabels = (
         optionLabel.on("pointertap", () => {
           // 执行攻击逻辑
           console.log(`选择了攻击选项: ${text}`);
-          const range = attack.range ? attack.range : 1;
           attackSelect(
             unit,
             attack,
@@ -107,6 +109,7 @@ export const getAttackControlLabels = (
   labels.push(label);
   return labels;
 };
+
 const attackSelect = (
   unit: Unit,
   attack: CreatureAttack,
@@ -249,7 +252,7 @@ const attackSelect = (
     if (cannel) {
       return;
     }
-    attackMovement(e, unit, attack, container, mapPassiable);
+    attackMovement(e, unit, attack, lineLayer, container, mapPassiable);
     // moveMovement(e, unit, container, path);
   });
 
@@ -260,6 +263,7 @@ async function attackMovement(
   e: PIXI.FederatedPointerEvent,
   unit: Unit,
   attack: CreatureAttack,
+  lineLayer: any,
   container: PIXI.Container<PIXI.ContainerChild>,
   mapPassiable: TiledMap | null
 ) {
@@ -292,49 +296,137 @@ async function attackMovement(
     // 执行攻击逻辑
     console.log(target);
     // if (target) alert("attack " + target?.name);
+    let hitFlag = false;
+    if (target) {
+      hitFlag = await checkHit(unit, target, attack);
+      createMissOrHitAnimation(unit, target, hitFlag, container, lineLayer);
+    }
+    // hitFlag = true;
 
-    let direction = unit.direction;
-    const spriteUnitX = Math.floor(unit.x / 64); // 假设动画
-    const spriteUnitY = Math.floor(unit.y / 64); // 假设动画
-    const dx = targetX - spriteUnitX;
-    const dy = targetY - spriteUnitY;
-    //设置朝向
-    if (Math.abs(dx) >= Math.abs(dy) && Math.abs(dx) > 0) {
-      // 水平移动
-      direction = dx > 0 ? 0 : 1; // 0向右, 1向左
-    } else if (Math.abs(dy) > Math.abs(dx)) {
-      // 垂直移动
-      direction = dy > 0 ? 2 : 3; // 2向下, 3向上
-    }
-    console.log(
-      `单位 ${unit.name} 攻击方向: ${direction}，目标位置: (${targetX}, ${targetY}), dx: ${dx}, dy: ${dy}`
-    );
-    // 设置动画精灵的新位置
-    unit.direction = direction;
-    if (unit.animUnit) {
-      unit.animUnit.state = "slash";
-    }
-    const animEndPromise = new Promise<void>((resolve) => {
-      if (unit.animUnit) {
-        unit.animUnit.animationCallback = resolve;
-      }
-    });
-    animEndPromise.then(() => {
-      if (unit.animUnit) {
-        unit.animUnit.anims[unit.animUnit.state]?.stop();
-        // unit.animUnit.state = "walk"; // 恢复为行走状态
-        setTimeout(() => {
-          // 延时一段时间后恢复为行走状态
-          if (unit.animUnit&&unit.animUnit.anims["walk"]) {
-            unit.animUnit.state = "walk"; // 恢复为行走状态
-          }
-        }, 100); // 延时100毫秒
-      }
-      // alert(
-      //   `单位 ${unit.name} 攻击目标: ${target?.name}，位置: (${targetX}, ${targetY})`
-      // );
-    });
+    //播放攻击动画
+    await playAttackAnim(unit, targetX, targetY);
 
     console.log(`单位 ${unit.name} 攻击目标位置: (${targetX}, ${targetY})`);
+    //结算
+    if (target) {
+      if (hitFlag) {
+        //  alert("攻击命中!");
+      } else {
+        // alert("攻击未命中!");
+      }
+    }
   }
+}
+
+async function playAttackAnim(unit: Unit, targetX: number, targetY: number) {
+  let direction = unit.direction;
+  const spriteUnitX = Math.floor(unit.x / 64); // 假设动画
+  const spriteUnitY = Math.floor(unit.y / 64); // 假设动画
+  const dx = targetX - spriteUnitX;
+  const dy = targetY - spriteUnitY;
+  //设置朝向
+  if (Math.abs(dx) >= Math.abs(dy) && Math.abs(dx) > 0) {
+    // 水平移动
+    direction = dx > 0 ? 0 : 1; // 0向右, 1向左
+  } else if (Math.abs(dy) > Math.abs(dx)) {
+    // 垂直移动
+    direction = dy > 0 ? 2 : 3; // 2向下, 3向上
+  }
+  console.log(
+    `单位 ${unit.name} 攻击方向: ${direction}，目标位置: (${targetX}, ${targetY}), dx: ${dx}, dy: ${dy}`
+  );
+  // 设置动画精灵的新位置
+  unit.direction = direction;
+  if (unit.animUnit) {
+    unit.animUnit.state = "slash";
+  }
+  const framesEndPromise = new Promise<void>((resolve) => {
+    if (unit.animUnit) {
+      unit.animUnit.animationCallback = resolve;
+    }
+  });
+  let animEndResolve: (value: void | PromiseLike<void>) => void;
+  const animEndPromise = new Promise<void>((resolve) => {
+    animEndResolve = resolve;
+  });
+  framesEndPromise.then(() => {
+    if (unit.animUnit) {
+      unit.animUnit.anims[unit.animUnit.state]?.stop();
+      // unit.animUnit.state = "walk"; // 恢复为行走状态
+      setTimeout(() => {
+        // 延时一段时间后恢复为行走状态
+        if (unit.animUnit && unit.animUnit.anims["walk"]) {
+          unit.animUnit.state = "walk"; // 恢复为行走状态
+          animEndResolve();
+        }
+      }, 100); // 延时100毫秒
+    }
+  });
+
+  return animEndPromise;
+}
+
+async function checkHit(unit: Unit, target: any, attack: CreatureAttack) {
+  // 检查攻击是否命中
+  const attackBonus = attack.attackBonus || 0; // 攻击加值
+  const targetAC = target.creature?.ac || 10; // 目标护甲等级，默认10
+
+  const roll = parseInt(await diceRoll("1d20+" + attackBonus));
+  console.log(`攻击掷骰: ${roll} vs AC ${targetAC}`);
+
+  if (roll >= targetAC) {
+    console.log("攻击命中!");
+
+    return true; // 命中
+  } else {
+    console.log("攻击未命中!");
+    return false; // 未命中
+  }
+}
+
+async function createMissOrHitAnimation(
+  unit: Unit,
+  target: { x: number; y: number },
+  hitFlag: boolean,
+  container: PIXI.Container<PIXI.ContainerChild>,
+  lineLayer: { attach: (arg0: PIXI.Sprite) => void }
+) {
+  let texture: PIXI.Texture;
+  let video: HTMLVideoElement | null = null;
+
+  video = document.createElement("video");
+  if (hitFlag){
+  video.src = hitURL;
+  }else{
+    video.src=missHRL
+  }
+
+  video.loop = false;
+  video.autoplay = false;
+  video.muted = true;
+  await video.play(); // 兼容自动播放策略
+  texture = PIXI.Texture.from(video);
+
+  if (video) {
+    console.log("重播");
+    video.currentTime = 0;
+    video.play();
+  }
+  console.log("texturetexture", texture);
+  const sprite = new PIXI.Sprite(texture);
+  // 设置 sprite 位置和大小
+  if (hitFlag) {
+    sprite.x = target.x - 32;
+    sprite.y = target.y - 32;
+  } else {
+    sprite.x = target.x - 32;
+    sprite.y = target.y - 90;
+  }
+
+  sprite.scale = (1 / (sprite.width / 64)) * 2;
+  container.addChild(sprite);
+  lineLayer.attach(sprite);
+  setTimeout(() => {
+    container.removeChild(sprite);
+  }, 1000);
 }
