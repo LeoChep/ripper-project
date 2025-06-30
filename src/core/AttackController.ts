@@ -205,7 +205,7 @@ const attackSelect = (
       const nx = x + dir.dx;
       const ny = y + dir.dy;
       const key = `${nx},${ny}`;
-      const passiable = true;
+      const passiable = checkPassiable(unit,startX*64,startX*64,nx*64,ny*64,mapPassiable)
       if (passiable) {
         if (!visited.has(key)) {
           queue.push({ x: nx, y: ny, step: step + 1 });
@@ -274,8 +274,12 @@ async function attackMovement(
     return;
   }
   // 获取点击位置
-  const clickX = e.data.global.x;
-  const clickY = e.data.global.y;
+    // 获取点击位置
+  const pos = e.data.global;
+  // 计算点击位置相对于动画精灵的偏移
+  const clickX = pos.x - container.x;
+  const clickY = pos.y - container.y;
+
 
   // 检查点击位置是否在可攻击范围内
   const targetX = Math.floor(clickX / 64);
@@ -472,7 +476,7 @@ async function createDamageAnim(
   function animateDamageText(ts: number) {
     if (startTime === null) startTime = ts;
     const elapsed = ts - startTime;
-    const t = Math.min(elapsed / duration, 1);
+    const t = Math.min(elapsed / duration, 1.2);
 
     damageText.y = startY + (endY - startY) * t;
     damageText.alpha = startAlpha + (endAlpha - startAlpha) * t;
@@ -481,6 +485,7 @@ async function createDamageAnim(
       requestAnimationFrame(animateDamageText);
     } else {
       container.removeChild(damageText);
+      damageText.destroy()
     }
   }
 
@@ -496,3 +501,90 @@ async function getDamage(unit: Unit, target: any, attack: CreatureAttack) {
   console.log(`攻击掷骰: ${roll} vs AC ${targetAC}`);
   return roll;
 }
+
+export const checkPassiable = (
+  unit: Unit,
+  prex: number,
+  prey: number,
+  x: number,
+  y: number,
+  mapPassiable: TiledMap | null
+) => {
+  let passiable = true;
+  if (mapPassiable) {
+    const edges = mapPassiable.edges;
+    // 检查是否穿过边
+    if (edges) {
+      // console.log(edges)
+      // 检查是否有对象在指定位置
+      // 遍历对象组中的所有对象
+      edges.forEach((edge) => {
+        if (edge.useable === false) {
+          return; // 如果边不可用，则跳过
+        }
+        let testx = x;
+        let testy = y;
+
+        // 获取两个格子的四个顶点和中点
+        const pointsA = [
+          { x: prex + 32, y: prey + 32 },
+          { x: prex, y: prey },
+          { x: prex + 64, y: prey },
+          { x: prex + 64, y: prey + 64 },
+          { x: prex, y: prey + 64 },
+        ];
+        const pointsB = [
+          { x: testx + 32, y: testy + 32 },
+          { x: testx, y: testy },
+          { x: testx + 64, y: testy },
+          { x: testx + 64, y: testy + 64 },
+          { x: testx, y: testy + 64 },
+        ];
+        // 检查所有中点的连线
+        let intersectCount = 0;
+        for (let i = 0; i < 1; i++) {
+          if (
+            segmentsIntersect(
+              pointsA[i].x,
+              pointsA[i].y,
+              pointsB[i].x,
+              pointsB[i].y,
+              edge.x1,
+              edge.y1,
+              edge.x2,
+              edge.y2
+            )
+          ) {
+            intersectCount++;
+          }
+        }
+        if (intersectCount >= 1) {
+          passiable = false;
+          return;
+        }
+      });
+    }
+    // 检查是否被敌人阻挡
+    
+  }
+
+  return passiable;
+};
+const segmentsIntersect = (
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  x3: number,
+  y3: number,
+  x4: number,
+  y4: number
+) => {
+  const denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+  if (denom === 0) {
+    return false; // 平行或重合
+  }
+  const ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom;
+  const ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denom;
+  return ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1; // 判断是否在有效范围内
+};
