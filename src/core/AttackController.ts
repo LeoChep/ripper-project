@@ -87,7 +87,13 @@ export const getAttackControlLabels = (
           // 执行攻击逻辑
           console.log(`选择了攻击选项: ${text}`);
           const range = attack.range ? attack.range : 1;
-          attackSelect(unit, attack, container, rlayers.lineLayer, mapPassiable);
+          attackSelect(
+            unit,
+            attack,
+            container,
+            rlayers.lineLayer,
+            mapPassiable
+          );
           container.removeChild(selectionBox);
           if (childSelectionBox.parent) {
             childSelectionBox.parent.removeChild(childSelectionBox);
@@ -243,14 +249,14 @@ const attackSelect = (
     if (cannel) {
       return;
     }
-    attackMovement(e, unit,attack, container, mapPassiable);
+    attackMovement(e, unit, attack, container, mapPassiable);
     // moveMovement(e, unit, container, path);
   });
 
   container.on("pointerup", removeGraphics);
 };
 
-function attackMovement(
+async function attackMovement(
   e: PIXI.FederatedPointerEvent,
   unit: Unit,
   attack: CreatureAttack,
@@ -288,8 +294,8 @@ function attackMovement(
     // if (target) alert("attack " + target?.name);
 
     let direction = unit.direction;
-    const spriteUnitX = Math.floor(unit.x/ 64)  // 假设动画
-    const spriteUnitY =  Math.floor(unit.y/ 64)  // 假设动画
+    const spriteUnitX = Math.floor(unit.x / 64); // 假设动画
+    const spriteUnitY = Math.floor(unit.y / 64); // 假设动画
     const dx = targetX - spriteUnitX;
     const dy = targetY - spriteUnitY;
     //设置朝向
@@ -300,12 +306,34 @@ function attackMovement(
       // 垂直移动
       direction = dy > 0 ? 2 : 3; // 2向下, 3向上
     }
-    console.log(`单位 ${unit.name} 攻击方向: ${direction}，目标位置: (${targetX}, ${targetY}), dx: ${dx}, dy: ${dy}`);
+    console.log(
+      `单位 ${unit.name} 攻击方向: ${direction}，目标位置: (${targetX}, ${targetY}), dx: ${dx}, dy: ${dy}`
+    );
     // 设置动画精灵的新位置
     unit.direction = direction;
-        if (unit.animUnit) {
+    if (unit.animUnit) {
       unit.animUnit.state = "slash";
     }
+    const animEndPromise = new Promise<void>((resolve) => {
+      if (unit.animUnit) {
+        unit.animUnit.animationCallback = resolve;
+      }
+    });
+    animEndPromise.then(() => {
+      if (unit.animUnit) {
+        unit.animUnit.anims[unit.animUnit.state]?.stop();
+        // unit.animUnit.state = "walk"; // 恢复为行走状态
+        setTimeout(() => {
+          // 延时一段时间后恢复为行走状态
+          if (unit.animUnit&&unit.animUnit.anims["walk"]) {
+            unit.animUnit.state = "walk"; // 恢复为行走状态
+          }
+        }, 100); // 延时100毫秒
+      }
+      // alert(
+      //   `单位 ${unit.name} 攻击目标: ${target?.name}，位置: (${targetX}, ${targetY})`
+      // );
+    });
 
     console.log(`单位 ${unit.name} 攻击目标位置: (${targetX}, ${targetY})`);
   }

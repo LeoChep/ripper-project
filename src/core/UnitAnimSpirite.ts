@@ -14,13 +14,21 @@ export class UnitAnimSpirite extends Container {
   private _animationState: string = "";
   public anims: { [key: string]: PIXI.AnimatedSprite } = {};
   public animsSheet: { [key: string]: PIXI.Spritesheet } = {};
+  private callback: any;
+  public get animationCallback(): any {
+    return this.callback;
+  }
+
+  public set animationCallback(cb: any) {
+    this.callback = cb;
+  }
 
   constructor(unit: Unit | undefined) {
     super();
     this.owner = unit;
     // 可以在这里初始化你的自定义属性
     this.onRender = () => {
-      this.update();
+      this.update(this.callback);
     };
   }
   public get ownerUnit(): Unit | undefined {
@@ -62,7 +70,7 @@ export class UnitAnimSpirite extends Container {
   }
 
   // 可以添加自定义方法
-  public update(): void {
+  public update(callback?:any): void {
     // 如果当前状态与动画状态不一致，则更新渲染状态
     if (this._state !== this._animationState)
       this.children.forEach((child) => {
@@ -118,20 +126,23 @@ export class UnitAnimSpirite extends Container {
           this.anims["slash"].textures.length - 1
         ) {
           // 如果当前帧是最后一帧，则停止动画
-          this.anims["slash"].stop();
+          // this.anims["slash"].stop();
           //this.anims["slash"].renderable = false;
-          setTimeout(() => {
-            // 延时一段时间后恢复为行走状态
-            if (this.anims["walk"]) {
-                    this._state = "walk"; // 恢复为行走状态
-            }
-          }, 100); // 延时100毫秒
 
-         
         }
       }
     }
+      if ( this.anims[this.state]&&
+          this.anims[this.state].currentFrame ===
+          this.anims[this.state].textures.length - 1
+          &&
+          this.callback
+        ){
+          this.callback(this)
+          this.callback = undefined; // 清除回调函数
+        }
   }
+
 
   public getWASDDirection(): string {
     let dirctionWASD = "";
