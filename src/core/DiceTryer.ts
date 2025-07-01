@@ -5,6 +5,7 @@ import { subscribe } from "./tool_modules/SubscribeMan/SubscribeMan";
 const diceCommander = new DiceCommander();
 Roller.dicesplugin = new MathDicePlugin();
 export async function diceRoll(s: string): Promise<string> {
+  console.log("diceRoll",s)
   const command = diceCommander.excute(s);
   const endPromise = new Promise<string>((resolve) => {
     subscribe(command, "value", () => {
@@ -13,5 +14,6 @@ export async function diceRoll(s: string): Promise<string> {
     });
   });
   await endPromise;
+  console.log('endPromise',endPromise)
   return endPromise;
 }

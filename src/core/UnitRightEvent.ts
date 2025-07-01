@@ -1,4 +1,5 @@
 import * as AttackController from "./AttackController";
+import * as InitiativeController from "./InitiativeController";
 import * as PIXI from "pixi.js";
 import type { TiledMap } from "./MapClass";
 import type { Unit } from "@/core/Unit";
@@ -52,7 +53,7 @@ export const UnitRightEvent = (
   selectionBox.fill({ color: 0x333366, alpha: 0.9 });
 
   // 示例：添加三个选项
-  const options = ["移动", "取消"];
+  const options = ["移动", "结束回合"];
   options.forEach((text, i) => {
     const label = new PIXI.Text({
       text,
@@ -93,6 +94,9 @@ export const UnitRightEvent = (
           rlayers.lineLayer,
           mapPassiable
         );
+      }
+       if (text == "结束回合") {
+        InitiativeController.endTurn(unit);
       }
       const childSelectionBox =
         selectionBox.getChildByLabel("childSelectionBox");

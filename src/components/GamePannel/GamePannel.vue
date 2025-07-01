@@ -1,7 +1,7 @@
 <template>
 
-   <div class="game-pannel" id="game-pannel"></div> 
-        <!-- <img :src="hitURL"> -->
+    <div class="game-pannel" id="game-pannel"></div>
+    <!-- <img :src="hitURL"> -->
     <CreatureInfo :creature="selectedCreature" v-if="selectedCreature" @close="selectedCreature = null" />
 </template>
 
@@ -9,7 +9,7 @@
 import CreatureInfo from '../CreatureInfo.vue'
 import { ref, onMounted } from 'vue'
 import { getJsonFile, getUnitFile, getMapAssetFile, getAnimMetaJsonFile, getAnimActionSpriteJsonFile, getAnimSpriteImgUrl } from '@/utils/utils'
-
+import * as InitiativeController from "@/core/InitiativeController"
 import * as PIXI from 'pixi.js'
 import { UnitRightEvent } from '@/core/UnitRightEvent'
 import { TiledMap } from '@/core/MapClass'
@@ -17,7 +17,7 @@ import { UnitAnimSpirite } from '@/core/UnitAnimSpirite'
 import { Unit, createUnitsFromMapSprites } from '@/core/Unit'
 import { AnimMetaJson } from '@/core/AnimMetaJson'
 import { createCreature } from '@/units/Creature'
-import hitURL from "@/assets/effect/Impact_03_Regular_Yellow_400x400.webm";
+
 const appSetting = {
     width: 800,
     height: 600,
@@ -61,14 +61,26 @@ onMounted(async () => {
     const spritesOBJ = mapPassiable.sprites
     const units = createUnitsFromMapSprites(spritesOBJ, mapPassiable);
     console.log(units)
-    units.forEach(async (unit) => {
-        await generateAnimSprite(unit, container, rlayers, mapPassiable)
+    let createEndPromise = []
+    units.forEach((unit) => {
+        const promise = generateAnimSprite(unit, container, rlayers, mapPassiable)
+        createEndPromise.push(promise)
     });
+    if (createEndPromise.length > 0)
+        await Promise.all(createEndPromise);
     mapPassiable.sprites = units;
     //绘制格子
     drawGrid(app, rlayers);
     //增加键盘监听
     addListenKeyboard(container);
+
+    //测试战斗
+    const initCombatPromise=InitiativeController.addUnitsToInitiativeSheet(units)
+    setTimeout(()=>{ initCombatPromise.then(()=>{
+        InitiativeController.startCombatTurn()
+    });
+    },2000)
+   
 
 })
 
@@ -128,8 +140,8 @@ const generateAnimSprite = async (unit, container, rlayers, mapPassiable) => {
     addAnimSpriteUnit(unit, container, rlayers, mapPassiable);
     animSpriteUnit.x = Math.round(unit.x / 64) * 64;
     animSpriteUnit.y = Math.round(unit.y / 64) * 64 - 64;
-    unit.x= animSpriteUnit.x;
-    unit.y = animSpriteUnit.y ;
+    unit.x = animSpriteUnit.x;
+    unit.y = animSpriteUnit.y;
     return unit
 }
 

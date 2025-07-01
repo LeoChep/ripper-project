@@ -1,6 +1,7 @@
 import type { C } from "vitest/dist/chunks/environment.d.cL3nLXbE.js";
 import type { UnitAnimSpirite } from "./UnitAnimSpirite";
 import type { Creature } from "@/units/Creature";
+import type { InitiativeClass } from "./InitativeClass";
 
 export interface UnitOptions {
     id: number;
@@ -26,6 +27,7 @@ export class Unit  {
     width: number;
     height: number;
     animUnit : UnitAnimSpirite | undefined;
+    initiative?:InitiativeClass ;
     creature:Creature | undefined; // 可能是 Creature 实例
     direction: number = 0; // 方向，0-3 分别表示上、右、下、左
     constructor(options: UnitOptions) {
