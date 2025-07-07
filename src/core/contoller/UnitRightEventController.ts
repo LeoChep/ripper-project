@@ -1,11 +1,11 @@
 import * as AttackController from "./AttackController";
 import * as InitiativeController from "./InitiativeController";
 import * as PIXI from "pixi.js";
-import type { TiledMap } from "./MapClass";
+import type { TiledMap } from "../MapClass";
 import type { Unit } from "@/core/Unit";
 import * as MoveController from "./UnitMoveController";
 import * as DoorController from "./DoorController";
-import type { RLayers } from "./RLayersInterface";
+import type { RLayers } from "../type/RLayersInterface";
 let oldselectionBox: PIXI.Graphics | null = null;
 
 export const UnitRightEvent = (

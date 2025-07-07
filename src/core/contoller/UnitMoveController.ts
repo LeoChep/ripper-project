@@ -1,6 +1,6 @@
-import type { TiledMap } from "./MapClass";
-import type { Unit } from "./Unit";
-import { girdMoveMovement, moveMovement } from "./UnitMove";
+import type { TiledMap } from "../MapClass";
+import type { Unit } from "../Unit";
+import { girdMoveMovement, moveMovement } from "../action/UnitMove";
 import * as PIXI from "pixi.js";
 
 export const moveSelect = (
@@ -156,6 +156,7 @@ export const moveSelect = (
 
   container.on("pointerup", removeGraphics);
 };
+
 export const checkPassiable = (
   unit: Unit,
   prex: number,

@@ -1,9 +1,11 @@
-import { diceRoll } from "./DiceTryer";
-import { InitiativeClass } from "./InitativeClass";
-import { Unit } from "./Unit";
+import { diceRoll } from "../DiceTryer";
+import type { TiledMap } from "../MapClass";
+import { InitiativeClass } from "../type/InitativeClass";
+import { Unit } from "../Unit";
 
 const InitiativeSheet = [] as InitiativeClass[];
-const initiativeCursor = { pointAt: null as null | InitiativeClass };
+const initiativeCursor = { pointAt: null as null | InitiativeClass,map:null as null |TiledMap };
+
 export async function addUnitsToInitiativeSheet(units: Unit[]) {
   const allAddedPromise = [] as Promise<any>[];
   units.forEach((unit) => {
@@ -13,7 +15,9 @@ export async function addUnitsToInitiativeSheet(units: Unit[]) {
   await Promise.all(allAddedPromise);
   return;
 }
-
+export function setMap(map: TiledMap) {
+  initiativeCursor.map = map;
+}
 export async function addToInitiativeSheet(unit: Unit) {
   const creature = unit.creature;
   console.log("initiativeValueCreature", creature);
@@ -64,6 +68,14 @@ export function startCombatTurn() {
     );
     if (initiativeCursor.pointAt.owner) {
       alert(initiativeCursor.pointAt.owner.name + "的回合！");
+      //如果是npc
+      if (initiativeCursor.pointAt.owner.party !== "player") {
+        //如果是npc,则自动行动
+        if (initiativeCursor.pointAt.owner.ai?.autoAction && initiativeCursor.map) {
+               initiativeCursor.pointAt.owner.ai.autoAction(initiativeCursor.pointAt.owner, initiativeCursor.map);
+        }
+   
+      }
     }
   }
   //所有人都行动过开启新一轮

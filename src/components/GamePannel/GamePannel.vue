@@ -9,13 +9,13 @@
 import CreatureInfo from '../CreatureInfo.vue'
 import { ref, onMounted } from 'vue'
 import { getJsonFile, getUnitFile, getMapAssetFile, getAnimMetaJsonFile, getAnimActionSpriteJsonFile, getAnimSpriteImgUrl } from '@/utils/utils'
-import * as InitiativeController from "@/core/InitiativeController"
+import * as InitiativeController from "@/core/contoller/InitiativeController"
 import * as PIXI from 'pixi.js'
-import { UnitRightEvent } from '@/core/UnitRightEvent'
+import { UnitRightEvent } from '@/core/contoller/UnitRightEventController'
 import { TiledMap } from '@/core/MapClass'
-import { UnitAnimSpirite } from '@/core/UnitAnimSpirite'
+import { UnitAnimSpirite } from '@/core/anim/UnitAnimSpirite'
 import { Unit, createUnitsFromMapSprites } from '@/core/Unit'
-import { AnimMetaJson } from '@/core/AnimMetaJson'
+import { AnimMetaJson } from '@/core/anim/AnimMetaJson'
 import { createCreature } from '@/units/Creature'
 
 const appSetting = {
@@ -75,12 +75,15 @@ onMounted(async () => {
     addListenKeyboard(container);
 
     //测试战斗
-    const initCombatPromise=InitiativeController.addUnitsToInitiativeSheet(units)
-    setTimeout(()=>{ initCombatPromise.then(()=>{
-        InitiativeController.startCombatTurn()
-    });
-    },2000)
-   
+    InitiativeController.setMap(mapPassiable);
+    const initCombatPromise = InitiativeController.addUnitsToInitiativeSheet(units)
+
+    setTimeout(() => {
+        initCombatPromise.then(() => {
+            InitiativeController.startCombatTurn()
+        });
+    }, 2000)
+
 
 })
 

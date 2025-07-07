@@ -1,11 +1,11 @@
 import type { CreatureAttack } from "@/units/Creature";
 import { distance } from "./DoorController";
-import type { TiledMap } from "./MapClass";
-import type { RLayers } from "./RLayersInterface";
-import type { Unit } from "./Unit";
+import type { TiledMap } from "../MapClass";
+import type { RLayers } from "../type/RLayersInterface";
+import type { Unit } from "../Unit";
 import * as PIXI from "pixi.js";
-import { DiceCommand } from "./dice_modules/dices/commandMoudle/DiceCommand";
-import { diceRoll } from "./DiceTryer";
+import { DiceCommand } from "../dice_modules/dices/commandMoudle/DiceCommand";
+import { diceRoll } from "../DiceTryer";
 import hitURL from "@/assets/effect/Impact_03_Regular_Yellow_400x400.webm";
 import missHRL from "@/assets/effect/Miss_02_White_200x200.webm";
 import { takeDamage } from "./DamageController";
@@ -325,12 +325,9 @@ async function attackMovement(
         );
       }
     }
-    // hitFlag = true;
-
     //播放攻击动画
     await playAttackAnim(unit, targetX, targetY);
 
-    console.log(`单位 ${unit.name} 攻击目标位置: (${targetX}, ${targetY})`);
     //结算
     if (target) {
       if (hitFlag) {

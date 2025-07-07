@@ -1,5 +1,5 @@
 import type { Container } from "pixi.js";
-import { Unit } from "./Unit";
+import { Unit } from "../Unit";
 
 export function takeDamage(damage: number, unit: Unit, container: Container) {
   if (unit.creature && typeof unit.creature.hp === "number") {

@@ -1,7 +1,9 @@
 import type { C } from "vitest/dist/chunks/environment.d.cL3nLXbE.js";
-import type { UnitAnimSpirite } from "./UnitAnimSpirite";
+import type { UnitAnimSpirite } from "./anim/UnitAnimSpirite";
 import type { Creature } from "@/units/Creature";
-import type { InitiativeClass } from "./InitativeClass";
+import type { InitiativeClass } from "./type/InitativeClass";
+import type { AIInterface } from "./type/AIInterface";
+import { NormalAI } from "./ai/NormalAI";
 
 export interface UnitOptions {
     id: number;
@@ -17,6 +19,7 @@ export interface UnitOptions {
 }
 
 export class Unit  {
+    ai:AIInterface | undefined; // AI 接口，可能是 AI 实例
     id: number;
     name: string;
     party: string;
@@ -51,7 +54,7 @@ export function createUnitsFromMapSprites(sprites: any[]): Unit[] {
         const partyProp = obj.properties?.find((p: any) => p.name === 'party');
         const unitTypeNameProp = obj.properties?.find((p: any) => p.name === 'unitTypeName');
         const directionProp = obj.properties?.find((p: any) => p.name === 'direction');
-        return new Unit({
+        const unit= new Unit({
             id: obj.id,
             name: obj.name,
             x: obj.x,
@@ -61,8 +64,10 @@ export function createUnitsFromMapSprites(sprites: any[]): Unit[] {
             party: partyProp ? partyProp.value : '',
             unitTypeName: unitTypeNameProp ? unitTypeNameProp.value : '',
             gid: obj.gid,
-            direction: directionProp? directionProp.value : 2 // 默认方向为 0
+            direction: directionProp? directionProp.value : 2, // 默认方向为 0
         });
+        unit.ai= new NormalAI(); // 为每个 Unit 实例分配一个 AI 实例
+        return unit;
     });
 }
 

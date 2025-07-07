@@ -1,5 +1,5 @@
-import type { TiledMap } from "./MapClass";
-import type { Unit } from "./Unit";
+import type { TiledMap } from "../MapClass";
+import type { Unit } from "../Unit";
 import * as PIXI from "pixi.js";
 
 export const moveMovement = async (
