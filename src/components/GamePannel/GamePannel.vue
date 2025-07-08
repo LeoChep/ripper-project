@@ -17,6 +17,7 @@ import { UnitAnimSpirite } from '@/core/anim/UnitAnimSpirite'
 import { Unit, createUnitsFromMapSprites } from '@/core/Unit'
 import { AnimMetaJson } from '@/core/anim/AnimMetaJson'
 import { createCreature } from '@/units/Creature'
+import { setContainer, setLayer } from '@/stores/container'
 
 const appSetting = {
     width: 800,
@@ -52,7 +53,8 @@ onMounted(async () => {
     //初始化容器
     const rlayers = createRenderLayers(app)
     const container = createContainer(app, rlayers)
-
+    setContainer(container);
+    setLayer(rlayers);
     //绘制地图
     const mapView = mapPassiable.textures;
     drawMap(mapView, container, rlayers);

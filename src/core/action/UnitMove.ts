@@ -1,11 +1,23 @@
-import type { TiledMap } from "../MapClass";
 import type { Unit } from "../Unit";
 import * as PIXI from "pixi.js";
-
-export const moveMovement = async (
+export const playerSelectMovement = (
   event: PIXI.FederatedPointerEvent,
   unit: Unit,
   container: PIXI.Container<PIXI.ContainerChild>,
+  path: { [key: string]: { x: number; y: number } | null }
+) => {
+  const pos = event.data.global;
+  // 计算点击位置相对于动画精灵的偏移
+  const offsetX = pos.x - container.x;
+  const offsetY = pos.y - container.y;
+  const targetX = Math.floor(offsetX / 64);
+  const targetY = Math.floor(offsetY / 64);
+  return moveMovement(targetX, targetY, unit, path);
+};
+export const moveMovement = async (
+  targetX: number,
+  targetY: number,
+  unit: Unit,
   path: { [key: string]: { x: number; y: number } | null }
 ) => {
   const tileSize = 64; // 格子大小
@@ -19,13 +31,10 @@ export const moveMovement = async (
   const centerY = Math.floor(spriteUnit.y / tileSize);
   console.log(`动画精灵所在格子: (${centerX}, ${centerY})`);
   // 获取点击位置
-  const pos = event.data.global;
-  // 计算点击位置相对于动画精灵的偏移
-  const offsetX = pos.x - container.x;
-  const offsetY = pos.y - container.y;
+
   // 计算点击位置对应的格子坐标
-  const tileX = Math.floor(offsetX / tileSize);
-  const tileY = Math.floor(offsetY / tileSize);
+  const tileX = targetX;
+  const tileY = targetY;
   console.log(`点击位置所在格子: (${tileX}, ${tileY})`);
   let pathCuror = path[`${tileX},${tileY}`];
   console.log(pathCuror);
@@ -60,6 +69,12 @@ export const moveMovement = async (
   for (const step of pathWay) {
     await girdMoveMovement(step.x, step.y, unit, tileSize);
   }
+  const movePromise= new Promise<void>((resolve) => {
+     setTimeout(() => {
+      resolve()
+  }, 500);
+  })
+  await movePromise;
 };
 
 export const girdMoveMovement = (
@@ -139,4 +154,3 @@ export const girdMoveMovement = (
   });
   return girdMovePromise;
 };
-
