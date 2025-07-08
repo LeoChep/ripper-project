@@ -12,7 +12,7 @@ export const moveSelect = (
   mapPassiable: TiledMap | null
 ) => {
   //显示红色的可移动范围
-  const range = 6;
+  const range = unit.creature?.speed ?? 0;
   const tileSize = 64;
   const graphics = new PIXI.Graphics();
   graphics.alpha = 0.4;

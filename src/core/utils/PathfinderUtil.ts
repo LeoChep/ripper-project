@@ -48,45 +48,45 @@ export function generateWays(
     ];
     for (const dir of dirs) {
       // 检查是否是对角线方向
-      if (dir.dx * dir.dx + dir.dy * dir.dy > 1) {
-        // 如果是对角线方向，检查是否是拐角,拐角则不可对角线移动
-        if (dir.dx < 0 && dir.dy < 0) {
-          // 左上角
-          if (
-            path[`${x - 1},${y}`] === undefined ||
-            path[`${x},${y - 1}`] === undefined
-          ) {
-            continue; // 如果左或上不可通行，则跳过
-          }
-        }
-        if (dir.dx > 0 && dir.dy < 0) {
-          // 右上角
-          if (
-            path[`${x + 1},${y}`] === undefined ||
-            path[`${x},${y - 1}`] === undefined
-          ) {
-            continue; // 如果右或上不可通行，则跳过
-          }
-        }
-        if (dir.dx < 0 && dir.dy > 0) {
-          // 左下角
-          if (
-            path[`${x - 1},${y}`] === undefined ||
-            path[`${x},${y + 1}`] === undefined
-          ) {
-            continue; // 如果左或下不可通行，则跳过
-          }
-        }
-        if (dir.dx > 0 && dir.dy > 0) {
-          // 右下角
-          if (
-            path[`${x + 1},${y}`] === undefined ||
-            path[`${x},${y + 1}`] === undefined
-          ) {
-            continue; // 如果右或下不可通行，则跳过
-          }
-        }
-      }
+    //   if (dir.dx * dir.dx + dir.dy * dir.dy > 1) {
+    //     // 如果是对角线方向，检查是否是拐角,拐角则不可对角线移动
+    //     if (dir.dx < 0 && dir.dy < 0) {
+    //       // 左上角
+    //       if (
+    //         path[`${x - 1},${y}`] === undefined ||
+    //         path[`${x},${y - 1}`] === undefined
+    //       ) {
+    //         continue; // 如果左或上不可通行，则跳过
+    //       }
+    //     }
+    //     if (dir.dx > 0 && dir.dy < 0) {
+    //       // 右上角
+    //       if (
+    //         path[`${x + 1},${y}`] === undefined ||
+    //         path[`${x},${y - 1}`] === undefined
+    //       ) {
+    //         continue; // 如果右或上不可通行，则跳过
+    //       }
+    //     }
+    //     if (dir.dx < 0 && dir.dy > 0) {
+    //       // 左下角
+    //       if (
+    //         path[`${x - 1},${y}`] === undefined ||
+    //         path[`${x},${y + 1}`] === undefined
+    //       ) {
+    //         continue; // 如果左或下不可通行，则跳过
+    //       }
+    //     }
+    //     if (dir.dx > 0 && dir.dy > 0) {
+    //       // 右下角
+    //       if (
+    //         path[`${x + 1},${y}`] === undefined ||
+    //         path[`${x},${y + 1}`] === undefined
+    //       ) {
+    //         continue; // 如果右或下不可通行，则跳过
+    //       }
+    //     }
+    //   }
       const nx = x + dir.dx;
       const ny = y + dir.dy;
       const key = `${nx},${ny}`;
