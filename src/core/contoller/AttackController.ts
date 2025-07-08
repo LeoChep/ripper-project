@@ -1,10 +1,11 @@
 import type { CreatureAttack } from "@/units/Creature";
-
+import { segmentsIntersect } from "../utils/MathUtil";
 import type { TiledMap } from "../MapClass";
 import type { RLayers } from "../type/RLayersInterface";
 import type { Unit } from "../Unit";
 import * as PIXI from "pixi.js";
-import { attackMovement, playerSelectAttackMovement } from "../action/UnitAttack";
+import { playerSelectAttackMovement } from "../action/UnitAttack";
+import { generateWays } from "../utils/PathfinderUtil";
 
 export const getAttackControlLabels = (
   unit: Unit,
@@ -130,96 +131,18 @@ const attackSelect = (
   //
   const centerX = spriteUnit.x;
   const centerY = spriteUnit.y;
-  //使用切比雪夫距离绘制
-  // 使用广度优先搜索(BFS)绘制可移动范围，并记录路径
-  const visited = new Set<string>();
-  const queue: { x: number; y: number; step: number }[] = [];
   const startX = Math.floor(centerX / tileSize);
   const startY = Math.floor(centerY / tileSize);
-
-  // 用二维数组记录每个格子的前驱节点
-  const path: { [key: string]: { x: number; y: number } | null } = {};
-
-  queue.push({ x: startX, y: startY, step: 0 });
-  visited.add(`${startX},${startY}`);
-  path[`${startX},${startY}`] = null;
-
-  while (queue.length > 0) {
-    const { x, y, step } = queue.shift()!;
-    if (step >= range) continue;
-
-    // 八方向扩展
-    const dirs = [
-      { dx: 1, dy: 0 },
-      { dx: -1, dy: 0 },
-      { dx: 0, dy: 1 },
-      { dx: 0, dy: -1 },
-      { dx: 1, dy: 1 },
-      { dx: -1, dy: -1 },
-      { dx: 1, dy: -1 },
-      { dx: -1, dy: 1 },
-    ];
-    for (const dir of dirs) {
-      // 检查是否是对角线方向
-      if (dir.dx * dir.dx + dir.dy * dir.dy > 1) {
-        // 如果是对角线方向，检查是否是拐角,拐角则不可对角线移动
-        if (dir.dx < 0 && dir.dy < 0) {
-          // 左上角
-          if (
-            path[`${x - 1},${y}`] === undefined ||
-            path[`${x},${y - 1}`] === undefined
-          ) {
-            continue; // 如果左或上不可通行，则跳过
-          }
-        }
-        if (dir.dx > 0 && dir.dy < 0) {
-          // 右上角
-          if (
-            path[`${x + 1},${y}`] === undefined ||
-            path[`${x},${y - 1}`] === undefined
-          ) {
-            continue; // 如果右或上不可通行，则跳过
-          }
-        }
-        if (dir.dx < 0 && dir.dy > 0) {
-          // 左下角
-          if (
-            path[`${x - 1},${y}`] === undefined ||
-            path[`${x},${y + 1}`] === undefined
-          ) {
-            continue; // 如果左或下不可通行，则跳过
-          }
-        }
-        if (dir.dx > 0 && dir.dy > 0) {
-          // 右下角
-          if (
-            path[`${x + 1},${y}`] === undefined ||
-            path[`${x},${y + 1}`] === undefined
-          ) {
-            continue; // 如果右或下不可通行，则跳过
-          }
-        }
-      }
-      const nx = x + dir.dx;
-      const ny = y + dir.dy;
-      const key = `${nx},${ny}`;
-      const passiable = checkPassiable(
-        unit,
-        startX * 64,
-        startX * 64,
-        nx * 64,
-        ny * 64,
-        mapPassiable
-      );
-      if (passiable) {
-        if (!visited.has(key)) {
-          queue.push({ x: nx, y: ny, step: step + 1 });
-          visited.add(key);
-          path[key] = { x, y }; // 记录前驱
-        }
-      }
-    }
-  }
+  const path = generateWays(startX, startY, range, (x, y, preX, preY) => {
+    return checkPassiable(
+      unit,
+      preX * tileSize,
+      preY * tileSize,
+      x * tileSize,
+      y * tileSize,
+      mapPassiable
+    );
+  });
   // 绘制可移动范围
   graphics.clear();
   if (path) {
@@ -263,8 +186,6 @@ const attackSelect = (
 
   container.on("pointerup", removeGraphics);
 };
-
-
 
 export const checkPassiable = (
   unit: Unit,
@@ -328,26 +249,7 @@ export const checkPassiable = (
         }
       });
     }
-    // 检查是否被敌人阻挡
   }
 
   return passiable;
-};
-const segmentsIntersect = (
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
-  x3: number,
-  y3: number,
-  x4: number,
-  y4: number
-) => {
-  const denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
-  if (denom === 0) {
-    return false; // 平行或重合
-  }
-  const ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom;
-  const ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denom;
-  return ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1; // 判断是否在有效范围内
 };

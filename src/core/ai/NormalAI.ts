@@ -6,6 +6,7 @@ import { generateWays } from "../utils/PathfinderUtil";
 import * as UnitMove from "../action/UnitMove";
 import * as UnitMoveController from "../contoller/UnitMoveController";
 import * as UnitAttack from "../action/UnitAttack";
+import { segmentsIntersect } from "../utils/MathUtil";
 
 const tileSize = 64; // 假设每个格子的大小为64像素
 export class NormalAI implements AIInterface {
@@ -38,19 +39,16 @@ export class NormalAI implements AIInterface {
       }
     );
     if (result.target) {
-      const pathEntry = path ? path[`${result.x},${result.y}`] : null;
-      // if (pathEntry && pathEntry.step != null) {
-      //   alert(pathEntry.step);
-      // }
-    
       //移动
-     await UnitMove.moveMovement(result.x, result.y, unit, path);
-     const attack = unit.creature?.attacks[0];
-     if (attack) {
-       await UnitAttack.attackMovement(result.x, result.y, unit, attack, map);
-     }
+      await UnitMove.moveMovement(result.x, result.y, unit, path);
+      const attack = unit.creature?.attacks[0];
+      const enemyX = Math.floor(result.target.x / tileSize);
+      const enemyY = Math.floor(result.target.y / tileSize);
+      if (attack) {
+        await UnitAttack.attackMovement(enemyX, enemyY, unit, attack, map);
+      }
     }
-    
+
     InitiativeController.endTurn(unit);
     // Implement the logic for the AI to automatically take actions
   }
@@ -67,22 +65,52 @@ function findAttackTarget(
 ) {
   //没找到敌人就继续寻找
   let noHaveTarget = true;
-  // nx = Math.floor(nx / tileSize);
-  // ny = Math.floor(ny / tileSize);
+  let passiable = true;
+  if (tiledMap) {
+    const edges = tiledMap.edges;
+    // 检查是否穿过边
+    if (edges) {
+      // console.log(edges)
+      // 检查是否有对象在指定位置
+      // 遍历对象组中的所有对象
+      edges.forEach((edge) => {
+        if (edge.useable === false) {
+          return; // 如果边不可用，则跳过
+        }
+        // 检查中点的连线
+        if (
+          segmentsIntersect(
+            nx * tileSize + 32,
+            ny * tileSize + 32,
+            x * tileSize + 32,
+            y * tileSize + 32,
+            edge.x1,
+            edge.y1,
+            edge.x2,
+            edge.y2
+          )
+        ) {
+          passiable = false; // 如果中点的连线与边相交，则不可通行
+          return; // 如果不可通行，则跳过
+        }
+      });
+    }
+  }
+  if (!passiable) {
+    return false; // 如果不可通行，直接返回
+  }
   tiledMap.sprites.forEach((sprite) => {
     if (sprite.party !== unit.party) {
       //检测敌人是否在这个点
       const spriteX = Math.floor(sprite.x / tileSize);
       const spriteY = Math.floor(sprite.y / tileSize);
-      console.log(`检测敌人: ${sprite.name} 在 (${spriteX}, ${spriteY})`);
-      console.log(`检测敌人: ${sprite.name} 在 (${nx}, ${ny})`);
+
       if (spriteX === nx && spriteY === ny) {
         //找到了就不需要继续寻找了
         noHaveTarget = false;
         result.x = x;
         result.y = y;
         result.target = sprite;
-        // console.log(`找到目标: ${sprite.name} 在 (${sprite.x}, ${sprite
       }
     }
   });

@@ -67,7 +67,7 @@ export function startCombatTurn() {
       initiativeCursor.pointAt
     );
     if (initiativeCursor.pointAt.owner) {
-      alert(initiativeCursor.pointAt.owner.name + "的回合！");
+      //alert(initiativeCursor.pointAt.owner.name + "的回合！");
       //如果是npc
       if (initiativeCursor.pointAt.owner.party !== "player") {
         //如果是npc,则自动行动
