@@ -1,10 +1,15 @@
+import { getContainer, getLayers } from "@/stores/container";
 import { diceRoll } from "../DiceTryer";
 import type { TiledMap } from "../MapClass";
 import { InitiativeClass } from "../type/InitativeClass";
 import { Unit } from "../Unit";
+import * as PIXI from "pixi.js";
 
 const InitiativeSheet = [] as InitiativeClass[];
-const initiativeCursor = { pointAt: null as null | InitiativeClass,map:null as null |TiledMap };
+const initiativeCursor = {
+  pointAt: null as null | InitiativeClass,
+  map: null as null | TiledMap,
+};
 
 export async function addUnitsToInitiativeSheet(units: Unit[]) {
   const allAddedPromise = [] as Promise<any>[];
@@ -42,7 +47,7 @@ export function removeFromInitiativeSheet(unit: Unit) {
   initiative.owner = undefined;
 }
 
-export function startCombatTurn() {
+export async function startCombatTurn() {
   if (!(InitiativeSheet.length > 0)) return;
   let maxInitiative = 0;
   let allNotReady = true;
@@ -67,14 +72,20 @@ export function startCombatTurn() {
       initiativeCursor.pointAt
     );
     if (initiativeCursor.pointAt.owner) {
+      await playAnim(initiativeCursor.pointAt.owner);
       //alert(initiativeCursor.pointAt.owner.name + "的回合！");
       //如果是npc
       if (initiativeCursor.pointAt.owner.party !== "player") {
         //如果是npc,则自动行动
-        if (initiativeCursor.pointAt.owner.ai?.autoAction && initiativeCursor.map) {
-               initiativeCursor.pointAt.owner.ai.autoAction(initiativeCursor.pointAt.owner, initiativeCursor.map);
+        if (
+          initiativeCursor.pointAt.owner.ai?.autoAction &&
+          initiativeCursor.map
+        ) {
+          initiativeCursor.pointAt.owner.ai.autoAction(
+            initiativeCursor.pointAt.owner,
+            initiativeCursor.map
+          );
         }
-   
       }
     }
   }
@@ -87,10 +98,16 @@ export function startCombatTurn() {
   }
 }
 
-export function endTurn(unit: Unit) {
+export async function endTurn(unit: Unit) {
   if (unit.initiative) {
     unit.initiative.ready = false;
   }
+ const stayPromisee=new Promise<void>((resolve) => { 
+  setTimeout(() => {
+    resolve();
+  }, 500); // 延时1秒
+ })
+ await stayPromisee;
   startCombatTurn();
 }
 
@@ -145,4 +162,53 @@ export function checkActionUseful(
     if (!(unit.initiative.minorActionNumber >= minorNum)) passable = false;
   }
   return passable;
+}
+
+async function playAnim(unit: Unit) {
+  const container = getContainer();
+  const lineLayer = getLayers().lineLayer;
+  //
+  const graphics = new PIXI.Graphics();
+  graphics.rect(0, 0, 800, 800);
+  let color= 0xff0000; // 默认颜色为红色
+  if (unit.party === "player") {
+    color= 0x0000ff;
+  }
+  graphics.fill({ color: color, alpha: 0.5 });
+  console.log("container", container);
+  if (container && lineLayer) {
+    container.addChild(graphics);
+    lineLayer.attach(graphics);
+  }
+
+  const text = new PIXI.Text({
+    text: unit.name + "的回合",
+    style: {
+      fill: "#ffffff",
+      fontSize: 48,
+      fontWeight: "bold",
+      align: "center",
+    },
+  });
+  text.anchor.set(0.5);
+  text.x = 400;
+  text.y = 400;
+  if (container && lineLayer) {
+    container.addChild(text);
+    lineLayer.attach(text);
+  }
+
+  // 可选：动画持续一段时间后移除
+  const animPromise = new Promise<void>((resolve) => {
+    setTimeout(() => {
+      if (container) {
+        container.removeChild(graphics);
+        container.removeChild(text);
+      }
+      graphics.destroy();
+      text.destroy();
+      resolve();
+    }, 1500);
+  });
+  return animPromise;
 }
