@@ -1,5 +1,6 @@
 import type { Container } from "pixi.js";
 import { Unit } from "../Unit";
+import { removeFromInitiativeSheet } from "./InitiativeSystem";
 
 export function takeDamage(damage: number, unit: Unit, container: Container) {
   if (unit.creature && typeof unit.creature.hp === "number") {
@@ -12,6 +13,7 @@ export function takeDamage(damage: number, unit: Unit, container: Container) {
 
 async function takeDeath(unit: Unit, container: Container) {
   await playDeathAnim(unit, container);
+  removeFromInitiativeSheet(unit);
 }
 
 function playDeathAnim(unit: Unit, container: Container) {

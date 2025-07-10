@@ -42,12 +42,9 @@ onMounted(async () => {
 
     document.getElementById("game-pannel").appendChild(app.canvas);
 
-    // TODO 路径暂时写死
-    //加载地图内容
 
 
-    // const assets=await PIXI.Assets.load(hitURL)
-    console.log()
+    //加载地图
     const mapPassiable = await loadMap('A')
 
     //初始化容器
@@ -71,8 +68,16 @@ onMounted(async () => {
     if (createEndPromise.length > 0)
         await Promise.all(createEndPromise);
     mapPassiable.sprites = units;
+
+    //增加遮罩
+    // const mask = makeMask(app, rlayers, container);
+    // mask.x = 400;
+    // mask.y = 300;
+
+    // mapPassiable.sprites[0].animUnit.addChild(mask);
     //绘制格子
     drawGrid(app, rlayers);
+
     //增加键盘监听
     addListenKeyboard(container);
 
@@ -262,6 +267,41 @@ const drawGrid = (app, rlayers) => {
     app.stage.addChild(lineContainer);
     rlayers.lineLayer.attach(lineContainer);
 }
+const makeMask = (app, rlayers, containers) => {
+    // 创建一个覆盖整个地图的黑色层
+    const fogOfWar = new PIXI.Graphics();
+    fogOfWar.rect(-400, -300, 1200, 900); // 比屏幕稍大
+    fogOfWar.fill({ color: 0x000000, alpha: 0.8 }); // 黑色半透明
+
+    // 创建视野圆形 - 相对于角色位置
+    const visionCircle = new PIXI.Graphics();
+    visionCircle.circle(0, 0, 100);
+    visionCircle.fill({ color: 0xffffff }); // 白色
+    const visionCircle2 = new PIXI.Graphics();
+    visionCircle2.circle(0, 0, 100);
+    visionCircle2.fill({ color: 0xffffff }); // 白色
+    visionCircle2.x = 400
+    const nContainer = new PIXI.Container();
+    nContainer.addChild(visionCircle);
+    nContainer.addChild(visionCircle2);
+    // visionCircle.visible = false; // 隐藏遮罩形状
+
+    // 应用遮罩
+    fogOfWar.setMask({ mask: nContainer, inverse: true }); // 反转遮罩
+
+    // 创建容器来管理遮罩
+    const maskContainer = new PIXI.Container();
+    maskContainer.addChild(nContainer); // 先添加遮罩
+    maskContainer.addChild(fogOfWar);     // 再添加被遮罩的对象
+
+    // 将整个容器添加到舞台，而不是分别添加
+    containers.addChild(maskContainer);
+
+    // 将战争迷雾附加到渲染层
+    rlayers.lineLayer.attach(fogOfWar);
+
+    return maskContainer;
+}
 </script>
 
 <style scoped>
@@ -270,7 +310,7 @@ const drawGrid = (app, rlayers) => {
     top: 0;
     left: 0;
     width: 800px;
-    height:600px;
+    height: 600px;
     background: white
 }
 </style>

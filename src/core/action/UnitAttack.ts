@@ -174,7 +174,7 @@ async function createMissOrHitAnimation(
 ) {
   let texture: PIXI.Texture;
   let video: HTMLVideoElement | null = null;
-
+  
   video = document.createElement("video");
   if (hitFlag) {
     video.src = hitURL;
