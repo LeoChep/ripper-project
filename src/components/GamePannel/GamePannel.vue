@@ -9,9 +9,9 @@
 import CreatureInfo from '../CreatureInfo.vue'
 import { ref, onMounted } from 'vue'
 import { getJsonFile, getUnitFile, getMapAssetFile, getAnimMetaJsonFile, getAnimActionSpriteJsonFile, getAnimSpriteImgUrl } from '@/utils/utils'
-import * as InitiativeController from "@/core/contoller/InitiativeController"
+import * as InitiativeController from "@/core/system/InitiativeSystem"
 import * as PIXI from 'pixi.js'
-import { UnitRightEvent } from '@/core/contoller/UnitRightEventController'
+import { UnitRightEvent } from '@/core/controller/UnitRightEventController'
 import { TiledMap } from '@/core/MapClass'
 import { UnitAnimSpirite } from '@/core/anim/UnitAnimSpirite'
 import { Unit, createUnitsFromMapSprites } from '@/core/Unit'
@@ -269,8 +269,8 @@ const drawGrid = (app, rlayers) => {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 800px;
+    height:600px;
     background: white
 }
 </style>

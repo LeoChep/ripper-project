@@ -3,7 +3,7 @@ import type { Unit } from "../Unit";
 import { diceRoll } from "../DiceTryer";
 import * as PIXI from "pixi.js";
 import { TiledMap } from "../MapClass";
-import { takeDamage } from "../contoller/DamageController";
+import { takeDamage } from "../system/DamageSystem";
 import hitURL from "@/assets/effect/Impact_03_Regular_Yellow_400x400.webm";
 import missHRL from "@/assets/effect/Miss_02_White_200x200.webm";
 import { getContainer, getLayers } from "@/stores/container";

@@ -88,13 +88,13 @@
                  "height":0,
                  "id":8,
                  "name":"",
-                 "polygon":[
+                 "polyline":[
                         {
-                         "x":0,
-                         "y":0
+                         "x":448,
+                         "y":6
                         }, 
                         {
-                         "x":642,
+                         "x":646,
                          "y":2
                         }, 
                         {
@@ -160,6 +160,14 @@
                         {
                          "x":2.60606,
                          "y":769.394
+                        }, 
+                        {
+                         "x":4,
+                         "y":0
+                        }, 
+                        {
+                         "x":326,
+                         "y":4
                         }],
                  "rotation":0,
                  "type":"",
@@ -167,6 +175,34 @@
                  "width":0,
                  "x":58,
                  "y":570
+                }, 
+                {
+                 "height":0,
+                 "id":21,
+                 "name":"",
+                 "polygon":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":1534,
+                         "y":2
+                        }, 
+                        {
+                         "x":1532,
+                         "y":1920
+                        }, 
+                        {
+                         "x":-10,
+                         "y":1922
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":4,
+                 "y":-2
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -198,6 +234,26 @@
                  "width":0,
                  "x":253,
                  "y":251
+                }, 
+                {
+                 "height":0,
+                 "id":22,
+                 "name":"",
+                 "polyline":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":158,
+                         "y":2
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":380,
+                 "y":576
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -280,7 +336,7 @@
          "y":0
         }],
  "nextlayerid":5,
- "nextobjectid":21,
+ "nextobjectid":23,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

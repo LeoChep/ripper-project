@@ -1,10 +1,10 @@
 import type { TiledMap } from "../MapClass";
 import { Unit } from "../Unit";
 import type { AIInterface } from "../type/AIInterface";
-import * as InitiativeController from "../contoller/InitiativeController";
+import * as InitiativeController from "../system/InitiativeSystem";
 import { generateWays } from "../utils/PathfinderUtil";
 import * as UnitMove from "../action/UnitMove";
-import * as UnitMoveController from "../contoller/UnitMoveController";
+import * as UnitMoveController from "../system/UnitMoveSystem";
 import * as UnitAttack from "../action/UnitAttack";
 import { segmentsIntersect } from "../utils/MathUtil";
 

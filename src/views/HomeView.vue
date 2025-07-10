@@ -6,6 +6,7 @@ import GamePannel from '@/components/GamePannel/GamePannel.vue';
 
 <template>
   <main @contextmenu.prevent>
+  
     <GamePannel></GamePannel>
     <UnitBox></UnitBox>
   </main>
