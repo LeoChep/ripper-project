@@ -136,10 +136,12 @@ export const UnitRightEvent = (
     selectionBox,
     rlayers
   );
-  attackControlLabels.forEach((label) => {
-    selectionBox.addChild(label);
-    options.push(label.text);
-  });
+  if (attackControlLabels) {
+    attackControlLabels.forEach((label) => {
+      selectionBox.addChild(label);
+      options.push(label.text);
+    });
+  }
   //如果附近有门，那么增加开门选择
   console.log("mapPassiable", mapPassiable);
   const doorControlLabels = DoorSystem.getDoorControlLabels(

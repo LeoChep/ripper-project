@@ -6,6 +6,7 @@ import type { RLayers } from "../type/RLayersInterface";
 import type { CreatureAttack } from "@/units/Creature";
 import { generateWays } from "../utils/PathfinderUtil";
 import { checkPassiable } from "../system/AttackSystem";
+import { useInitiativeStore } from "@/stores/initiativeStore";
 
 export const getAttackControlLabels = (
   unit: Unit,
@@ -15,6 +16,10 @@ export const getAttackControlLabels = (
   selectionBox: PIXI.Graphics,
   rlayers: RLayers
 ) => {
+//   console.log("getMoveLabel", unit.initiative?.moveActionNumber);
+  if ((unit.initiative?.standerActionNumber ?? 0) <= 0) {
+    return;
+  }
   const labels: PIXI.Text[] = [];
   let text = "攻击";
   const label = new PIXI.Text({
@@ -180,6 +185,17 @@ const attackSelect = (
     if (cannel) {
       return;
     }
+       if (
+          unit.initiative &&
+          typeof unit.initiative.standerActionNumber === "number"
+        ) {
+          unit.initiative.standerActionNumber = unit.initiative.standerActionNumber - 1;
+          useInitiativeStore().updateActionNumbers(
+            unit.initiative.standerActionNumber,
+            unit.initiative.minorActionNumber,
+            unit.initiative.moveActionNumber
+          );
+        }
     playerSelectAttackMovement(e, unit, attack, mapPassiable);
     // moveMovement(e, unit, container, path);
   });
