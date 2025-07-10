@@ -68,7 +68,7 @@ export async function attackMovement(
     if (target) {
       hitFlag = await checkHit(unit, target, attack);
       if (container && lineLayer) {
-        createMissOrHitAnimation(unit, target, hitFlag, container, lineLayer);
+       await createMissOrHitAnimation(unit, target, hitFlag, container, lineLayer);
       }
 
       if (hitFlag) {
