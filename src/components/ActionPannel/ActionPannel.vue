@@ -77,6 +77,14 @@ initiativeStore.$onAction(({ name, args }) => {
     standerActionNumber.value = stander
     minorActionNumber.value = minor
   }
+  if (name === 'setIniitiative') {
+        const [initiative] = args
+        moveActionNumber.value = initiative.moveActionNumber
+        standerActionNumber.value = initiative.standerActionNumber
+        minorActionNumber.value = initiative.minorActionNumber
+        initiativeStore.setReady(initiative.ready)
+
+  }
 })  
 // 方法
 const resetInitiative = () => {

@@ -73,13 +73,16 @@ export async function startCombatTurn() {
       initiativeCursor.pointAt
     );
     if (initiativeCursor.pointAt.owner) {
+      initiativeCursor.pointAt.standerActionNumber = 1;
+      initiativeCursor.pointAt.moveActionNumber = 1;
+      initiativeCursor.pointAt.minorActionNumber = 1;
       //设置Store
       if (initiativeCursor.pointAt.owner.initiative) {
-        useInitiativeStore().setIniitiative(initiativeCursor.pointAt.owner.initiative);
+        useInitiativeStore().setIniitiative(
+          initiativeCursor.pointAt.owner.initiative
+        );
       }
-      initiativeCursor.pointAt.standerActionNumber=1;
-      initiativeCursor.pointAt.moveActionNumber=1;
-      initiativeCursor.pointAt.minorActionNumber=1;
+
       //播放动画
       await playAnim(initiativeCursor.pointAt.owner);
       if (initiativeCursor.pointAt.owner.party !== "player") {
@@ -109,12 +112,12 @@ export async function endTurn(unit: Unit) {
   if (unit.initiative) {
     unit.initiative.ready = false;
   }
- const stayPromisee=new Promise<void>((resolve) => { 
-  setTimeout(() => {
-    resolve();
-  }, 500); // 延时1秒
- })
- await stayPromisee;
+  const stayPromisee = new Promise<void>((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, 500); // 延时1秒
+  });
+  await stayPromisee;
   startCombatTurn();
 }
 
@@ -177,9 +180,9 @@ async function playAnim(unit: Unit) {
   //
   const graphics = new PIXI.Graphics();
   graphics.rect(0, 0, 800, 800);
-  let color= 0xff0000; // 默认颜色为红色
+  let color = 0xff0000; // 默认颜色为红色
   if (unit.party === "player") {
-    color= 0x0000ff;
+    color = 0x0000ff;
   }
   graphics.fill({ color: color, alpha: 0.5 });
   console.log("container", container);
@@ -218,4 +221,11 @@ async function playAnim(unit: Unit) {
     }, 1500);
   });
   return animPromise;
+}
+export function checkIsTurn(unit: Unit) {
+  if (!unit.initiative) return false;
+  if (initiativeCursor.pointAt && initiativeCursor.pointAt.owner === unit) {
+    return true;
+  }
+  return false;
 }

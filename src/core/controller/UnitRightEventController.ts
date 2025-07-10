@@ -1,10 +1,12 @@
-import * as AttackController from "../system/AttackSystem";
-import * as InitiativeController from "../system/InitiativeSystem";
+import * as AttackSystem from "../system/AttackSystem";
+import * as AttackController from "../controller/UnitAttackController";
+import * as InitiativeSystem from "../system/InitiativeSystem";
 import * as PIXI from "pixi.js";
 import type { TiledMap } from "../MapClass";
 import type { Unit } from "@/core/Unit";
-import * as MoveController from "../system/UnitMoveSystem";
-import * as DoorController from "../system/DoorSystem";
+import * as MoveController from "../controller/UnitMoveController";
+import * as UnitMoveSystem from "../system/UnitMoveSystem";
+import * as DoorSystem from "../system/DoorSystem";
 import type { RLayers } from "../type/RLayersInterface";
 let oldselectionBox: PIXI.Graphics | null = null;
 
@@ -16,6 +18,15 @@ export const UnitRightEvent = (
   mapPassiable: TiledMap | null
 ) => {
   event.stopPropagation();
+  //判断控制权
+  const controlable = InitiativeSystem.checkIsTurn(unit);
+  if (!controlable) {
+    console.warn("当前不是该单位的回合，无法进行操作");
+    return;
+  }
+  if (unit.party !== "player") {
+    return; // 只处理玩家单位的右键事件
+  }
 
   const spriteUnit = unit.animUnit;
   if (!spriteUnit) {
@@ -53,7 +64,7 @@ export const UnitRightEvent = (
   selectionBox.fill({ color: 0x333366, alpha: 0.9 });
 
   // 示例：添加三个选项
-  const options = ["移动", "结束回合"];
+  const options = ["结束回合"];
   options.forEach((text, i) => {
     const label = new PIXI.Text({
       text,
@@ -75,7 +86,7 @@ export const UnitRightEvent = (
         if (childSelectionBox instanceof PIXI.Graphics) {
           childSelectionBox.clear();
         }
-        if (childSelectionBox.children){
+        if (childSelectionBox.children) {
           childSelectionBox.children.forEach((child) => {
             if (child instanceof PIXI.Text) {
               child.destroy();
@@ -87,16 +98,9 @@ export const UnitRightEvent = (
     });
     label.on("pointertap", () => {
       // alert(`选择了: ${text}`);
-      if (text == "移动") {
-        MoveController.moveSelect(
-          unit,
-          container,
-          rlayers.lineLayer,
-          mapPassiable
-        );
-      }
-       if (text == "结束回合") {
-        InitiativeController.endTurn(unit);
+
+      if (text == "结束回合") {
+        InitiativeSystem.endTurn(unit);
       }
       const childSelectionBox =
         selectionBox.getChildByLabel("childSelectionBox");
@@ -112,6 +116,18 @@ export const UnitRightEvent = (
 
     selectionBox.addChild(label);
   });
+  const moveLabel = MoveController.getMoveLabel(
+    unit,
+    container,
+    mapPassiable,
+    options,
+    selectionBox,
+    rlayers
+  );
+  if (moveLabel) {
+    selectionBox.addChild(moveLabel);
+    options.push(moveLabel.text);
+  }
   const attackControlLabels = AttackController.getAttackControlLabels(
     unit,
     container,
@@ -126,7 +142,7 @@ export const UnitRightEvent = (
   });
   //如果附近有门，那么增加开门选择
   console.log("mapPassiable", mapPassiable);
-  const doorControlLabels = DoorController.getDoorControlLabels(
+  const doorControlLabels = DoorSystem.getDoorControlLabels(
     unit,
     container,
     mapPassiable,
