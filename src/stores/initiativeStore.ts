@@ -29,6 +29,7 @@ export const useInitiativeStore = defineStore('initiative', {
       this.currentInitiative.standerActionNumber = stander
       this.currentInitiative.minorActionNumber = minor
       this.currentInitiative.moveActionNumber = move
+      console.log(`更新主动权: ${stander}, ${minor}, ${move}`)
     },
 
     setReady(ready: boolean) {

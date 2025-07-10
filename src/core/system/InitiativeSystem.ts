@@ -77,6 +77,9 @@ export async function startCombatTurn() {
       if (initiativeCursor.pointAt.owner.initiative) {
         useInitiativeStore().setIniitiative(initiativeCursor.pointAt.owner.initiative);
       }
+      initiativeCursor.pointAt.standerActionNumber=1;
+      initiativeCursor.pointAt.moveActionNumber=1;
+      initiativeCursor.pointAt.minorActionNumber=1;
       //播放动画
       await playAnim(initiativeCursor.pointAt.owner);
       if (initiativeCursor.pointAt.owner.party !== "player") {

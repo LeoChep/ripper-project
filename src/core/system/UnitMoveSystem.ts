@@ -4,6 +4,7 @@ import { girdMoveMovement, moveMovement, playerSelectMovement } from "../action/
 import * as PIXI from "pixi.js";
 import { generateWays } from "../utils/PathfinderUtil";
 import { segmentsIntersect } from "../utils/MathUtil";
+import { useInitiativeStore } from "@/stores/initiativeStore";
 
 export const moveSelect = (
   unit: Unit,
@@ -76,6 +77,11 @@ export const moveSelect = (
       return;
     }
     playerSelectMovement(e, unit, container, path);
+    if (unit.initiative && typeof unit.initiative.moveActionNumber === "number") {
+      unit.initiative.moveActionNumber = unit.initiative.moveActionNumber - 1;
+      useInitiativeStore().updateActionNumbers(unit.initiative.standerActionNumber, unit.initiative.minorActionNumber, unit.initiative.moveActionNumber   );
+      console.log( `剩余移动次数: ${unit.initiative.moveActionNumber}`);
+    }
   });
 
   container.on("pointerup", removeGraphics);

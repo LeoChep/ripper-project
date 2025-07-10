@@ -8,14 +8,15 @@ export const getDoorControlLabels = (
   container: PIXI.Container<PIXI.ContainerChild>,
   mapPassiable: TiledMap | null,
   options: string[],
-    selectionBox: PIXI.Graphics,
-    rlayers:RLayers
+  selectionBox: PIXI.Graphics,
+  rlayers: RLayers
 ) => {
-    const labels: PIXI.Text[]=[]
+  const labels: PIXI.Text[] = [];
   if (mapPassiable && mapPassiable.doors) {
     const doors = mapPassiable.doors;
 
     if (doors.length > 0) {
+      let index = 0;
       doors.forEach((door, i) => {
         // 检查门是否在选择框范围内
         const doorX = door.x1 + (door.x2 - door.x1) / 2;
@@ -39,7 +40,8 @@ export const getDoorControlLabels = (
         const boxWidth = 40;
         const boxHeight = 80;
         label.x = boxWidth / 2 - label.width / 2;
-        label.y = 8 + (options.length + i) * 20;
+        label.y = 8 + (options.length + index) * 20;
+        index++;
         label.eventMode = "static";
         label.cursor = "pointer";
         const graphics = new PIXI.Graphics();
@@ -52,7 +54,7 @@ export const getDoorControlLabels = (
           }
         });
         label.on("pointerenter", () => {
-            graphics.clear()
+          graphics.clear();
           graphics.alpha = 0.4;
           graphics.zIndex = 1000;
           graphics.rect(
@@ -63,7 +65,7 @@ export const getDoorControlLabels = (
           );
           graphics.fill({ color: 0xff0000 });
           container.addChild(graphics);
-          const lineLayer = rlayers.lineLayer
+          const lineLayer = rlayers.lineLayer;
           lineLayer.attach(graphics);
           label.once("pointerleave", () => {
             if (graphics.parent) {

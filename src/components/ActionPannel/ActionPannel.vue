@@ -43,19 +43,19 @@
       </div>
     </div>
     
-    <div class="action-buttons">
+    <!-- <div class="action-buttons">
       <button @click="resetInitiative" class="btn btn-secondary">
         重置主动权
       </button>
       <button @click="toggleReady" class="btn btn-primary">
         {{ isReady ? '取消准备' : '设为准备' }}
       </button>
-    </div>
+    </div> -->
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useInitiativeStore } from '../../stores/initiativeStore'
 
 // 使用 initiative store
@@ -64,11 +64,20 @@ const initiativeStore = useInitiativeStore()
 // 计算属性，从 store 获取数据
 const initiativeValue = computed(() => initiativeStore.getInitiativeValue)
 const owner = computed(() => initiativeStore.getOwner)
-const standerActionNumber = computed(() => initiativeStore.getStanderActionNumber)
-const minorActionNumber = computed(() => initiativeStore.getMinorActionNumber)
-const moveActionNumber = computed(() => initiativeStore.getMoveActionNumber)
+const standerActionNumber = ref(1)
+const minorActionNumber = ref(1)
+const moveActionNumber = ref(1)
 const isReady = computed(() => initiativeStore.isReady)
 
+// 监听updata事件更新移动行动次数
+initiativeStore.$onAction(({ name, args }) => {
+  if (name === 'updateActionNumbers') {
+    const [stander, minor, move] = args
+    moveActionNumber.value = move
+    standerActionNumber.value = stander
+    minorActionNumber.value = minor
+  }
+})  
 // 方法
 const resetInitiative = () => {
   initiativeStore.resetInitiative()
