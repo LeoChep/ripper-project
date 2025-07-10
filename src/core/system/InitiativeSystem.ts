@@ -1,9 +1,10 @@
 import { getContainer, getLayers } from "@/stores/container";
 import { diceRoll } from "../DiceTryer";
 import type { TiledMap } from "../MapClass";
-import { InitiativeClass } from "../type/InitativeClass";
+import { InitiativeClass } from "../type/InitiativeClass";
 import { Unit } from "../Unit";
 import * as PIXI from "pixi.js";
+import { useInitiativeStore } from "@/stores/initiativeStore";
 
 const InitiativeSheet = [] as InitiativeClass[];
 const initiativeCursor = {
@@ -72,9 +73,12 @@ export async function startCombatTurn() {
       initiativeCursor.pointAt
     );
     if (initiativeCursor.pointAt.owner) {
+      //设置Store
+      if (initiativeCursor.pointAt.owner.initiative) {
+        useInitiativeStore().setIniitiative(initiativeCursor.pointAt.owner.initiative);
+      }
+      //播放动画
       await playAnim(initiativeCursor.pointAt.owner);
-      //alert(initiativeCursor.pointAt.owner.name + "的回合！");
-      //如果是npc
       if (initiativeCursor.pointAt.owner.party !== "player") {
         //如果是npc,则自动行动
         if (

@@ -1,7 +1,7 @@
 import type { C } from "vitest/dist/chunks/environment.d.cL3nLXbE.js";
 import type { UnitAnimSpirite } from "./anim/UnitAnimSpirite";
 import type { Creature } from "@/units/Creature";
-import type { InitiativeClass } from "./type/InitativeClass";
+import type { InitiativeClass } from "./type/InitiativeClass";
 import type { AIInterface } from "./type/AIInterface";
 import { NormalAI } from "./ai/NormalAI";
 
