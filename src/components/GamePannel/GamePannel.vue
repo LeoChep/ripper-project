@@ -18,7 +18,8 @@ import { Unit, createUnitsFromMapSprites } from '@/core/Unit'
 import { AnimMetaJson } from '@/core/anim/AnimMetaJson'
 import { createCreature } from '@/units/Creature'
 import { setContainer, setLayer } from '@/stores/container'
-
+import { makeFog } from '@/core/system/FogSystem'
+import { makeFogOfWar, caculteFog } from '@/core/system/FogSystem_unuse'
 const appSetting = {
     width: 800,
     height: 600,
@@ -69,18 +70,13 @@ onMounted(async () => {
         await Promise.all(createEndPromise);
     mapPassiable.sprites = units;
 
-    //增加遮罩
-    // const mask = makeMask(app, rlayers, container);
-    // mask.x = 400;
-    // mask.y = 300;
 
-    // mapPassiable.sprites[0].animUnit.addChild(mask);
     //绘制格子
     drawGrid(app, rlayers);
 
     //增加键盘监听
     addListenKeyboard(container);
-
+    drawFog(mapPassiable, rlayers, container, units[0])
     //测试战斗
     InitiativeController.setMap(mapPassiable);
     const initCombatPromise = InitiativeController.addUnitsToInitiativeSheet(units)
@@ -94,6 +90,102 @@ onMounted(async () => {
 
 })
 
+const drawFog = (mapPassiable, rlayers, container, unit) => {
+    //增加遮罩
+    const fogOfWar = new PIXI.Graphics();
+
+    let containerMask = new PIXI.Container();
+    container.addChild(fogOfWar);
+    container.addChild(containerMask); // 添加遮罩容器
+    fogOfWar.eventMode = 'none'; // 令遮罩不影响事件
+    rlayers.fogLayer.attach(fogOfWar);
+    // fogOfWar.zIndex=-1;
+    fogOfWar.rect(0, 0, 1200, 900); // 比屏幕稍大
+    fogOfWar.fill({ color: 0x000000, alpha: 0.8 }); // 黑色半透明
+
+    let gcMask;
+    const darwFogFunc = () => {
+        const timePromise = new Promise((resolve) => {
+            setTimeout(() => {
+                resolve();
+            }, 500);
+        });
+        const makeFogOfWarPromise = new Promise((resolve) => {
+            const mask = makeFogOfWar(mapPassiable, rlayers, container, unit);
+            resolve(mask);
+        });
+        const maskCaculatePromise = new Promise((resolve) => {
+            const mask = caculteFog(mapPassiable, rlayers, container, unit);
+            resolve(mask);
+        });
+        Promise.all([timePromise, makeFogOfWarPromise, maskCaculatePromise]).then((value) => {
+            if (gcMask) {
+                gcMask.destroy()
+            }
+
+            console.log('遮罩计算完成', value)
+            containerMask.addChild(value[1]); // 添加第二个遮罩
+            gcMask = value[1];
+            gcMask.eventMode = 'none'; // 设置遮罩为静态事件模式
+            // fogOfWar.setMask({ mask: containerMask, inverse: true });
+            fogOfWar.clear(); // 清除之前的绘制
+            fogOfWar.rect(-100, -100, 20000, 20000); // 比屏幕稍大
+           fogOfWar.fill({ color: 0x000000, alpha: 1 }); // 黑色半透明
+            fogOfWar.eventMode = 'none'; // 令遮罩不影响事件
+            const visiblePoints = value[2]
+            console.log('挖洞可见区域', visiblePoints)
+            if (
+                visiblePoints &&
+                Object.keys(visiblePoints).length > 2 &&
+                visiblePoints["0"]
+            ) {
+                //打孔
+                const pointData = []
+                console.log('打孔可见区域', visiblePoints)
+                // fogOfWar.moveTo(visiblePoints["0"].x, visiblePoints["0"].y);
+                // newG.moveTo(200, 111);
+                for (const pt of Object.values(visiblePoints)) {
+
+                    if (pt) {
+
+                        // fogOfWar.lineTo(pt.x, pt.y);
+                        pointData.push(pt.x, pt.y);
+                    }
+                }
+                // fogOfWar.lineTo(visiblePoints["0"].x, visiblePoints["0"].y);
+                // fogOfWar.moveTo(0, 0);
+                // for (let i=0;i<=700;i++){
+                //     fogOfWar.lineTo(0, i); 
+                // }
+                // for (let i=0;i<=700;i++){
+                //     fogOfWar.lineTo(i, 700); 
+                // }
+                //    for (let i=0;i<=400;i++){
+                //     fogOfWar.lineTo(700, 700-i); 
+                // }
+         
+                console.log('打孔可见区域2', visiblePoints)
+                // fogOfWar.fill({ color: 0x000000, alpha: 1 }); // 填充黑色
+                // fogOfWar.cut();
+                fogOfWar.poly(pointData).cut();
+                // fogOfWar.poly(pointData,true).fill({ color: 0x000000, alpha: 1 }); // 填充黑色
+                // fogOfWar.circle(
+                //    200,
+                //   200,
+                //     20
+                // ).cut(); // 绘制一个圆形区域
+                // newG.fill({ color: 0x000000, alpha: 1 });
+
+                console.log('打孔可见区域3', visiblePoints)
+            }
+            // rlayers.fogLayer.attach(fogOfWar);
+            // rlayers.fogLayer.attach(gcMask);
+            darwFogFunc()
+        });
+    }
+    darwFogFunc();
+
+}
 const selectedCreature = ref(null) // 新增
 
 const createRenderLayers = (app) => {
@@ -101,13 +193,15 @@ const createRenderLayers = (app) => {
     rlayers.basicLayer = new PIXI.RenderLayer()
     rlayers.spriteLayer = new PIXI.RenderLayer();
     rlayers.lineLayer = new PIXI.RenderLayer();
+    rlayers.fogLayer = new PIXI.RenderLayer();
     rlayers.selectLayer = new PIXI.RenderLayer();
     rlayers.controllerLayer = new PIXI.RenderLayer();
     app.stage.addChildAt(rlayers.basicLayer, 0);
     app.stage.addChildAt(rlayers.spriteLayer, 1);
-    app.stage.addChildAt(rlayers.lineLayer, 2);
-    app.stage.addChildAt(rlayers.selectLayer, 3);
-    app.stage.addChildAt(rlayers.controllerLayer, 4);
+    app.stage.addChildAt(rlayers.fogLayer, 2);
+    app.stage.addChildAt(rlayers.lineLayer, 3);
+    app.stage.addChildAt(rlayers.selectLayer, 4);
+    app.stage.addChildAt(rlayers.controllerLayer, 5);
     return rlayers
 }
 
@@ -261,47 +355,13 @@ const drawGrid = (app, rlayers) => {
         const line = new PIXI.Graphics();
         line.moveTo(0, j * gridSize);
         line.lineTo(appSetting.width, j * gridSize);
-        line.stroke({ width: 1, color: 0x444444, alpha: 0.5 });
+        line.stroke({ width: 1, color: 0x000000, alpha: 1 });
         lineContainer.addChild(line);
     }
     app.stage.addChild(lineContainer);
     rlayers.lineLayer.attach(lineContainer);
 }
-const makeMask = (app, rlayers, containers) => {
-    // 创建一个覆盖整个地图的黑色层
-    const fogOfWar = new PIXI.Graphics();
-    fogOfWar.rect(-400, -300, 1200, 900); // 比屏幕稍大
-    fogOfWar.fill({ color: 0x000000, alpha: 0.8 }); // 黑色半透明
 
-    // 创建视野圆形 - 相对于角色位置
-    const visionCircle = new PIXI.Graphics();
-    visionCircle.circle(0, 0, 100);
-    visionCircle.fill({ color: 0xffffff }); // 白色
-    const visionCircle2 = new PIXI.Graphics();
-    visionCircle2.circle(0, 0, 100);
-    visionCircle2.fill({ color: 0xffffff }); // 白色
-    visionCircle2.x = 400
-    const nContainer = new PIXI.Container();
-    nContainer.addChild(visionCircle);
-    nContainer.addChild(visionCircle2);
-    // visionCircle.visible = false; // 隐藏遮罩形状
-
-    // 应用遮罩
-    fogOfWar.setMask({ mask: nContainer, inverse: true }); // 反转遮罩
-
-    // 创建容器来管理遮罩
-    const maskContainer = new PIXI.Container();
-    maskContainer.addChild(nContainer); // 先添加遮罩
-    maskContainer.addChild(fogOfWar);     // 再添加被遮罩的对象
-
-    // 将整个容器添加到舞台，而不是分别添加
-    containers.addChild(maskContainer);
-
-    // 将战争迷雾附加到渲染层
-    rlayers.lineLayer.attach(fogOfWar);
-
-    return maskContainer;
-}
 </script>
 
 <style scoped>
