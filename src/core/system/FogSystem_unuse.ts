@@ -198,6 +198,7 @@ export class FogSystem {
     fogSystem.rlayers.fogLayer.attach(fogOfWar);
     fogOfWar.rect(-100, -100, mapWidth, mapHeight);
     fogOfWar.fill({ color: 0x000000, alpha: 1 });
+    
     return fogSystem;
   }
 }

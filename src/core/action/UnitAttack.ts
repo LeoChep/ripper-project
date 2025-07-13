@@ -1,4 +1,4 @@
-import type { CreatureAttack } from "@/units/Creature";
+import type { CreatureAttack } from "@/core/units/Creature";
 import type { Unit } from "../Unit";
 import { diceRoll } from "../DiceTryer";
 import * as PIXI from "pixi.js";

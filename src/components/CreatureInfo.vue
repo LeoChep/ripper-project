@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Creature } from '@/units/Creature'
+import type { Creature } from '@/core/units/Creature'
 defineProps<{ creature: Creature | null }>()
 defineEmits(['close'])
 </script>

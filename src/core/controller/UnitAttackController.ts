@@ -3,7 +3,7 @@ import * as PIXI from "pixi.js";
 import type { TiledMap } from "../MapClass";
 import type { Unit } from "../Unit";
 import type { RLayers } from "../type/RLayersInterface";
-import type { CreatureAttack } from "@/units/Creature";
+import type { CreatureAttack } from "@/core/units/Creature";
 import { generateWays } from "../utils/PathfinderUtil";
 import { checkPassiable } from "../system/AttackSystem";
 import { useInitiativeStore } from "@/stores/initiativeStore";

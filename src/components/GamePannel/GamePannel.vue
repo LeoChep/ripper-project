@@ -3,10 +3,12 @@
     <div class="game-pannel" id="game-pannel"></div>
     <!-- <img :src="hitURL"> -->
     <CreatureInfo :creature="selectedCreature" v-if="selectedCreature" @close="selectedCreature = null" />
+    <TalkPannel />
 </template>
 
 <script setup>
 import CreatureInfo from '../CreatureInfo.vue'
+import TalkPannel from '../TalkPannel/TalkPannel.vue'
 import { ref, onMounted } from 'vue'
 import { getJsonFile, getUnitFile, getMapAssetFile, getAnimMetaJsonFile, getAnimActionSpriteJsonFile, getAnimSpriteImgUrl } from '@/utils/utils'
 import * as InitiativeController from "@/core/system/InitiativeSystem"
@@ -16,10 +18,11 @@ import { TiledMap } from '@/core/MapClass'
 import { UnitAnimSpirite } from '@/core/anim/UnitAnimSpirite'
 import { Unit, createUnitsFromMapSprites } from '@/core/Unit'
 import { AnimMetaJson } from '@/core/anim/AnimMetaJson'
-import { createCreature } from '@/units/Creature'
+import { createCreature } from '@/core/units/Creature'
 import { setContainer, setLayer } from '@/stores/container'
 import { makeFog } from '@/core/system/FogSystem'
 import { FogSystem } from '@/core/system/FogSystem_unuse'
+import {d1} from '@/drama/d1'
 const appSetting = {
     width: 800,
     height: 600,
@@ -80,15 +83,17 @@ onMounted(async () => {
     addListenKeyboard(container);
 
     //测试战斗
-    InitiativeController.setMap(mapPassiable);
-    const initCombatPromise = InitiativeController.addUnitsToInitiativeSheet(units)
+    // InitiativeController.setMap(mapPassiable);
+    // const initCombatPromise = InitiativeController.addUnitsToInitiativeSheet(units)
 
-    setTimeout(() => {
-        initCombatPromise.then(() => {
-            InitiativeController.startCombatTurn()
-        });
-    }, 2000)
+    // setTimeout(() => {
+    //     initCombatPromise.then(() => {
+    //         InitiativeController.startCombatTurn()
+    //     });
+    // }, 2000)
 
+    //测试剧本
+    d1.start();
 
 })
 

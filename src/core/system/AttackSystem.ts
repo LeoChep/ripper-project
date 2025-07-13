@@ -1,4 +1,4 @@
-import type { CreatureAttack } from "@/units/Creature";
+import type { CreatureAttack } from "@/core/units/Creature";
 import { segmentsIntersect } from "../utils/MathUtil";
 import type { TiledMap } from "../MapClass";
 import type { RLayers } from "../type/RLayersInterface";
