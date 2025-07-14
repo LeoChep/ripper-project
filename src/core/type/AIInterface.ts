@@ -1,5 +1,5 @@
 import type { TiledMap } from "../MapClass";
-import type { Unit } from "../Unit";
+import type { Unit } from "../units/Unit";
 
 /**
  * AI接口定义

@@ -1,5 +1,5 @@
 import type { CreatureAttack } from "@/core/units/Creature";
-import type { Unit } from "../Unit";
+import type { Unit } from "../units/Unit";
 import { diceRoll } from "../DiceTryer";
 import * as PIXI from "pixi.js";
 import { TiledMap } from "../MapClass";

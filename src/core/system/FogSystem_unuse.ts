@@ -1,6 +1,6 @@
 import { makeFog } from "./FogSystem";
 import type { TiledMap } from "../MapClass";
-import type { Unit } from "../Unit";
+import type { Unit } from "../units/Unit";
 
 import { segmentsIntersect } from "../utils/MathUtil";
 import { generateWays } from "../utils/PathfinderUtil";
@@ -198,7 +198,7 @@ export class FogSystem {
     fogSystem.rlayers.fogLayer.attach(fogOfWar);
     fogOfWar.rect(-100, -100, mapWidth, mapHeight);
     fogOfWar.fill({ color: 0x000000, alpha: 1 });
-    
+
     return fogSystem;
   }
 }

@@ -4,25 +4,29 @@
     <!-- <img :src="hitURL"> -->
     <CreatureInfo :creature="selectedCreature" v-if="selectedCreature" @close="selectedCreature = null" />
     <TalkPannel />
+    <CharacterPannel/>
 </template>
 
 <script setup>
+
 import CreatureInfo from '../CreatureInfo.vue'
 import TalkPannel from '../TalkPannel/TalkPannel.vue'
 import { ref, onMounted } from 'vue'
-import { getJsonFile, getUnitFile, getMapAssetFile, getAnimMetaJsonFile, getAnimActionSpriteJsonFile, getAnimSpriteImgUrl } from '@/utils/utils'
+import { getJsonFile, getMapAssetFile, getAnimMetaJsonFile, getAnimActionSpriteJsonFile, getAnimSpriteImgUrl } from '@/utils/utils'
 import * as InitiativeController from "@/core/system/InitiativeSystem"
 import * as PIXI from 'pixi.js'
 import { UnitRightEvent } from '@/core/controller/UnitRightEventController'
 import { TiledMap } from '@/core/MapClass'
 import { UnitAnimSpirite } from '@/core/anim/UnitAnimSpirite'
-import { Unit, createUnitsFromMapSprites } from '@/core/Unit'
+import { Unit, createUnitsFromMapSprites } from '@/core/units/Unit'
 import { AnimMetaJson } from '@/core/anim/AnimMetaJson'
 import { createCreature } from '@/core/units/Creature'
 import { setContainer, setLayer } from '@/stores/container'
 import { makeFog } from '@/core/system/FogSystem'
 import { FogSystem } from '@/core/system/FogSystem_unuse'
 import {d1} from '@/drama/d1'
+import CharacterPannel from '../CharacterPannel/CharacterPannel.vue'
+import { useCharacterStore } from '@/stores/characterStore'
 const appSetting = {
     width: 800,
     height: 600,
@@ -74,8 +78,13 @@ onMounted(async () => {
     if (createEndPromise.length > 0)
         await Promise.all(createEndPromise);
     mapPassiable.sprites = units;
-
-
+    //初始化玩家角色
+    const characterStore=useCharacterStore();
+    units.forEach((unit) => {
+        if (unit.party === 'player') {
+            characterStore.addCharacter(unit);
+        }
+    });
     //绘制格子
     drawGrid(app, rlayers);
 

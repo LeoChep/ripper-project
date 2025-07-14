@@ -1,4 +1,4 @@
-import type { Unit } from "../Unit";
+import type { Unit } from "../units/Unit";
 import * as PIXI from "pixi.js";
 export const playerSelectMovement = (
   event: PIXI.FederatedPointerEvent,

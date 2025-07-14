@@ -3,7 +3,7 @@ import * as AttackController from "../controller/UnitAttackController";
 import * as InitiativeSystem from "../system/InitiativeSystem";
 import * as PIXI from "pixi.js";
 import type { TiledMap } from "../MapClass";
-import type { Unit } from "@/core/Unit";
+import type { Unit } from "@/core/units/Unit";
 import * as MoveController from "../controller/UnitMoveController";
 import * as UnitMoveSystem from "../system/UnitMoveSystem";
 import * as DoorSystem from "../system/DoorSystem";

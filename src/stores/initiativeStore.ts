@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { InitiativeClass } from '../core/type/InitiativeClass'
-import type { Unit } from '../core/Unit'
+import type { Unit } from '../core/units/Unit'
 
 export const useInitiativeStore = defineStore('initiative', {
   state: () => ({

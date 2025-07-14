@@ -1,5 +1,5 @@
 import type { TiledMap } from "../MapClass";
-import type { Unit } from "../Unit";
+import type { Unit } from "../units/Unit";
 import { girdMoveMovement, moveMovement, playerSelectMovement } from "../action/UnitMove";
 import * as PIXI from "pixi.js";
 import { generateWays } from "../utils/PathfinderUtil";

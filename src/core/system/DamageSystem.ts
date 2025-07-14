@@ -1,5 +1,5 @@
 import type { Container } from "pixi.js";
-import { Unit } from "../Unit";
+import { Unit } from "../units/Unit";
 import { removeFromInitiativeSheet } from "./InitiativeSystem";
 
 export function takeDamage(damage: number, unit: Unit, container: Container) {

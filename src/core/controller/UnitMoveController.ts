@@ -1,7 +1,7 @@
 import type { TiledMap } from "../MapClass";
 import type { RLayers } from "../type/RLayersInterface";
 import * as PIXI from "pixi.js";
-import type { Unit } from "../Unit";
+import type { Unit } from "../units/Unit";
 
 import * as UnitMoveSystem from "../system/UnitMoveSystem";
 import { playerSelectMovement } from "../action/UnitMove";

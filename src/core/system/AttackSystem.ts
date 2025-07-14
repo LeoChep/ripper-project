@@ -2,7 +2,7 @@ import type { CreatureAttack } from "@/core/units/Creature";
 import { segmentsIntersect } from "../utils/MathUtil";
 import type { TiledMap } from "../MapClass";
 import type { RLayers } from "../type/RLayersInterface";
-import type { Unit } from "../Unit";
+import type { Unit } from "../units/Unit";
 import * as PIXI from "pixi.js";
 import { playerSelectAttackMovement } from "../action/UnitAttack";
 import { generateWays } from "../utils/PathfinderUtil";

@@ -1,5 +1,5 @@
-export const getUnitFile = (unitTypeName: string, actionNmae: string) => {
-  return new URL(`../assets/${unitTypeName}/${actionNmae}.png`, import.meta.url)
+export const getUnitAvatar = (unitTypeName: string) => {
+  return new URL(`../assets/${unitTypeName}/avatar.png`, import.meta.url)
     .href;
 };
 export const getMapAssetFile = (mapName: string) => {

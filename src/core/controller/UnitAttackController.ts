@@ -1,7 +1,7 @@
 import { playerSelectAttackMovement } from "../action/UnitAttack";
 import * as PIXI from "pixi.js";
 import type { TiledMap } from "../MapClass";
-import type { Unit } from "../Unit";
+import type { Unit } from "../units/Unit";
 import type { RLayers } from "../type/RLayersInterface";
 import type { CreatureAttack } from "@/core/units/Creature";
 import { generateWays } from "../utils/PathfinderUtil";

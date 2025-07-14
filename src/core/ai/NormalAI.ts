@@ -1,5 +1,5 @@
 import type { TiledMap } from "../MapClass";
-import { Unit } from "../Unit";
+import { Unit } from "../units/Unit";
 import type { AIInterface } from "../type/AIInterface";
 import * as InitiativeController from "../system/InitiativeSystem";
 import { generateWays } from "../utils/PathfinderUtil";

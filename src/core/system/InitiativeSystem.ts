@@ -2,7 +2,7 @@ import { getContainer, getLayers } from "@/stores/container";
 import { diceRoll } from "../DiceTryer";
 import type { TiledMap } from "../MapClass";
 import { InitiativeClass } from "../type/InitiativeClass";
-import { Unit } from "../Unit";
+import { Unit } from "../units/Unit";
 import * as PIXI from "pixi.js";
 import { useInitiativeStore } from "@/stores/initiativeStore";
 

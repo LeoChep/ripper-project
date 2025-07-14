@@ -1,6 +1,6 @@
 import type { TiledMap } from "../MapClass";
 import type { RLayers } from "../type/RLayersInterface";
-import type { Unit } from "../Unit";
+import type { Unit } from "../units/Unit";
 import * as PIXI from "pixi.js";
 
 export const getDoorControlLabels = (

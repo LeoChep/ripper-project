@@ -1,6 +1,6 @@
 import { Container } from "pixi.js";
 import * as PIXI from "pixi.js";
-import type { Unit } from "../Unit";
+import type { Unit } from "../units/Unit";
 export class UnitAnimSpirite extends Container {
   // 单位的朝向，单位为弧度，0 表示向右
   private _direction: number = -1;
