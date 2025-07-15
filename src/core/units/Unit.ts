@@ -1,9 +1,10 @@
-import type { C } from "vitest/dist/chunks/environment.d.cL3nLXbE.js";
+
 import type { UnitAnimSpirite } from "../anim/UnitAnimSpirite";
 import type { Creature } from "@/core/units/Creature";
 import type { InitiativeClass } from "../type/InitiativeClass";
 import type { AIInterface } from "../type/AIInterface";
 import { NormalAI } from "../ai/NormalAI";
+import type { Action } from "../type/Action";
 
 export interface UnitOptions {
     id: number;
@@ -20,6 +21,7 @@ export interface UnitOptions {
 
 export class Unit  {
     ai:AIInterface | undefined; // AI 接口，可能是 AI 实例
+    actions= [] as Action[]
     id: number;
     name: string;
     party: string;

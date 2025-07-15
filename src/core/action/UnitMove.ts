@@ -12,6 +12,10 @@ export const playerSelectMovement = (
   const offsetY = pos.y - container.y;
   const targetX = Math.floor(offsetX / 64);
   const targetY = Math.floor(offsetY / 64);
+  if (!path[`${targetX},${targetY}`]) {
+    console.warn("点击位置不在可移动范围内");
+    return;
+  }
   return moveMovement(targetX, targetY, unit, path);
 };
 export const moveMovement = async (
@@ -111,14 +115,14 @@ export const girdMoveMovement = (
 
   const moveFunc = () => {
     console.log(`目标位置: (${targetX}, ${targetY})`);
-    // 如果精灵已经在目标
+    
     if (spriteUnit.x !== targetX || spriteUnit.y !== targetY) {
       const dx = targetX - spriteUnit.x;
       const dy = targetY - spriteUnit.y;
 
       // 计算移动步长
       const distance = Math.sqrt(dx * dx + dy * dy);
-      const step = 64;
+      const step = 32;
       const stepX =
         distance === 0 ? 0 : (dx / distance) * Math.min(step, Math.abs(dx));
       const stepY =
@@ -134,7 +138,6 @@ export const girdMoveMovement = (
       ) {
         spriteUnit.x = targetX;
         spriteUnit.y = targetY;
-        // 停止动画更新
       }
       unit.x = spriteUnit.x;
       unit.y = spriteUnit.y;
@@ -150,7 +153,7 @@ export const girdMoveMovement = (
         clearInterval(timer);
         resolve();
       }
-    }, 160);
+    }, 80);
   });
   return girdMovePromise;
 };

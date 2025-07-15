@@ -7,13 +7,17 @@
 <script setup>
 import { onMounted, computed,ref } from 'vue'
 import { useTalkStateStore } from '@/stores/talkStateStore'
+import { useCharacterStore } from '@/stores/characterStore'
 const talkState = useTalkStateStore();
+const characterStore = useCharacterStore();
 const showFlag=ref(false)
 const talkContent = computed(() => {
     if (talkState.talkState.content&&talkState.talkState.content.length>0){
         showFlag.value = true;
+        characterStore.setShow(false);
     }else{
         showFlag.value = false;
+         characterStore.setShow(true);
     }
     return talkState.talkState.input;
 })

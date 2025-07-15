@@ -132,7 +132,12 @@ export class FogSystem {
       this.fog.clear();
     } else {
       this.fog = new PIXI.Graphics();
-      this.fog.eventMode = "none"; // 令遮罩不影响事件
+      this.fog.eventMode = "static"; // 令遮罩不影响事件
+      const fogOfWar = this.fog;
+
+      fogOfWar.zIndex = 1000; // 确保fog在最上层
+
+
       this.containers.addChild(this.fog);
       this.rlayers.fogLayer.attach(this.fog);
     }
@@ -192,7 +197,8 @@ export class FogSystem {
     const mapWidth = mapPassiable.width * tileSize + 200;
     const mapHeight = mapPassiable.height * tileSize + 200;
     const fogOfWar = new PIXI.Graphics();
-    fogOfWar.eventMode = "none"; // 令遮罩不影响事件
+    fogOfWar.zIndex = 1000; //
+
     fogSystem.fog = fogOfWar;
     fogSystem.containers.addChild(fogOfWar);
     fogSystem.rlayers.fogLayer.attach(fogOfWar);

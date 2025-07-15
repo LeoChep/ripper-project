@@ -20,10 +20,10 @@ export const UnitRightEvent = (
   event.stopPropagation();
   //判断控制权
   const controlable = InitiativeSystem.checkIsTurn(unit);
-  if (!controlable) {
-    console.warn("当前不是该单位的回合，无法进行操作");
-    return;
-  }
+  // if (!controlable) {
+  //   console.warn("当前不是该单位的回合，无法进行操作");
+  //   return;
+  // }
   if (unit.party !== "player") {
     return; // 只处理玩家单位的右键事件
   }

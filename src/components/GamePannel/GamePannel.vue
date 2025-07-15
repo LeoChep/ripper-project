@@ -4,7 +4,7 @@
     <!-- <img :src="hitURL"> -->
     <CreatureInfo :creature="selectedCreature" v-if="selectedCreature" @close="selectedCreature = null" />
     <TalkPannel />
-    <CharacterPannel/>
+    <CharacterPannel />
 </template>
 
 <script setup>
@@ -24,9 +24,10 @@ import { createCreature } from '@/core/units/Creature'
 import { setContainer, setLayer } from '@/stores/container'
 import { makeFog } from '@/core/system/FogSystem'
 import { FogSystem } from '@/core/system/FogSystem_unuse'
-import {d1} from '@/drama/d1'
+import { d1 } from '@/drama/d1'
 import CharacterPannel from '../CharacterPannel/CharacterPannel.vue'
 import { useCharacterStore } from '@/stores/characterStore'
+import { CharacterOutCombatController } from '@/core/controller/CharacterOutCombatController'
 const appSetting = {
     width: 800,
     height: 600,
@@ -78,13 +79,11 @@ onMounted(async () => {
     if (createEndPromise.length > 0)
         await Promise.all(createEndPromise);
     mapPassiable.sprites = units;
-    //初始化玩家角色
-    const characterStore=useCharacterStore();
-    units.forEach((unit) => {
-        if (unit.party === 'player') {
-            characterStore.addCharacter(unit);
-        }
-    });
+
+
+
+
+
     //绘制格子
     drawGrid(app, rlayers);
 
@@ -102,7 +101,19 @@ onMounted(async () => {
     // }, 2000)
 
     //测试剧本
+
+    //初始化玩家角色
+    const characterStore = useCharacterStore();
+    units.forEach((unit) => {
+        if (unit.party === 'player') {
+            characterStore.addCharacter(unit);
+        }
+    });
+    const characterOutCombatController = new CharacterOutCombatController(rlayers, container, mapPassiable)
+    characterStore.setCharacterOutCombatController(characterOutCombatController);
     d1.start();
+
+
 
 })
 
@@ -124,9 +135,9 @@ const createRenderLayers = (app) => {
     rlayers.controllerLayer = new PIXI.RenderLayer();
     app.stage.addChildAt(rlayers.basicLayer, 0);
     app.stage.addChildAt(rlayers.spriteLayer, 1);
-    app.stage.addChildAt(rlayers.fogLayer, 2);
+    app.stage.addChildAt(rlayers.selectLayer, 2);
     app.stage.addChildAt(rlayers.lineLayer, 3);
-    app.stage.addChildAt(rlayers.selectLayer, 4);
+    app.stage.addChildAt(rlayers.fogLayer, 4);
     app.stage.addChildAt(rlayers.controllerLayer, 5);
     return rlayers
 }
@@ -154,8 +165,10 @@ const loadMap = async (mapName) => {
 }
 
 const drawMap = (mapView, container, rlayers) => {
-    container.addChild(mapView);
-    rlayers.basicLayer.attach(mapView)
+    const ms=new PIXI.Sprite(mapView)
+    ms.label= 'map'
+    container.addChild(ms);
+    rlayers.basicLayer.attach(ms)
 }
 
 const generateAnimSprite = async (unit, container, rlayers, mapPassiable) => {

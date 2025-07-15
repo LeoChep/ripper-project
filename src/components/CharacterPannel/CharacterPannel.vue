@@ -1,10 +1,10 @@
 <template>
-    <div class="character-panel">
+    <div v-show="show" class="character-panel">
         <div
             v-for="(character, index) in characters"
             :key="character.id"
             :class="['character-item', { selected: index === selectedIndex }]"
-            @click="selectCharacter(index)"
+            @click="selectCharacter(character)"
         >
             <img :src="getAvatar(character.unitTypeName)" :alt="character.name" class="avatar" />
             <div class="name">{{ character.name }}</div>
@@ -13,10 +13,14 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useCharacterStore } from '@/stores/characterStore'
 import { getUnitAvatar } from '@/utils/utils'
 const characters = ref([])
+const show=computed(() => {
+    const characterStore = useCharacterStore();
+    return characterStore.show;
+});
 onMounted(() => {
     // 可以在这里加载角色数据
     const characterStore = useCharacterStore();
@@ -28,8 +32,10 @@ const getAvatar = (unitTypeName) => {
 };
 const selectedIndex = ref(0)
 
-function selectCharacter(index) {
-    selectedIndex.value = index
+function selectCharacter(character) {
+ 
+     const characterStore = useCharacterStore();
+     characterStore.selectCharacter(character);
     // 可在此处发出事件通知父组件
 }
 </script>

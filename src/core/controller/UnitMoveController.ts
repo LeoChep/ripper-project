@@ -17,9 +17,9 @@ export function getMoveLabel(
   rlayers: RLayers
 ) {
   console.log("getMoveLabel", unit.initiative?.moveActionNumber);
-  if ((unit.initiative?.moveActionNumber ?? 0) <= 0) {
-    return;
-  }
+  // if ((unit.initiative?.moveActionNumber ?? 0) <= 0) {
+  //   return;
+  // }
   const boxWidth = 40;
   const boxHeight = 80;
   const label = new PIXI.Text({
