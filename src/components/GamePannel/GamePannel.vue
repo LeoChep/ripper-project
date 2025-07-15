@@ -107,6 +107,7 @@ onMounted(async () => {
     units.forEach((unit) => {
         if (unit.party === 'player') {
             characterStore.addCharacter(unit);
+            unit.stateMachinePack.startPlay();
         }
     });
     const characterOutCombatController = new CharacterOutCombatController(rlayers, container, mapPassiable)

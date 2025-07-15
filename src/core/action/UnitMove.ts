@@ -1,3 +1,4 @@
+import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
 import type { Unit } from "../units/Unit";
 import * as PIXI from "pixi.js";
 export const playerSelectMovement = (
@@ -6,6 +7,7 @@ export const playerSelectMovement = (
   container: PIXI.Container<PIXI.ContainerChild>,
   path: { [key: string]: { x: number; y: number } | null }
 ) => {
+  unit.state = "walk"; // 设置单位状态为行走
   const pos = event.data.global;
   // 计算点击位置相对于动画精灵的偏移
   const offsetX = pos.x - container.x;
@@ -56,6 +58,7 @@ export const moveMovement = async (
   // 反转路径
   pathWay.reverse();
   pathWay.push({ x: tileX, y: tileY });
+  pathWay.shift();
   //合并路径中的直线
   for (let i = pathWay.length - 2; i > 0; i--) {
     const prev = pathWay[i - 1];
@@ -69,91 +72,13 @@ export const moveMovement = async (
       pathWay.splice(i, 1);
     }
   }
-  // 执行移动
-  for (const step of pathWay) {
-    await girdMoveMovement(step.x, step.y, unit, tileSize);
-  }
-  const movePromise= new Promise<void>((resolve) => {
-     setTimeout(() => {
-      resolve()
-  }, 500);
-  })
-  await movePromise;
+  (unit.stateMachinePack.getMachine("walk") as WalkStateMachine)?.setPath?.(
+    pathWay
+  );
+  (unit.stateMachinePack.getMachine("walk") as WalkStateMachine)?.setTarget?.(
+    targetX,
+    targetY
+  );
+
 };
 
-export const girdMoveMovement = (
-  tileX: number,
-  tileY: number,
-  unit: Unit,
-  tileSize: number
-) => {
-  const spriteUnit = unit.animUnit;
-  if (!spriteUnit) {
-    console.error("动画精灵不存在");
-    return;
-  }
-  // 更新状态
-  spriteUnit.state = "walk";
-  // 计算实际的移动位置
-  const targetX = tileX * tileSize;
-  const targetY = tileY * tileSize;
-  // 设置动画精灵的新位置
-  const dx = targetX - spriteUnit.x;
-  const dy = targetY - spriteUnit.y;
-  //转向
-  let direction = unit.direction;
-  //设置朝向
-  if (Math.abs(dx) >= Math.abs(dy) && Math.abs(dx) > 0) {
-    // 水平移动
-    direction = dx > 0 ? 0 : 1; // 0向右, 1向左
-  } else if (Math.abs(dy) > Math.abs(dx)) {
-    // 垂直移动
-    direction = dy > 0 ? 2 : 3; // 2向下, 3向上
-  }
-
-  unit.direction = direction;
-
-  const moveFunc = () => {
-    console.log(`目标位置: (${targetX}, ${targetY})`);
-    
-    if (spriteUnit.x !== targetX || spriteUnit.y !== targetY) {
-      const dx = targetX - spriteUnit.x;
-      const dy = targetY - spriteUnit.y;
-
-      // 计算移动步长
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      const step = 32;
-      const stepX =
-        distance === 0 ? 0 : (dx / distance) * Math.min(step, Math.abs(dx));
-      const stepY =
-        distance === 0 ? 0 : (dy / distance) * Math.min(step, Math.abs(dy));
-      // 更新动画精灵的位置
-      spriteUnit.x += stepX;
-      spriteUnit.y += stepY;
-
-      // 如果接近目标位置，则直接设置到目标位置
-      if (
-        Math.abs(spriteUnit.x - targetX) < 1 &&
-        Math.abs(spriteUnit.y - targetY) < 1
-      ) {
-        spriteUnit.x = targetX;
-        spriteUnit.y = targetY;
-      }
-      unit.x = spriteUnit.x;
-      unit.y = spriteUnit.y;
-    }
-  };
-  const girdMovePromise = new Promise<void>((resolve) => {
-    const timer = setInterval(() => {
-      moveFunc();
-      if (
-        Math.abs(spriteUnit.x - targetX) < 1 &&
-        Math.abs(spriteUnit.y - targetY) < 1
-      ) {
-        clearInterval(timer);
-        resolve();
-      }
-    }, 80);
-  });
-  return girdMovePromise;
-};

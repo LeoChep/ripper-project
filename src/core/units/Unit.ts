@@ -1,3 +1,4 @@
+import { StateMachinePack } from './../stateMachine/StateMachinePack';
 
 import type { UnitAnimSpirite } from "../anim/UnitAnimSpirite";
 import type { Creature } from "@/core/units/Creature";
@@ -5,6 +6,7 @@ import type { InitiativeClass } from "../type/InitiativeClass";
 import type { AIInterface } from "../type/AIInterface";
 import { NormalAI } from "../ai/NormalAI";
 import type { Action } from "../type/Action";
+import { WalkStateMachine } from '../stateMachine/WalkStateMachine';
 
 export interface UnitOptions {
     id: number;
@@ -33,6 +35,8 @@ export class Unit  {
     height: number;
     animUnit : UnitAnimSpirite | undefined;
     initiative?:InitiativeClass ;
+    state: string = "idle"; // 状态，默认为 "idle"
+    stateMachinePack: StateMachinePack; // 状态机包
     creature:Creature | undefined; // 可能是 Creature 实例
     direction: number = 0; // 方向，0-3 分别表示上、右、下、左
     constructor(options: UnitOptions) {
@@ -47,6 +51,8 @@ export class Unit  {
         this.direction = options.direction 
         this.unitTypeName = options.unitTypeName;
         this.gid = options.gid;
+        this.stateMachinePack = new StateMachinePack(this); // 初始化状态机包
+        this.stateMachinePack.addMachine("walk", new WalkStateMachine(this)); // 添加默认的 AI 状态机
     }
 }
 

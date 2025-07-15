@@ -50,12 +50,13 @@ function selectCharacter(character) {
     background-size: 800px 100%;
     background-repeat: no-repeat;
     background-position: center top -10px;
-    padding: 20px 0px 20px 20px;
+    padding: 20px 0px 25px 20px;
     gap: 32px;
     z-index:10;
     left:0px;
-    top:550px;
+    top:450px;
     width:800px;
+    height: 170px;
 }
 
 .character-item {
@@ -65,9 +66,9 @@ function selectCharacter(character) {
     cursor: pointer;
     transition: transform 0.2s;
     padding: 0;
-    border-radius: 12px;
-    width: 80px;
-    height: 80px;
+    /* border-radius: 12px; */
+    width: 120px;
+    height: 120px;
     position: relative;
 }
 
@@ -80,7 +81,7 @@ function selectCharacter(character) {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 12px;
+    /* border-radius: 12px; */
     border: 2px solid #fff;
     margin-bottom: 0;
 }

@@ -54,12 +54,12 @@ export class FogSystem {
     const step = (2 * Math.PI) / 360; // 每度采样一次
     //打印时间
     const now = new Date();
-    console.log(
-      "开始计算可见区域",
-      now.toLocaleTimeString() +
-        "." +
-        now.getMilliseconds().toString().padStart(3, "0")
-    );
+    // console.log(
+    //   "开始计算可见区域",
+    //   now.toLocaleTimeString() +
+    //     "." +
+    //     now.getMilliseconds().toString().padStart(3, "0")
+    // );
     for (let angle = 0; angle < 2 * Math.PI; angle += step) {
       for (let r = 0; r < visionRadius * tileSize; r += 1) {
         const px = unitCenter.x + Math.cos(angle) * r;
@@ -162,7 +162,7 @@ export class FogSystem {
       const timePromise = new Promise<void>((resolve) => {
         setTimeout(() => {
           resolve();
-        }, 500);
+        }, 100);
       });
       const versionCaculatePromise = new Promise((resolve) => {
         const mask = this.caculteVersionByPlayers();
@@ -172,7 +172,7 @@ export class FogSystem {
         const visiblePoints = value[1] as any;
         if (visiblePoints) {
           //打孔
-          console.log("开始打孔");
+          // console.log("开始打孔");
           this.makeFogOfWar(visiblePoints);
         }
         darwFogFunc();

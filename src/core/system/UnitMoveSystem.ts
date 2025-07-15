@@ -1,10 +1,9 @@
 import type { TiledMap } from "../MapClass";
 import type { Unit } from "../units/Unit";
-import { girdMoveMovement, moveMovement, playerSelectMovement } from "../action/UnitMove";
-import * as PIXI from "pixi.js";
-import { generateWays } from "../utils/PathfinderUtil";
+
+
 import { segmentsIntersect } from "../utils/MathUtil";
-import { useInitiativeStore } from "@/stores/initiativeStore";
+
 
 
 export const checkPassiable = (
