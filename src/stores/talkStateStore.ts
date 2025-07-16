@@ -6,25 +6,26 @@ export const useTalkStateStore = defineStore("talkSteteStore", () => {
     input: "",
     content: "",
     endFlag: false,
-    inputingTimer: null as any ,
+    inputingTimer: null as any,
+    onCg: false,
   });
-  const end = ref((res:any) => {});
-  const count=ref(0)
+  const end = ref((res: any) => {});
+  const count = ref(0);
   const enterEnd = () => {
     count.value++;
-    console.log('count',count.value)
+    console.log("count", count.value);
     if (!talkState.value.endFlag) {
       window.clearInterval(talkState.value.inputingTimer);
       talkState.value.input = talkState.value.content;
-      console.log(talkState.value)
+      console.log(talkState.value);
       talkState.value.endFlag = true;
     } else {
       end.value(true);
-      talkState.value.endFlag= false,
-      talkState.value.inputingTimer=null as any ;
+      (talkState.value.endFlag = false),
+        (talkState.value.inputingTimer = null as any);
       talkState.value.input = "";
       talkState.value.content = "";
-      end.value =()=>{}
+      end.value = () => {};
     }
   };
   const speak = (content: string) => {
@@ -46,5 +47,11 @@ export const useTalkStateStore = defineStore("talkSteteStore", () => {
       talkState.value.inputingTimer = timer;
     });
   };
-  return { talkState, speak, enterEnd };
+  const CGstart = () => {
+    talkState.value.onCg = true;
+  };
+  const CGEnd = () => {
+    talkState.value.onCg = false;
+  };
+  return { talkState, speak, enterEnd,CGstart,CGEnd };
 });

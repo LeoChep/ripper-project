@@ -1,7 +1,12 @@
+
 export const getUnitAvatar = (unitTypeName: string) => {
   return new URL(`../assets/${unitTypeName}/avatar.png`, import.meta.url)
     .href;
 };
+export const getDoorSvg=(state:string)=>{
+    return new URL(`../assets/door/door-${state}.svg`, import.meta.url)
+    .href;
+}
 export const getMapAssetFile = (mapName: string) => {
   return new URL(`../assets/map/${mapName}.png`, import.meta.url).href;
 };

@@ -1,6 +1,6 @@
 import { StateMachinePack } from './../stateMachine/StateMachinePack';
 
-import type { UnitAnimSpirite } from "../anim/UnitAnimSpirite";
+import type { UnitAnimSpirite } from "../anim/UnitAnimSprite";
 import type { Creature } from "@/core/units/Creature";
 import type { InitiativeClass } from "../type/InitiativeClass";
 import type { AIInterface } from "../type/AIInterface";

@@ -12,13 +12,13 @@
 import CreatureInfo from '../CreatureInfo.vue'
 import TalkPannel from '../TalkPannel/TalkPannel.vue'
 import { ref, onMounted } from 'vue'
-import { getJsonFile, getMapAssetFile, getAnimMetaJsonFile, getAnimActionSpriteJsonFile, getAnimSpriteImgUrl } from '@/utils/utils'
+import { getJsonFile, getMapAssetFile, getAnimMetaJsonFile, getAnimActionSpriteJsonFile, getAnimSpriteImgUrl, getDoorSvg } from '@/utils/utils'
 import * as InitiativeController from "@/core/system/InitiativeSystem"
 import * as PIXI from 'pixi.js'
 import { UnitRightEvent } from '@/core/controller/UnitRightEventController'
 import { TiledMap } from '@/core/MapClass'
-import { UnitAnimSpirite } from '@/core/anim/UnitAnimSpirite'
-import { Unit, createUnitsFromMapSprites } from '@/core/units/Unit'
+import { UnitAnimSpirite } from '@/core/anim/UnitAnimSprite'
+import { createUnitsFromMapSprites } from '@/core/units/Unit'
 import { AnimMetaJson } from '@/core/anim/AnimMetaJson'
 import { createCreature } from '@/core/units/Creature'
 import { setContainer, setLayer } from '@/stores/container'
@@ -28,6 +28,10 @@ import { d1 } from '@/drama/d1'
 import CharacterPannel from '../CharacterPannel/CharacterPannel.vue'
 import { useCharacterStore } from '@/stores/characterStore'
 import { CharacterOutCombatController } from '@/core/controller/CharacterOutCombatController'
+import { createDoorFromDoorObj } from '@/core/units/Door'
+import { createDoorAnimSpriteFromDoor } from '@/core/anim/DoorAnimSprite'
+import * as envSetting  from '@/core/envSetting'
+import { golbalSetting } from '@/core/golbalSetting'
 const appSetting = {
     width: 800,
     height: 600,
@@ -51,18 +55,17 @@ onMounted(async () => {
 
     document.getElementById("game-pannel").appendChild(app.canvas);
 
-
-
     //加载地图
     const mapPassiable = await loadMap('A')
 
     //初始化容器
     const rlayers = createRenderLayers(app)
     const container = createContainer(app, rlayers)
+    container.sortableChildren = true;
     setContainer(container);
     setLayer(rlayers);
     //绘制迷雾
-    drawFog(mapPassiable, rlayers, container)
+    drawFog(mapPassiable, rlayers, container,app)
     //绘制地图
     const mapView = mapPassiable.textures;
     drawMap(mapView, container, rlayers);
@@ -80,8 +83,14 @@ onMounted(async () => {
         await Promise.all(createEndPromise);
     mapPassiable.sprites = units;
 
-
-
+    //创建门
+    const doors = mapPassiable.doors;
+    doors.forEach(async (obj) => {
+        const door=createDoorFromDoorObj(obj);
+        const doorSprite = await createDoorAnimSpriteFromDoor(door)
+        container.addChild(doorSprite);
+        rlayers.controllerLayer.attach(doorSprite);
+    }) 
 
 
     //绘制格子
@@ -112,15 +121,18 @@ onMounted(async () => {
     });
     const characterOutCombatController = new CharacterOutCombatController(rlayers, container, mapPassiable)
     characterStore.setCharacterOutCombatController(characterOutCombatController);
-    d1.start();
-
+    CharacterOutCombatController.instance = characterOutCombatController;
+    d1.map = mapPassiable;
+    // d1.start();
+    console.log('app',app.stage)
 
 
 })
 
-const drawFog = (mapPassiable, rlayers, container, unit) => {
+const drawFog = (mapPassiable, rlayers, container,app) => {
     //增加遮罩
-    const fogSystem = FogSystem.initFog(mapPassiable, rlayers, container);
+    console.log('drawFog', app)
+    const fogSystem = FogSystem.initFog(mapPassiable, container,app);
     fogSystem.autoDraw();
 }
 
@@ -140,6 +152,14 @@ const createRenderLayers = (app) => {
     app.stage.addChildAt(rlayers.lineLayer, 3);
     app.stage.addChildAt(rlayers.fogLayer, 4);
     app.stage.addChildAt(rlayers.controllerLayer, 5);
+    rlayers.basicLayer.label = 'basicLayer';
+    rlayers.spriteLayer.label = 'spriteLayer';
+    rlayers.selectLayer.label = 'selectLayer';
+    rlayers.lineLayer.label = 'lineLayer';
+    rlayers.fogLayer.label = 'fogLayer';
+    rlayers.controllerLayer.label = 'controllerLayer';
+        
+
     return rlayers
 }
 
@@ -148,12 +168,25 @@ const createContainer = (app, rlayers) => {
     const container = new PIXI.Container();
     // 创建一个 800x600 的矩形图形作为底盘
     const rect = new PIXI.Graphics();
-    rect.rect(0, 0, 800, 600);
+    rect.rect(0, 0, 20000, 20000);
     rect.fill({ color: 'black' }); // 黑色填充
     container.addChild(rect);
     container.eventMode = 'static';
     rlayers.basicLayer.attach(container);
     app.stage.addChild(container);
+    const spriteContainer = new PIXI.Container();
+    const mapContainer = new PIXI.Container();
+    spriteContainer.label = 'spriteContainer';
+    mapContainer.label = 'mapContainer';
+    container.addChild(spriteContainer);
+    container.addChild(mapContainer);
+    spriteContainer.zIndex = envSetting.zIndexSetting.spriteZIndex;
+    mapContainer.zIndex = envSetting.zIndexSetting.mapZindex;
+    // spriteContainer.eventMode = 'none';
+    // mapContainer.eventMode = 'none';  
+    // 设置全局变量
+    golbalSetting.spriteContainer = spriteContainer;
+    golbalSetting.mapContainer = mapContainer;
     return container
 }
 
@@ -166,9 +199,10 @@ const loadMap = async (mapName) => {
 }
 
 const drawMap = (mapView, container, rlayers) => {
-    const ms=new PIXI.Sprite(mapView)
-    ms.label= 'map'
-    container.addChild(ms);
+    const ms = new PIXI.Sprite(mapView)
+    ms.zIndex = envSetting.zIndexSetting.mapZindex;
+    ms.label = 'map'
+    golbalSetting.mapContainer.addChild(ms);
     rlayers.basicLayer.attach(ms)
 }
 
@@ -176,10 +210,10 @@ const generateAnimSprite = async (unit, container, rlayers, mapPassiable) => {
 
     const animSpriteUnit = await createAnimSpriteUnits(unit.unitTypeName, unit);
     const unitCreature = await createUnitCreature(unit.unitTypeName, unit);
-    // const animSpriteUnit = await createAnimSpriteUnit(unit.unitTypeName);
+
     unit.animUnit = animSpriteUnit;
+    animSpriteUnit.zIndex=envSetting.zIndexSetting.spriteZIndex;
     unit.creature = unitCreature;
-    //unit.direction = 2;
     console.log('generateAnimSprite', unit, animSpriteUnit)
     addAnimSpriteUnit(unit, container, rlayers, mapPassiable);
     animSpriteUnit.x = Math.round(unit.x / 64) * 64;
@@ -195,8 +229,7 @@ const createUnitCreature = async (unitTypeName, unit) => {
         console.error(`Creature JSON file for ${unitTypeName} not found.`);
         return null;
     }
-    // console.log('createUnitCreature', unitTypeName, jsonStr)
-    // const jsonObj = JSON.parse(jsonStr);
+
     const creature = createCreature(json);
     return creature;
 }
@@ -226,7 +259,6 @@ const createAnimSpriteUnits = async (unitTypeName, unit) => {
 
     })
     // spritesheet is ready to use!
-
     return animSpriteUnit;
 }
 
@@ -235,8 +267,10 @@ const addAnimSpriteUnit = (unit, container, rlayers, mapPassiable) => {
     const animSpriteUnit = unit.animUnit;
     console.log('addAnimSpriteUnit', unit)
     rlayers.spriteLayer.attach(animSpriteUnit);
-    animSpriteUnit.eventMode = 'dynamic';
+    // animSpriteUnit.zIndex=20;
+    animSpriteUnit.eventMode = 'static';
     animSpriteUnit.on('rightdown', (event) => {
+        console.log('rightdown', unit)
         UnitRightEvent(event, unit, container, rlayers, mapPassiable);
     });
     animSpriteUnit.on('click', (event) => {
@@ -245,7 +279,7 @@ const addAnimSpriteUnit = (unit, container, rlayers, mapPassiable) => {
             selectedCreature.value = unit.creature
         }
     });
-    container.addChild(animSpriteUnit);
+    golbalSetting.spriteContainer.addChild(animSpriteUnit);
 }
 
 const addListenKeyboard = (container) => {

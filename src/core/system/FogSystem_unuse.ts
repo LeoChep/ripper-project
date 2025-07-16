@@ -5,38 +5,30 @@ import type { Unit } from "../units/Unit";
 import { segmentsIntersect } from "../utils/MathUtil";
 import { generateWays } from "../utils/PathfinderUtil";
 import * as PIXI from "pixi.js";
+import { golbalSetting } from "../golbalSetting";
 const tileSize = 64;
 export class FogSystem {
   mapPassiable: TiledMap;
-  rlayers: {
-    basicLayer: PIXI.IRenderLayer;
-    spriteLayer: PIXI.IRenderLayer;
-    lineLayer: any;
-    selectLayer: PIXI.IRenderLayer;
-    fogLayer: PIXI.IRenderLayer;
-    controllerLayer: PIXI.IRenderLayer;
-  };
+
   containers: PIXI.Container<PIXI.ContainerChild>;
   fog: PIXI.Graphics | null = null;
+  mask: PIXI.Container | null = null;
+  app: PIXI.Application;
   constructor(
     mapPassiable: TiledMap,
-    rlayers: {
-      basicLayer: PIXI.IRenderLayer;
-      spriteLayer: PIXI.IRenderLayer;
-      lineLayer: PIXI.IRenderLayer;
-      fogLayer: PIXI.IRenderLayer;
-      selectLayer: PIXI.IRenderLayer;
-      controllerLayer: PIXI.IRenderLayer;
-    },
-    containers: PIXI.Container<PIXI.ContainerChild>
+    containers: PIXI.Container<PIXI.ContainerChild>,
+    app: PIXI.Application
   ) {
     this.mapPassiable = mapPassiable;
-    this.rlayers = rlayers;
+
     this.containers = containers;
+    this.app = app;
+    console.log("app", app);
   }
   caculteVersionByUnit = (unit: Unit) => {
     const mapPassiable = this.mapPassiable;
     const edge = mapPassiable.edges;
+    // console.log("caculteVersionByUnit", edge);
 
     // 计算单位的视野范围
     const visionRadius = 20; // 假设单位有vision属性，单位为格
@@ -51,17 +43,12 @@ export class FogSystem {
     const visiblePoints: {
       [key: string]: { x: number; y: number } | null;
     } = {};
-    const step = (2 * Math.PI) / 360; // 每度采样一次
+    const step = (3 * Math.PI) / 360; // 每度采样一次
     //打印时间
     const now = new Date();
-    // console.log(
-    //   "开始计算可见区域",
-    //   now.toLocaleTimeString() +
-    //     "." +
-    //     now.getMilliseconds().toString().padStart(3, "0")
-    // );
+
     for (let angle = 0; angle < 2 * Math.PI; angle += step) {
-      for (let r = 0; r < visionRadius * tileSize; r += 1) {
+      for (let r = 0; r < visionRadius * tileSize; r += 5) {
         const px = unitCenter.x + Math.cos(angle) * r;
         const py = unitCenter.y + Math.sin(angle) * r;
 
@@ -69,6 +56,7 @@ export class FogSystem {
         let blocked = false;
         for (const wall of edge) {
           if (
+            !wall.onlyBlock &&
             wall.useable == true &&
             segmentsIntersect(
               unitCenter.x,
@@ -126,35 +114,46 @@ export class FogSystem {
   ) => {
     const mapPassiable = this.mapPassiable;
     // 创建一个覆盖整个地图的黑色层
-    const mapWidth = mapPassiable.width * tileSize + 200;
-    const mapHeight = mapPassiable.height * tileSize + 200;
-    if (this.fog) {
-      this.fog.clear();
+
+    if (this.mask) {
+      this.mask.children.forEach((child) => {
+        if (child instanceof PIXI.Graphics) {
+          child.destroy();
+        }
+      });
+      this.mask.removeChildren();
     } else {
-      this.fog = new PIXI.Graphics();
-      this.fog.eventMode = "static"; // 令遮罩不影响事件
-      const fogOfWar = this.fog;
-
-      fogOfWar.zIndex = 1000; // 确保fog在最上层
-
-
-      this.containers.addChild(this.fog);
-      this.rlayers.fogLayer.attach(this.fog);
+      this.mask = new PIXI.Container();
+      this.containers.addChild(this.mask);
     }
-    const fogOfWar = this.fog;
-    fogOfWar.rect(-100, -100, mapWidth, mapHeight);
-    fogOfWar.fill({ color: 0x000000, alpha: 1 });
     const visiblePointsArr = data;
+    const bigVisition = new PIXI.Graphics();
     if (visiblePointsArr.length > 0) {
-      const pointData = [] as number[];
+      let i = 1;
+      const visitions = this.mask;
       visiblePointsArr.forEach((visiblePoints) => {
+        const pointData = [] as number[];
+        i++;
         for (const pt of Object.values(visiblePoints.visiblePoints)) {
           if (pt) {
             pointData.push(pt.x, pt.y);
           }
         }
-        fogOfWar.poly(pointData).cut();
+        bigVisition.poly(pointData).fill({ color: 0xffffff, alpha: 1 });
       });
+      visitions.addChild(bigVisition);
+      if (golbalSetting.mapContainer) {
+        golbalSetting.mapContainer.children.forEach((child) => {
+                child.setMask({mask:bigVisition});
+        });
+      }
+      if (golbalSetting.spriteContainer) {
+        golbalSetting.spriteContainer.children.forEach((child) => {
+          child.setMask({mask:bigVisition});
+        });
+      }
+      this.mask.eventMode='none'
+ 
     }
   };
   autoDraw() {
@@ -172,7 +171,6 @@ export class FogSystem {
         const visiblePoints = value[1] as any;
         if (visiblePoints) {
           //打孔
-          // console.log("开始打孔");
           this.makeFogOfWar(visiblePoints);
         }
         darwFogFunc();
@@ -182,28 +180,11 @@ export class FogSystem {
   }
   static initFog(
     mapPassiable: TiledMap,
-    rlayers: {
-      basicLayer: PIXI.IRenderLayer;
-      spriteLayer: PIXI.IRenderLayer;
-      lineLayer: PIXI.IRenderLayer;
-      fogLayer: PIXI.IRenderLayer;
-      selectLayer: PIXI.IRenderLayer;
-      controllerLayer: PIXI.IRenderLayer;
-    },
-    containers: PIXI.Container<PIXI.ContainerChild>
+    containers: PIXI.Container<PIXI.ContainerChild>,
+    app: PIXI.Application
   ) {
-    const fogSystem = new FogSystem(mapPassiable, rlayers, containers);
+    const fogSystem = new FogSystem(mapPassiable, containers, app);
     // 创建一个覆盖整个地图的黑色层
-    const mapWidth = mapPassiable.width * tileSize + 200;
-    const mapHeight = mapPassiable.height * tileSize + 200;
-    const fogOfWar = new PIXI.Graphics();
-    fogOfWar.zIndex = 1000; //
-
-    fogSystem.fog = fogOfWar;
-    fogSystem.containers.addChild(fogOfWar);
-    fogSystem.rlayers.fogLayer.attach(fogOfWar);
-    fogOfWar.rect(-100, -100, mapWidth, mapHeight);
-    fogOfWar.fill({ color: 0x000000, alpha: 1 });
 
     return fogSystem;
   }

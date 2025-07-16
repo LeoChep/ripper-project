@@ -1,11 +1,7 @@
 <template>
     <div v-show="show" class="character-panel">
-        <div
-            v-for="(character, index) in characters"
-            :key="character.id"
-            :class="['character-item', { selected: index === selectedIndex }]"
-            @click="selectCharacter(character)"
-        >
+        <div v-for="(character, index) in characters" :key="character.id"
+            :class="['character-item']" @click="selectCharacter(character,index)">
             <img :src="getAvatar(character.unitTypeName)" :alt="character.name" class="avatar" />
             <div class="name">{{ character.name }}</div>
         </div>
@@ -16,14 +12,15 @@
 import { computed, onMounted, ref } from 'vue'
 import { useCharacterStore } from '@/stores/characterStore'
 import { getUnitAvatar } from '@/utils/utils'
+import { CharacterOutCombatController } from '@/core/controller/CharacterOutCombatController';
 const characters = ref([])
-const show=computed(() => {
+const show = computed(() => {
     const characterStore = useCharacterStore();
     return characterStore.show;
 });
+const characterStore = useCharacterStore();
 onMounted(() => {
     // 可以在这里加载角色数据
-    const characterStore = useCharacterStore();
     characters.value = characterStore.characters;
 });
 // 示例角色数据，可根据实际需求替换
@@ -32,11 +29,11 @@ const getAvatar = (unitTypeName) => {
 };
 const selectedIndex = ref(0)
 
-function selectCharacter(character) {
- 
-     const characterStore = useCharacterStore();
-     characterStore.selectCharacter(character);
-    // 可在此处发出事件通知父组件
+function selectCharacter(character,index) {
+    console.log('选中角色:', character);
+    CharacterOutCombatController.curser=character.id;
+    //CharacterOutCombatController.selectedCharacter = character;
+    selectedIndex.value = index
 }
 </script>
 
@@ -52,10 +49,10 @@ function selectCharacter(character) {
     background-position: center top -10px;
     padding: 20px 0px 25px 20px;
     gap: 32px;
-    z-index:10;
-    left:0px;
-    top:450px;
-    width:800px;
+    z-index: 10;
+    left: 0px;
+    top: 450px;
+    width: 800px;
     height: 170px;
 }
 

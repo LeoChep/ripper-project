@@ -16,7 +16,9 @@ export interface TiledMapObject {
   name: string;
   polygon?: Array<{ x: number; y: number }>;
   polyline?: Array<{ x: number; y: number }>;
-
+  onlyVisiton?: string; // 是否只可见
+  onlyBlock?: string; // 是否只阻挡
+  properties: any[];
   rotation: number;
   type: string;
   visible: boolean;
@@ -80,7 +82,16 @@ export class TiledMap {
   type: string;
   version: string;
   width: number;
-  edges: Array<{ x1: number; y1: number; x2: number; y2: number ;id:number;useable:boolean}> = [];
+  edges: Array<{
+    onlyBlock: boolean;
+    onlyVisition: boolean;
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+    id: number;
+    useable: boolean;
+  }> = [];
   textures?: PIXI.Sprite;
   sprites: any[] = [];
   doors: any[] = [];
@@ -115,7 +126,9 @@ export class TiledMap {
   initEdges() {
     const layers = this.layers;
     const objectsGroups = layers.filter(
-      (layer) => layer.type === "objectgroup" && (layer.name === "wall" || layer.name === "door")
+      (layer) =>
+        layer.type === "objectgroup" &&
+        (layer.name === "wall" || layer.name === "door")
     );
     const edges: {
       x1: number;
@@ -124,10 +137,29 @@ export class TiledMap {
       y2: number;
       id: number;
       useable: boolean;
+      onlyVisition: boolean;
+      onlyBlock: boolean;
     }[] = [];
     objectsGroups.forEach((objectsGroup) => {
       if (objectsGroup && objectsGroup.objects) {
         objectsGroup.objects.forEach((object) => {
+          const onlyVisitionProp = object.properties?.find(
+            (p: any) => p.name === "onlyVisition"
+          );
+          const onlyBlockProp = object.properties?.find(
+            (p: any) => p.name === "onlyBlock"
+          );
+          console.log(
+            "objectFOwal",
+            onlyVisitionProp && onlyVisitionProp.value === "true"
+              ? true
+              : false,
+            onlyBlockProp && onlyBlockProp.value === "true"
+                    ? true
+                    : false,
+            object
+          );
+
           // 检查对象是否有polygon属性
           let polys = null;
           let type = null;
@@ -148,16 +180,25 @@ export class TiledMap {
             for (let i = 0; i < polys.length - 1; i++) {
               const start = polys[i];
               const end = polys[i + 1];
-              const edge={
+              const edge = {
                 x1: start.x + object.x,
                 y1: start.y + object.y,
                 x2: end.x + object.x,
                 y2: end.y + object.y,
                 id: id,
                 useable: true,
-              }
+                onlyVisition:
+                  onlyVisitionProp && onlyVisitionProp.value === "true"
+                    ? true
+                    : false,
+                onlyBlock:
+                  onlyBlockProp && onlyBlockProp.value === "true"
+                    ? true
+                    : false,
+              };
               edges.push(edge);
               if (objectsGroup.name === "door") {
+                // edge.onlyBlock=true;
                 this.doors.push(edge);
               }
             }
@@ -176,6 +217,14 @@ export class TiledMap {
                 y2: end.y + object.y,
                 id: id,
                 useable: true,
+                onlyVisition:
+                  onlyVisitionProp && onlyVisitionProp.value === "true"
+                    ? true
+                    : false,
+                onlyBlock:
+                  onlyBlockProp && onlyBlockProp.value === "true"
+                    ? true
+                    : false,
               });
             }
           }
@@ -184,6 +233,7 @@ export class TiledMap {
         console.error("No passable objects found in the map.");
       }
     });
+    console.log("init edges", edges);
     this.edges = edges;
   }
 }

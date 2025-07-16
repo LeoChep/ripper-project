@@ -17,6 +17,7 @@ export const UnitRightEvent = (
   rlayers: RLayers,
   mapPassiable: TiledMap | null
 ) => {
+  console.log("UnitRightEvent", event, unit);
   event.stopPropagation();
   //判断控制权
   const controlable = InitiativeSystem.checkIsTurn(unit);

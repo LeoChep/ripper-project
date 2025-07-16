@@ -1,4 +1,3 @@
-import type { C } from 'vitest/dist/chunks/environment.d.cL3nLXbE.js';
 
 export interface CreatureAttack {
     name: string;
