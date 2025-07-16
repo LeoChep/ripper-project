@@ -7,7 +7,7 @@ export const playerSelectMovement = (
   container: PIXI.Container<PIXI.ContainerChild>,
   path: { [key: string]: { x: number; y: number } | null }
 ) => {
-  unit.state = "walk"; // 设置单位状态为行走
+ 
   const pos = event.data.global;
   // 计算点击位置相对于动画精灵的偏移
   const offsetX = pos.x - container.x;
@@ -26,6 +26,7 @@ export const moveMovement = async (
   unit: Unit,
   path: { [key: string]: { x: number; y: number } | null }
 ) => {
+   unit.state = "walk"; // 设置单位状态为行走
   const tileSize = 64; // 格子大小
   //计算出动画精灵所在的格子
   const spriteUnit = unit.animUnit;

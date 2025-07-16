@@ -798,34 +798,6 @@
                 {
                  "gid":739,
                  "height":64,
-                 "id":48,
-                 "name":"wolf2",
-                 "properties":[
-                        {
-                         "name":"name",
-                         "type":"string",
-                         "value":"wolf2"
-                        }, 
-                        {
-                         "name":"party",
-                         "type":"string",
-                         "value":"player"
-                        }, 
-                        {
-                         "name":"unitTypeName",
-                         "type":"string",
-                         "value":"wolf"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":64,
-                 "x":449,
-                 "y":328
-                }, 
-                {
-                 "gid":739,
-                 "height":64,
                  "id":50,
                  "name":"wolf",
                  "properties":[
@@ -850,6 +822,34 @@
                  "width":64,
                  "x":373,
                  "y":187
+                }, 
+                {
+                 "gid":812,
+                 "height":64,
+                 "id":51,
+                 "name":"manFighter",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"manFighter"
+                        }, 
+                        {
+                         "name":"party",
+                         "type":"string",
+                         "value":"player"
+                        }, 
+                        {
+                         "name":"unitTypeName",
+                         "type":"string",
+                         "value":"manFighter"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":450,
+                 "y":190
                 }],
          "offsetx":4,
          "offsety":0,
@@ -860,7 +860,7 @@
          "y":0
         }],
  "nextlayerid":5,
- "nextobjectid":51,
+ "nextobjectid":52,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
@@ -896,6 +896,19 @@
          "columns":9,
          "firstgid":757,
          "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/skeleton\/anim\/standard\/walk.png",
+         "imageheight":256,
+         "imagewidth":576,
+         "margin":0,
+         "name":"walk",
+         "spacing":0,
+         "tilecount":36,
+         "tileheight":64,
+         "tilewidth":64
+        }, 
+        {
+         "columns":9,
+         "firstgid":793,
+         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/manFighter\/anim\/standard\/walk.png",
          "imageheight":256,
          "imagewidth":576,
          "margin":0,

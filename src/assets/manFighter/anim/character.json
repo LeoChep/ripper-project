@@ -1,0 +1,272 @@
+{
+  "bodyTypeName": "male",
+  "url": "https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/#?body=Body_color_light&head=Human_male_light&armour=Leather_leather&cape=none_Solid&backpack=none_Backpack&backpack_straps=none_Straps&quiver=none_Quiver&cargo=none_Jetpack_fins&legs=Leggings_leather&shoes=Basic_Shoes_black&shoulders=Leather_leather&hair=Plain_carrot&hat=none_Leather_Cap&hat_accessory=none_Leather_Cap_Feather&visor=none_Round_visor_raised&neck=none_Bowtie&headcover=none_Kerchief&hairtie=none_Hair_Tie&bandana=none_Bandana&bandana_overlay=none_Skull_Bandana_Overlay&mustache=none_Mustache&facial_eyes=none_Glasses&accessory=none_Helmet_wings&arms=Armour_steel&shield=Shield_round_silver&weapon=Arming_Sword_bronze",
+  "spritesheets": "https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/spritesheets/",
+  "version": 1,
+  "datetime": "2025/7/17 03:09:41",
+  "credits": [
+    {
+      "fileName": "body/bodies/male/light.png",
+      "licenses": "OGA-BY 3.0,CC-BY-SA 3.0,GPL 3.0",
+      "authors": "bluecarrot16,JaidynReiman,Benjamin K. Smith (BenCreating),Evert,Eliza Wyatt (ElizaWy),TheraHedwig,MuffinElZangano,Durrani,Johannes Sjölund (wulax),Stephen Challener (Redshrike)",
+      "urls": "https://opengameart.org/content/liberated-pixel-cup-lpc-base-assets-sprites-map-tiles,https://opengameart.org/content/lpc-medieval-fantasy-character-sprites,https://opengameart.org/content/lpc-male-jumping-animation-by-durrani,https://opengameart.org/content/lpc-runcycle-and-diagonal-walkcycle,https://opengameart.org/content/lpc-revised-character-basics,https://opengameart.org/content/lpc-be-seated,https://opengameart.org/content/lpc-runcycle-for-male-muscular-and-pregnant-character-bases-with-modular-heads,https://opengameart.org/content/lpc-jump-expanded,https://opengameart.org/content/lpc-character-bases",
+      "notes": "see details at https://opengameart.org/content/lpc-character-bases; 'Thick' Male Revised Run/Climb by JaidynReiman (based on ElizaWy's LPC Revised)"
+    },
+    {
+      "fileName": "head/heads/human/male/light.png",
+      "licenses": "OGA-BY 3.0,CC-BY-SA 3.0,GPL 3.0",
+      "authors": "bluecarrot16,Benjamin K. Smith (BenCreating),Stephen Challener (Redshrike)",
+      "urls": "https://opengameart.org/content/liberated-pixel-cup-lpc-base-assets-sprites-map-tiles,https://opengameart.org/content/lpc-character-bases",
+      "notes": "original head by Redshrike, tweaks by BenCreating, modular version by bluecarrot16"
+    },
+    {
+      "fileName": "hair/plain/adult/carrot.png",
+      "licenses": "OGA-BY 3.0,CC-BY-SA 3.0,GPL 3.0",
+      "authors": "JaidynReiman,Manuel Riecke (MrBeast),Joe White",
+      "urls": "https://opengameart.org/content/liberated-pixel-cup-lpc-base-assets-sprites-map-tiles,https://opengameart.org/content/ponytail-and-plain-hairstyles,https://opengameart.org/content/lpc-expanded-hair",
+      "notes": ""
+    },
+    {
+      "fileName": "shoulders/leather/male/leather.png",
+      "licenses": "OGA-BY 3.0,CC-BY-SA 3.0,GPL 3.0",
+      "authors": "Matthew Krohn (makrohn),Johannes Sjölund (wulax)",
+      "urls": "https://opengameart.org/content/lpc-medieval-fantasy-character-sprites,http://opengameart.org/content/lpc-clothing-updates",
+      "notes": "adapted to female base by makrohn, adapted to v3 bases by bluecarrot16"
+    },
+    {
+      "fileName": "arms/armour/plate/male/steel.png",
+      "licenses": "OGA-BY 3.0,CC-BY-SA 3.0,GPL 3.0",
+      "authors": "Michael Whitlock (bigbeargames),Matthew Krohn (makrohn),Johannes Sjölund (wulax)",
+      "urls": "https://opengameart.org/content/lpc-medieval-fantasy-character-sprites,http://opengameart.org/content/lpc-clothing-updates",
+      "notes": "original by wulax, recolors by bigbeargames; adapted to v3 bases and further recolors by bluecarrot16"
+    },
+    {
+      "fileName": "torso/armour/leather/male/leather.png",
+      "licenses": "OGA-BY 3.0,CC-BY-SA 3.0,GPL 3.0",
+      "authors": "Johannes Sjölund (wulax)",
+      "urls": "https://opengameart.org/content/lpc-medieval-fantasy-character-sprites,http://opengameart.org/content/lpc-clothing-updates",
+      "notes": "adapted to v3 bases by bluecarrot16"
+    },
+    {
+      "fileName": "legs/leggings/male/leather.png",
+      "licenses": "OGA-BY 3.0,GPL 3.0",
+      "authors": "bluecarrot16,ElizaWy,JaidynReiman,Mandi Paugh,William.Thompsonj,Johannes Sjölund (wulax),Stephen Challener (Redshrike)",
+      "urls": "https://github.com/ElizaWy/LPC/tree/main/Characters/Clothing,https://opengameart.org/content/lpc-expanded-pants",
+      "notes": "Original bases by Redshrike, thrust/shoot bases by Wulax, original overalls by ElizaWy, base animations adapted from v3 overalls by bluecarrot16, leggings by JaidynReiman"
+    },
+    {
+      "fileName": "feet/shoes/basic/male/black.png",
+      "licenses": "OGA-BY 3.0,CC-BY-SA 3.0,GPL 3.0",
+      "authors": "JaidynReiman,bluecarrot16,Johannes Sjölund (wulax)",
+      "urls": "https://opengameart.org/content/lpc-medieval-fantasy-character-sprites,http://opengameart.org/content/lpc-clothing-updates,https://opengameart.org/content/lpc-expanded-socks-shoes",
+      "notes": "original by wulax, edited for v3 base by bluecarrot16, Jump/Sit/Emote/Run/Revised Combat by JaidynReiman"
+    },
+    {
+      "fileName": "shield/male/round_silver.png",
+      "licenses": "CC-BY-SA 3.0,GPL 3.0",
+      "authors": "Johannes Sjölund (wulax),Michael Whitlock (bigbeargames),DarkwallLKE,Tuomo Untinen (reemax)",
+      "urls": "https://opengameart.org/content/lpc-medieval-fantasy-character-sprites,https://opengameart.org/content/lpc-shields-pack",
+      "notes": "?"
+    },
+    {
+      "fileName": "weapon/sword/arming/universal/fg/bronze.png",
+      "licenses": "OGA-BY 3.0",
+      "authors": "ElizaWy; walk and down by JaidynReiman",
+      "urls": "https://github.com/ElizaWy/LPC/tree/main/Characters/Props/Sword%2001%20-%20Arming%20Sword,https://opengameart.org/content/lpc-expanded-sit-run-jump-more",
+      "notes": ""
+    },
+    {
+      "fileName": "weapon/sword/arming/universal/bg/bronze.png",
+      "licenses": "OGA-BY 3.0",
+      "authors": "ElizaWy; walk and down by JaidynReiman",
+      "urls": "https://github.com/ElizaWy/LPC/tree/main/Characters/Props/Sword%2001%20-%20Arming%20Sword,https://opengameart.org/content/lpc-expanded-sit-run-jump-more",
+      "notes": ""
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_slash/bg/bronze.png",
+      "licenses": "OGA-BY 3.0",
+      "authors": "ElizaWy; walk and down by JaidynReiman",
+      "urls": "https://github.com/ElizaWy/LPC/tree/main/Characters/Props/Sword%2001%20-%20Arming%20Sword,https://opengameart.org/content/lpc-expanded-sit-run-jump-more",
+      "notes": ""
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_slash/fg/bronze.png",
+      "licenses": "OGA-BY 3.0",
+      "authors": "ElizaWy; walk and down by JaidynReiman",
+      "urls": "https://github.com/ElizaWy/LPC/tree/main/Characters/Props/Sword%2001%20-%20Arming%20Sword,https://opengameart.org/content/lpc-expanded-sit-run-jump-more",
+      "notes": ""
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_backslash/bg/bronze.png",
+      "licenses": "OGA-BY 3.0",
+      "authors": "ElizaWy; walk and down by JaidynReiman",
+      "urls": "https://github.com/ElizaWy/LPC/tree/main/Characters/Props/Sword%2001%20-%20Arming%20Sword,https://opengameart.org/content/lpc-expanded-sit-run-jump-more",
+      "notes": ""
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_backslash/fg/bronze.png",
+      "licenses": "OGA-BY 3.0",
+      "authors": "ElizaWy; walk and down by JaidynReiman",
+      "urls": "https://github.com/ElizaWy/LPC/tree/main/Characters/Props/Sword%2001%20-%20Arming%20Sword,https://opengameart.org/content/lpc-expanded-sit-run-jump-more",
+      "notes": ""
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_halfslash/bg/bronze.png",
+      "licenses": "OGA-BY 3.0",
+      "authors": "ElizaWy; walk and down by JaidynReiman",
+      "urls": "https://github.com/ElizaWy/LPC/tree/main/Characters/Props/Sword%2001%20-%20Arming%20Sword,https://opengameart.org/content/lpc-expanded-sit-run-jump-more",
+      "notes": ""
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_halfslash/fg/bronze.png",
+      "licenses": "OGA-BY 3.0",
+      "authors": "ElizaWy; walk and down by JaidynReiman",
+      "urls": "https://github.com/ElizaWy/LPC/tree/main/Characters/Props/Sword%2001%20-%20Arming%20Sword,https://opengameart.org/content/lpc-expanded-sit-run-jump-more",
+      "notes": ""
+    }
+  ],
+  "layers": [
+    {
+      "fileName": "weapon/sword/arming/attack_slash/bg/bronze.png",
+      "zPos": 8,
+      "custom_animation": "slash_128",
+      "parentName": "weapon",
+      "name": "Arming_Sword",
+      "variant": "bronze",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_backslash/bg/bronze.png",
+      "zPos": 8,
+      "custom_animation": "backslash_128",
+      "parentName": "weapon",
+      "name": "Arming_Sword",
+      "variant": "bronze",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_halfslash/bg/bronze.png",
+      "zPos": 8,
+      "custom_animation": "halfslash_128",
+      "parentName": "weapon",
+      "name": "Arming_Sword",
+      "variant": "bronze",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "weapon/sword/arming/universal/bg/bronze.png",
+      "zPos": 9,
+      "parentName": "weapon",
+      "name": "Arming_Sword",
+      "variant": "bronze",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "body/bodies/male/light.png",
+      "zPos": 10,
+      "parentName": "body",
+      "name": "Body_color",
+      "variant": "light",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "feet/shoes/basic/male/black.png",
+      "zPos": 15,
+      "parentName": "shoes",
+      "name": "Basic_Shoes",
+      "variant": "black",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "legs/leggings/male/leather.png",
+      "zPos": 20,
+      "parentName": "legs",
+      "name": "Leggings",
+      "variant": "leather",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "shoulders/leather/male/leather.png",
+      "zPos": 60,
+      "parentName": "shoulders",
+      "name": "Leather",
+      "variant": "leather",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering"
+    },
+    {
+      "fileName": "arms/armour/plate/male/steel.png",
+      "zPos": 60,
+      "parentName": "arms",
+      "name": "Armour",
+      "variant": "steel",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering"
+    },
+    {
+      "fileName": "torso/armour/leather/male/leather.png",
+      "zPos": 60,
+      "parentName": "armour",
+      "name": "Leather",
+      "variant": "leather",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering"
+    },
+    {
+      "fileName": "head/heads/human/male/light.png",
+      "zPos": 100,
+      "parentName": "head",
+      "name": "Human_male",
+      "variant": "light",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "shield/male/round_silver.png",
+      "zPos": 110,
+      "parentName": "shield",
+      "name": "Shield",
+      "variant": "round silver",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering"
+    },
+    {
+      "fileName": "hair/plain/adult/carrot.png",
+      "zPos": 120,
+      "parentName": "hair",
+      "name": "Plain",
+      "variant": "carrot",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "weapon/sword/arming/universal/fg/bronze.png",
+      "zPos": 140,
+      "parentName": "weapon",
+      "name": "Arming_Sword",
+      "variant": "bronze",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_slash/fg/bronze.png",
+      "zPos": 150,
+      "custom_animation": "slash_128",
+      "parentName": "weapon",
+      "name": "Arming_Sword",
+      "variant": "bronze",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_backslash/fg/bronze.png",
+      "zPos": 150,
+      "custom_animation": "backslash_128",
+      "parentName": "weapon",
+      "name": "Arming_Sword",
+      "variant": "bronze",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "weapon/sword/arming/attack_halfslash/fg/bronze.png",
+      "zPos": 150,
+      "custom_animation": "halfslash_128",
+      "parentName": "weapon",
+      "name": "Arming_Sword",
+      "variant": "bronze",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    }
+  ]
+}

@@ -40,7 +40,9 @@ export class NormalAI implements AIInterface {
     );
     if (result.target) {
       //移动
+      
       await UnitMove.moveMovement(result.x, result.y, unit, path);
+      console.log('aiUnit state',unit)
       const attack = unit.creature?.attacks[0];
       const enemyX = Math.floor(result.target.x / tileSize);
       const enemyY = Math.floor(result.target.y / tileSize);

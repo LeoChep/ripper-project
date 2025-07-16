@@ -1,9 +1,11 @@
 import type { TiledMap } from "@/core/MapClass";
 import { useTalkStateStore } from "@/stores/talkStateStore";
+import * as InitiativeController from "@/core/system/InitiativeSystem";
 
 export const d1 = {
   map: null as TiledMap | null,
   start: async () => {
+    if (!d1.map) return;
     const talkStore = useTalkStateStore();
     talkStore.CGstart();
     await talkStore.speak(
@@ -24,6 +26,16 @@ export const d1 = {
         );
         await talkStore.speak("骷髅：咯吱吱……咯吱吱");
         talkStore.CGEnd();
+        //开始战斗
+        if (!d1.map) {
+          return;
+        }
+        InitiativeController.setMap(d1.map);
+        const initCombatPromise =
+          InitiativeController.addUnitsToInitiativeSheet(d1.map.sprites);
+        initCombatPromise.then(() => {
+          InitiativeController.startCombatTurn();
+        });
       }
     }, 100);
     return;

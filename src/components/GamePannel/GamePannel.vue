@@ -116,14 +116,15 @@ onMounted(async () => {
     units.forEach((unit) => {
         if (unit.party === 'player') {
             characterStore.addCharacter(unit);
-            unit.stateMachinePack.startPlay();
+            
         }
+        unit.stateMachinePack.startPlay();
     });
     const characterOutCombatController = new CharacterOutCombatController(rlayers, container, mapPassiable)
     characterStore.setCharacterOutCombatController(characterOutCombatController);
     CharacterOutCombatController.instance = characterOutCombatController;
     d1.map = mapPassiable;
-    // d1.start();
+    d1.start();
     console.log('app',app.stage)
 
 
