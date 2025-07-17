@@ -173,7 +173,50 @@ export function checkActionUseful(
   }
   return passable;
 }
+export async function playStartAnim() {
+  const container = getContainer();
+  const lineLayer = getLayers().lineLayer;
+  //
+  const graphics = new PIXI.Graphics();
+  graphics.rect(0, 0, 800, 800);
+  let color = 0xff0000; // 默认颜色为红色
 
+  graphics.fill({ color: color, alpha: 0.5 });
+
+  if (container && lineLayer) {
+    container.addChild(graphics);
+    lineLayer.attach(graphics);
+  }
+
+  const text = new PIXI.Text({
+    text: "战斗开始",
+    style: {
+      fill: "#ffffff",
+      fontSize: 48,
+      fontWeight: "bold",
+      align: "center",
+    },
+  });
+  text.anchor.set(0.5);
+  text.x = 400;
+  text.y = 400;
+  if (container && lineLayer) {
+    container.addChild(text);
+    lineLayer.attach(text);
+  }
+  const animPromise = new Promise<void>((resolve) => {
+    setTimeout(() => {
+      if (container) {
+        container.removeChild(graphics);
+        container.removeChild(text);
+      }
+      graphics.destroy();
+      text.destroy();
+      resolve();
+    }, 1500);
+  });
+  return animPromise;
+}
 async function playAnim(unit: Unit) {
   const container = getContainer();
   const lineLayer = getLayers().lineLayer;

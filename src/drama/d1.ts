@@ -33,7 +33,8 @@ export const d1 = {
         InitiativeController.setMap(d1.map);
         const initCombatPromise =
           InitiativeController.addUnitsToInitiativeSheet(d1.map.sprites);
-        initCombatPromise.then(() => {
+        initCombatPromise.then(async () => {
+          await InitiativeController.playStartAnim();
           InitiativeController.startCombatTurn();
         });
       }

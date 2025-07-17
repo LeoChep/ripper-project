@@ -9,6 +9,7 @@ export class WalkStateMachine extends StateMachine {
   }[] = [];
   private targetX: number = 0;
   private targetY: number = 0;
+  public callBack = () => {};
   constructor(unit: Unit) {
     super(unit);
   }
@@ -50,7 +51,7 @@ export class WalkStateMachine extends StateMachine {
     //设置朝向
     if (Math.abs(dx) < 7 && Math.abs(dy) < 7) {
       // 如果没有移动，直接返回
-    } else if (Math.abs(dx) >= Math.abs(dy)-1) {
+    } else if (Math.abs(dx) >= Math.abs(dy) - 1) {
       // 水平移动
       direction = dx > 0 ? 0 : 1; // 0向右, 1向左
     } else if (Math.abs(dy) > Math.abs(dx)) {
@@ -119,6 +120,8 @@ export class WalkStateMachine extends StateMachine {
         console.log("到达目标位置，停止移动");
         this.path = []; // 清空路径
         this.owner.state = "idle"; // 设置单位状态为闲置
+        this.callBack(); // 调用回调函数
+        this.callBack=()=>{}
       }
     }
   }
