@@ -1,3 +1,4 @@
+import { CharacterController } from './../controller/CharacterController';
 import { getContainer, getLayers } from "@/stores/container";
 import { diceRoll } from "../DiceTryer";
 import type { TiledMap } from "../MapClass";
@@ -5,6 +6,10 @@ import { InitiativeClass } from "../type/InitiativeClass";
 import { Unit } from "../units/Unit";
 import * as PIXI from "pixi.js";
 import { useInitiativeStore } from "@/stores/initiativeStore";
+import { CharacterOutCombatController } from "../controller/CharacterOutCombatController";
+import { zIndexSetting } from "../envSetting";
+import { SelectAnimSprite } from "../anim/SelectAnimSprite";
+import { lockOn } from "../anim/LockOnAnim";
 
 const InitiativeSheet = [] as InitiativeClass[];
 const initiativeCursor = {
@@ -96,6 +101,22 @@ export async function startCombatTurn() {
             initiativeCursor.map
           );
         }
+      } else {
+        //提醒玩家
+
+        const arrowSprite = new SelectAnimSprite();
+
+        arrowSprite.zIndex = zIndexSetting.spriteZIndex;
+        const unit = initiativeCursor.pointAt.owner;
+
+        const container = getContainer();
+        const lineLayer = getLayers().lineLayer;
+        container?.addChild(arrowSprite);
+        lineLayer?.attach(arrowSprite);
+        arrowSprite.x = unit.x;
+        arrowSprite.y = unit.y;
+        lockOn(unit.x, unit.y);
+        CharacterController.curser=unit.id;
       }
     }
   }
@@ -173,6 +194,10 @@ export function checkActionUseful(
   }
   return passable;
 }
+export function startBattle() {
+  CharacterOutCombatController.isUse = false;
+  return playStartAnim();
+}
 export async function playStartAnim() {
   const container = getContainer();
   const lineLayer = getLayers().lineLayer;
@@ -233,9 +258,14 @@ async function playAnim(unit: Unit) {
     container.addChild(graphics);
     lineLayer.attach(graphics);
   }
-
+  let turnTextContent = "";
+  if (unit.party === "player") {
+    turnTextContent = unit.name + "的回合";
+  } else {
+    turnTextContent = "敌方行动";
+  }
   const text = new PIXI.Text({
-    text: unit.name + "的回合",
+    text: turnTextContent,
     style: {
       fill: "#ffffff",
       fontSize: 48,

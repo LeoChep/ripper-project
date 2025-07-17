@@ -1,6 +1,7 @@
 import type { TiledMap } from "@/core/MapClass";
 import { useTalkStateStore } from "@/stores/talkStateStore";
 import * as InitiativeController from "@/core/system/InitiativeSystem";
+import { CharacterOutCombatController } from "@/core/controller/CharacterOutCombatController";
 
 export const d1 = {
   map: null as TiledMap | null,
@@ -17,6 +18,7 @@ export const d1 = {
     const door1 = d1.map?.edges?.find((edge: { id: number }) => edge.id === 10);
     let door1Flag = false;
     talkStore.CGEnd();
+    CharacterOutCombatController.isUse = true;
     setInterval(async () => {
       if (door1?.useable === false && !door1Flag) {
         door1Flag = true;
@@ -34,7 +36,7 @@ export const d1 = {
         const initCombatPromise =
           InitiativeController.addUnitsToInitiativeSheet(d1.map.sprites);
         initCombatPromise.then(async () => {
-          await InitiativeController.playStartAnim();
+          await InitiativeController.startBattle();
           InitiativeController.startCombatTurn();
         });
       }

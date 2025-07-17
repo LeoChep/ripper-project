@@ -7,6 +7,7 @@ import type { TiledMap } from "../MapClass";
 import { useTalkStateStore } from "@/stores/talkStateStore";
 import { useCharacterStore } from "@/stores/characterStore";
 import { golbalSetting } from "../golbalSetting";
+import { CharacterController } from "./CharacterController";
 const tileSize = 64;
 
 type Rlayer = {
@@ -19,7 +20,7 @@ type Rlayer = {
 };
 
 export class CharacterOutCombatController {
-  public static curser:number=0;
+  public static isUse:boolean = false;
   container: PIXI.Container;
   selectedCharacter: Unit | null = null;
   rlayer: Rlayer;
@@ -35,31 +36,15 @@ export class CharacterOutCombatController {
 
     const ms = golbalSetting.mapContainer;
     if (ms) {
-
       console.log("ms", ms);
       ms.eventMode = "static";
       ms.on("pointerdown", (e: PIXI.FederatedPointerEvent) => {
         console.log("map click", e);
-        const talkStore = useTalkStateStore();
-        if (talkStore.talkState.onCg) {
+      
+        if (!CharacterOutCombatController.isUse) {
           return;
         }
         this.unitMove(e);
-      });
-      window.addEventListener("keydown", (e) => {
-        if (e.key === "q") {
-          // const characterStore = useCharacterStore();
-          // characterStore.selectCharacter(mapPassiable.sprites[2]);
-          this.selectedCharacter = mapPassiable.sprites[2];
-          console.log("Escape pressed, deselecting character.");
-        }
-      });
-      window.addEventListener("keydown", (e) => {
-        if (e.key === "e") {
-
-           this.selectedCharacter = mapPassiable.sprites[1];
-          console.log("Escape pressed, deselecting character.");
-        }
       });
       this.container.addChild(ms);
     } else {
@@ -67,15 +52,12 @@ export class CharacterOutCombatController {
     }
     // 初始化逻辑
   }
-  selectCharacter(unit: Unit) {
-    this.selectedCharacter = unit;
-    // // 处理选中角色的逻辑
-    // console.log("Selected character:", unit.name);
-    // 可以在这里添加更多的逻辑，比如高亮显示选中的角色等
-  }
+
   unitMove(e: PIXI.FederatedPointerEvent) {
     console.log("unitMove", e);
-    this.selectedCharacter=this.mapPassiable?.sprites.find((sprite => sprite.id === CharacterOutCombatController.curser) );
+    this.selectedCharacter = this.mapPassiable?.sprites.find(
+      (sprite) => sprite.id === CharacterController.curser
+    );
     if (!this.selectedCharacter) {
       console.warn("No character selected for movement.");
       return;

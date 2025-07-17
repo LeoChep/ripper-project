@@ -32,26 +32,10 @@ import { createDoorFromDoorObj } from '@/core/units/Door'
 import { createDoorAnimSpriteFromDoor } from '@/core/anim/DoorAnimSprite'
 import * as envSetting  from '@/core/envSetting'
 import { golbalSetting } from '@/core/golbalSetting'
-const appSetting = {
-    width: 800,
-    height: 600,
-    antialias: true,
-    background: 0x262626, // 设置canvas背景颜色
-    backgroundAlpha: 1,   // 设置背景颜色透明度
-    resolution: 1,
-    // transparent: false, // backgroundAlpha 已控制透明度
-};
+const appSetting=envSetting.appSetting;
 onMounted(async () => {
     const app = new PIXI.Application();
-    await app.init({
-        width: appSetting.width,
-        height: appSetting.height,
-        antialias: true,
-        background: 0x262626, // 设置canvas背景颜色
-        backgroundAlpha: 1,   // 设置背景颜色透明度
-        resolution: 1,
-        // transparent: false, // backgroundAlpha 已控制透明度
-    });
+    await app.init(appSetting);
 
     document.getElementById("game-pannel").appendChild(app.canvas);
 
@@ -188,6 +172,7 @@ const createContainer = (app, rlayers) => {
     // 设置全局变量
     golbalSetting.spriteContainer = spriteContainer;
     golbalSetting.mapContainer = mapContainer;
+    golbalSetting.rootContainer = container;
     return container
 }
 

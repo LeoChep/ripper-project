@@ -3,3 +3,14 @@ export const zIndexSetting={
     mapZindex: 1,
     doorZindex: 3,
 }
+export const tileSize = 64; // 格子大小
+
+export const appSetting = {
+    width: 800,
+    height: 600,
+    antialias: true,
+    background: 0x262626, // 设置canvas背景颜色
+    backgroundAlpha: 1,   // 设置背景颜色透明度
+    resolution: 1,
+    // transparent: false, // backgroundAlpha 已控制透明度
+};

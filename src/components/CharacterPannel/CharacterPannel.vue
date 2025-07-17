@@ -38,7 +38,8 @@ import { useCharacterStore } from '@/stores/characterStore'
 import { getUnitAvatar } from '@/utils/utils'
 import { CharacterOutCombatController } from '@/core/controller/CharacterOutCombatController'
 import ActionPannel from '../ActionPannel/ActionPannel.vue'
-
+import { CharacterController } from '@/core/controller/CharacterController'
+import { lockOn } from '@/core/anim/LockOnAnim'
 const characters = ref([])
 const show = computed(() => {
     const characterStore = useCharacterStore();
@@ -55,6 +56,15 @@ onMounted(() => {
     if (characters.value.length > 0) {
         selectedCharacter.value = characters.value[0];
     }
+    setInterval(() => {
+       const curser=CharacterController.curser;
+       characters.value.forEach((character, index) => {
+           if (character.id === curser) {
+               selectedIndex.value = index;
+               selectedCharacter.value = character;
+           }
+       });
+    }, 100);
 });
 
 // 示例角色数据，可根据实际需求替换
@@ -76,10 +86,12 @@ const handleActionSelected = (action) => {
 
 function selectCharacter(character, index) {
     console.log('选中角色:', character);
-    CharacterOutCombatController.curser = character.id;
+    CharacterController.curser = character.id;
     selectedIndex.value = index;
     selectedCharacter.value = character;
+    lockOn(character.x, character.y);
 }
+
 </script>
 
 <style scoped>
