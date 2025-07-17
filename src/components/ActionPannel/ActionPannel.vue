@@ -1,236 +1,262 @@
 <template>
-  <div class="action-panel">
-    <div class="panel-header">
-      <h3>行动面板</h3>
-    </div>
-    
-    <div class="initiative-info">
-      <div class="info-row">
-        <label>主动权值:</label>
-        <span class="value">{{ initiativeValue }}</span>
-      </div>
-      
-      <div class="info-row" v-if="owner">
-        <label>所有者:</label>
-        <span class="value">{{ owner.name || '未命名单位' }}</span>
-      </div>
-      
-      <div class="info-row">
-        <label>准备状态:</label>
-        <span class="value" :class="{ 'ready': isReady, 'not-ready': !isReady }">
-          {{ isReady ? '已准备' : '未准备' }}
-        </span>
-      </div>
-    </div>
-    
-    <div class="action-counts">
-      <h4>行动点数</h4>
-      <div class="action-grid">
-        <div class="action-item">
-          <div class="action-label">标准行动</div>
-          <div class="action-value">{{ standerActionNumber }}</div>
+    <div class="action-panel">
+        <!-- 双标签栏 -->
+        <div class="tab-container">
+            <div class="tab-row">
+                <div class="tab-group">
+                    <button :class="['tab-btn', { active: activeActionTab === 'standard' }]" 
+                            @click="activeActionTab = 'standard'">标准动作</button>
+                    <button :class="['tab-btn', { active: activeActionTab === 'move' }]" 
+                            @click="activeActionTab = 'move'">移动动作</button>
+                    <button :class="['tab-btn', { active: activeActionTab === 'minor' }]" 
+                            @click="activeActionTab = 'minor'">次要动作</button>
+                </div>
+                <div class="tab-separator"></div>
+                <div class="tab-group">
+                    <button :class="['tab-btn', { active: activePowerTab === 'atwill' }]" 
+                            @click="activePowerTab = 'atwill'">随意</button>
+                    <button :class="['tab-btn', { active: activePowerTab === 'encounter' }]" 
+                            @click="activePowerTab = 'encounter'">遭遇</button>
+                    <button :class="['tab-btn', { active: activePowerTab === 'utility' }]" 
+                            @click="activePowerTab = 'utility'">辅助</button>
+                    <button :class="['tab-btn', { active: activePowerTab === 'daily' }]" 
+                            @click="activePowerTab = 'daily'">每日</button>
+                    <button :class="['tab-btn', { active: activePowerTab === 'item' }]" 
+                            @click="activePowerTab = 'item'">道具</button>
+                </div>
+            </div>
         </div>
         
-        <div class="action-item">
-          <div class="action-label">次要行动</div>
-          <div class="action-value">{{ minorActionNumber }}</div>
+        <!-- 动作按钮区域 -->
+        <div class="action-buttons">
+            <button v-for="action in filteredActions" :key="action.id" 
+                    :class="['action-btn', { selected: selectedAction?.id === action.id }]"
+                    @click="selectAction(action)">
+                {{ action.name }}
+            </button>
         </div>
         
-        <div class="action-item">
-          <div class="action-label">移动行动</div>
-          <div class="action-value">{{ moveActionNumber }}</div>
+        <!-- 状态提示栏 -->
+        <div class="status-bar">
+            <div class="current-selection">
+                <span v-if="selectedAction">
+                    当前选择：[{{ getActionTypeText(selectedAction.type) }}·{{ getPowerTypeText(selectedAction.powerType) }}]
+                </span>
+                <span v-else>当前选择：无</span>
+            </div>
+            <div class="action-points">
+                剩余行动点：
+                <span v-for="n in 3" :key="n" 
+                      :class="['action-point', { filled: n <= remainingActionPoints }]">
+                    {{ n <= remainingActionPoints ? '●' : '○' }}
+                </span>
+            </div>
         </div>
-      </div>
     </div>
-    
-    <!-- <div class="action-buttons">
-      <button @click="resetInitiative" class="btn btn-secondary">
-        重置主动权
-      </button>
-      <button @click="toggleReady" class="btn btn-primary">
-        {{ isReady ? '取消准备' : '设为准备' }}
-      </button>
-    </div> -->
-  </div>
 </template>
-
-<script setup lang="ts">
+<script setup>
 import { computed, ref } from 'vue'
-import { useInitiativeStore } from '../../stores/initiativeStore'
 
-// 使用 initiative store
-const initiativeStore = useInitiativeStore()
+// Props
+const props = defineProps({
+    character: {
+        type: Object,
+        default: null
+    }
+})
 
-// 计算属性，从 store 获取数据
-const initiativeValue = computed(() => initiativeStore.getInitiativeValue)
-const owner = computed(() => initiativeStore.getOwner)
-const standerActionNumber = ref(1)
-const minorActionNumber = ref(1)
-const moveActionNumber = ref(1)
-const isReady = computed(() => initiativeStore.isReady)
+// Emits
+const emit = defineEmits(['actionSelected'])
 
-// 监听updata事件更新移动行动次数
-initiativeStore.$onAction(({ name, args }) => {
-  if (name === 'updateActionNumbers') {
-    const [stander, minor, move] = args
-    moveActionNumber.value = move
-    standerActionNumber.value = stander
-    minorActionNumber.value = minor
-  }
-  if (name === 'setIniitiative') {
-        const [initiative] = args
-        moveActionNumber.value = initiative.moveActionNumber
-        standerActionNumber.value = initiative.standerActionNumber
-        minorActionNumber.value = initiative.minorActionNumber
-        initiativeStore.setReady(initiative.ready)
+// 响应式数据
+const activeActionTab = ref('standard')
+const activePowerTab = ref('atwill')
+const selectedAction = ref(null)
+const remainingActionPoints = ref(3)
 
-  }
-})  
-// 方法
-const resetInitiative = () => {
-  initiativeStore.resetInitiative()
+// 示例动作数据
+const actions = ref([
+    { id: 1, name: '冲锋', type: 'standard', powerType: 'atwill' },
+    { id: 2, name: '斩击', type: 'standard', powerType: 'atwill' },
+    { id: 3, name: '盾击', type: 'standard', powerType: 'encounter' },
+    { id: 4, name: '治疗', type: 'minor', powerType: 'utility' },
+    { id: 5, name: '火球', type: 'standard', powerType: 'encounter' },
+    { id: 6, name: '药水', type: 'minor', powerType: 'item' },
+    { id: 7, name: '移动', type: 'move', powerType: 'atwill' },
+    { id: 8, name: '冲刺', type: 'move', powerType: 'atwill' },
+    { id: 9, name: '神圣打击', type: 'standard', powerType: 'daily' },
+])
+
+// 过滤动作
+const filteredActions = computed(() => {
+    return actions.value.filter(action => 
+        action.type === activeActionTab.value && action.powerType === activePowerTab.value
+    )
+})
+
+// 获取动作类型文本
+const getActionTypeText = (type) => {
+    const typeMap = {
+        'standard': '标准动作',
+        'move': '移动动作',
+        'minor': '次要动作'
+    }
+    return typeMap[type] || type
 }
 
-const toggleReady = () => {
-  initiativeStore.setReady(!isReady.value)
+// 获取威能类型文本
+const getPowerTypeText = (type) => {
+    const typeMap = {
+        'atwill': '随意威能',
+        'encounter': '遭遇威能',
+        'utility': '辅助威能',
+        'daily': '每日威能',
+        'item': '道具'
+    }
+    return typeMap[type] || type
 }
+
+// 选择动作
+const selectAction = (action) => {
+    selectedAction.value = action
+    console.log('选中动作:', action)
+    emit('actionSelected', action)
+}
+
+// 暴露给父组件的方法
+defineExpose({
+    resetSelection() {
+        selectedAction.value = null
+    },
+    setActionPoints(points) {
+        remainingActionPoints.value = points
+    }
+})
 </script>
 
 <style scoped>
+/* 动作选择面板 */
 .action-panel {
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  padding: 20px;
-  width: 300px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 125px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 8px;
+    padding: 10px;
+    border: 2px solid #444;
 }
 
-.panel-header {
-  text-align: center;
-  margin-bottom: 20px;
+/* 标签栏容器 */
+.tab-container {
+    margin-bottom: 8px;
 }
 
-.panel-header h3 {
-  margin: 0;
-  color: #495057;
-  font-weight: 600;
+.tab-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    /* margin-bottom: 8px; */
 }
 
-.initiative-info {
-  margin-bottom: 20px;
+.tab-group {
+    display: flex;
+    gap: 4px;
 }
 
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  padding: 8px 0;
-  border-bottom: 1px solid #e9ecef;
+.tab-separator {
+    width: 1px;
+    height: 20px;
+    background: #666;
 }
 
-.info-row:last-child {
-  border-bottom: none;
+.tab-btn {
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #666;
+    border-radius: 4px;
+    color: #ccc;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-.info-row label {
-  font-weight: 500;
-  color: #6c757d;
+.tab-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
 }
 
-.info-row .value {
-  font-weight: 600;
-  color: #212529;
+.tab-btn.active {
+    background: #4a90e2;
+    color: #fff;
+    border-color: #4a90e2;
 }
 
-.value.ready {
-  color: #28a745;
-}
-
-.value.not-ready {
-  color: #dc3545;
-}
-
-.action-counts {
-  margin-bottom: 20px;
-}
-
-.action-counts h4 {
-  margin: 0 0 15px 0;
-  color: #495057;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.action-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-.action-item {
-  background: white;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-  padding: 12px;
-  text-align: center;
-  transition: box-shadow 0.2s;
-}
-
-.action-item:hover {
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.action-label {
-  font-size: 12px;
-  color: #6c757d;
-  margin-bottom: 5px;
-}
-
-.action-value {
-  font-size: 24px;
-  font-weight: bold;
-  color: #007bff;
-}
-
+/* 动作按钮区域 */
 .action-buttons {
-  display: flex;
-  gap: 10px;
-  justify-content: space-between;
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    overflow-y: auto;
+    margin-bottom: 8px;
 }
 
-.btn {
-  flex: 1;
-  padding: 10px 16px;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
+.action-btn {
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #666;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
 }
 
-.btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+.action-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
 }
 
-.btn-primary {
-  background-color: #007bff;
-  color: white;
+.action-btn.selected {
+    background: #f39c12;
+    border-color: #f39c12;
+    color: #fff;
 }
 
-.btn-primary:hover {
-  background-color: #0056b3;
+/* 状态提示栏 */
+.status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 8px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 4px;
+    border-top: 1px solid #444;
 }
 
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
+.current-selection {
+    color: #fff;
+    font-size: 10px;
+    font-weight: bold;
 }
 
-.btn-secondary:hover {
-  background-color: #545b62;
+.action-points {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #fff;
+    font-size: 10px;
+}
+
+.action-point {
+    font-size: 14px;
+    color: #666;
+}
+
+.action-point.filled {
+    color: #4a90e2;
 }
 </style>
+

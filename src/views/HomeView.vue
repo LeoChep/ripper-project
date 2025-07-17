@@ -10,9 +10,9 @@ initiative.initializeInitiative(0);
 <template>
   <main @contextmenu.prevent>
     <GamePannel></GamePannel>
-    <div class="action-panel-container">
+    <!-- <div class="action-panel-container">
       <ActionPannel></ActionPannel>
-    </div>
+    </div> -->
     <UnitBox></UnitBox>
   </main>
 </template>

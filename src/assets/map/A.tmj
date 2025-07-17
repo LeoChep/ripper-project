@@ -799,7 +799,7 @@
                  "gid":739,
                  "height":64,
                  "id":50,
-                 "name":"wolf",
+                 "name":"\u72fc\u4eba",
                  "properties":[
                         {
                          "name":"name",
@@ -827,7 +827,7 @@
                  "gid":812,
                  "height":64,
                  "id":51,
-                 "name":"manFighter",
+                 "name":"\u6218\u58eb",
                  "properties":[
                         {
                          "name":"name",
