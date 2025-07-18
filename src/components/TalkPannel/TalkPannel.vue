@@ -51,10 +51,11 @@ onMounted(()=>{
     padding: 30px 0px ;
     gap: 32px;
     z-index:10;
-    left:0px;
-    top:450px;
-    width:800px;
+    left: 400px;
+    top: 745px;
+    width: 800px;
     height: 170px;
+    gap: 20px;
 
 }
 

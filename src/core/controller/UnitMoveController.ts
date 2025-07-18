@@ -1,3 +1,4 @@
+import * as envSetting from './../envSetting';
 import type { TiledMap } from "../MapClass";
 import type { RLayers } from "../type/RLayersInterface";
 import * as PIXI from "pixi.js";
@@ -7,6 +8,7 @@ import * as UnitMoveSystem from "../system/UnitMoveSystem";
 import { playerSelectMovement } from "../action/UnitMove";
 import { useInitiativeStore } from "@/stores/initiativeStore";
 import { generateWays } from "../utils/PathfinderUtil";
+import { golbalSetting } from "../golbalSetting";
 
 export function getMoveLabel(
   unit: Unit,
@@ -17,9 +19,9 @@ export function getMoveLabel(
   rlayers: RLayers
 ) {
   console.log("getMoveLabel", unit.initiative?.moveActionNumber);
-  // if ((unit.initiative?.moveActionNumber ?? 0) <= 0) {
-  //   return;
-  // }
+  if ((unit.initiative?.moveActionNumber ?? 0) <= 0) {
+    return;
+  }
   const boxWidth = 40;
   const boxHeight = 80;
   const label = new PIXI.Text({
@@ -74,12 +76,12 @@ export const moveSelect = (
   lineLayer: PIXI.IRenderLayer,
   mapPassiable: TiledMap | null
 ) => {
-  //显示红色的可移动范围
+  //显示可移动范围
   const range = unit.creature?.speed ?? 0;
   const tileSize = 64;
   const graphics = new PIXI.Graphics();
   graphics.alpha = 0.4;
-  graphics.zIndex = 1000;
+  graphics.zIndex = envSetting.zIndexSetting.mapZindex;
   const spriteUnit = unit.animUnit;
   console.log("spriteUnits", unit);
   if (!spriteUnit) {
@@ -110,7 +112,7 @@ export const moveSelect = (
       const drawX = x * tileSize;
       const drawY = y * tileSize;
       graphics.rect(drawX, drawY, tileSize, tileSize);
-      graphics.fill({ color: 0xff0000 });
+      graphics.fill({ color: 0x66ccff });
     });
   }
 

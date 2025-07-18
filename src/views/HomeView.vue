@@ -13,7 +13,7 @@ initiative.initializeInitiative(0);
     <!-- <div class="action-panel-container">
       <ActionPannel></ActionPannel>
     </div> -->
-    <UnitBox></UnitBox>
+    <!-- <UnitBox></UnitBox> -->
   </main>
 </template>
 

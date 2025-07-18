@@ -1,3 +1,4 @@
+import { golbalSetting } from "../golbalSetting";
 import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
 import type { Unit } from "../units/Unit";
 import * as PIXI from "pixi.js";
@@ -10,8 +11,13 @@ export const playerSelectMovement = (
  
   const pos = event.data.global;
   // 计算点击位置相对于动画精灵的偏移
-  const offsetX = pos.x - container.x;
-  const offsetY = pos.y - container.y;
+  let gobalContainer=golbalSetting.rootContainer;
+  if (!gobalContainer) {
+    console.error("全局容器不存在");
+    return;
+  }
+  const offsetX = pos.x - gobalContainer.x;
+  const offsetY = pos.y - gobalContainer.y;
   const targetX = Math.floor(offsetX / 64);
   const targetY = Math.floor(offsetY / 64);
   if (!path[`${targetX},${targetY}`]) {

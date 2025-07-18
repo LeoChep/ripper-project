@@ -7,9 +7,13 @@ import { Unit } from "../units/Unit";
 import * as PIXI from "pixi.js";
 import { useInitiativeStore } from "@/stores/initiativeStore";
 import { CharacterOutCombatController } from "../controller/CharacterOutCombatController";
-import { zIndexSetting } from "../envSetting";
+import { appSetting, zIndexSetting } from "../envSetting";
 import { SelectAnimSprite } from "../anim/SelectAnimSprite";
 import { lockOn } from "../anim/LockOnAnim";
+import { moveSelect } from '../controller/UnitMoveController';
+import { golbalSetting } from '../golbalSetting';
+import { CharacterCombatController } from '../controller/CharacterCombatController';
+
 
 const InitiativeSheet = [] as InitiativeClass[];
 const initiativeCursor = {
@@ -103,20 +107,11 @@ export async function startCombatTurn() {
         }
       } else {
         //提醒玩家
-
-        const arrowSprite = new SelectAnimSprite();
-
-        arrowSprite.zIndex = zIndexSetting.spriteZIndex;
         const unit = initiativeCursor.pointAt.owner;
-
-        const container = getContainer();
-        const lineLayer = getLayers().lineLayer;
-        container?.addChild(arrowSprite);
-        lineLayer?.attach(arrowSprite);
-        arrowSprite.x = unit.x;
-        arrowSprite.y = unit.y;
-        lockOn(unit.x, unit.y);
         CharacterController.curser=unit.id;
+        CharacterController.selectedCharacter = unit;
+        CharacterController.lookOn();
+        CharacterCombatController.instance?.useMoveController()
       }
     }
   }
@@ -196,14 +191,23 @@ export function checkActionUseful(
 }
 export function startBattle() {
   CharacterOutCombatController.isUse = false;
+  if (!initiativeCursor.map) {
+    return;
+  }
+  if (!CharacterCombatController.instance) {
+    CharacterCombatController.instance = new CharacterCombatController(initiativeCursor.map);
+  }
+  CharacterCombatController.instance.mapPassiable= initiativeCursor.map;
+  CharacterCombatController.instance.inUse = true;
+
   return playStartAnim();
 }
 export async function playStartAnim() {
-  const container = getContainer();
+  const container = golbalSetting.rootContainer;
   const lineLayer = getLayers().lineLayer;
   //
   const graphics = new PIXI.Graphics();
-  graphics.rect(0, 0, 800, 800);
+  graphics.rect(0, 0, appSetting.width, appSetting.height);
   let color = 0xff0000; // 默认颜色为红色
 
   graphics.fill({ color: color, alpha: 0.5 });
@@ -223,8 +227,8 @@ export async function playStartAnim() {
     },
   });
   text.anchor.set(0.5);
-  text.x = 400;
-  text.y = 400;
+  text.x = appSetting.width / 2;
+  text.y = appSetting.height / 2;
   if (container && lineLayer) {
     container.addChild(text);
     lineLayer.attach(text);
@@ -243,11 +247,11 @@ export async function playStartAnim() {
   return animPromise;
 }
 async function playAnim(unit: Unit) {
-  const container = getContainer();
+  const container = golbalSetting.rootContainer;
   const lineLayer = getLayers().lineLayer;
   //
   const graphics = new PIXI.Graphics();
-  graphics.rect(0, 0, 800, 800);
+  graphics.rect(0, 0, appSetting.width, appSetting.height);
   let color = 0xff0000; // 默认颜色为红色
   if (unit.party === "player") {
     color = 0x0000ff;
@@ -274,8 +278,8 @@ async function playAnim(unit: Unit) {
     },
   });
   text.anchor.set(0.5);
-  text.x = 400;
-  text.y = 400;
+  text.x =appSetting.width / 2;
+  text.y = appSetting.height / 2;
   if (container && lineLayer) {
     container.addChild(text);
     lineLayer.attach(text);

@@ -6,8 +6,8 @@ export const zIndexSetting={
 export const tileSize = 64; // 格子大小
 
 export const appSetting = {
-    width: 800,
-    height: 600,
+    width: 1600,
+    height: 900,
     antialias: true,
     background: 0x262626, // 设置canvas背景颜色
     backgroundAlpha: 1,   // 设置背景颜色透明度

@@ -9,7 +9,7 @@ import { golbalSetting } from "../golbalSetting";
 const tileSize = 64;
 export class FogSystem {
   mapPassiable: TiledMap;
-
+ static instanse:FogSystem;
   containers: PIXI.Container<PIXI.ContainerChild>;
   fog: PIXI.Graphics | null = null;
   mask: PIXI.Container | null = null;
@@ -24,6 +24,7 @@ export class FogSystem {
     this.containers = containers;
     this.app = app;
     console.log("app", app);
+    FogSystem.instanse = this;
   }
   caculteVersionByUnit = (unit: Unit) => {
     const mapPassiable = this.mapPassiable;

@@ -143,7 +143,7 @@ const createRenderLayers = (app) => {
     rlayers.lineLayer.label = 'lineLayer';
     rlayers.fogLayer.label = 'fogLayer';
     rlayers.controllerLayer.label = 'controllerLayer';
-        
+    golbalSetting.rlayers = rlayers;
 
     return rlayers
 }
@@ -188,6 +188,9 @@ const drawMap = (mapView, container, rlayers) => {
     const ms = new PIXI.Sprite(mapView)
     ms.zIndex = envSetting.zIndexSetting.mapZindex;
     ms.label = 'map'
+    const allFog=new PIXI.Graphics();
+    container.addChild(allFog);
+    ms.setMask({mask:allFog})
     golbalSetting.mapContainer.addChild(ms);
     rlayers.basicLayer.attach(ms)
 }

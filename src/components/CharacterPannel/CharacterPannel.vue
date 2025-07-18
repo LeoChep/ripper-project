@@ -98,7 +98,7 @@ function selectCharacter(character, index) {
 /* 左侧角色列表 */
 .character-list {
     position: fixed;
-    left: 650px;
+    left: 1450px;
     top: 10px;
     display: flex;
     flex-direction: column;
@@ -162,8 +162,8 @@ function selectCharacter(character, index) {
     background-position: center top -10px;
     padding: 20px 0px 25px 20px;
     z-index: 10;
-    left: 0px;
-    top: 450px;
+    left: 400px;
+    top: 745px;
     width: 800px;
     height: 170px;
     gap: 20px;
