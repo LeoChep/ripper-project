@@ -8,6 +8,8 @@ import { CharacterController } from "./CharacterController";
 import { moveSelect } from "./UnitMoveController";
 import { SelectAnimSprite } from "../anim/SelectAnimSprite";
 import { zIndexSetting } from "../envSetting";
+import { CharCombatAttackController } from "./CharacterCombatAttackController";
+import type { CreatureAttack } from "../units/Creature";
 
 export class CharacterCombatController {
   public inUse: boolean = false;
@@ -26,6 +28,7 @@ export class CharacterCombatController {
   }
 
   useMoveController() {
+     CharCombatAttackController.instense?.removeFunction();
     this.selectedCharacter = this.mapPassiable?.sprites.find(
       (sprite) => sprite.id === CharacterController.curser
     );
@@ -49,5 +52,22 @@ export class CharacterCombatController {
   }
   useAttackController() {
     CharCombatMoveController.instense?.removeFunction();
+    if (
+      this.selectedCharacter &&
+      golbalSetting.mapContainer &&
+      golbalSetting.rlayers.lineLayer &&
+      this.mapPassiable
+    ) {
+      let atkController = CharCombatAttackController.instense;
+      if (!atkController) {
+        atkController = new CharCombatAttackController(
+          golbalSetting.mapContainer,
+          this.mapPassiable
+        );
+        CharCombatAttackController.instense = atkController;
+      }
+      atkController.selectedCharacter = this.selectedCharacter;
+      atkController.attackSelect(this.selectedCharacter.creature?.attacks[0] as CreatureAttack);
+    }
   }
 }

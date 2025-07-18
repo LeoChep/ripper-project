@@ -137,6 +137,10 @@ const selectPowerTab = (tab) => {
 
 const attackSelected = ref(false)
 const selectAttack = () => {
+    if (CharacterCombatController.instance.selectedCharacter.state !== 'idle') {
+    console.warn('当前角色状态不允许移动')
+    return
+  }
   activePowerTab.value = null
   attackSelected.value = true
   moveSelected.value = false
@@ -146,6 +150,10 @@ const selectAttack = () => {
 
 const moveSelected = ref(false)
 const selectMove = () => {
+  if (CharacterCombatController.instance.selectedCharacter.state !== 'idle') {
+    console.warn('当前角色状态不允许移动')
+    return
+  }
   CharacterCombatController.instance.useMoveController()
   activePowerTab.value = null
   attackSelected.value = false

@@ -36,6 +36,7 @@ export async function attackMovement(
   attack: CreatureAttack,
   mapPassiable: TiledMap | null
 ) {
+  unit.state = "attack";
   const spriteUnit = unit.animUnit;
   if (!spriteUnit) {
     console.error("动画精灵不存在");
@@ -97,6 +98,7 @@ export async function attackMovement(
         // alert("攻击未命中!");
       }
     }
+    unit.state = "idle";
   }
 }
 

@@ -34,6 +34,7 @@ export class CharacterController {
   }
   static lookOn() {
     const arrowSprite = new SelectAnimSprite();
+    arrowSprite.label='effect'
     const unit = CharacterController.selectedCharacter;
     if (!unit || !unit.animUnit) {
       console.warn("没有选中单位或单位动画精灵不存在");

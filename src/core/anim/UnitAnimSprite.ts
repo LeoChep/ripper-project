@@ -74,7 +74,7 @@ export class UnitAnimSpirite extends Container {
     // 如果当前状态与动画状态不一致，则更新渲染状态
     if (this._state !== this._animationState)
       this.children.forEach((child) => {
-        if (child.label !== this._state) {
+        if (child.label !== this._state&&child.label!=="effect") {
           child.renderable = false;
         }
       });
