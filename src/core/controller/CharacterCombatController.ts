@@ -10,7 +10,7 @@ import { SelectAnimSprite } from "../anim/SelectAnimSprite";
 import { zIndexSetting } from "../envSetting";
 import { CharCombatAttackController } from "./CharacterCombatAttackController";
 import type { CreatureAttack } from "../units/Creature";
-
+import * as InitiativeSystem from "../system/InitiativeSystem";
 export class CharacterCombatController {
   public inUse: boolean = false;
   public static instance: CharacterCombatController | null = null;
@@ -28,7 +28,7 @@ export class CharacterCombatController {
   }
 
   useMoveController() {
-     CharCombatAttackController.instense?.removeFunction();
+    CharCombatAttackController.instense?.removeFunction();
     this.selectedCharacter = this.mapPassiable?.sprites.find(
       (sprite) => sprite.id === CharacterController.curser
     );
@@ -67,7 +67,18 @@ export class CharacterCombatController {
         CharCombatAttackController.instense = atkController;
       }
       atkController.selectedCharacter = this.selectedCharacter;
-      atkController.attackSelect(this.selectedCharacter.creature?.attacks[0] as CreatureAttack);
+      atkController.attackSelect(
+        this.selectedCharacter.creature?.attacks[0] as CreatureAttack
+      );
     }
+  }
+  endTurn() {
+    if (!this.selectedCharacter) {
+      console.warn("没有选中单位，无法结束回合");
+      return;
+    }
+    CharCombatMoveController.instense?.removeFunction();
+    CharCombatAttackController.instense?.removeFunction();
+    InitiativeSystem.endTurn(this.selectedCharacter);
   }
 }

@@ -1,4 +1,4 @@
-import type { V } from 'vitest/dist/chunks/environment.d.cL3nLXbE.js';
+
 import { StateMachine } from './StateMachine';
 import type { Unit } from '../units/Unit';
 export class StateMachinePack {

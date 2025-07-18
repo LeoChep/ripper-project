@@ -10,6 +10,9 @@
           <button :class="['action-btn', { selected: moveSelected === true }]" @click="selectMove()">
             移动
           </button>
+             <button :class="['action-btn', ]" @click="endTurn()">
+            结束回合
+          </button>
           <!-- <button :class="['tab-btn', { active: activeActionTab === 'standard' }]" 
                             @click="activeActionTab = 'standard'">标准动作</button>
                     <button :class="['tab-btn', { active: activeActionTab === 'move' }]" 
@@ -159,8 +162,13 @@ const selectMove = () => {
   attackSelected.value = false
   moveSelected.value = true
   selectedAction.value = null // 清除选中的动作
-
-
+}
+const endTurn=()=>{
+    if (CharacterCombatController.instance.selectedCharacter.state !== 'idle') {
+    console.warn('当前角色状态不允许结束')
+    return
+  }
+  CharacterCombatController.instance.endTurn()
 }
 // 暴露给父组件的方法
 defineExpose({

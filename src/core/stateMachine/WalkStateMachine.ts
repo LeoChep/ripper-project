@@ -31,6 +31,8 @@ export class WalkStateMachine extends StateMachine {
   public doAction() {
     if (this.path.length === 0) {
       console.warn("没有路径可供移动");
+      this.callBack(); // 调用回调函数
+      this.callBack = () => {};
       return;
     }
     const nextPathPoint = this.path[0];
@@ -121,7 +123,7 @@ export class WalkStateMachine extends StateMachine {
         this.path = []; // 清空路径
         this.owner.state = "idle"; // 设置单位状态为闲置
         this.callBack(); // 调用回调函数
-        this.callBack=()=>{}
+        this.callBack = () => {};
       }
     }
   }
