@@ -1,4 +1,4 @@
-import { CharacterController } from './../controller/CharacterController';
+import { CharacterController } from "./../controller/CharacterController";
 import { getContainer, getLayers } from "@/stores/container";
 import { diceRoll } from "../DiceTryer";
 import type { TiledMap } from "../MapClass";
@@ -10,10 +10,9 @@ import { CharacterOutCombatController } from "../controller/CharacterOutCombatCo
 import { appSetting, zIndexSetting } from "../envSetting";
 import { SelectAnimSprite } from "../anim/SelectAnimSprite";
 import { lockOn } from "../anim/LockOnAnim";
-import { moveSelect } from '../controller/UnitMoveController';
-import { golbalSetting } from '../golbalSetting';
-import { CharacterCombatController } from '../controller/CharacterCombatController';
-
+import { moveSelect } from "../controller/UnitMoveController";
+import { golbalSetting } from "../golbalSetting";
+import { CharacterCombatController } from "../controller/CharacterCombatController";
 
 const InitiativeSheet = [] as InitiativeClass[];
 const initiativeCursor = {
@@ -49,12 +48,27 @@ export function removeFromInitiativeSheet(unit: Unit) {
   const initiative = unit.initiative;
   //从Initiative中移除initiative
   if (!initiative) return;
+
   const index = InitiativeSheet.indexOf(initiative);
   if (index !== -1) {
     InitiativeSheet.splice(index, 1);
   }
   unit.initiative = undefined;
   initiative.owner = undefined;
+  if (initiative == initiativeCursor.pointAt) {
+    endTurn(unit);
+  }
+  //遍历sheet
+  let haveEnemy=false;
+  InitiativeSheet.forEach((item) => {
+    if (item.owner?.party !== "player") {
+      haveEnemy = true;
+    }
+  });
+  if (!haveEnemy) {
+    //如果没有敌人了，则结束战斗
+    endBattle();
+  }
 }
 
 export async function startCombatTurn() {
@@ -94,7 +108,7 @@ export async function startCombatTurn() {
 
       //播放动画
       await playAnim(initiativeCursor.pointAt.owner);
-    
+
       //设置选中角色
       if (initiativeCursor.pointAt.owner.party !== "player") {
         //如果是npc,则自动行动
@@ -110,10 +124,10 @@ export async function startCombatTurn() {
       } else {
         //提醒玩家
         const unit = initiativeCursor.pointAt.owner;
-        CharacterController.curser=unit.id;
+        CharacterController.curser = unit.id;
         CharacterController.selectedCharacter = unit;
         CharacterController.lookOn();
-        CharacterCombatController.instance?.useMoveController()
+        CharacterCombatController.instance?.useMoveController();
       }
     }
   }
@@ -198,9 +212,11 @@ export function startBattle() {
     return;
   }
   if (!CharacterCombatController.instance) {
-    CharacterCombatController.instance = new CharacterCombatController(initiativeCursor.map);
+    CharacterCombatController.instance = new CharacterCombatController(
+      initiativeCursor.map
+    );
   }
-  CharacterCombatController.instance.mapPassiable= initiativeCursor.map;
+  CharacterCombatController.instance.mapPassiable = initiativeCursor.map;
   CharacterCombatController.instance.inUse = true;
 
   return playStartAnim();
@@ -281,7 +297,7 @@ async function playAnim(unit: Unit) {
     },
   });
   text.anchor.set(0.5);
-  text.x =appSetting.width / 2;
+  text.x = appSetting.width / 2;
   text.y = appSetting.height / 2;
   if (container && lineLayer) {
     container.addChild(text);
@@ -308,4 +324,60 @@ export function checkIsTurn(unit: Unit) {
     return true;
   }
   return false;
+}
+export async function endBattle() {
+  // 清空InitiativeSheet
+  while (InitiativeSheet.length > 0) {
+    InitiativeSheet.pop();
+  }
+  CharacterController.removeLookOn();
+  await playEndAnim();
+  CharacterOutCombatController.isUse = true;
+  if (CharacterCombatController.instance) {
+    CharacterCombatController.instance.inUse = false;
+  }
+}
+export async function playEndAnim() {
+  const container = golbalSetting.rootContainer;
+  const lineLayer = getLayers().lineLayer;
+  //
+  const graphics = new PIXI.Graphics();
+  graphics.rect(0, 0, appSetting.width, appSetting.height);
+  let color = 0x0000ff; // 默认颜色为红色
+
+  graphics.fill({ color: color, alpha: 0.5 });
+
+  if (container && lineLayer) {
+    container.addChild(graphics);
+    lineLayer.attach(graphics);
+  }
+
+  const text = new PIXI.Text({
+    text: "战斗结束",
+    style: {
+      fill: "#ffffff",
+      fontSize: 48,
+      fontWeight: "bold",
+      align: "center",
+    },
+  });
+  text.anchor.set(0.5);
+  text.x = appSetting.width / 2;
+  text.y = appSetting.height / 2;
+  if (container && lineLayer) {
+    container.addChild(text);
+    lineLayer.attach(text);
+  }
+  const animPromise = new Promise<void>((resolve) => {
+    setTimeout(() => {
+      if (container) {
+        container.removeChild(graphics);
+        container.removeChild(text);
+      }
+      graphics.destroy();
+      text.destroy();
+      resolve();
+    }, 1500);
+  });
+  return animPromise;
 }
