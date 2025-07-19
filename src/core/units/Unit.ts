@@ -74,7 +74,9 @@ export function createUnitsFromMapSprites(sprites: any[]): Unit[] {
             gid: obj.gid,
             direction: directionProp? directionProp.value : 2, // 默认方向为 0
         });
-        unit.ai= new NormalAI(); // 为每个 Unit 实例分配一个 AI 实例
+        if (unit.party!== "player") { unit.ai= new NormalAI(); unit.ai.owner = unit; } 
+
+       
         return unit;
     });
 }

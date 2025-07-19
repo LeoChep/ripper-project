@@ -1,6 +1,7 @@
 import type { Container } from "pixi.js";
 // If you are using @pixi/layers, import IRenderLayer from there:
 import type { IRenderLayer } from "pixi.js";
+import { TiledMap } from "./MapClass";
 
 export const golbalSetting = {
     rootContainer: null as null | Container,
@@ -13,5 +14,6 @@ export const golbalSetting = {
         fogLayer: null as null | IRenderLayer,
         selectLayer: null as null | IRenderLayer,
         controllerLayer: null as null | IRenderLayer
-    }
+    },
+    map:null as TiledMap|null
 }

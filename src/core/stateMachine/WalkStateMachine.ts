@@ -1,3 +1,4 @@
+import { OpportunitySystem } from "../system/OpportunitySystem";
 import type { Unit } from "../units/Unit";
 import { StateMachine } from "./StateMachine";
 const tileSize = 64; // 假设每个格子的大小为64像素
@@ -9,6 +10,8 @@ export class WalkStateMachine extends StateMachine {
   }[] = [];
   private targetX: number = 0;
   private targetY: number = 0;
+  private pauseMove: boolean = false;
+  private haveOpportunity: number[] = [];
   public callBack = () => {};
   constructor(unit: Unit) {
     super(unit);
@@ -35,9 +38,50 @@ export class WalkStateMachine extends StateMachine {
       this.callBack = () => {};
       return;
     }
+    if (this.pauseMove) {
+      console.log("移动已暂停");
+      return;
+    }
     const nextPathPoint = this.path[0];
     const nextX = nextPathPoint.x * tileSize;
     const nextY = nextPathPoint.y * tileSize;
+    //借机判断
+    const unitX = Math.floor((this.owner.x+tileSize/2) / tileSize);
+    const unitY = Math.floor((this.owner.y+tileSize/2) / tileSize);
+    //判断是否需要移动到新的格子
+    let haveMoveToNewTile = true;
+    if (unitX === nextPathPoint.x && unitY === nextPathPoint.y) {
+      haveMoveToNewTile = false; // 如果当前单位已经在目标格子上，则不需要移动
+    }
+    if (haveMoveToNewTile) {
+      const mayOpportunityUnit = OpportunitySystem.getOpportunityUnit(
+        unitX,
+        unitY,
+        this.owner
+      );
+      const opportunityUnit: Unit[] = [];
+      if (mayOpportunityUnit.length > 0) {
+        // 如果有单位可以触发借机，则暂停移动
+        mayOpportunityUnit.forEach((unit) => {
+          if (!this.haveOpportunity.includes(unit.id)) {
+            this.haveOpportunity.push(unit.id);
+            opportunityUnit.push(unit);
+          }
+        });
+      }
+      if (opportunityUnit.length > 0) {
+        // 如果有多个单位可以触发借机，则按照 InitiativeSheet 的顺序处理
+        this.pauseMove = true; // 暂停移动
+        OpportunitySystem.opportunitysHandle(this.owner, opportunityUnit).then(
+          () => {
+            this.pauseMove = false; // 恢复移动
+          }
+        );
+      } else {
+        console.log("没有单位可以触发借机");
+      }
+    }
+    //
     console.log("nextpoint", nextPathPoint);
     const unit = this.owner;
     const spriteUnit = this.owner.animUnit;
@@ -66,7 +110,9 @@ export class WalkStateMachine extends StateMachine {
     unit.direction = direction;
     this.movefunc(unit, nextX, nextY, this.path);
   }
-
+  clearHaveOpportunity() {
+    this.haveOpportunity = [];
+  }
   movefunc(
     unit: Unit,
     nextX: number,

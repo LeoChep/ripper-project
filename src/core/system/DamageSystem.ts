@@ -12,6 +12,7 @@ export function takeDamage(damage: number, unit: Unit, container: Container) {
 }
 
 async function takeDeath(unit: Unit, container: Container) {
+  unit.state = "dead"; // 设置单位状态为死亡
   await playDeathAnim(unit, container);
   removeFromInitiativeSheet(unit);
 }

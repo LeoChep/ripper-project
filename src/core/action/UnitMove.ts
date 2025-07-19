@@ -86,6 +86,7 @@ export const moveMovement = async (
     targetX,
     targetY
   );
+   (unit.stateMachinePack.getMachine("walk") as WalkStateMachine)?.clearHaveOpportunity()
   const movePromise=new Promise<void>((resolve) => {
    (unit.stateMachinePack.getMachine("walk") as WalkStateMachine).callBack=resolve;
   })

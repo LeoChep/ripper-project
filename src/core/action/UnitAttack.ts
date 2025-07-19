@@ -32,10 +32,11 @@ export function playerSelectAttackMovement(
 export async function attackMovement(
   targetX: number,
   targetY: number,
-  unit: Unit,
+  attacker: Unit,
   attack: CreatureAttack,
   mapPassiable: TiledMap | null
 ) {
+  const unit= attacker;
   unit.state = "attack";
   const spriteUnit = unit.animUnit;
   if (!spriteUnit) {

@@ -14,7 +14,7 @@ import { moveSelect } from "../controller/UnitMoveController";
 import { golbalSetting } from "../golbalSetting";
 import { CharacterCombatController } from "../controller/CharacterCombatController";
 
-const InitiativeSheet = [] as InitiativeClass[];
+export const InitiativeSheet = [] as InitiativeClass[];
 const initiativeCursor = {
   pointAt: null as null | InitiativeClass,
   map: null as null | TiledMap,
@@ -141,9 +141,10 @@ export async function startCombatTurn() {
 }
 
 export async function endTurn(unit: Unit) {
+   CharacterController.removeLookOn();
   if (unit.initiative) {
     unit.initiative.ready = false;
-    CharacterController.removeLookOn();
+   
   }
   const stayPromisee = new Promise<void>((resolve) => {
     setTimeout(() => {

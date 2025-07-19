@@ -7,9 +7,11 @@ import * as UnitMove from "../action/UnitMove";
 import * as UnitMoveController from "../system/UnitMoveSystem";
 import * as UnitAttack from "../action/UnitAttack";
 import { segmentsIntersect } from "../utils/MathUtil";
+import { golbalSetting } from "../golbalSetting";
 
 const tileSize = 64; // 假设每个格子的大小为64像素
 export class NormalAI implements AIInterface {
+  public owner: Unit | undefined;
   constructor() {
     // Initialization code for NormalAI
   }
@@ -40,9 +42,9 @@ export class NormalAI implements AIInterface {
     );
     if (result.target) {
       //移动
-      
+
       await UnitMove.moveMovement(result.x, result.y, unit, path);
-      console.log('aiUnit state',unit)
+      console.log("aiUnit state", unit);
       const attack = unit.creature?.attacks[0];
       const enemyX = Math.floor(result.target.x / tileSize);
       const enemyY = Math.floor(result.target.y / tileSize);
@@ -53,6 +55,28 @@ export class NormalAI implements AIInterface {
 
     InitiativeController.endTurn(unit);
     // Implement the logic for the AI to automatically take actions
+  }
+  async opportunityAttack(targetUnit: Unit) {
+    //  alert(`单位 ${targetUnit.name} 触发了借机攻击！`);
+    if (!this.owner) {
+      console.warn("AI owner is not defined.");
+      return;
+    }
+    if (!this.owner.creature?.attacks[0]) {
+      console.warn("AI owner has no attacks defined.");
+      return;
+    }
+    const enemyX = Math.floor(targetUnit.x / tileSize);
+    const enemyY = Math.floor(targetUnit.y / tileSize);
+    console.log(`AI单位尝试攻击: (${enemyX}, ${enemyY})`);
+    // 执
+    await UnitAttack.attackMovement(
+      enemyX,
+      enemyY,
+      this.owner,
+      this.owner.creature?.attacks[0],
+      golbalSetting.map
+    );
   }
 }
 

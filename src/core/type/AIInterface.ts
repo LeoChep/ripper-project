@@ -11,5 +11,7 @@ export interface AIInterface {
    * @param unit 当前行动的单位
    * @param map 地图对象
    */
-  autoAction(unit: Unit, map: TiledMap): void;
+  autoAction(unit: Unit, map: TiledMap): Promise<void>
+  opportunityAttack(targetUnit: Unit): Promise<void>
+  owner:Unit | undefined; // AI的拥有者单位
 }

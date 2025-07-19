@@ -11,8 +11,6 @@ import { generateWays } from "../utils/PathfinderUtil";
 
 export const checkPassiable = (
   unit: Unit,
-  prex: number,
-  prey: number,
   x: number,
   y: number,
   mapPassiable: TiledMap | null
@@ -34,11 +32,11 @@ export const checkPassiable = (
 
         // 获取两个格子的四个顶点和中点
         const pointsA = [
-          { x: prex + 32, y: prey + 32 },
-          { x: prex, y: prey },
-          { x: prex + 64, y: prey },
-          { x: prex + 64, y: prey + 64 },
-          { x: prex, y: prey + 64 },
+          { x: unit.x + 32, y: unit.y + 32 },
+          { x: unit.x, y: unit.y },
+          { x: unit.x + 64, y: unit.y },
+          { x: unit.x + 64, y: unit.y + 64 },
+          { x: unit.x, y: unit.y + 64 },
         ];
         const pointsB = [
           { x: testx + 32, y: testy + 32 },

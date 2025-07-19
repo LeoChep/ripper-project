@@ -32,6 +32,7 @@ import { createDoorFromDoorObj } from '@/core/units/Door'
 import { createDoorAnimSpriteFromDoor } from '@/core/anim/DoorAnimSprite'
 import * as envSetting  from '@/core/envSetting'
 import { golbalSetting } from '@/core/golbalSetting'
+
 const appSetting=envSetting.appSetting;
 onMounted(async () => {
     const app = new PIXI.Application();
@@ -108,6 +109,7 @@ onMounted(async () => {
     characterStore.setCharacterOutCombatController(characterOutCombatController);
     CharacterOutCombatController.instance = characterOutCombatController;
     d1.map = mapPassiable;
+    golbalSetting.map= mapPassiable;
     d1.start();
     console.log('app',app.stage)
 
