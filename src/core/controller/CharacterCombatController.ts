@@ -28,10 +28,17 @@ export class CharacterCombatController {
   }
 
   useMoveController() {
-    CharCombatAttackController.instense?.removeFunction();
     this.selectedCharacter = this.mapPassiable?.sprites.find(
       (sprite) => sprite.id === CharacterController.curser
     );
+    console.log("使用移动控制器", this.selectedCharacter,this.selectedCharacter?.initiative?.moveActionNumber);
+    if (
+      (this.selectedCharacter?.initiative?.moveActionNumber ?? 0) < 1
+    ) {
+      return;
+    }
+    CharCombatAttackController.instense?.removeFunction();
+
     if (
       this.selectedCharacter &&
       golbalSetting.mapContainer &&
@@ -51,6 +58,14 @@ export class CharacterCombatController {
     }
   }
   useAttackController() {
+    this.selectedCharacter = this.mapPassiable?.sprites.find(
+      (sprite) => sprite.id === CharacterController.curser
+    );
+    if (
+         (this.selectedCharacter?.initiative?.standerActionNumber ?? 0)<1 
+    ) {
+      return;
+    }
     CharCombatMoveController.instense?.removeFunction();
     if (
       this.selectedCharacter &&

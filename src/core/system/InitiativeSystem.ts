@@ -94,6 +94,8 @@ export async function startCombatTurn() {
 
       //播放动画
       await playAnim(initiativeCursor.pointAt.owner);
+    
+      //设置选中角色
       if (initiativeCursor.pointAt.owner.party !== "player") {
         //如果是npc,则自动行动
         if (
@@ -127,6 +129,7 @@ export async function startCombatTurn() {
 export async function endTurn(unit: Unit) {
   if (unit.initiative) {
     unit.initiative.ready = false;
+    CharacterController.removeLookOn();
   }
   const stayPromisee = new Promise<void>((resolve) => {
     setTimeout(() => {
