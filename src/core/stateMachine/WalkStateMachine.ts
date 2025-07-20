@@ -54,6 +54,8 @@ export class WalkStateMachine extends StateMachine {
       haveMoveToNewTile = false; // 如果当前单位已经在目标格子上，则不需要移动
     }
     if (haveMoveToNewTile) {
+      console.log(`单位 (${unitX}, ${unitY}) 移动到目标格子 (${nextPathPoint.x}, ${nextPathPoint.y})`);
+      // 检查是否有单位可以触
       const mayOpportunityUnit = OpportunitySystem.getOpportunityUnit(
         unitX,
         unitY,

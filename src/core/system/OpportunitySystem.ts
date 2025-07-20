@@ -3,6 +3,7 @@ import type { Unit } from "../units/Unit";
 import { checkPassiable } from "./AttackSystem";
 import { golbalSetting } from "../golbalSetting";
 import { InitiativeSheet } from "./InitiativeSystem";
+import { attackMovement } from "../action/UnitAttack";
 
 export class OpportunitySystem {
   constructor() {
@@ -19,9 +20,12 @@ export class OpportunitySystem {
       if (checkUnit === undefined) {
         return;
       }
-      if (checkUnit.party === targetUnit.party) {
-        return; // 如果是同一方的单位，则跳过
+      if (checkUnit.id === targetUnit.id) {
+        return; // 如果是目标单位本身，则跳过
       }
+        if (checkUnit.party === targetUnit.party) {
+          return; // 如果是同一方的单位，则跳过
+        }
       // 检查单位是否可以触发借机
       const checkUnitX = Math.floor(checkUnit.x / tileSize);
       const checkUnitY = Math.floor(checkUnit.y / tileSize);
@@ -65,7 +69,10 @@ export class OpportunitySystem {
   static opportunitysHandle(targetUnit: Unit, opportunityUnits: Unit[]) {
     const promises = [] as Promise<void>[];
     opportunityUnits.forEach((opportunityUnit) => {
-      const promise = OpportunitySystem.opportunityHandle(targetUnit, opportunityUnit);
+      const promise = OpportunitySystem.opportunityHandle(
+        targetUnit,
+        opportunityUnit
+      );
       promises.push(promise);
     });
     return Promise.all(promises);
@@ -75,8 +82,35 @@ export class OpportunitySystem {
     opportunityUnit: Unit
   ): Promise<void> {
     if (opportunityUnit.party === "player") {
-      alert(`单位 ${targetUnit.name} 触发了借机攻击！`);
-      return Promise.resolve();
+      return new Promise<void>((resolve) => {
+        const attack = opportunityUnit.creature?.attacks[0];
+        if (attack) {
+          const userChoice = confirm(
+            `单位 ${opportunityUnit.name} 可以触发借机攻击，是否执行？`
+          );
+          if (userChoice) {
+            // 执行借机攻击
+            const targetX = Math.floor(targetUnit.x / tileSize);
+            const targetY = Math.floor(targetUnit.y / tileSize);
+            attackMovement(
+              targetX,
+              targetY,
+              opportunityUnit,
+              attack,
+              golbalSetting.map
+            ).then(() => {
+              resolve();
+            });
+          } else {
+            // 用户选择不执行借机攻击
+            console.log(`单位 ${opportunityUnit.name} 未执行借机攻击`);
+            resolve();
+          }
+        } else {
+          // 没有有效攻击动作，直接 resolve
+          resolve();
+        }
+      });
     } else {
       if (opportunityUnit.ai === undefined) {
         console.warn(
@@ -84,7 +118,7 @@ export class OpportunitySystem {
         );
         return Promise.resolve();
       }
-      
+
       return opportunityUnit.ai?.opportunityAttack(targetUnit);
     }
   }
