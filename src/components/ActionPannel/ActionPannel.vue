@@ -168,6 +168,10 @@ const endTurn=()=>{
     console.warn('当前角色状态不允许结束')
     return
   }
+  if (!CharacterCombatController.instance.inUse) {
+    console.warn('当前无法结束回合')
+    return
+  }
   CharacterCombatController.instance.endTurn()
 }
 // 暴露给父组件的方法

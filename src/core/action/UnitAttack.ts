@@ -93,7 +93,7 @@ export async function attackMovement(
     if (target) {
       if (hitFlag) {
         //  alert("攻击命中!");
-        takeDamage(damage, target, container);
+       await takeDamage(damage, target, container);
       } else {
         // alert("攻击未命中!");
       }

@@ -100,6 +100,7 @@ export class CharacterCombatController {
         this.selectedCharacter.creature?.attacks[0] as CreatureAttack
       ).then((result)=>{
         console.log("attackSelect result", result);
+        this.resetDivideWalk();
         setTimeout(() => {
           if (result?.from!=='moveConrotller') {
               this.useMoveController();
@@ -116,6 +117,9 @@ export class CharacterCombatController {
     }
     CharCombatMoveController.instense?.removeFunction();
     CharCombatAttackController.instense?.removeFunction();
+     if (CharacterCombatController.instance) {
+       CharacterCombatController.instance.inUse = false;
+     }
     InitiativeSystem.endTurn(this.selectedCharacter);
   }
   resetDivideWalk() {

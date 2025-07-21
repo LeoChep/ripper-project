@@ -2,11 +2,11 @@ import type { Container } from "pixi.js";
 import { Unit } from "../units/Unit";
 import { removeFromInitiativeSheet } from "./InitiativeSystem";
 
-export function takeDamage(damage: number, unit: Unit, container: Container) {
+export async function takeDamage(damage: number, unit: Unit, container: Container) {
   if (unit.creature && typeof unit.creature.hp === "number") {
     unit.creature.hp -= damage;
     if (unit.creature.hp <= 0) {
-      takeDeath(unit, container);
+      await takeDeath(unit, container);
     }
   }
 }

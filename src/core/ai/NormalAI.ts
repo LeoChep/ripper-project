@@ -92,7 +92,7 @@ export class NormalAI implements AIInterface {
         }
       }
     }
-
+    
     InitiativeController.endTurn(unit);
     // Implement the logic for the AI to automatically take actions
   }

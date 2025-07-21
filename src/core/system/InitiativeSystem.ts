@@ -70,6 +70,9 @@ export function removeFromInitiativeSheet(unit: Unit) {
 }
 
 export async function startCombatTurn() {
+   if (CharacterCombatController.instance) {
+     CharacterCombatController.instance.inUse = false;
+   }
   if (!(InitiativeSheet.length > 0)) return;
   let maxInitiative = 0;
   let allNotReady = true;
@@ -121,6 +124,9 @@ export async function startCombatTurn() {
         }
       } else {
         //提醒玩家
+         if (CharacterCombatController.instance) {
+           CharacterCombatController.instance.inUse = true;
+         }
         const unit = initiativeCursor.pointAt.owner;
         CharacterController.curser = unit.id;
         CharacterController.selectedCharacter = unit;
@@ -144,6 +150,7 @@ export async function endTurn(unit: Unit) {
     unit.initiative.ready = false;
    
   }
+ 
   const stayPromisee = new Promise<void>((resolve) => {
     setTimeout(() => {
       resolve();
