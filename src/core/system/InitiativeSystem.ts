@@ -1,5 +1,5 @@
 import { CharacterController } from "./../controller/CharacterController";
-import { getContainer, getLayers } from "@/stores/container";
+import {  getLayers } from "@/stores/container";
 import { diceRoll } from "../DiceTryer";
 import type { TiledMap } from "../MapClass";
 import { InitiativeClass } from "../type/InitiativeClass";
@@ -7,10 +7,8 @@ import { Unit } from "../units/Unit";
 import * as PIXI from "pixi.js";
 import { useInitiativeStore } from "@/stores/initiativeStore";
 import { CharacterOutCombatController } from "../controller/CharacterOutCombatController";
-import { appSetting, zIndexSetting } from "../envSetting";
-import { SelectAnimSprite } from "../anim/SelectAnimSprite";
-import { lockOn } from "../anim/LockOnAnim";
-import { moveSelect } from "../controller/UnitMoveController";
+import { appSetting } from "../envSetting";
+
 import { golbalSetting } from "../golbalSetting";
 import { CharacterCombatController } from "../controller/CharacterCombatController";
 

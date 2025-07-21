@@ -8,6 +8,8 @@ export class WalkStateMachine extends StateMachine {
     x: number;
     y: number;
   }[] = [];
+  public onDivideWalk: boolean = false; // 是否分割行走
+  public leastDivideSpeed:number = 0//剩余
   private targetX: number = 0;
   private targetY: number = 0;
   private pauseMove: boolean = false;

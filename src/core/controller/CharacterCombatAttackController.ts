@@ -1,4 +1,3 @@
-
 import * as PIXI from "pixi.js";
 import { Unit } from "../units/Unit";
 import * as UnitMoveSystem from "../system/UnitMoveSystem";
@@ -31,11 +30,11 @@ export class CharCombatAttackController {
 
     // 初始化逻辑
   }
-  attackSelect = (attack: CreatureAttack) => {
+  attackSelect = (attack: CreatureAttack): Promise<any> => {
     const unit = this.selectedCharacter;
     if (unit === null) {
       console.warn("没有选中单位，无法进行移动选择");
-      return;
+      return Promise.resolve({});
     }
     if (this.graphics) {
       this.removeFunction();
@@ -44,14 +43,14 @@ export class CharCombatAttackController {
     const range = attack.range ? attack.range : 1; // 默认攻击范围为1
     const tileSize = 64;
     const graphics = new PIXI.Graphics();
-    
+
     this.graphics = graphics;
     graphics.alpha = 0.4;
     graphics.zIndex = envSetting.zIndexSetting.spriteZIndex;
     const spriteUnit = unit.animUnit;
     console.log("spriteUnits", unit);
     if (!spriteUnit) {
-      return;
+      return Promise.resolve({});
     }
     console.log(`动画精灵位置: (${spriteUnit.x}, ${spriteUnit.y})`);
     //
@@ -83,38 +82,56 @@ export class CharCombatAttackController {
     const container = golbalSetting.spriteContainer;
     if (!container) {
       console.warn("Map container not found.");
-      return;
+      return Promise.resolve({});
     }
     if (!golbalSetting.rlayers.spriteLayer) {
       console.warn("Sprite layer not found in global settings.");
-      return;
+      return Promise.resolve({});
     }
     golbalSetting.rlayers.spriteLayer.attach(graphics);
     container.addChild(graphics);
     // 点击其他地方移除移动范围
+    let cencel = false;
     const removeGraphics = () => {
       if (graphics.parent) {
         graphics.parent.removeChild(graphics);
         this.removeFunction = () => {};
       }
     };
-    let cannel = false;
-    this.removeFunction = () => {
+    let resolveCallback: (arg0: any) => void = () => {};
+    const promise = new Promise<any>((resolve) => {
+      resolveCallback = resolve;
+    });
+    this.removeFunction = (input:any) => {
+      cencel = true;
       removeGraphics();
-      
+      resolveCallback(input);
     };
     graphics.on("rightdown", (e) => {
       e.stopPropagation();
-      cannel = true;
+      cencel = true;
+      removeGraphics();
+      resolveCallback({});
     });
+
+    const ms = golbalSetting.mapContainer;
+    const msRemoveG=(e: { stopPropagation: () => void; })=>{
+      e.stopPropagation();
+      cencel = true;
+      removeGraphics();
+      resolveCallback({});
+      ms?.off("rightdown", msRemoveG);
+    }
+    ms?.on("rightdown", msRemoveG);
     graphics.on("pointerup", (e) => {
       console.log("pointerup");
       e.stopPropagation();
-
-      if (cannel) {
+      removeGraphics();
+      if (cencel) {
+        resolveCallback({ cencel: true });
         return;
       }
-      removeGraphics();
+
       if (
         unit.initiative &&
         typeof unit.initiative.standerActionNumber === "number"
@@ -127,10 +144,16 @@ export class CharCombatAttackController {
           unit.initiative.moveActionNumber
         );
       }
-      playerSelectAttackMovement(e, unit, attack, this.mapPassiable);
+      playerSelectAttackMovement(e, unit, attack, this.mapPassiable).then(
+        () => {
+          console.log("resolveCallback", {});
+          resolveCallback({});
+        }
+      );
       // moveMovement(e, unit, container, path);
     });
+    return promise;
   };
-  removeFunction = () => {};
+  removeFunction = (args?:any) => {};
   // 添加你的方法和属性
 }

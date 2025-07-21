@@ -71,6 +71,7 @@ export class NormalAI implements AIInterface {
         }
       }
       console.log("AI停止路径:", path[`${result.x},${result.y}`], result);
+      
       await UnitMove.moveMovement(result.x, result.y, unit, path);
       console.log("aiUnit state", unit);
       if (!isCantAttack) {

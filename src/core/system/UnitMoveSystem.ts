@@ -28,7 +28,8 @@ export const checkPassiable = (
     return false;
   }
 
-  console.log(`检查通行性: 单位位置 (${prey}, ${prey}), 目标位置 (${x}, ${y})`);
+  
+  // console.log(`检查通行性: 单位位置 (${prey}, ${prey}), 目标位置 (${x}, ${y})`);
   // 检查单位是否在地图上
   let passiable = true;
   if (mapPassiable) {

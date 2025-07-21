@@ -1,16 +1,15 @@
-import { lockOn } from "./../anim/LockOnAnim";
+
 import { golbalSetting } from "../golbalSetting";
 import type { TiledMap } from "../MapClass";
 import type { Unit } from "../units/Unit";
 import { CharCombatMoveController } from "./CharacterCombatMoveController";
 import { CharacterController } from "./CharacterController";
 
-import { moveSelect } from "./UnitMoveController";
-import { SelectAnimSprite } from "../anim/SelectAnimSprite";
-import { zIndexSetting } from "../envSetting";
+
 import { CharCombatAttackController } from "./CharacterCombatAttackController";
 import type { CreatureAttack } from "../units/Creature";
 import * as InitiativeSystem from "../system/InitiativeSystem";
+import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
 export class CharacterCombatController {
   public inUse: boolean = false;
   public static instance: CharacterCombatController | null = null;
@@ -27,17 +26,25 @@ export class CharacterCombatController {
     }
   }
 
-  useMoveController() {
+ useMoveController() {
     this.selectedCharacter = this.mapPassiable?.sprites.find(
       (sprite) => sprite.id === CharacterController.curser
     );
-    console.log("使用移动控制器", this.selectedCharacter,this.selectedCharacter?.initiative?.moveActionNumber);
+    console.log(
+      "使用移动控制器",
+      this.selectedCharacter,
+      this.selectedCharacter?.initiative?.moveActionNumber
+    );
+    const walkMachine = this.selectedCharacter?.stateMachinePack.getMachine(
+      "walk"
+    ) as WalkStateMachine;
     if (
-      (this.selectedCharacter?.initiative?.moveActionNumber ?? 0) < 1
+      (this.selectedCharacter?.initiative?.moveActionNumber ?? 0) < 1 &&
+      walkMachine.onDivideWalk === false
     ) {
       return;
     }
-    CharCombatAttackController.instense?.removeFunction();
+    CharCombatAttackController.instense?.removeFunction({'from':'moveConrotller'});
 
     if (
       this.selectedCharacter &&
@@ -54,19 +61,26 @@ export class CharacterCombatController {
         CharCombatMoveController.instense = moveController;
       }
       moveController.selectedCharacter = this.selectedCharacter;
-      moveController.moveSelect();
+      const move = moveController.moveSelect();
+      move.then((result) => {
+        console.log("moveSelect result", result);
+        if (result?.cencel === false) {
+          if (walkMachine.onDivideWalk === true) {
+            this.useMoveController();
+          }
+        }
+      });
     }
   }
   useAttackController() {
     this.selectedCharacter = this.mapPassiable?.sprites.find(
       (sprite) => sprite.id === CharacterController.curser
     );
-    if (
-         (this.selectedCharacter?.initiative?.standerActionNumber ?? 0)<1 
-    ) {
+    if ((this.selectedCharacter?.initiative?.standerActionNumber ?? 0) < 1) {
       return;
     }
     CharCombatMoveController.instense?.removeFunction();
+
     if (
       this.selectedCharacter &&
       golbalSetting.mapContainer &&
@@ -82,9 +96,17 @@ export class CharacterCombatController {
         CharCombatAttackController.instense = atkController;
       }
       atkController.selectedCharacter = this.selectedCharacter;
-      atkController.attackSelect(
+       atkController.attackSelect(
         this.selectedCharacter.creature?.attacks[0] as CreatureAttack
-      );
+      ).then((result)=>{
+        console.log("attackSelect result", result);
+        setTimeout(() => {
+          if (result?.from!=='moveConrotller') {
+              this.useMoveController();
+          }
+        },90)
+    
+      });
     }
   }
   endTurn() {
@@ -95,5 +117,14 @@ export class CharacterCombatController {
     CharCombatMoveController.instense?.removeFunction();
     CharCombatAttackController.instense?.removeFunction();
     InitiativeSystem.endTurn(this.selectedCharacter);
+  }
+  resetDivideWalk() {
+    const walkMachine = this.selectedCharacter?.stateMachinePack.getMachine(
+      "walk"
+    ) as WalkStateMachine;
+    if (walkMachine.onDivideWalk === true) {
+      walkMachine.onDivideWalk = false;
+      walkMachine.leastDivideSpeed = 0;
+    }
   }
 }

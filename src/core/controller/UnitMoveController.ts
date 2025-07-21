@@ -140,7 +140,8 @@ export const moveSelect = (
     if (cannel) {
       return;
     }
-    playerSelectMovement(e, unit, container, path);
+    
+    playerSelectMovement(e, unit, container, path,{});
     if (
       unit.initiative &&
       typeof unit.initiative.moveActionNumber === "number"

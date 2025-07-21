@@ -12,7 +12,6 @@ export function playerSelectAttackMovement(
   e: PIXI.FederatedPointerEvent,
   unit: Unit,
   attack: CreatureAttack,
-
   mapPassiable: TiledMap | null
 ) {
   e.stopPropagation();
@@ -21,7 +20,7 @@ export function playerSelectAttackMovement(
   const container = getContainer();
   if (!container) {
     console.error("container 不存在");
-    return;
+    return Promise.resolve({});
   }
   const offsetX = pos.x - container.x;
   const offsetY = pos.y - container.y;

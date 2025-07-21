@@ -141,8 +141,6 @@ const attackSelect = (
   const path = generateWays(startX, startY, range, (x, y, preX, preY) => {
     return checkPassiable(
       unit,
-      preX * tileSize,
-      preY * tileSize,
       x * tileSize,
       y * tileSize,
       mapPassiable

@@ -1,3 +1,4 @@
+import { walk } from "vue/compiler-sfc";
 import { golbalSetting } from "../golbalSetting";
 import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
 import type { Unit } from "../units/Unit";
@@ -6,12 +7,12 @@ export const playerSelectMovement = (
   event: PIXI.FederatedPointerEvent,
   unit: Unit,
   container: PIXI.Container<PIXI.ContainerChild>,
-  path: { [key: string]: { x: number; y: number } | null }
+  path: { [key: string]: { x: number; y: number; step: number } | null },
+  result: any
 ) => {
- 
   const pos = event.data.global;
   // 计算点击位置相对于动画精灵的偏移
-  let gobalContainer=golbalSetting.rootContainer;
+  let gobalContainer = golbalSetting.rootContainer;
   if (!gobalContainer) {
     console.error("全局容器不存在");
     return;
@@ -24,15 +25,31 @@ export const playerSelectMovement = (
     console.warn("点击位置不在可移动范围内");
     return;
   }
+  if (!unit.creature) {
+    console.warn("单位没有生物属性，无法进行移动");
+    return;
+  }
+  const walkMachine = unit.stateMachinePack.getMachine("walk") as WalkStateMachine;
+  if (!walkMachine) {
+    console.warn("单位没有行走状态机，无法进行移动");
+    return;
+  }
+  let speed = unit.creature.speed;
+
+  if (walkMachine.onDivideWalk) {
+    speed = walkMachine.leastDivideSpeed;
+  }
+  result.least =
+    speed - (path[`${targetX},${targetY}`]?.step ?? 0);
   return moveMovement(targetX, targetY, unit, path);
 };
-export const moveMovement = async (
+export const moveMovement =  (
   targetX: number,
   targetY: number,
   unit: Unit,
   path: { [key: string]: { x: number; y: number } | null }
 ) => {
-   unit.state = "walk"; // 设置单位状态为行走
+  unit.state = "walk"; // 设置单位状态为行走
   const tileSize = 64; // 格子大小
   //计算出动画精灵所在的格子
   const spriteUnit = unit.animUnit;
@@ -86,10 +103,17 @@ export const moveMovement = async (
     targetX,
     targetY
   );
-   (unit.stateMachinePack.getMachine("walk") as WalkStateMachine)?.clearHaveOpportunity()
-  const movePromise=new Promise<void>((resolve) => {
-   (unit.stateMachinePack.getMachine("walk") as WalkStateMachine).callBack=resolve;
-  })
+  if (
+    (unit.stateMachinePack.getMachine("walk") as WalkStateMachine)
+      ?.onDivideWalk === false
+  ) {
+    (
+      unit.stateMachinePack.getMachine("walk") as WalkStateMachine
+    )?.clearHaveOpportunity();
+  }
+  const movePromise = new Promise<void>((resolve) => {
+    (unit.stateMachinePack.getMachine("walk") as WalkStateMachine).callBack =
+      resolve;
+  });
   return movePromise;
 };
-

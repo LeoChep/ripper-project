@@ -76,11 +76,13 @@ export class CharacterOutCombatController {
     });
 
     console.log("Path generated:", path);
+    const result={}as any
     UnitMoveAction.playerSelectMovement(
       e,
       this.selectedCharacter,
       this.container,
-      path
+      path,
+      result
     );
   }
   // 添加你的方法和属性

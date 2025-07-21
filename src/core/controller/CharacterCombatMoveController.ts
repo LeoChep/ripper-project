@@ -10,6 +10,8 @@ import { useInitiativeStore } from "@/stores/initiativeStore";
 import * as envSetting from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import { FogSystem } from "../system/FogSystem_unuse";
+import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
+import type { A } from "vitest/dist/chunks/environment.d.cL3nLXbE.js";
 const tileSize = 64;
 
 type Rlayer = {
@@ -38,16 +40,27 @@ export class CharCombatMoveController {
     // 初始化逻辑
   }
   moveSelect = () => {
+    console.log("moveSSSS")
     const unit = this.selectedCharacter;
     if (unit === null) {
       console.warn("没有选中单位，无法进行移动选择");
-      return;
+      return Promise.resolve({});
     }
     if (this.graphics) {
       this.removeFunction();
     }
     //显示可移动范围
-    const range = unit.creature?.speed ?? 0;
+    let range = unit.creature?.speed ?? 0;
+    const walkMachine = unit.stateMachinePack.getMachine(
+      "walk"
+    ) as WalkStateMachine;
+    if (walkMachine.onDivideWalk) {
+      // console.warn("当前单位正在分割移动，无法进行选择");
+      if (walkMachine.leastDivideSpeed > 0) {
+        range = walkMachine.leastDivideSpeed;
+      }
+    }
+
     const tileSize = 64;
     const graphics = new PIXI.Graphics();
     graphics.alpha = 0.4;
@@ -55,7 +68,7 @@ export class CharCombatMoveController {
     const spriteUnit = unit.animUnit;
     console.log("spriteUnits", unit);
     if (!spriteUnit) {
-      return;
+      return Promise.resolve({});
     }
     console.log(`动画精灵位置: (${spriteUnit.x}, ${spriteUnit.y})`);
     //
@@ -87,21 +100,27 @@ export class CharCombatMoveController {
     }
 
     graphics.eventMode = "static";
-    if (FogSystem.instanse.mask) graphics.setMask({mask:FogSystem.instanse.mask});
+    if (FogSystem.instanse.mask)
+      graphics.setMask({ mask: FogSystem.instanse.mask });
     const container = golbalSetting.mapContainer;
     if (!container) {
       console.warn("Map container not found.");
-      return;
+      return Promise.resolve({});
     }
     if (!golbalSetting.rlayers.spriteLayer) {
       console.warn("Sprite layer not found in global settings.");
-      return;
+      return Promise.resolve({});
     }
     golbalSetting.rlayers.spriteLayer.attach(graphics);
     container.addChild(graphics);
 
     this.graphics = graphics;
     // 点击其他地方移除移动范围
+    let resolveCallback: (arg0: any) => void = () => {};
+    const promise = new Promise<any>((resolve) => {
+      resolveCallback = resolve;
+    });
+
     const removeGraphics = () => {
       if (graphics.parent) {
         graphics.parent.removeChild(graphics);
@@ -110,6 +129,7 @@ export class CharCombatMoveController {
     let cannel = false;
     this.removeFunction = () => {
       removeGraphics();
+      resolveCallback({});
       this.removeFunction = () => {};
     };
     graphics.on("pointerup", (e) => {
@@ -117,9 +137,14 @@ export class CharCombatMoveController {
       e.stopPropagation();
       removeGraphics();
       if (cannel) {
-        return;
+        return Promise.resolve({ cencel: true });
       }
-      playerSelectMovement(e, unit, container, path);
+      const result = {} as any;
+      result.cencel = false;
+      playerSelectMovement(e, unit, container, path, result)?.then(() => {
+        console.log("resolveCallback", result);
+        resolveCallback(result);
+      });
       if (
         unit.initiative &&
         typeof unit.initiative.moveActionNumber === "number"
@@ -131,8 +156,16 @@ export class CharCombatMoveController {
           unit.initiative.moveActionNumber
         );
         console.log(`剩余移动次数: ${unit.initiative.moveActionNumber}`);
+        if (result.least > 0) {
+          walkMachine.leastDivideSpeed = result.least;
+          walkMachine.onDivideWalk = true;
+        } else {
+          walkMachine.leastDivideSpeed = 0;
+          walkMachine.onDivideWalk = false;
+        }
       }
     });
+    return promise;
   };
   removeFunction = () => {};
   // 添加你的方法和属性
