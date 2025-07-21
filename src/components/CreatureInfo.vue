@@ -48,14 +48,35 @@
         <li v-for="n in creature.notes" :key="n">{{ n }}</li>
       </ul>
     </div>
-    <button @click="$emit('close')">关闭</button>
+    <div class="button-group">
+      <button @click="exportCreature">导出JSON</button>
+      <button @click="$emit('close')">关闭</button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { Creature } from '@/core/units/Creature'
-defineProps<{ creature: Creature | null }>()
+
 defineEmits(['close'])
+
+const props = defineProps<{ creature: Creature | null }>()
+
+const exportCreature = () => {
+  if (!props.creature) return
+  
+  const dataStr = JSON.stringify(props.creature, null, 2)
+  const dataBlob = new Blob([dataStr], { type: 'application/json' })
+  const url = URL.createObjectURL(dataBlob)
+  
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `${props.creature.name || 'creature'}.json`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
 </script>
 
 <style scoped>
@@ -85,5 +106,12 @@ defineEmits(['close'])
 }
 .creature-info button {
   margin-top: 16px;
+}
+.button-group {
+  margin-top: 16px;
+}
+.button-group button {
+  margin-top: 0;
+  margin-right: 8px;
 }
 </style>

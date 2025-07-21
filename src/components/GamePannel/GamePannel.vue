@@ -84,15 +84,6 @@ onMounted(async () => {
     //增加键盘监听
     addListenKeyboard(container);
 
-    //测试战斗
-    // InitiativeController.setMap(mapPassiable);
-    // const initCombatPromise = InitiativeController.addUnitsToInitiativeSheet(units)
-
-    // setTimeout(() => {
-    //     initCombatPromise.then(() => {
-    //         InitiativeController.startCombatTurn()
-    //     });
-    // }, 2000)
 
     //测试剧本
 
