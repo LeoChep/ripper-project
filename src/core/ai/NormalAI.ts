@@ -40,9 +40,13 @@ export class NormalAI implements AIInterface {
         }
       }
     );
-    console.log("AI路径计算结果:", path,path[`${result.x},${result.y}`], result);
-    if (result.target && path && path[`${result.x},${result.y}`] != null) {
-
+    console.log(
+      "AI路径计算结果:",
+      path,
+      path[`${result.x},${result.y}`],
+      result
+    );
+    if (result.target && path) {
       //移动
       //计算可以移动到的格子
       let rc = path[`${result.x},${result.y}`] as unknown as {
@@ -50,29 +54,34 @@ export class NormalAI implements AIInterface {
         y: number;
         step: number;
       };
-      let speed = 0;
-      if (unit.creature?.speed) {
-        speed = unit.creature.speed;
-      }
       let isCantAttack = false;
-      if (rc.step > speed) {
-        console.log(`AI单位 ${unit.name} 的步数 ${rc.step} 超过速度 ${speed}`);
-        isCantAttack = true; //如果步数大于速度，就不能攻击
-        let least =  rc.step-speed;
-        while (least > 0) {
-          result.x = rc.x;
-          result.y = rc.y;
-          rc = path[`${result.x},${result.y}`] as unknown as {
-            x: number;
-            y: number;
-            step: number;
-          };
-          least--;
+      if (rc) {
+        let speed = 0;
+        if (unit.creature?.speed) {
+          speed = unit.creature.speed;
         }
+
+        if (rc.step > speed) {
+          console.log(
+            `AI单位 ${unit.name} 的步数 ${rc.step} 超过速度 ${speed}`
+          );
+          isCantAttack = true; //如果步数大于速度，就不能攻击
+          let least = rc.step - speed;
+          while (least > 0) {
+            result.x = rc.x;
+            result.y = rc.y;
+            rc = path[`${result.x},${result.y}`] as unknown as {
+              x: number;
+              y: number;
+              step: number;
+            };
+            least--;
+          }
+        }
+        console.log("AI停止路径:", path[`${result.x},${result.y}`], result);
+        await UnitMove.moveMovement(result.x, result.y, unit, path);
       }
-      console.log("AI停止路径:", path[`${result.x},${result.y}`], result);
-      
-      await UnitMove.moveMovement(result.x, result.y, unit, path);
+
       console.log("aiUnit state", unit);
       if (!isCantAttack) {
         const attack = unit.creature?.attacks[0];
