@@ -15,20 +15,58 @@
   "fly": null,
   "initiative": 0,
   "senses": "",
-  "immunities": [ "疾病", "毒素" ],
-  "resistances": [ { "type": "黯蚀", "value": 10 } ],
+  "immunities": [
+    "疾病",
+    "毒素"
+  ],
+  "resistances": [
+    {
+      "type": "黯蚀",
+      "value": 10
+    }
+  ],
   "alignment": "无",
-  "languages": [ "-" ],
+  "languages": [
+    "-"
+  ],
   "skills": [],
   "abilities": [
-    { "name": "Strength", "value": 15, "modifier": 2 },
-    { "name": "Dexterity", "value": 17, "modifier": 3 },
-    { "name": "Constitution", "value": 13, "modifier": 1 },
-    { "name": "Intelligence", "value": 3, "modifier": -4 },
-    { "name": "Wisdom", "value": 14, "modifier": 2 },
-    { "name": "Charisma", "value": 3, "modifier": -4 }
+    {
+      "name": "Strength",
+      "value": 15,
+      "modifier": 2
+    },
+    {
+      "name": "Dexterity",
+      "value": 17,
+      "modifier": 3
+    },
+    {
+      "name": "Constitution",
+      "value": 13,
+      "modifier": 1
+    },
+    {
+      "name": "Intelligence",
+      "value": 3,
+      "modifier": -4
+    },
+    {
+      "name": "Wisdom",
+      "value": 14,
+      "modifier": 2
+    },
+    {
+      "name": "Charisma",
+      "value": 3,
+      "modifier": -4
+    }
   ],
-  "equipment": [ "长剑", "短弓", "20 支箭" ],
+  "equipment": [
+    "长剑",
+    "短弓",
+    "20 支箭"
+  ],
   "attacks": [
     {
       "name": "长剑",
@@ -53,6 +91,21 @@
       "missEffect": null
     }
   ],
+  "powers": [
+    {
+      "name": "突刺击",
+      "type": "encounter",
+      "action": "standard",
+      "range": null,
+      "target": null,
+      "description": "突刺击 Lunging Strike  MP\n战士攻击 1\n你一记突刺，击中了本来位于你攻击范围外的敌人。\n遭遇✦武术，武器\n标准动作✦近战武器 + 1触及\n目标： 一个生物\n攻击： 力量 - 1 vs. AC\n命中： 2[W] + 力量调整值的伤害。",
+      "damage": null,
+      "attackBonus": null,
+      "missEffect": null
+    }
+  ],
   "traits": [],
-  "notes": [ "Equipment: 长剑, 短弓, 20 支箭" ]
+  "notes": [
+    "Equipment: 长剑, 短弓, 20 支箭"
+  ]
 }

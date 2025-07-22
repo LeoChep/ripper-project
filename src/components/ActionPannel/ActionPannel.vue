@@ -48,7 +48,7 @@
     <div class="status-bar">
       <div class="current-selection">
         <span v-if="selectedAction">
-          当前选择：[{{ getActionTypeText(selectedAction.type) }}·{{ getPowerTypeText(selectedAction.powerType) }}]
+          当前选择：[{{ getActionTypeText(selectedAction.actionType) }}·{{ getPowerTypeText(selectedAction.powerType) }}]
         </span>
         <span v-else>当前选择：无</span>
       </div>
@@ -83,22 +83,24 @@ const remainingActionPoints = ref(3)
 
 // 从角色获取威能数据
 const actions = computed(() => {
-  const character = CharacterCombatController.instance?.selectedCharacter
+  const character = props.character.creature
   if (!character || !character.powers) {
     return []
   }
-
-  return character.powers.map((power, index) => ({
+  console.log('获取威能数据:', character.powers)
+  const actions=character.powers.map((power, index) => ({
     id: `power_${index}`,
     name: power.name,
-    type: power.actionType, // 'standard', 'move', 'minor'
-    powerType: power.useType, // 'atwill', 'encounter', 'daily', 'utility'
+    actionType: power.action, // 'standard', 'move', 'minor'
+    powerType: power.type, // 'atwill', 'encounter', 'daily', 'utility'
     power: power // 保存完整的威能对象以供后续使用
   }))
+  console.log('获取的动作:', actions)
+  return actions
 })
 
 // 监听角色变化，重置选择状态
-watch(() => CharacterCombatController.instance?.selectedCharacter, (newCharacter) => {
+watch(() => props.character, (newCharacter) => {
   selectedAction.value = null
   attackSelected.value = false
   moveSelected.value = false
@@ -106,6 +108,7 @@ watch(() => CharacterCombatController.instance?.selectedCharacter, (newCharacter
 
 // 过滤动作
 const filteredActions = computed(() => {
+  console.log('过滤动作:', props.character)
   return actions.value.filter(action =>
     // action.type === activeActionTab.value && 
     action.powerType === activePowerTab.value
@@ -137,7 +140,7 @@ const getPowerTypeText = (type) => {
 // 选择动作
 const selectAction = (action) => {
   selectedAction.value = action
-  console.log('选中威能:', action.power)
+  console.log('选中威能:', action)
   emit('actionSelected', action)
 }
 //

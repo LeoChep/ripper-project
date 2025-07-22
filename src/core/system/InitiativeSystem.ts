@@ -16,6 +16,7 @@ export const InitiativeSheet = [] as InitiativeClass[];
 const initiativeCursor = {
   pointAt: null as null | InitiativeClass,
   map: null as null | TiledMap,
+  inBattle: false
 };
 
 export async function addUnitsToInitiativeSheet(units: Unit[]) {
@@ -70,6 +71,7 @@ export function removeFromInitiativeSheet(unit: Unit) {
 }
 
 export async function startCombatTurn() {
+  initiativeCursor.inBattle = true;
   if (CharacterCombatController.instance) {
     CharacterCombatController.instance.inUse = false;
   }
@@ -156,9 +158,14 @@ export async function endTurn(unit: Unit) {
     }, 500); // 延时1秒
   });
   await stayPromisee;
+  if (initiativeCursor.inBattle === false) {
+    return;
+  }
   startCombatTurn();
 }
-
+export function isInBattle() {  
+  return initiativeCursor.inBattle;
+}
 export function useMoveAction(unit: Unit) {
   if (!unit.initiative) {
     return false;
@@ -332,10 +339,11 @@ export function checkIsTurn(unit: Unit) {
 }
 export async function endBattle() {
   // 清空InitiativeSheet
+  initiativeCursor.inBattle = false;
   while (InitiativeSheet.length > 0) {
     InitiativeSheet.pop();
   }
-  endTurn(CharacterController.selectedCharacter as Unit);
+  await endTurn(CharacterController.selectedCharacter as Unit);
   CharacterController.removeLookOn();
 
   await playEndAnim();

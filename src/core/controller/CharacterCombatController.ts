@@ -47,6 +47,7 @@ export class CharacterCombatController {
     }
     CharCombatAttackController.instense?.removeFunction({
       from: "moveConrotller",
+      cencel: true
     });
 
     if (
@@ -110,7 +111,7 @@ export class CharacterCombatController {
           console.log("attackSelect result", result);
           this.resetDivideWalk();
           setTimeout(() => {
-            if (result?.from !== "moveConrotller") {
+            if (result?.from !== "moveConrotller" && InitiativeSystem.isInBattle()) {
               this.useMoveController();
             }
           }, 90);
