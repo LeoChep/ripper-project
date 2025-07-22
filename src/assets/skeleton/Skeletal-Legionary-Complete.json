@@ -1,0 +1,1039 @@
+{
+  "name": "骷髅士兵",
+  "type": "NPC",
+  "img": "",
+  "system": {
+    "biography": "",
+    "details": {
+      "size": "med",
+      "origin": "natural",
+      "type": "animate",
+      "other": "undead",
+      "race": "骷髅",
+      "age": "",
+      "gender": "",
+      "height": "",
+      "weight": "",
+      "alignment": "无",
+      "deity": "",
+      "level": 7,
+      "tier": 2,
+      "exp": 75,
+      "bloodied": 0,
+      "surgeValue": 0,
+      "surgeBon": {
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 0
+      },
+      "surges": {
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 0,
+        "max": 0
+      },
+      "surgeEnv": {
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 0
+      },
+      "saves": {
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 0
+      },
+      "class": "士兵",
+      "paragon": "",
+      "epic": "",
+      "secondwind": false,
+      "secondwindEffect": {},
+      "deathsaves": 3,
+      "deathsavefail": 0,
+      "deathsaveCrit": 20,
+      "deathsavebon": {
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 0
+      },
+      "secondwindbon": {
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 0,
+        "custom": ""
+      },
+      "weaponProf": {
+        "value": [],
+        "custom": ""
+      },
+      "armourProf": {
+        "value": [],
+        "custom": ""
+      }
+    },
+    "languages": {
+      "spoken": {
+        "value": [],
+        "custom": ""
+      },
+      "script": {
+        "value": [],
+        "custom": ""
+      }
+    },
+    "senses": {
+      "vision": {
+        "value": ["darkvision"],
+        "custom": ""
+      },
+      "special": {
+        "value": [],
+        "custom": ""
+      },
+      "notes": "黑暗视觉"
+    },
+    "abilities": {
+      "str": {
+        "value": 18,
+        "chat": "@name uses @label.",
+        "mod": 7
+      },
+      "con": {
+        "value": 16,
+        "chat": "@name uses @label.",
+        "mod": 6
+      },
+      "dex": {
+        "value": 19,
+        "chat": "@name uses @label.",
+        "mod": 7
+      },
+      "int": {
+        "value": 3,
+        "chat": "@name uses @label.",
+        "mod": -1
+      },
+      "wis": {
+        "value": 14,
+        "chat": "@name uses @label.",
+        "mod": 5
+      },
+      "cha": {
+        "value": 3,
+        "chat": "@name uses @label.",
+        "mod": -1
+      }
+    },
+    "attributes": {
+      "hp": {
+        "value": 1,
+        "min": 0,
+        "max": 1,
+        "temp": 0,
+        "perlevel": 0,
+        "details": "失手攻击无法伤害杂兵"
+      },
+      "temphp": {
+        "value": 0,
+        "max": 0
+      },
+      "init": {
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 9
+      },
+      "actionpoints": {
+        "value": 1,
+        "encounteruse": false,
+        "effects": "",
+        "notes": "",
+        "custom": ""
+      },
+      "movement": {
+        "base": {
+          "value": 5,
+          "bonus": [],
+          "feat": 0,
+          "item": 0,
+          "power": 0,
+          "race": 0,
+          "untyped": 0,
+          "temp": 0,
+          "base": 5,
+          "armour": 0
+        },
+        "walk": {
+          "value": 5,
+          "formula": "@base + @armour",
+          "bonus": [],
+          "feat": 0,
+          "item": 0,
+          "power": 0,
+          "race": 0,
+          "untyped": 0,
+          "temp": 0
+        },
+        "charge": {
+          "value": 5,
+          "formula": "@base + @armour",
+          "bonus": [],
+          "feat": 0,
+          "item": 0,
+          "power": 0,
+          "race": 0,
+          "untyped": 0,
+          "temp": 0
+        },
+        "run": {
+          "value": 7,
+          "formula": "@base + @armour + 2",
+          "bonus": [],
+          "feat": 0,
+          "item": 0,
+          "power": 0,
+          "race": 0,
+          "untyped": 0,
+          "temp": 0,
+          "misc": 0
+        },
+        "climb": {
+          "value": 2,
+          "formula": "(@base + @armour)/2",
+          "bonus": [],
+          "feat": 0,
+          "item": 0,
+          "power": 0,
+          "race": 0,
+          "untyped": 0,
+          "temp": 0
+        },
+        "shift": {
+          "value": 1,
+          "formula": "1",
+          "bonus": [],
+          "feat": 0,
+          "item": 0,
+          "power": 0,
+          "race": 0,
+          "untyped": 0,
+          "temp": 0
+        },
+        "swim": {
+          "value": 2,
+          "formula": "(@base + @armour)/2",
+          "bonus": [],
+          "feat": 0,
+          "item": 0,
+          "power": 0,
+          "race": 0,
+          "untyped": 0,
+          "temp": 0
+        },
+        "notes": ""
+      }
+    },
+    "defences": {
+      "ac": {
+        "value": 23,
+        "armour": 0,
+        "class": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "enhance": 0,
+        "shield": 0,
+        "temp": 0,
+        "ability": "dex"
+      },
+      "fort": {
+        "value": 20,
+        "armour": 0,
+        "class": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "enhance": 0,
+        "shield": 0,
+        "temp": 0,
+        "ability": "str"
+      },
+      "ref": {
+        "value": 20,
+        "armour": 0,
+        "class": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "enhance": 0,
+        "shield": 0,
+        "temp": 0,
+        "ability": "dex"
+      },
+      "wil": {
+        "value": 18,
+        "armour": 0,
+        "class": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "enhance": 0,
+        "shield": 0,
+        "temp": 0,
+        "ability": "wis"
+      }
+    },
+    "modifiers": {
+      "attack": {
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 0
+      },
+      "damage": {
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 0
+      },
+      "skills": {
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 0
+      },
+      "defences": {
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 0
+      }
+    },
+    "skills": {
+      "acr": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "ability": "dex",
+        "armourCheck": true,
+        "chat": "@name makes an Acrobatics check.",
+        "bonus": []
+      },
+      "arc": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "ability": "int",
+        "armourCheck": false,
+        "chat": "@name makes an Arcana check.",
+        "bonus": []
+      },
+      "ath": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "ability": "str",
+        "armourCheck": true,
+        "chat": "@name makes an Athletics check.",
+        "bonus": []
+      },
+      "blu": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "ability": "cha",
+        "armourCheck": false,
+        "chat": "@name makes a Bluff check.",
+        "bonus": []
+      },
+      "dip": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "ability": "cha",
+        "armourCheck": false,
+        "chat": "@name makes a Diplomacy check.",
+        "bonus": []
+      },
+      "dun": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "ability": "wis",
+        "armourCheck": false,
+        "chat": "@name makes a Dungeoneering check.",
+        "bonus": []
+      },
+      "end": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "ability": "con",
+        "armourCheck": true,
+        "chat": "@name makes an Endurance check.",
+        "bonus": []
+      },
+      "hea": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "ability": "wis",
+        "armourCheck": false,
+        "chat": "@name makes a Heal check.",
+        "bonus": []
+      },
+      "his": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "ability": "int",
+        "armourCheck": false,
+        "chat": "@name makes a History check.",
+        "bonus": []
+      },
+      "ins": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "ability": "wis",
+        "armourCheck": false,
+        "chat": "@name makes an Insight check.",
+        "bonus": []
+      },
+      "itm": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "ability": "cha",
+        "armourCheck": false,
+        "chat": "@name makes an Intimidate check.",
+        "bonus": []
+      },
+      "nat": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "ability": "wis",
+        "armourCheck": false,
+        "chat": "@name makes a Nature check.",
+        "bonus": []
+      },
+      "prc": {
+        "value": 5,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "ability": "wis",
+        "armourCheck": false,
+        "chat": "@name makes a Perception check.",
+        "bonus": []
+      },
+      "rel": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "ability": "int",
+        "armourCheck": false,
+        "chat": "@name makes a Religion check.",
+        "bonus": []
+      },
+      "stl": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "ability": "dex",
+        "armourCheck": true,
+        "chat": "@name makes a Stealth check.",
+        "bonus": []
+      },
+      "stw": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "ability": "cha",
+        "armourCheck": false,
+        "chat": "@name makes a Streetwise check.",
+        "bonus": []
+      },
+      "thi": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "ability": "dex",
+        "armourCheck": true,
+        "chat": "@name makes a Thievery check.",
+        "bonus": []
+      }
+    },
+    "skillTraining": {
+      "untrained": {
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 0
+      },
+      "trained": {
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 5
+      },
+      "expertise": {
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 8
+      }
+    },
+    "passive": {
+      "pasprc": {
+        "value": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "skill": "prc",
+        "bonus": []
+      },
+      "pasins": {
+        "value": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "skill": "ins",
+        "bonus": []
+      }
+    },
+    "resistances": {
+      "physical": {
+        "res": 0,
+        "vuln": 0,
+        "immune": false
+      },
+      "acid": {
+        "res": 0,
+        "vuln": 0,
+        "immune": false
+      },
+      "cold": {
+        "res": 0,
+        "vuln": 0,
+        "immune": false
+      },
+      "fire": {
+        "res": 0,
+        "vuln": 0,
+        "immune": false
+      },
+      "force": {
+        "res": 0,
+        "vuln": 0,
+        "immune": false
+      },
+      "lightning": {
+        "res": 0,
+        "vuln": 0,
+        "immune": false
+      },
+      "necrotic": {
+        "res": 10,
+        "vuln": 0,
+        "immune": false
+      },
+      "poison": {
+        "res": 0,
+        "vuln": 0,
+        "immune": true
+      },
+      "psychic": {
+        "res": 0,
+        "vuln": 0,
+        "immune": false
+      },
+      "radiant": {
+        "res": 0,
+        "vuln": 0,
+        "immune": false
+      },
+      "thunder": {
+        "res": 0,
+        "vuln": 0,
+        "immune": false
+      },
+      "disease": {
+        "res": 0,
+        "vuln": 0,
+        "immune": true
+      }
+    },
+    "untypedResistances": {
+      "physical": 0,
+      "acid": 0,
+      "cold": 0,
+      "fire": 0,
+      "force": 0,
+      "lightning": 0,
+      "necrotic": 0,
+      "poison": 0,
+      "psychic": 0,
+      "radiant": 0,
+      "thunder": 0
+    },
+    "commonAttackBonuses": {
+      "weapon": {
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 0
+      },
+      "melee": {
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 0
+      },
+      "ranged": {
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 0
+      },
+      "damage": {
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 0
+      }
+    },
+    "currency": {
+      "copper": 0,
+      "silver": 0,
+      "gold": 0,
+      "platinum": 0,
+      "astral": 0
+    },
+    "ritualcomp": {
+      "alchemical": 0,
+      "arcane": 0,
+      "divine": 0,
+      "elemental": 0,
+      "nature": 0,
+      "shadow": 0,
+      "binding": 0
+    },
+    "movement": {
+      "base": {
+        "value": 5,
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "temp": 0,
+        "base": 5,
+        "armour": 0
+      },
+      "walk": {
+        "value": 5,
+        "formula": "@base + @armour",
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "temp": 0
+      },
+      "charge": {
+        "value": 5,
+        "formula": "@base + @armour",
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "temp": 0
+      },
+      "run": {
+        "value": 7,
+        "formula": "@base + @armour + 2",
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "temp": 0,
+        "misc": 0
+      },
+      "climb": {
+        "value": 2,
+        "formula": "(@base + @armour)/2",
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "temp": 0
+      },
+      "shift": {
+        "value": 1,
+        "formula": "1",
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "temp": 0
+      },
+      "swim": {
+        "value": 2,
+        "formula": "(@base + @armour)/2",
+        "bonus": [],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "temp": 0
+      },
+      "notes": ""
+    },
+    "resources": {
+      "primary": {
+        "label": "",
+        "value": 0,
+        "max": 0,
+        "sr": false,
+        "lr": false
+      },
+      "secondary": {
+        "label": "",
+        "value": 0,
+        "max": 0,
+        "sr": false,
+        "lr": false
+      },
+      "tertiary": {
+        "label": "",
+        "value": 0,
+        "max": 0,
+        "sr": false,
+        "lr": false
+      }
+    },
+    "magicItemUse": {
+      "perDay": 1,
+      "milestone": 0
+    },
+    "encumbrance": {
+      "value": 0,
+      "max": 0,
+      "pct": 0,
+      "encumbered": false
+    },
+    "featureSortTypes": "name",
+    "powerGroupTypes": "usage",
+    "powerSortTypes": "name",
+    "ritualSortTypes": "name"
+  },
+  "items": [
+    {
+      "name": "长剑",
+      "type": "weapon",
+      "img": "",
+      "system": {
+        "description": "",
+        "equipped": true,
+        "identified": true,
+        "weaponType": "melee",
+        "proficient": true,
+        "weight": 4,
+        "price": 15,
+        "damage": {
+          "parts": [["1d8", "slashing"]]
+        },
+        "properties": ["versatile"]
+      }
+    },
+    {
+
+      "name": "标枪",
+      "type": "weapon",
+      "img": "",
+      "system": {
+        "description": "",
+        "equipped": true,
+        "identified": true,
+        "weaponType": "ranged",
+        "proficient": true,
+        "weight": 2,
+        "price": 5,
+        "quantity": 3,
+        "range": {
+          "value": 20,
+          "long": 60,
+          "units": "squares"
+        },
+        "damage": {
+          "parts": [["1d6", "piercing"]]
+        },
+        "properties": ["thrown"]
+      }
+    },
+    {
+
+      "name": "鳞甲",
+      "type": "equipment",
+      "img": "",
+      "system": {
+        "description": "",
+        "equipped": true,
+        "identified": true,
+        "armorType": "medium",
+        "ac": {
+          "value": 14
+        },
+        "weight": 45,
+        "price": 50
+      }
+    },
+    {
+
+      "name": "重盾",
+      "type": "equipment",
+      "img": "",
+      "system": {
+        "description": "",
+        "equipped": true,
+        "identified": true,
+        "ac": {
+          "value": 2
+        },
+        "weight": 6,
+        "price": 15
+      }
+    },
+    {
+
+      "name": "基本近战：长剑",
+      "type": "power",
+      "img": "",
+      "system": {
+        "description": "攻击：近战 1（一个生物）+12vs.AC命中：7 点伤害。效果：该骷髅标记目标直到该骷髅下回合结束。",
+        "actionType": "standard",
+        "usage": "atwill",
+        "recharge": "",
+        "range": "melee 1",
+        "target": "一个生物",
+        "attack": {
+          "formula": "+12",
+          "ability": "str"
+        },
+        "damage": {
+          "formula": "7",
+          "type": "physical"
+        },
+        "effect": "该骷髅标记目标直到该骷髅下回合结束。"
+      }
+    },
+    {
+
+      "name": "基本远程：标枪",
+      "type": "power",
+      "img": "",
+      "system": {
+        "description": "攻击：射程 20（一个生物）+12vs.AC命中：7 点伤害。效果：该骷髅标记目标直到该骷髅下回合结束。",
+        "actionType": "standard",
+        "usage": "atwill",
+        "recharge": "",
+        "range": "ranged 20",
+        "target": "一个生物",
+        "attack": {
+          "formula": "+12",
+          "ability": "str"
+        },
+        "damage": {
+          "formula": "7",
+          "type": "physical"
+        },
+        "effect": "该骷髅标记目标直到该骷髅下回合结束。"
+      }
+    },
+    {
+
+      "name": "杂兵",
+      "type": "feature",
+      "img": "",
+      "system": {
+        "description": "失手攻击无法伤害杂兵",
+        "featureType": "trait"
+      }
+    }
+  ],
+  "effects": [],
+  "flags": {},
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  }
+}

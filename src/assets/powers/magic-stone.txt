@@ -1,0 +1,9 @@
+魔法石 Magic Stones  HoF
+德鲁伊攻击 1
+Three small stones clutched in your hand glow with a green light as you throw them, then explode when they strike your foes.
+随意✦法器，原力
+标准动作✦远程10
+目标：	一、二或三个生物
+攻击：	感知 vs. 反射
+命中：	1d4 + 感知调整值的伤害，且你可以推离目标1格。
+21级：2d4 + 感知调整值的伤害。

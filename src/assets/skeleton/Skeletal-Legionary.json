@@ -1,0 +1,49 @@
+{
+  "name": "骷髅士兵",
+  "type": "NPC",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+    "details": {
+      "level": 7,
+      "race": "骷髅",
+      "class": "士兵"
+    },
+    "abilities": {
+      "str": {
+        "value": 18,
+        "mod": 7
+      },
+      "con": {
+        "value": 16,
+        "mod": 6
+      },
+      "dex": {
+        "value": 19,
+        "mod": 7
+      },
+      "int": {
+        "value": 3,
+        "mod": -1
+      },
+      "wis": {
+        "value": 14,
+        "mod": 5
+      },
+      "cha": {
+        "value": 3,
+        "mod": -1
+      }
+    },
+    "attributes": {
+      "hp": {
+        "value": 1,
+        "max": 1
+      }
+    }
+  },
+  "prototypeToken": {},
+  "items": [],
+  "effects": [],
+  "folder": null,
+  "flags": {}
+}

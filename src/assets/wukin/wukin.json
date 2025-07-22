@@ -1,0 +1,2010 @@
+{
+  "name": "乌金",
+  "type": "Player Character",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+    "biography": "",
+    "details": {
+      "size": "med",
+      "origin": "natural",
+      "type": "humanoid",
+      "other": "",
+      "race": "人类",
+      "age": "",
+      "gender": "",
+      "height": "",
+      "weight": "",
+      "alignment": "",
+      "deity": "",
+      "level": 2,
+      "tier": 1,
+      "exp": 0,
+      "bloodied": 0,
+      "surgeValue": 0,
+      "surgeBon": {
+        "bonus": [
+          {}
+        ],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 0
+      },
+      "surges": {
+        "value": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "max": 0
+      },
+      "surgeEnv": {
+        "bonus": [
+          {}
+        ],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 0
+      },
+      "saves": {
+        "bonus": [
+          {}
+        ],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 0
+      },
+      "class": "德鲁伊",
+      "paragon": "",
+      "epic": "",
+      "secondwind": false,
+      "secondwindEffect": {},
+      "deathsaves": 3,
+      "deathsavefail": 0,
+      "deathsaveCrit": 20,
+      "deathsavebon": {
+        "bonus": [
+          {}
+        ],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "value": 0
+      },
+      "secondwindbon": {
+        "bonus": [
+          {}
+        ],
+        "value": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "custom": ""
+      },
+      "weaponProf": {
+        "value": [],
+        "custom": ""
+      },
+      "armourProf": {
+        "value": [],
+        "custom": ""
+      }
+    },
+    "languages": {
+      "spoken": {
+        "value": [],
+        "custom": ""
+      },
+      "script": {
+        "value": [],
+        "custom": ""
+      }
+    },
+    "senses": {
+      "vision": {
+        "value": [],
+        "custom": ""
+      },
+      "special": {
+        "value": [],
+        "custom": ""
+      },
+      "notes": ""
+    },
+    "abilities": {
+      "str": {
+        "value": 10,
+        "chat": "@name uses @label."
+      },
+      "con": {
+        "value": 11,
+        "chat": "@name uses @label."
+      },
+      "dex": {
+        "value": 14,
+        "chat": "@name uses @label.",
+        "mod": 2
+      },
+      "int": {
+        "value": 10,
+        "chat": "@name uses @label."
+      },
+      "wis": {
+        "value": 20,
+        "chat": "@name uses @label.",
+        "mod": 5
+      },
+      "cha": {
+        "value": 8,
+        "chat": "@name uses @label.",
+        "mod": -1
+      }
+    },
+    "attributes": {
+      "hp": {
+        "value": 10,
+        "min": 0,
+        "max": 10,
+        "starting": 0,
+        "perlevel": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "misc": 0,
+        "autototal": false,
+        "temprest": false
+      },
+      "temphp": {
+        "value": null,
+        "max": 10
+      },
+      "init": {
+        "value": 0,
+        "ability": "dex",
+        "bonus": [
+          {}
+        ],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "notes": ""
+      }
+    },
+    "actionpoints": {
+      "value": 1,
+      "encounteruse": false,
+      "effects": "",
+      "notes": "",
+      "custom": ""
+    },
+    "defences": {
+      "ac": {
+        "value": 10,
+        "ability": "",
+        "armour": 0,
+        "class": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "enhance": 0,
+        "shield": 0,
+        "bonus": [
+          {}
+        ],
+        "temp": 0,
+        "light": false,
+        "altability": "",
+        "condition": "Conditional Bonuses.",
+        "chat": "@name defends with armour."
+      },
+      "fort": {
+        "value": 10,
+        "ability": "",
+        "armour": 0,
+        "class": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "enhance": 0,
+        "shield": 0,
+        "bonus": [
+          {}
+        ],
+        "temp": 0,
+        "condition": "Conditional Bonuses.",
+        "chat": "@name defends with fortitude."
+      },
+      "ref": {
+        "value": 10,
+        "ability": "",
+        "armour": 0,
+        "class": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "enhance": 0,
+        "shield": 0,
+        "bonus": [
+          {}
+        ],
+        "temp": 0,
+        "condition": "Conditional Bonuses.",
+        "chat": "@name defends with reflexes."
+      },
+      "wil": {
+        "value": 10,
+        "ability": "",
+        "armour": 0,
+        "class": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "enhance": 0,
+        "shield": 0,
+        "bonus": [
+          {}
+        ],
+        "temp": 0,
+        "condition": "Conditional Bonuses.",
+        "chat": "@name defends with willpower."
+      }
+    },
+    "modifiers": {
+      "attack": {
+        "value": 0,
+        "class": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ]
+      },
+      "damage": {
+        "value": 0,
+        "class": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ]
+      },
+      "skills": {
+        "value": 0,
+        "class": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ]
+      },
+      "defences": {
+        "value": 0,
+        "class": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ]
+      }
+    },
+    "skills": {
+      "acr": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 8,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ],
+        "ability": "dex",
+        "armourCheck": true,
+        "chat": "@name uses @label."
+      },
+      "arc": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 5,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ],
+        "ability": "int",
+        "armourCheck": false,
+        "chat": "@name uses @label."
+      },
+      "ath": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ],
+        "ability": "str",
+        "armourCheck": true,
+        "chat": "@name uses @label."
+      },
+      "blu": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ],
+        "ability": "cha",
+        "armourCheck": false,
+        "chat": "@name uses @label."
+      },
+      "dip": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ],
+        "ability": "cha",
+        "armourCheck": false,
+        "chat": "@name uses @label."
+      },
+      "dun": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ],
+        "ability": "wis",
+        "armourCheck": false,
+        "chat": "@name uses @label."
+      },
+      "end": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ],
+        "ability": "con",
+        "armourCheck": true,
+        "chat": "@name uses @label."
+      },
+      "hea": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 5,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ],
+        "ability": "wis",
+        "armourCheck": false,
+        "chat": "@name uses @label."
+      },
+      "his": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ],
+        "ability": "int",
+        "armourCheck": false,
+        "chat": "@name uses @label."
+      },
+      "ins": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 5,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ],
+        "ability": "wis",
+        "armourCheck": false,
+        "chat": "@name uses @label."
+      },
+      "itm": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ],
+        "ability": "cha",
+        "armourCheck": false,
+        "chat": "@name uses @label."
+      },
+      "nat": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 5,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ],
+        "ability": "wis",
+        "armourCheck": false,
+        "chat": "@name uses @label."
+      },
+      "prc": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 5,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ],
+        "ability": "wis",
+        "armourCheck": false,
+        "chat": "@name uses @label."
+      },
+      "rel": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ],
+        "ability": "int",
+        "armourCheck": false,
+        "chat": "@name uses @label."
+      },
+      "stl": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ],
+        "ability": "dex",
+        "armourCheck": true,
+        "chat": "@name uses @label."
+      },
+      "stw": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ],
+        "ability": "cha",
+        "armourCheck": false,
+        "chat": "@name uses @label."
+      },
+      "thi": {
+        "value": 0,
+        "base": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "training": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ],
+        "ability": "dex",
+        "armourCheck": true,
+        "chat": "@name uses @label."
+      }
+    },
+    "skillTraining": {
+      "untrained": {
+        "value": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0
+      },
+      "trained": {
+        "value": 5,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0
+      },
+      "expertise": {
+        "value": 8,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0
+      }
+    },
+    "passive": {
+      "pasprc": {
+        "value": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "skill": "prc",
+        "bonus": [
+          {}
+        ]
+      },
+      "pasins": {
+        "value": 0,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "skill": "ins",
+        "bonus": [
+          {}
+        ]
+      }
+    },
+    "resistances": {
+      "damage": {
+        "value": 0,
+        "res": 0,
+        "vuln": 0,
+        "armour": 0,
+        "immune": false,
+        "bonus": [
+          {}
+        ]
+      },
+      "physical": {
+        "value": 0,
+        "res": 0,
+        "vuln": 0,
+        "armour": 0,
+        "immune": false,
+        "bonus": [
+          {}
+        ]
+      },
+      "ongoing": {
+        "value": 0,
+        "res": 0,
+        "vuln": 0,
+        "armour": 0,
+        "immune": false,
+        "bonus": [
+          {}
+        ]
+      },
+      "acid": {
+        "value": 0,
+        "res": 0,
+        "vuln": 0,
+        "armour": 0,
+        "immune": false,
+        "bonus": [
+          {}
+        ]
+      },
+      "cold": {
+        "value": 0,
+        "res": 0,
+        "vuln": 0,
+        "armour": 0,
+        "immune": false,
+        "bonus": [
+          {}
+        ]
+      },
+      "fire": {
+        "value": 0,
+        "res": 0,
+        "vuln": 0,
+        "armour": 0,
+        "immune": false,
+        "bonus": [
+          {}
+        ]
+      },
+      "force": {
+        "value": 0,
+        "res": 0,
+        "vuln": 0,
+        "armour": 0,
+        "immune": false,
+        "bonus": [
+          {}
+        ]
+      },
+      "lightning": {
+        "value": 0,
+        "res": 0,
+        "vuln": 0,
+        "armour": 0,
+        "immune": false,
+        "bonus": [
+          {}
+        ]
+      },
+      "necrotic": {
+        "value": 0,
+        "res": 0,
+        "vuln": 0,
+        "armour": 0,
+        "immune": false,
+        "bonus": [
+          {}
+        ]
+      },
+      "poison": {
+        "value": 0,
+        "res": 0,
+        "vuln": 0,
+        "armour": 0,
+        "immune": false,
+        "bonus": [
+          {}
+        ]
+      },
+      "psychic": {
+        "value": 0,
+        "res": 0,
+        "vuln": 0,
+        "armour": 0,
+        "immune": false,
+        "bonus": [
+          {}
+        ]
+      },
+      "radiant": {
+        "value": 0,
+        "res": 0,
+        "vuln": 0,
+        "armour": 0,
+        "immune": false,
+        "bonus": [
+          {}
+        ]
+      },
+      "thunder": {
+        "value": 0,
+        "res": 0,
+        "vuln": 0,
+        "armour": 0,
+        "immune": false,
+        "bonus": [
+          {}
+        ]
+      }
+    },
+    "untypedResistances": {
+      "resistances": [],
+      "vulnerabilities": [],
+      "immunities": []
+    },
+    "commonAttackBonuses": {
+      "comAdv": {
+        "value": 2,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ]
+      },
+      "charge": {
+        "value": 1,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ]
+      },
+      "conceal": {
+        "value": -2,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ]
+      },
+      "concealTotal": {
+        "value": -5,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ]
+      },
+      "cover": {
+        "value": -2,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ]
+      },
+      "coverSup": {
+        "value": -5,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ]
+      },
+      "longRange": {
+        "value": -2,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ]
+      },
+      "prone": {
+        "value": -2,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ]
+      },
+      "restrained": {
+        "value": -2,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ]
+      },
+      "running": {
+        "value": -5,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ]
+      },
+      "squeez": {
+        "value": -5,
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "bonus": [
+          {}
+        ]
+      }
+    },
+    "currency": {
+      "ad": 0,
+      "pp": 0,
+      "gp": 0,
+      "sp": 0,
+      "cp": 0
+    },
+    "ritualcomp": {
+      "ar": 0,
+      "ms": 0,
+      "rh": 0,
+      "si": 0,
+      "rs": 0
+    },
+    "movement": {
+      "base": {
+        "value": 0,
+        "base": 6,
+        "armour": 0,
+        "bonus": [
+          {}
+        ],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "temp": 0
+      },
+      "walk": {
+        "value": 0,
+        "formula": "@base + @armour",
+        "bonus": [
+          {}
+        ],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "temp": 0
+      },
+      "charge": {
+        "value": 0,
+        "formula": "@base + @armour",
+        "bonus": [
+          {}
+        ],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "temp": 0
+      },
+      "run": {
+        "value": 0,
+        "formula": "@base + @armour + 2",
+        "bonus": [
+          {}
+        ],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "misc": 0,
+        "temp": 0
+      },
+      "climb": {
+        "value": 0,
+        "formula": "(@base + @armour)/2",
+        "bonus": [
+          {}
+        ],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "temp": 0
+      },
+      "shift": {
+        "value": 0,
+        "formula": "1",
+        "bonus": [
+          {}
+        ],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "temp": 0
+      },
+      "swim": {
+        "value": 0,
+        "formula": "(@base + @armour)/2",
+        "bonus": [
+          {}
+        ],
+        "feat": 0,
+        "item": 0,
+        "power": 0,
+        "race": 0,
+        "untyped": 0,
+        "temp": 0
+      },
+      "notes": ""
+    },
+    "resources": {
+      "primary": {
+        "value": "",
+        "max": null,
+        "sr": false,
+        "lr": false,
+        "label": ""
+      },
+      "secondary": {
+        "value": "",
+        "max": null,
+        "sr": false,
+        "lr": false,
+        "label": ""
+      },
+      "tertiary": {
+        "value": "",
+        "max": null,
+        "sr": false,
+        "lr": false,
+        "label": ""
+      }
+    },
+    "magicItemUse": {
+      "perDay": 1,
+      "bonusValue": 0,
+      "milestone": 0,
+      "dailyuse": 1,
+      "encounteruse": false
+    },
+    "encumbrance": {
+      "value": null,
+      "max": null,
+      "formulaNorm": "@abilities.str.value * 10",
+      "formulaHeavy": "@abilities.str.value * 20",
+      "formulaMax": "@abilities.str.value * 50"
+    },
+    "featureSortTypes": "name",
+    "powerGroupTypes": "usage",
+    "powerSortTypes": "name",
+    "ritualSortTypes": "name"
+  },
+  "prototypeToken": {
+    "name": "玩家人物",
+    "displayName": 0,
+    "actorLink": true,
+    "appendNumber": false,
+    "prependAdjective": false,
+    "width": 1,
+    "height": 1,
+    "texture": {
+      "src": "icons/svg/mystery-man.svg",
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "offsetX": 0,
+      "offsetY": 0,
+      "fit": "contain",
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "tint": "#ffffff",
+      "alphaThreshold": 0.75
+    },
+    "hexagonalShape": 0,
+    "lockRotation": false,
+    "rotation": 0,
+    "alpha": 1,
+    "disposition": 1,
+    "displayBars": 0,
+    "bar1": {
+      "attribute": "attributes.hp"
+    },
+    "bar2": {
+      "attribute": "attributes.temphp"
+    },
+    "light": {
+      "negative": false,
+      "priority": 0,
+      "alpha": 0.5,
+      "angle": 360,
+      "bright": 0,
+      "color": null,
+      "coloration": 1,
+      "dim": 0,
+      "attenuation": 0.5,
+      "luminosity": 0.5,
+      "saturation": 0,
+      "contrast": 0,
+      "shadows": 0,
+      "animation": {
+        "type": null,
+        "speed": 5,
+        "intensity": 5,
+        "reverse": false
+      },
+      "darkness": {
+        "min": 0,
+        "max": 1
+      }
+    },
+    "sight": {
+      "enabled": false,
+      "range": 0,
+      "angle": 360,
+      "visionMode": "basic",
+      "color": null,
+      "attenuation": 0.1,
+      "brightness": 0,
+      "saturation": 0,
+      "contrast": 0
+    },
+    "detectionModes": [],
+    "occludable": {
+      "radius": 0
+    },
+    "ring": {
+      "enabled": false,
+      "colors": {
+        "ring": null,
+        "background": null
+      },
+      "effects": 1,
+      "subject": {
+        "scale": 1,
+        "texture": null
+      }
+    },
+    "flags": {},
+    "randomImg": false
+  },
+  "items": [
+    {
+      "name": "魔法石",
+      "type": "power",
+      "system": {
+        "description": {
+          "value": "",
+          "chat": "",
+          "unidentified": ""
+        },
+        "descriptionGM": {
+          "value": ""
+        },
+        "source": "",
+        "activation": {
+          "type": "",
+          "cost": 0,
+          "condition": ""
+        },
+        "duration": {
+          "value": null,
+          "units": ""
+        },
+        "target": "One Creature",
+        "range": {
+          "value": null,
+          "long": null,
+          "units": ""
+        },
+        "uses": {
+          "value": 0,
+          "max": "0",
+          "per": ""
+        },
+        "consume": {
+          "type": "",
+          "target": "",
+          "amount": null
+        },
+        "macro": {
+          "type": "script",
+          "scope": "global",
+          "launchOrder": "off",
+          "command": "",
+          "author": "",
+          "autoanimationHook": ""
+        },
+        "attack": {
+          "shareAttackRoll": false,
+          "isAttack": true,
+          "isBasic": false,
+          "isCharge": false,
+          "isOpp": false,
+          "canCharge": false,
+          "canOpp": false,
+          "ability": "wis",
+          "abilityBonus": 0,
+          "def": "fort",
+          "defBonus": 0,
+          "formula": "@wepAttack + @powerMod + @lvhalf"
+        },
+        "hit": {
+          "shareDamageRoll": false,
+          "isDamage": true,
+          "isHealing": false,
+          "healSurge": "",
+          "baseQuantity": "1",
+          "baseDiceType": "d4",
+          "detail": "1[W] + Strength modifier damage.",
+          "formula": "@powBase + @powerMod + @wepDamage",
+          "critFormula": "@powMax + @powerMod + @wepDamage + @wepCritBonus",
+          "healFormula": ""
+        },
+        "miss": {
+          "detail": "",
+          "formula": ""
+        },
+        "effect": {
+          "detail": ""
+        },
+        "damage": {
+          "parts": []
+        },
+        "damageCrit": {
+          "parts": []
+        },
+        "damageImp": {
+          "parts": []
+        },
+        "damageCritImp": {
+          "parts": []
+        },
+        "damageType": {
+          "damage": false,
+          "acid": false,
+          "cold": false,
+          "fire": false,
+          "force": false,
+          "lightning": false,
+          "necrotic": false,
+          "physical": false,
+          "poison": false,
+          "psychic": true,
+          "radiant": false,
+          "thunder": false
+        },
+        "keyWords": [
+          ""
+        ],
+        "level": "",
+        "powersource": "primal",
+        "secondPowersource": "",
+        "powersourceName": "",
+        "subName": "",
+        "prepared": true,
+        "powerType": "class",
+        "powerSubtype": "attack",
+        "useType": "atwill",
+        "actionType": "standard",
+        "requirements": "",
+        "weaponType": "implement",
+        "weaponUse": "default",
+        "rangeType": "range",
+        "rangeTextShort": "",
+        "rangeText": "",
+        "rangePower": null,
+        "area": 0,
+        "rechargeRoll": "",
+        "rechargeCondition": "",
+        "damageShare": false,
+        "postEffect": true,
+        "postSpecial": true,
+        "autoGenChatPowerCard": true,
+        "sustain": {
+          "actionType": "",
+          "detail": ""
+        },
+        "trigger": "",
+        "requirement": "",
+        "special": "",
+        "specialAdd": {
+          "parts": []
+        },
+        "effectType": {
+          "transmutation": false,
+          "polymorph": false,
+          "teleportation": false,
+          "poison": false,
+          "runic": false,
+          "enchantment": false,
+          "invigorating": false,
+          "gaze": false,
+          "illusion": false,
+          "disease": false,
+          "stance": false,
+          "spirit": false,
+          "reliable": false,
+          "augmentable": false,
+          "fear": false,
+          "rage": false,
+          "rattling": false,
+          "aura": false,
+          "charm": false,
+          "mount": false,
+          "zone": false,
+          "fullDis": false,
+          "sleep": false,
+          "necro": false,
+          "nether": false,
+          "evocation": false,
+          "beast": false,
+          "beastForm": false,
+          "healing": false,
+          "channelDiv": false,
+          "shadow": false,
+          "elemental": false,
+          "summoning": false,
+          "conjuration": false
+        },
+        "keywordsCustom": "",
+        "tooltip": "新建项目",
+        "type": "atwill",
+        "effectHTML": false,
+        "chatFlavor": ""
+      },
+      "_id": "EO7EygR8gtuBf5RK",
+      "img": "icons/svg/combat.svg",
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "louvTvO122tfQ4Uo": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "coreVersion": "12.331",
+        "systemId": "dnd4e",
+        "systemVersion": "0.6.9",
+        "createdTime": 1752858321319,
+        "modifiedTime": 1753110715161,
+        "lastModifiedBy": "louvTvO122tfQ4Uo"
+      }
+    },
+    {
+      "name": "矮人活力护甲 Armor of Dwarven Vigor  AV2",
+      "type": "equipment",
+      "system": {
+        "description": {
+          "value": "<p>矮人活力护甲 Armor of Dwarven Vigor  AV2 </p><p>等级2+ 非普通</p><p>这件由凿来石头制成的装甲将赐予你矮人勇士的耐力</p><p>等级2 +1 520gp 等级17 +4 65,000gp</p><p>等级7 +2 2,600gp 等级22 +5 325,000gp</p><p>等级12 +3 13,000gp 等级27 +6 1,625,000gp</p><p>护甲：链甲，鳞甲，板甲</p><p>增强：AC</p><p>威能（医疗）✦每日（次要动作）</p><p>你使用你的回气，且此护甲每增强1点，就恢复1d6额外生命值</p><p>特殊：若你是矮人，则你可以在你的回合内以一个自由动作使用此护甲的威能</p>",
+          "chat": "",
+          "unidentified": ""
+        },
+        "descriptionGM": {
+          "value": ""
+        },
+        "source": "",
+        "quantity": 1,
+        "weight": 0,
+        "price": 0,
+        "attuned": false,
+        "equipped": true,
+        "rarity": "",
+        "identified": true,
+        "container": null,
+        "activation": {
+          "type": "",
+          "cost": 0,
+          "condition": ""
+        },
+        "duration": {
+          "value": null,
+          "units": ""
+        },
+        "target": {
+          "value": null,
+          "width": null,
+          "units": "",
+          "type": ""
+        },
+        "range": {
+          "value": null,
+          "long": null,
+          "units": ""
+        },
+        "uses": {
+          "value": 0,
+          "max": "0",
+          "per": ""
+        },
+        "consume": {
+          "type": "",
+          "target": "",
+          "amount": null
+        },
+        "macro": {
+          "type": "script",
+          "scope": "global",
+          "launchOrder": "off",
+          "command": "",
+          "author": "",
+          "autoanimationHook": ""
+        },
+        "level": null,
+        "armour": {
+          "type": "armour",
+          "subType": "heavy",
+          "enhance": 1,
+          "ac": 6,
+          "fort": 0,
+          "ref": 0,
+          "wil": 0,
+          "dex": null,
+          "movePen": true,
+          "movePenValue": 1,
+          "skillCheck": false,
+          "skillCheckValue": 0,
+          "damageRes": {
+            "parts": []
+          }
+        },
+        "speed": {
+          "value": null,
+          "conditions": ""
+        },
+        "strength": 0,
+        "stealth": false,
+        "proficient": true,
+        "tooltip": "新建项目",
+        "type": "equipment",
+        "armourBaseType": "plate",
+        "armourBaseTypeCustom": ""
+      },
+      "_id": "cNo5RVq48QlpdObm",
+      "img": "icons/svg/shield.svg",
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "C0bTcIRsjqg6LbRx": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "coreVersion": "12.331",
+        "systemId": "dnd4e",
+        "systemVersion": "0.6.9",
+        "createdTime": 1752859129741,
+        "modifiedTime": 1752859483583,
+        "lastModifiedBy": "C0bTcIRsjqg6LbRx"
+      }
+    },
+    {
+      "name": "原力守护者|Primal Guardian",
+      "type": "feature",
+      "system": {
+        "description": {
+          "value": "",
+          "chat": "",
+          "unidentified": ""
+        },
+        "descriptionGM": {
+          "value": ""
+        },
+        "source": "",
+        "macro": {
+          "type": "script",
+          "scope": "global",
+          "launchOrder": "off",
+          "command": "",
+          "author": "",
+          "autoanimationHook": ""
+        },
+        "featureType": "class",
+        "level": null,
+        "requirements": "",
+        "featureSource": "",
+        "featureGroup": "",
+        "auraSize": "",
+        "tooltip": "创建专长",
+        "type": "feature",
+        "subtype": "class"
+      },
+      "_id": "5vMNPOxqr29gRB0c",
+      "effects": [
+        {
+          "name": "原力守护者|Primal Guardian",
+          "img": "icons/svg/item-bag.svg",
+          "origin": "Actor.ljtEarhWPkUnyh5q.Item.5vMNPOxqr29gRB0c",
+          "duration": {
+            "rounds": 1,
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "disabled": false,
+          "flags": {
+            "dnd4e": {
+              "dots": [],
+              "keywords": [],
+              "effectData": {
+                "equippedRec": false,
+                "durationType": "",
+                "durationTurnInit": null,
+                "startTurnInit": null
+              },
+              "keywordsCustom": ""
+            }
+          },
+          "_id": "VWQh4H1tMrkSshCY",
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "system.defences.ac.value",
+              "mode": 2,
+              "value": "1",
+              "priority": null
+            }
+          ],
+          "description": "<p> 额外效果：当你穿着重甲时，你在AC上获得+1加值。</p>",
+          "tint": "#ffffff",
+          "transfer": true,
+          "statuses": [],
+          "sort": 0,
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.331",
+            "systemId": "dnd4e",
+            "systemVersion": "0.6.9",
+            "createdTime": 1752860424244,
+            "modifiedTime": 1752860487968,
+            "lastModifiedBy": "louvTvO122tfQ4Uo"
+          }
+        }
+      ],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "louvTvO122tfQ4Uo": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "coreVersion": "12.331",
+        "systemId": "dnd4e",
+        "systemVersion": "0.6.9",
+        "createdTime": 1752860279418,
+        "modifiedTime": 1752860494629,
+        "lastModifiedBy": "louvTvO122tfQ4Uo"
+      },
+      "img": "icons/svg/item-bag.svg"
+    },
+    {
+      "name": "毁灭法杖",
+      "type": "weapon",
+      "system": {
+        "description": {
+          "value": "",
+          "chat": "",
+          "unidentified": ""
+        },
+        "descriptionGM": {
+          "value": ""
+        },
+        "source": "",
+        "quantity": 1,
+        "weight": 0,
+        "price": 0,
+        "attuned": false,
+        "equipped": true,
+        "rarity": "",
+        "identified": true,
+        "container": null,
+        "activation": {
+          "type": "",
+          "cost": 0,
+          "condition": ""
+        },
+        "duration": {
+          "value": null,
+          "units": ""
+        },
+        "target": {
+          "value": null,
+          "width": null,
+          "units": "",
+          "type": ""
+        },
+        "range": {
+          "value": 5,
+          "long": 10,
+          "units": ""
+        },
+        "uses": {
+          "value": 0,
+          "max": "0",
+          "per": ""
+        },
+        "consume": {
+          "type": "",
+          "target": "",
+          "amount": null
+        },
+        "armour": {
+          "value": 10
+        },
+        "hp": {
+          "value": 0,
+          "max": 0,
+          "dt": null,
+          "conditions": ""
+        },
+        "macro": {
+          "type": "script",
+          "scope": "global",
+          "launchOrder": "off",
+          "command": "",
+          "author": "",
+          "autoanimationHook": ""
+        },
+        "level": null,
+        "weaponType": "simpleM",
+        "weaponHand": "hMain",
+        "properties": {
+          "rch": false,
+          "lom": false,
+          "amm": false,
+          "ver": false,
+          "imp": true,
+          "off": false,
+          "hic": false,
+          "def": false,
+          "tlg": false,
+          "two": false,
+          "spc": false,
+          "sml": false,
+          "bru": false,
+          "thv": false,
+          "rel": false,
+          "lof": false,
+          "mou": false,
+          "sto": false
+        },
+        "proficient": true,
+        "proficientI": true,
+        "profBonus": 0,
+        "profImpBonus": "0",
+        "enhance": "1",
+        "isRanged": false,
+        "damageDice": {
+          "parts": [
+            [
+              "1",
+              "8",
+              ""
+            ]
+          ]
+        },
+        "damage": {
+          "parts": []
+        },
+        "damageCrit": {
+          "parts": []
+        },
+        "damageImp": {
+          "parts": []
+        },
+        "damageCritImp": {
+          "parts": []
+        },
+        "damageType": {
+          "physical": true
+        },
+        "brutalNum": 1,
+        "weaponGroup": {
+          "blowgun": false,
+          "ham": false,
+          "axe": false,
+          "pik": false,
+          "bow": false,
+          "garrote": false,
+          "flail": false,
+          "dragon": false,
+          "spear": false,
+          "cbow": false,
+          "bladeL": false,
+          "sling": false,
+          "unarm": false,
+          "mace": false,
+          "whip": false,
+          "pole": false,
+          "staff": true,
+          "bladeH": false
+        },
+        "implementGroup": {},
+        "attackForm": "@profBonus+@enhance",
+        "attackFormImp": "@profImpBonus+@enhanceImp",
+        "damageForm": "@enhance",
+        "damageFormImp": "@enhanceImp+@enhanceImp",
+        "critDamageForm": "(@enhance)d6",
+        "critDamageFormImp": "(@enhanceImp)d6",
+        "critRange": 20,
+        "critRangeImp": 20,
+        "tooltip": "新建项目",
+        "type": "weapon",
+        "weaponBaseType": "",
+        "damageTypeWeapon": false,
+        "chatFlavor": "",
+        "implement": {
+          "staff": true,
+          "orb": false,
+          "tome": false,
+          "wand": false,
+          "ki": false,
+          "rod": false,
+          "holyS": false,
+          "totem": false
+        }
+      },
+      "_id": "fNaf1Ocit2avdfwN",
+      "img": "icons/svg/sword.svg",
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "louvTvO122tfQ4Uo": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "coreVersion": "12.331",
+        "systemId": "dnd4e",
+        "systemVersion": "0.6.9",
+        "createdTime": 1752860530335,
+        "modifiedTime": 1753110643063,
+        "lastModifiedBy": "louvTvO122tfQ4Uo"
+      }
+    },
+    {
+      "name": "恶毒攻击 Vicious Offensive  DSCS",
+      "type": "power",
+      "system": {
+        "description": {
+          "value": "<p>恶毒攻击 Vicious Offensive  DSCS</p><p>战士攻击 1</p><p>你以如此大的力量猛击你的对手，以至于附近的敌人不得不注意到你。</p><p>随意✦武术，武器</p><p>标准动作✦近战武器</p><p>目标：\t一个生物</p><p>攻击：\t力量 vs. AC</p><p>命中：\t1[W] + 力量调整值的伤害，并且你标记一个邻近你的敌人直到你下一回合结束。</p><p>21级：2[W] + 力量调整值的伤害</p>",
+          "chat": "",
+          "unidentified": ""
+        },
+        "descriptionGM": {
+          "value": ""
+        },
+        "source": "",
+        "activation": {
+          "type": "",
+          "cost": 0,
+          "condition": ""
+        },
+        "duration": {
+          "value": null,
+          "units": ""
+        },
+        "target": "One Creature",
+        "range": {
+          "value": null,
+          "long": null,
+          "units": ""
+        },
+        "uses": {
+          "value": 0,
+          "max": "0",
+          "per": ""
+        },
+        "consume": {
+          "type": "",
+          "target": "",
+          "amount": null
+        },
+        "macro": {
+          "type": "script",
+          "scope": "global",
+          "launchOrder": "off",
+          "command": "",
+          "author": "",
+          "autoanimationHook": ""
+        },
+        "attack": {
+          "shareAttackRoll": false,
+          "isAttack": true,
+          "isBasic": true,
+          "isCharge": false,
+          "isOpp": false,
+          "canCharge": false,
+          "canOpp": false,
+          "ability": "str",
+          "abilityBonus": 0,
+          "def": "ac",
+          "defBonus": 0,
+          "formula": "@wepAttack + @powerMod + @lvhalf"
+        },
+        "hit": {
+          "shareDamageRoll": false,
+          "isDamage": true,
+          "isHealing": false,
+          "healSurge": "",
+          "baseQuantity": "1",
+          "baseDiceType": "weapon",
+          "detail": "1[W] + Strength modifier damage.",
+          "formula": "@powBase + @powerMod + @wepDamage",
+          "critFormula": "@powMax + @powerMod + @wepDamage + @wepCritBonus",
+          "healFormula": ""
+        },
+        "miss": {
+          "detail": "",
+          "formula": ""
+        },
+        "effect": {
+          "detail": ""
+        },
+        "damage": {
+          "parts": []
+        },
+        "damageCrit": {
+          "parts": []
+        },
+        "damageImp": {
+          "parts": []
+        },
+        "damageCritImp": {
+          "parts": []
+        },
+        "damageType": {
+          "damage": false,
+          "acid": false,
+          "cold": false,
+          "fire": false,
+          "force": false,
+          "lightning": false,
+          "necrotic": false,
+          "physical": false,
+          "poison": false,
+          "psychic": false,
+          "radiant": false,
+          "thunder": false
+        },
+        "keyWords": [
+          ""
+        ],
+        "level": "1",
+        "powersource": "martial",
+        "secondPowersource": "martial",
+        "powersourceName": "",
+        "subName": "战士攻击 1",
+        "prepared": true,
+        "powerType": "class",
+        "powerSubtype": "attack",
+        "useType": "atwill",
+        "actionType": "standard",
+        "requirements": "",
+        "weaponType": "melee",
+        "weaponUse": "default",
+        "rangeType": "weapon",
+        "rangeTextShort": "",
+        "rangeText": "",
+        "rangePower": "",
+        "area": 0,
+        "rechargeRoll": "",
+        "rechargeCondition": "",
+        "damageShare": false,
+        "postEffect": true,
+        "postSpecial": true,
+        "autoGenChatPowerCard": true,
+        "sustain": {
+          "actionType": "",
+          "detail": ""
+        },
+        "trigger": "",
+        "requirement": "",
+        "special": "",
+        "specialAdd": {
+          "parts": []
+        },
+        "effectType": {
+          "transmutation": false,
+          "polymorph": false,
+          "teleportation": false,
+          "poison": false,
+          "runic": false,
+          "enchantment": false,
+          "invigorating": false,
+          "gaze": false,
+          "illusion": false,
+          "disease": false,
+          "stance": false,
+          "spirit": false,
+          "reliable": false,
+          "augmentable": false,
+          "fear": false,
+          "rage": false,
+          "rattling": false,
+          "aura": false,
+          "charm": false,
+          "mount": false,
+          "zone": false,
+          "fullDis": false,
+          "sleep": false,
+          "necro": false,
+          "nether": false,
+          "evocation": false,
+          "beast": false,
+          "beastForm": false,
+          "healing": false,
+          "channelDiv": false,
+          "shadow": false,
+          "elemental": false,
+          "summoning": false,
+          "conjuration": false
+        },
+        "keywordsCustom": "",
+        "tooltip": "新建项目",
+        "type": "atwill",
+        "effectHTML": false,
+        "chatFlavor": ""
+      },
+      "_id": "Pn4RTpYMLpYtJaY3",
+      "img": "icons/svg/combat.svg",
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "louvTvO122tfQ4Uo": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "coreVersion": "12.331",
+        "systemId": "dnd4e",
+        "systemVersion": "0.6.9",
+        "createdTime": 1753110454983,
+        "modifiedTime": 1753110551684,
+        "lastModifiedBy": "louvTvO122tfQ4Uo"
+      }
+    }
+  ],
+  "effects": [],
+  "folder": null,
+  "flags": {
+    "dnd4e": {
+      "sheetDisplay": {
+        "features": {
+          "sortBy": {
+            "value": ""
+          }
+        },
+        "powers": {
+          "groupBy": {
+            "value": ""
+          },
+          "sortBy": {
+            "value": ""
+          }
+        },
+        "rituals": {
+          "sortBy": {
+            "value": ""
+          }
+        }
+      }
+    },
+    "exportSource": {
+      "world": "test-4e",
+      "system": "dnd4e",
+      "coreVersion": "12.331",
+      "systemVersion": "0.6.9"
+    }
+  },
+  "_stats": {
+    "coreVersion": "12.331",
+    "systemId": "dnd4e",
+    "systemVersion": "0.6.9",
+    "createdTime": 1752858270019,
+    "modifiedTime": 1752859108153,
+    "lastModifiedBy": "C0bTcIRsjqg6LbRx"
+  }
+}
