@@ -1,5 +1,5 @@
 import { CharacterController } from "./../controller/CharacterController";
-import {  getLayers } from "@/stores/container";
+import { getLayers } from "@/stores/container";
 import { diceRoll } from "../DiceTryer";
 import type { TiledMap } from "../MapClass";
 import { InitiativeClass } from "../type/InitiativeClass";
@@ -57,7 +57,7 @@ export function removeFromInitiativeSheet(unit: Unit) {
     endTurn(unit);
   }
   //遍历sheet
-  let haveEnemy=false;
+  let haveEnemy = false;
   InitiativeSheet.forEach((item) => {
     if (item.owner?.party !== "player") {
       haveEnemy = true;
@@ -70,9 +70,9 @@ export function removeFromInitiativeSheet(unit: Unit) {
 }
 
 export async function startCombatTurn() {
-   if (CharacterCombatController.instance) {
-     CharacterCombatController.instance.inUse = false;
-   }
+  if (CharacterCombatController.instance) {
+    CharacterCombatController.instance.inUse = false;
+  }
   if (!(InitiativeSheet.length > 0)) return;
   let maxInitiative = 0;
   let allNotReady = true;
@@ -124,9 +124,9 @@ export async function startCombatTurn() {
         }
       } else {
         //提醒玩家
-         if (CharacterCombatController.instance) {
-           CharacterCombatController.instance.inUse = true;
-         }
+        if (CharacterCombatController.instance) {
+          CharacterCombatController.instance.inUse = true;
+        }
         const unit = initiativeCursor.pointAt.owner;
         CharacterController.curser = unit.id;
         CharacterController.selectedCharacter = unit;
@@ -145,12 +145,11 @@ export async function startCombatTurn() {
 }
 
 export async function endTurn(unit: Unit) {
-   CharacterController.removeLookOn();
+  CharacterController.removeLookOn();
   if (unit.initiative) {
     unit.initiative.ready = false;
-   
   }
- 
+
   const stayPromisee = new Promise<void>((resolve) => {
     setTimeout(() => {
       resolve();
@@ -336,7 +335,9 @@ export async function endBattle() {
   while (InitiativeSheet.length > 0) {
     InitiativeSheet.pop();
   }
+  endTurn(CharacterController.selectedCharacter as Unit);
   CharacterController.removeLookOn();
+
   await playEndAnim();
   CharacterOutCombatController.isUse = true;
   if (CharacterCombatController.instance) {

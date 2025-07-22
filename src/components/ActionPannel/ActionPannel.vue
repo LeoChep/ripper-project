@@ -10,7 +10,7 @@
           <button :class="['action-btn', { selected: moveSelected === true }]" @click="selectMove()">
             移动
           </button>
-             <button :class="['action-btn', ]" @click="endTurn()">
+          <button :class="['action-btn',]" @click="endTurn()">
             结束回合
           </button>
           <!-- <button :class="['tab-btn', { active: activeActionTab === 'standard' }]" 
@@ -62,7 +62,7 @@
 </template>
 <script setup>
 import { CharacterCombatController } from '@/core/controller/CharacterCombatController'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 // Props
 const props = defineProps({
@@ -81,18 +81,28 @@ const activePowerTab = ref('atwill')
 const selectedAction = ref(null)
 const remainingActionPoints = ref(3)
 
-// 示例动作数据
-const actions = ref([
-  { id: 1, name: '冲锋', type: 'standard', powerType: 'atwill' },
-  { id: 2, name: '斩击', type: 'standard', powerType: 'atwill' },
-  { id: 3, name: '盾击', type: 'standard', powerType: 'encounter' },
-  { id: 4, name: '治疗', type: 'minor', powerType: 'utility' },
-  { id: 5, name: '火球', type: 'standard', powerType: 'encounter' },
-  { id: 6, name: '药水', type: 'minor', powerType: 'item' },
-  { id: 7, name: '移动', type: 'move', powerType: 'atwill' },
-  { id: 8, name: '冲刺', type: 'move', powerType: 'atwill' },
-  { id: 9, name: '神圣打击', type: 'standard', powerType: 'daily' },
-])
+// 从角色获取威能数据
+const actions = computed(() => {
+  const character = CharacterCombatController.instance?.selectedCharacter
+  if (!character || !character.powers) {
+    return []
+  }
+
+  return character.powers.map((power, index) => ({
+    id: `power_${index}`,
+    name: power.name,
+    type: power.actionType, // 'standard', 'move', 'minor'
+    powerType: power.useType, // 'atwill', 'encounter', 'daily', 'utility'
+    power: power // 保存完整的威能对象以供后续使用
+  }))
+})
+
+// 监听角色变化，重置选择状态
+watch(() => CharacterCombatController.instance?.selectedCharacter, (newCharacter) => {
+  selectedAction.value = null
+  attackSelected.value = false
+  moveSelected.value = false
+}, { deep: true })
 
 // 过滤动作
 const filteredActions = computed(() => {
@@ -127,7 +137,7 @@ const getPowerTypeText = (type) => {
 // 选择动作
 const selectAction = (action) => {
   selectedAction.value = action
-  console.log('选中动作:', action)
+  console.log('选中威能:', action.power)
   emit('actionSelected', action)
 }
 //
@@ -140,8 +150,11 @@ const selectPowerTab = (tab) => {
 
 const attackSelected = ref(false)
 const selectAttack = () => {
-    if (CharacterCombatController.instance.selectedCharacter.state !== 'idle') {
-    console.warn('当前角色状态不允许移动')
+  if (!CharacterCombatController.instance.inUse) {
+    return
+  }
+  if (CharacterCombatController.instance.selectedCharacter.state !== 'idle') {
+    console.warn('当前角色状态不允许攻击')
     return
   }
   activePowerTab.value = null
@@ -153,6 +166,10 @@ const selectAttack = () => {
 
 const moveSelected = ref(false)
 const selectMove = () => {
+  if (!CharacterCombatController.instance.inUse) {
+
+    return
+  }
   if (CharacterCombatController.instance.selectedCharacter.state !== 'idle') {
     console.warn('当前角色状态不允许移动')
     return
@@ -163,8 +180,8 @@ const selectMove = () => {
   moveSelected.value = true
   selectedAction.value = null // 清除选中的动作
 }
-const endTurn=()=>{
-    if (CharacterCombatController.instance.selectedCharacter.state !== 'idle') {
+const endTurn = () => {
+  if (CharacterCombatController.instance.selectedCharacter.state !== 'idle') {
     console.warn('当前角色状态不允许结束')
     return
   }

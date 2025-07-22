@@ -1,10 +1,8 @@
-
 import { golbalSetting } from "../golbalSetting";
 import type { TiledMap } from "../MapClass";
 import type { Unit } from "../units/Unit";
 import { CharCombatMoveController } from "./CharacterCombatMoveController";
 import { CharacterController } from "./CharacterController";
-
 
 import { CharCombatAttackController } from "./CharacterCombatAttackController";
 import type { CreatureAttack } from "../units/Creature";
@@ -26,7 +24,10 @@ export class CharacterCombatController {
     }
   }
 
- useMoveController() {
+  useMoveController() {
+    if (this.inUse === false) {
+      return;
+    }
     this.selectedCharacter = this.mapPassiable?.sprites.find(
       (sprite) => sprite.id === CharacterController.curser
     );
@@ -44,7 +45,9 @@ export class CharacterCombatController {
     ) {
       return;
     }
-    CharCombatAttackController.instense?.removeFunction({'from':'moveConrotller'});
+    CharCombatAttackController.instense?.removeFunction({
+      from: "moveConrotller",
+    });
 
     if (
       this.selectedCharacter &&
@@ -73,6 +76,9 @@ export class CharacterCombatController {
     }
   }
   useAttackController() {
+    if (this.inUse === false) {
+      return;
+    }
     this.selectedCharacter = this.mapPassiable?.sprites.find(
       (sprite) => sprite.id === CharacterController.curser
     );
@@ -96,18 +102,19 @@ export class CharacterCombatController {
         CharCombatAttackController.instense = atkController;
       }
       atkController.selectedCharacter = this.selectedCharacter;
-       atkController.attackSelect(
-        this.selectedCharacter.creature?.attacks[0] as CreatureAttack
-      ).then((result)=>{
-        console.log("attackSelect result", result);
-        this.resetDivideWalk();
-        setTimeout(() => {
-          if (result?.from!=='moveConrotller') {
+      atkController
+        .attackSelect(
+          this.selectedCharacter.creature?.attacks[0] as CreatureAttack
+        )
+        .then((result) => {
+          console.log("attackSelect result", result);
+          this.resetDivideWalk();
+          setTimeout(() => {
+            if (result?.from !== "moveConrotller") {
               this.useMoveController();
-          }
-        },90)
-    
-      });
+            }
+          }, 90);
+        });
     }
   }
   endTurn() {
@@ -117,9 +124,9 @@ export class CharacterCombatController {
     }
     CharCombatMoveController.instense?.removeFunction();
     CharCombatAttackController.instense?.removeFunction();
-     if (CharacterCombatController.instance) {
-       CharacterCombatController.instance.inUse = false;
-     }
+    if (CharacterCombatController.instance) {
+      CharacterCombatController.instance.inUse = false;
+    }
     InitiativeSystem.endTurn(this.selectedCharacter);
   }
   resetDivideWalk() {

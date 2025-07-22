@@ -1,3 +1,4 @@
+import { Power } from '../power/Power';
 
 export interface CreatureAttack {
     name: string;
@@ -28,6 +29,7 @@ export interface CreatureResistance {
 }
 
 export interface CreatureOptions {
+    maxHp: number;
     name: string;
     level: number;
     role: string;
@@ -54,6 +56,7 @@ export interface CreatureOptions {
     attacks?: CreatureAttack[];
     traits?: string[];
     notes?: string[];
+    powers?: Power[];
 }
 
 export class Creature {
@@ -80,9 +83,11 @@ export class Creature {
     skills: CreatureSkill[];
     abilities: CreatureAbility[];
     equipment: string[];
-    attacks: CreatureAttack[];
+    maxHp: number;
     traits: string[];
     notes: string[];
+    attacks: CreatureAttack[];
+    powers: Power[];
 
     constructor(options: CreatureOptions) {
         this.name = options.name;
@@ -92,6 +97,7 @@ export class Creature {
         this.size = options.size;
         this.type = options.type;
         this.hp = options.hp;
+        this.maxHp = options.maxHp; // Initialize maxHp with hp
         this.bloodied = options.bloodied;
         this.ac = options.ac;
         this.fortitude = options.fortitude;
@@ -111,6 +117,7 @@ export class Creature {
         this.attacks = options.attacks || [];
         this.traits = options.traits || [];
         this.notes = options.notes || [];
+        this.powers = options.powers || [];
     }
 }
 
@@ -393,7 +400,9 @@ export function createCreatureOptions(txt: string): CreatureOptions {
         equipment,
         attacks,
         traits,
-        notes
+        notes,
+        maxHp: 0,
+        powers: []
     };
 
     return options; // 返回 JSON 字符串
