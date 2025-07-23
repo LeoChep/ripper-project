@@ -224,11 +224,8 @@ export function startBattle() {
     return;
   }
   if (!CharacterCombatController.instance) {
-    CharacterCombatController.instance = new CharacterCombatController(
-      initiativeCursor.map
-    );
+    CharacterCombatController.instance = new CharacterCombatController();
   }
-  CharacterCombatController.instance.mapPassiable = initiativeCursor.map;
   CharacterCombatController.instance.inUse = true;
 
   return playStartAnim();

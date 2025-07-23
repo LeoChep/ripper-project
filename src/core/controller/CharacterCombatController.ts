@@ -12,30 +12,14 @@ export class CharacterCombatController {
   public inUse: boolean = false;
   public static instance: CharacterCombatController | null = null;
   selectedCharacter: Unit | null = null;
-  mapPassiable: TiledMap | null = null;
-  constructor(mapPassiable: TiledMap) {
+  constructor() {
     // 初始化属性
-    if (!golbalSetting.mapContainer) {
-      console.warn("CharacterCombatController instance already exists.");
-      return;
-    }
-    if (!mapPassiable) {
-      return;
-    }
   }
 
   useMoveController() {
-    if (this.inUse === false) {
+    if (!this.preCheck() || !this.selectedCharacter) {
       return;
     }
-    this.selectedCharacter = this.mapPassiable?.sprites.find(
-      (sprite) => sprite.id === CharacterController.curser
-    );
-    console.log(
-      "使用移动控制器",
-      this.selectedCharacter,
-      this.selectedCharacter?.initiative?.moveActionNumber
-    );
     const walkMachine = this.selectedCharacter?.stateMachinePack.getMachine(
       "walk"
     ) as WalkStateMachine;
@@ -47,76 +31,70 @@ export class CharacterCombatController {
     }
     CharCombatAttackController.instense?.removeFunction({
       from: "moveConrotller",
-      cencel: true
+      cencel: true,
     });
 
-    if (
-      this.selectedCharacter &&
-      golbalSetting.mapContainer &&
-      golbalSetting.rlayers.lineLayer &&
-      this.mapPassiable
-    ) {
-      let moveController = CharCombatMoveController.instense;
-      if (!moveController) {
-        moveController = new CharCombatMoveController(
-          golbalSetting.mapContainer,
-          this.mapPassiable
-        );
-        CharCombatMoveController.instense = moveController;
-      }
-      moveController.selectedCharacter = this.selectedCharacter;
-      const move = moveController.moveSelect();
-      move.then((result) => {
-        console.log("moveSelect result", result);
-        if (result?.cencel === false) {
-          if (walkMachine.onDivideWalk === true) {
-            this.useMoveController();
-          }
+    let moveController = CharCombatMoveController.instense;
+    if (!moveController) {
+      moveController = new CharCombatMoveController();
+      CharCombatMoveController.instense = moveController;
+    }
+    moveController.selectedCharacter = this.selectedCharacter;
+    const move = moveController.moveSelect();
+    move.then((result) => {
+      console.log("moveSelect result", result);
+      if (result?.cencel === false) {
+        if (walkMachine.onDivideWalk === true) {
+          this.useMoveController();
         }
-      });
-    }
+      }
+    });
   }
-  useAttackController() {
-    if (this.inUse === false) {
-      return;
+  preCheck() {
+    if (this.inUse === false || !golbalSetting.map) {
+      return false;
     }
-    this.selectedCharacter = this.mapPassiable?.sprites.find(
+    this.selectedCharacter = golbalSetting.map.sprites.find(
       (sprite) => sprite.id === CharacterController.curser
     );
-    if ((this.selectedCharacter?.initiative?.standerActionNumber ?? 0) < 1) {
+    if (!this.selectedCharacter) {
+      console.warn("没有选中单位，无法进行操作选择");
+      return false;
+    }
+
+    return true;
+  }
+  useAttackController() {
+    if (!this.preCheck() || !this.selectedCharacter) {
       return;
     }
+      if (
+      (this.selectedCharacter?.initiative?.standerActionNumber ?? 0) < 1 
+    ) {
+      return;
+    }
+    CharCombatAttackController.instense?.removeFunction();
     CharCombatMoveController.instense?.removeFunction();
 
-    if (
-      this.selectedCharacter &&
-      golbalSetting.mapContainer &&
-      golbalSetting.rlayers.lineLayer &&
-      this.mapPassiable
-    ) {
-      let atkController = CharCombatAttackController.instense;
-      if (!atkController) {
-        atkController = new CharCombatAttackController(
-          golbalSetting.mapContainer,
-          this.mapPassiable
-        );
-        CharCombatAttackController.instense = atkController;
-      }
-      atkController.selectedCharacter = this.selectedCharacter;
-      atkController
-        .attackSelect(
-          this.selectedCharacter.creature?.attacks[0] as CreatureAttack
-        )
-        .then((result) => {
-          console.log("attackSelect result", result);
-          this.resetDivideWalk();
-          setTimeout(() => {
-            if (result?.from !== "moveConrotller" && InitiativeSystem.isInBattle()) {
-              this.useMoveController();
-            }
-          }, 90);
-        });
+    let atkController = CharCombatAttackController.instense;
+    if (!atkController) {
+      atkController = new CharCombatAttackController();
+      CharCombatAttackController.instense = atkController;
     }
+    atkController.selectedCharacter = this.selectedCharacter;
+    atkController
+      .attackSelect(
+        this.selectedCharacter.creature?.attacks[0] as CreatureAttack
+      )
+      .then((result) => {
+        console.log("attackSelect result", result);
+        this.resetDivideWalk();
+        setTimeout(() => {
+          if (!result.from && InitiativeSystem.isInBattle()) {
+            this.useMoveController();
+          }
+        }, 90);
+      });
   }
   endTurn() {
     if (!this.selectedCharacter) {

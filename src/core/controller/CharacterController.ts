@@ -32,7 +32,7 @@ export class CharacterController {
   }
   static lookOn() {
     //后续需要单独处理effectContainer的生成与更新
-       const unit = CharacterController.selectedCharacter;
+    const unit = CharacterController.selectedCharacter;
     if (!unit || !unit.animUnit) {
       console.warn("没有选中单位或单位动画精灵不存在");
       return;

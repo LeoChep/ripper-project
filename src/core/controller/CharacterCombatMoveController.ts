@@ -25,17 +25,15 @@ type Rlayer = {
 
 export class CharCombatMoveController {
   public static isUse: boolean = false;
-  container: PIXI.Container;
+
   selectedCharacter: Unit | null = null;
   public static instense = null as CharCombatMoveController | null;
-  mapPassiable: TiledMap | null = null;
+
   graphics: PIXI.Graphics | null = null;
   constructor(
-    container: PIXI.Container<PIXI.ContainerChild>,
-    mapPassiable: TiledMap
+   
   ) {
-    this.container = container;
-    this.mapPassiable = mapPassiable;
+
 
     // 初始化逻辑
   }
@@ -84,7 +82,7 @@ export class CharCombatMoveController {
         preY * tileSize,
         x * tileSize,
         y * tileSize,
-        this.mapPassiable
+        golbalSetting.map,
       );
     });
     // 绘制可移动范围
