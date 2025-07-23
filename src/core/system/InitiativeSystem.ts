@@ -198,26 +198,48 @@ export function useMinorAction(unit: Unit) {
   }
   return false;
 }
-
+export function useAction(unit: Unit, actionType: string) {
+   if (!unit.initiative) {
+    return false;
+  }
+   if (actionType==='standard') {
+    if (!(unit.initiative.standerActionNumber >= 1)) {
+      unit.initiative.standerActionNumber--;
+      return true
+    }
+  }
+  if (actionType==='move') {
+    if (!(unit.initiative.moveActionNumber >= 1)) {
+      unit.initiative.moveActionNumber--;
+      return true
+    }
+  }
+  if (actionType==='minor') {
+    if (!(unit.initiative.minorActionNumber >= 1)) {
+      unit.initiative.minorActionNumber--;
+      return true
+    }
+  }
+  return false
+}
 export function checkActionUseful(
   unit: Unit,
-  standNum: number,
-  minorNum: number,
-  moveNum: number
+  actionType:string
 ) {
   let passable = true;
   if (!unit.initiative) return false;
-  if (standNum) {
-    if (!(unit.initiative.standerActionNumber >= standNum)) passable = false;
+  if (actionType==='standard') {
+    if (!(unit.initiative.standerActionNumber >= 1)) passable = false;
   }
-  if (moveNum) {
-    if (!(unit.initiative.moveActionNumber >= moveNum)) passable = false;
+  if (actionType==='move') {
+    if (!(unit.initiative.moveActionNumber >= 1)) passable = false;
   }
-  if (minorNum) {
-    if (!(unit.initiative.minorActionNumber >= minorNum)) passable = false;
+  if (actionType==='minor') {
+    if (!(unit.initiative.minorActionNumber >= 1)) passable = false;
   }
   return passable;
 }
+
 export function startBattle() {
   CharacterOutCombatController.isUse = false;
   if (!initiativeCursor.map) {

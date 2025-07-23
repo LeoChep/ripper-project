@@ -40,7 +40,7 @@
     <div class="action-buttons">
       <button v-for="action in filteredActions" :key="action.id"
         :class="['action-btn', { selected: selectedAction?.id === action.id }]" @click="selectAction(action)">
-        {{ action.name }}
+        {{ action.displayName }}
       </button>
     </div>
 
@@ -90,6 +90,7 @@ const actions = computed(() => {
   console.log('获取威能数据:', character.powers)
   const actions=character.powers.map((power, index) => ({
     id: `power_${index}`,
+    displayName: power.displayName || power.name, // 使用威能的显示名称或默认名称
     name: power.name,
     actionType: power.action, // 'standard', 'move', 'minor'
     powerType: power.type, // 'atwill', 'encounter', 'daily', 'utility'
@@ -141,6 +142,7 @@ const getPowerTypeText = (type) => {
 const selectAction = (action) => {
   selectedAction.value = action
   console.log('选中威能:', action)
+  CharacterCombatController.instance.usePowerController(action.power)
   emit('actionSelected', action)
 }
 //

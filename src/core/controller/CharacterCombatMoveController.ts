@@ -165,6 +165,6 @@ export class CharCombatMoveController {
     });
     return promise;
   };
-  removeFunction = () => {};
+  removeFunction = (args?: any) => {};
   // 添加你的方法和属性
 }

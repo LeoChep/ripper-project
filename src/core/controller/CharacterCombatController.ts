@@ -8,6 +8,9 @@ import { CharCombatAttackController } from "./CharacterCombatAttackController";
 import type { CreatureAttack } from "../units/Creature";
 import * as InitiativeSystem from "../system/InitiativeSystem";
 import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
+import { AbstractPwoerController } from "./powers/AbstractPwoerController";
+import { Power } from "../power/Power";
+import { PowerSystem } from "../system/PowerSystem";
 export class CharacterCombatController {
   public inUse: boolean = false;
   public static instance: CharacterCombatController | null = null;
@@ -15,7 +18,7 @@ export class CharacterCombatController {
   constructor() {
     // 初始化属性
   }
-
+  powerController: AbstractPwoerController | null = null;
   useMoveController() {
     if (!this.preCheck() || !this.selectedCharacter) {
       return;
@@ -24,16 +27,17 @@ export class CharacterCombatController {
       "walk"
     ) as WalkStateMachine;
     if (
-      (this.selectedCharacter?.initiative?.moveActionNumber ?? 0) < 1 &&
+      !InitiativeSystem.checkActionUseful(this.selectedCharacter,'move') &&
       walkMachine.onDivideWalk === false
     ) {
       return;
     }
-    CharCombatAttackController.instense?.removeFunction({
+    const cencelInfo = {
       from: "moveConrotller",
       cencel: true,
-    });
-
+    };
+    CharCombatAttackController.instense?.removeFunction(cencelInfo);
+    this.powerController?.removeFunction(cencelInfo);
     let moveController = CharCombatMoveController.instense;
     if (!moveController) {
       moveController = new CharCombatMoveController();
@@ -64,17 +68,55 @@ export class CharacterCombatController {
 
     return true;
   }
+  usePowerController(power: Power) {
+    if (!this.preCheck() || !this.selectedCharacter) {
+      return;
+    }
+    if (
+      !InitiativeSystem.checkActionUseful(this.selectedCharacter, power.actionType)
+    ) {
+      return;
+    }
+    const cencelInfo = {
+      from: power.name + "Conrotller",
+      cencel: true,
+    };
+    CharCombatAttackController.instense?.removeFunction(cencelInfo);
+    CharCombatMoveController.instense?.removeFunction(cencelInfo);
+    this.powerController?.removeFunction(cencelInfo);
+    const powerController = PowerSystem.getInstance().getController(power.name);
+    this.powerController = powerController;
+    if (!powerController) {
+      console.warn(`PowerController for ${power.name} is not defined.`);
+      return;
+    }
+    powerController.selectedCharacter = this.selectedCharacter;
+    powerController.doSelect().then((result) => {
+      console.log("powerController result", result);
+      this.resetDivideWalk();
+      setTimeout(() => {
+        if (!result.from && InitiativeSystem.isInBattle()) {
+          this.useMoveController();
+        }
+      }, 90);
+    });
+  }
   useAttackController() {
     if (!this.preCheck() || !this.selectedCharacter) {
       return;
     }
-      if (
-      (this.selectedCharacter?.initiative?.standerActionNumber ?? 0) < 1 
+    if (
+      !InitiativeSystem.checkActionUseful(this.selectedCharacter, "standard")
     ) {
       return;
     }
-    CharCombatAttackController.instense?.removeFunction();
-    CharCombatMoveController.instense?.removeFunction();
+    const cencelInfo = {
+      from: "atkConrotller",
+      cencel: true,
+    };
+    CharCombatAttackController.instense?.removeFunction(cencelInfo);
+    CharCombatMoveController.instense?.removeFunction(cencelInfo);
+    this.powerController?.removeFunction(cencelInfo);
 
     let atkController = CharCombatAttackController.instense;
     if (!atkController) {

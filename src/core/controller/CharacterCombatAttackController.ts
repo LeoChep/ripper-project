@@ -11,6 +11,7 @@ import type { CreatureAttack } from "../units/Creature";
 
 import { BasicAttackSelector } from "../selector/BasicAttackSelector";
 import { tileSize } from "../envSetting";
+import { useStandAction } from "../system/InitiativeSystem";
 
 export class CharCombatAttackController {
   public static isUse: boolean = false;
@@ -33,7 +34,6 @@ export class CharCombatAttackController {
     if (!spriteUnit) {
       return Promise.resolve({});
     }
-
     //
     const centerX = spriteUnit.x;
     const centerY = spriteUnit.y;
@@ -60,13 +60,7 @@ export class CharCombatAttackController {
     });
     basicAttackSelector.promise?.then((result) => {
       if (result.cencel !== true) {
-        if (
-          unit.initiative &&
-          typeof unit.initiative.standerActionNumber === "number"
-        ) {
-          unit.initiative.standerActionNumber =
-            unit.initiative.standerActionNumber - 1;
-        }
+        useStandAction(unit);
         playerSelectAttackMovement(
           result.event,
           unit,

@@ -93,7 +93,8 @@
   ],
   "powers": [
     {
-      "name": "突刺击",
+      "name":"LungingStrike",
+      "displayName": "突刺击",
       "type": "encounter",
       "action": "standard",
       "range": null,
