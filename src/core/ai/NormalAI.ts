@@ -21,7 +21,7 @@ export class NormalAI implements AIInterface {
     //寻找目标
     // 这里可以实现AI的目标选择逻辑
     //用于存放结果
-    const result: any = {};
+    const result: any = { canAttack: false };
     const unitX = Math.floor(unit.x / tileSize);
     const unitY = Math.floor(unit.y / tileSize);
     console.log(`AI单位位置: (${unitX}, ${unitY})`);
@@ -30,10 +30,10 @@ export class NormalAI implements AIInterface {
       unitY,
       99,
       (nx, ny, x, y) => {
-        return findAttackPath(nx, ny, x, y, unit, map, result);
+        return findAttackTarget(nx, ny, x, y, unit, map, result);
       },
       () => {
-        if (result.target) {
+        if (result.target && result.canAttack) {
           return true;
         } else {
           return false;
@@ -54,14 +54,34 @@ export class NormalAI implements AIInterface {
         y: number;
         step: number;
       };
-      let isCantAttack = false;
+
+      let isCantAttack = !result.canAttack;
       if (rc) {
         let speed = 0;
         if (unit.creature?.speed) {
           speed = unit.creature.speed;
         }
-
-        if (rc.step > speed) {
+        if (isCantAttack) {
+          //如果不能攻击,检查是否为拥堵情况
+          let noUnit = false;
+          while (!noUnit&&rc) {
+            //如果是拥堵情况，往前找到不拥堵位置为止
+            rc = path[`${rc.x},${rc.y}`] as unknown as {
+              x: number;
+              y: number;
+              step: number;
+            };
+            noUnit = false;
+            golbalSetting?.map?.sprites.forEach((sprite) => {
+              const spriteX = Math.floor(sprite.x / tileSize);
+              const spriteY = Math.floor(sprite.y / tileSize);
+              if (rc&&rc.x === spriteX && rc.y === spriteY) {
+                noUnit = true;
+              }
+            });
+          }
+        }
+        if (rc&&rc.step > speed) {
           console.log(
             `AI单位 ${unit.name} 的步数 ${rc.step} 超过速度 ${speed}`
           );
@@ -79,7 +99,10 @@ export class NormalAI implements AIInterface {
           }
         }
         console.log("AI停止路径:", path[`${result.x},${result.y}`], result);
-        await UnitMove.moveMovement(result.x, result.y, unit, path);
+        if (rc) {
+          await UnitMove.moveMovement(result.x, result.y, unit, path);
+        }
+      
       }
 
       console.log("aiUnit state", unit);
@@ -92,7 +115,7 @@ export class NormalAI implements AIInterface {
         }
       }
     }
-    
+
     InitiativeController.endTurn(unit);
     // Implement the logic for the AI to automatically take actions
   }
@@ -130,8 +153,70 @@ function findAttackTarget(
   result: any
 ) {
   //没找到敌人就继续寻找
-  let noHaveTarget = true;
+  let continueFind = true;
   let passiable = true;
+  if (tiledMap) {
+    passiable = UnitMoveController.checkPassiable(
+      unit,
+      x * tileSize,
+      y * tileSize,
+      nx * tileSize,
+      ny * tileSize,
+      tiledMap
+    );
+  }
+  if (!passiable) {
+    return false; // 如果不可通行，直接返回
+  }
+  let noUnit = true;
+  tiledMap.sprites.forEach((sprite) => {
+    if (sprite === unit) {
+      return; // 如果是自己就跳过
+    }
+    const spriteX = Math.floor(sprite.x / tileSize);
+    const spriteY = Math.floor(sprite.y / tileSize);
+    if (x === spriteX && y === spriteY) {
+      //如果这个点有单位
+      noUnit = false; //有单位
+    }
+  });
+  tiledMap.sprites.forEach((sprite) => {
+    if (sprite === unit) {
+      return; // 如果是自己就跳过
+    }
+    const spriteX = Math.floor(sprite.x / tileSize);
+    const spriteY = Math.floor(sprite.y / tileSize);
+    if (sprite.party !== unit.party) {
+      let attackable = checkEdges(tiledMap, spriteX, spriteY, x, y);
+      //检测敌人是否在这个触及内,并且无障碍
+      const dx = Math.abs(spriteX - x);
+      const dy = Math.abs(spriteY - y);
+      const dis = Math.max(dx, dy);
+
+      if (dis <= (unit.creature?.attacks[0].range ?? 1) && attackable) {
+        //找到了就不需要继续寻找了,并且这个点没别人
+        if (noUnit) {
+          continueFind = false;
+          result.canAttack = true;
+        }
+        result.x = x;
+        result.y = y;
+        result.target = sprite;
+      }
+    }
+  });
+  return continueFind;
+}
+
+
+function checkEdges(
+  tiledMap: TiledMap,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number
+) {
+  let passiable = true; // 默认可通行
   if (tiledMap) {
     const edges = tiledMap.edges;
     // 检查是否穿过边
@@ -146,10 +231,10 @@ function findAttackTarget(
         // 检查中点的连线
         if (
           segmentsIntersect(
-            nx * tileSize + 32,
-            ny * tileSize + 32,
-            x * tileSize + 32,
-            y * tileSize + 32,
+            x1 * tileSize + 32,
+            y1 * tileSize + 32,
+            x2 * tileSize + 32,
+            y2 * tileSize + 32,
             edge.x1,
             edge.y1,
             edge.x2,
@@ -157,79 +242,12 @@ function findAttackTarget(
           )
         ) {
           passiable = false; // 如果中点的连线与边相交，则不可通行
-          return; // 如果不可通行，则跳过
+          return; // 如果不可通行，则跳出循环
         }
       });
     }
+  } else {
+    return false;
   }
-  if (!passiable) {
-    return false; // 如果不可通行，直接返回
-  }
-  tiledMap.sprites.forEach((sprite) => {
-    if (sprite.party !== unit.party) {
-      //检测敌人是否在这个点
-      const spriteX = Math.floor(sprite.x / tileSize);
-      const spriteY = Math.floor(sprite.y / tileSize);
-
-      if (spriteX === nx && spriteY === ny) {
-        //找到了就不需要继续寻找了
-        noHaveTarget = false;
-        result.x = x;
-        result.y = y;
-        result.target = sprite;
-      }
-    }
-  });
-  return noHaveTarget;
-}
-
-function findAttackPath(
-  nx: number,
-  ny: number,
-  x: number,
-  y: number,
-  unit: Unit,
-  tiledMap: TiledMap,
-  result: any
-) {
-  let passible = true;
-  //从这个点开始寻找攻击目标
-  const findAttackTargetResult: { target?: any } = {};
-  generateWays(
-    x,
-    y,
-    unit.creature?.attacks[0].range ?? 1,
-    (nx, ny, preX, preY) => {
-      return findAttackTarget(
-        nx,
-        ny,
-        x,
-        y,
-        unit,
-        tiledMap,
-        findAttackTargetResult
-      );
-    }
-  );
-  if (findAttackTargetResult.target) {
-    //如果找到了目标
-    result.target = findAttackTargetResult.target;
-    result.x = x;
-    result.y = y;
-    return false; // 找到目标后不需要继续寻找
-  }
-  //下一个点可否通行
-  let movePassible = UnitMoveController.checkPassiable(
-    unit,
-    x * tileSize,
-    y * tileSize,
-    nx * tileSize,
-    ny * tileSize,
-    tiledMap
-  );
-  if (!movePassible) {
-    return false; // 如果移动不可行，直接返回
-  }
-
-  return passible;
+  return passiable;
 }

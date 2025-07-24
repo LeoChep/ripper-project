@@ -25,10 +25,12 @@ export class LungingStrikeController extends AbstractPwoerController {
     const unit = this.selectedCharacter as Unit;
     const attack = {} as CreatureAttack;
     const range = 2; // 假设冲刺攻击范围为2
-    attack.attackBonus =
-      unit.creature?.abilities?.find((ability) => ability.name === "Strength")
-        ?.modifier ?? 0; // 使用力量作为攻击加值
-    attack.damage='1d8+'+attack.attackBonus
+    // attack.attackBonus =
+    //   unit.creature?.abilities?.find((ability) => ability.name === "Strength")
+    //     ?.modifier ?? 0; // 使用力量作为攻击加值
+    // attack.damage='1d8+'+attack.attackBonus
+        attack.attackBonus =12
+    attack.damage='1d8+7'
     // 执行攻击选择逻辑
     const basicAttackSelector = BasicAttackSelector.selectBasicAttack(
       (x, y, pre, prey) => {
