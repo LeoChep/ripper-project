@@ -75,7 +75,7 @@ export class NormalAI implements AIInterface {
             golbalSetting?.map?.sprites.forEach((sprite) => {
               const spriteX = Math.floor(sprite.x / tileSize);
               const spriteY = Math.floor(sprite.y / tileSize);
-              if (rc && rc.x === spriteX && rc.y === spriteY) {
+              if (rc && rc.x === spriteX && rc.y === spriteY && sprite.state !== "dead") {
                 noUnit = true;
               }
             });
@@ -173,7 +173,7 @@ function findAttackTarget(
     }
     const spriteX = Math.floor(sprite.x / tileSize);
     const spriteY = Math.floor(sprite.y / tileSize);
-    if (x === spriteX && y === spriteY) {
+    if (x === spriteX && y === spriteY&&sprite.state !== "dead") {
       //如果这个点有单位
       noUnit = false; //有单位
     }
