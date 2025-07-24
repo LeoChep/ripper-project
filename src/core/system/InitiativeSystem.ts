@@ -12,12 +12,13 @@ import { appSetting } from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import { CharacterCombatController } from "../controller/CharacterCombatController";
 import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
+import { CombatChallenge } from "../trait/fighter/CombatChallenge";
 
 export const InitiativeSheet = [] as InitiativeClass[];
 const initiativeCursor = {
   pointAt: null as null | InitiativeClass,
   map: null as null | TiledMap,
-  inBattle: false
+  inBattle: false,
 };
 
 export async function addUnitsToInitiativeSheet(units: Unit[]) {
@@ -103,7 +104,11 @@ export async function startCombatTurn() {
       initiativeCursor.pointAt.standerActionNumber = 1;
       initiativeCursor.pointAt.moveActionNumber = 1;
       initiativeCursor.pointAt.minorActionNumber = 1;
-      (initiativeCursor.pointAt.owner.stateMachinePack?.getMachine?.("walk") as WalkStateMachine).onDivideWalk=false;
+      (
+        initiativeCursor.pointAt.owner.stateMachinePack?.getMachine?.(
+          "walk"
+        ) as WalkStateMachine
+      ).onDivideWalk = false;
       //设置Store
       if (initiativeCursor.pointAt.owner.initiative) {
         useInitiativeStore().setIniitiative(
@@ -165,7 +170,7 @@ export async function endTurn(unit: Unit) {
   }
   startCombatTurn();
 }
-export function isInBattle() {  
+export function isInBattle() {
   return initiativeCursor.inBattle;
 }
 export function useMoveAction(unit: Unit) {
@@ -201,42 +206,39 @@ export function useMinorAction(unit: Unit) {
   return false;
 }
 export function useAction(unit: Unit, actionType: string) {
-   if (!unit.initiative) {
+  if (!unit.initiative) {
     return false;
   }
-   if (actionType==='standard') {
+  if (actionType === "standard") {
     if (!(unit.initiative.standerActionNumber >= 1)) {
       unit.initiative.standerActionNumber--;
-      return true
+      return true;
     }
   }
-  if (actionType==='move') {
+  if (actionType === "move") {
     if (!(unit.initiative.moveActionNumber >= 1)) {
       unit.initiative.moveActionNumber--;
-      return true
+      return true;
     }
   }
-  if (actionType==='minor') {
+  if (actionType === "minor") {
     if (!(unit.initiative.minorActionNumber >= 1)) {
       unit.initiative.minorActionNumber--;
-      return true
+      return true;
     }
   }
-  return false
+  return false;
 }
-export function checkActionUseful(
-  unit: Unit,
-  actionType:string
-) {
+export function checkActionUseful(unit: Unit, actionType: string) {
   let passable = true;
   if (!unit.initiative) return false;
-  if (actionType==='standard') {
+  if (actionType === "standard") {
     if (!(unit.initiative.standerActionNumber >= 1)) passable = false;
   }
-  if (actionType==='move') {
+  if (actionType === "move") {
     if (!(unit.initiative.moveActionNumber >= 1)) passable = false;
   }
-  if (actionType==='minor') {
+  if (actionType === "minor") {
     if (!(unit.initiative.minorActionNumber >= 1)) passable = false;
   }
   return passable;
@@ -251,7 +253,13 @@ export function startBattle() {
     CharacterCombatController.instance = new CharacterCombatController();
   }
   CharacterCombatController.instance.inUse = true;
-
+  initiativeCursor.map.sprites.forEach((unit) => {
+    if (unit.party === "player") {
+      const combatChallenge= new CombatChallenge();
+      combatChallenge.owner = unit;
+      combatChallenge.hook();
+    }
+  });
   return playStartAnim();
 }
 export async function playStartAnim() {

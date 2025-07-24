@@ -8,6 +8,7 @@ import hitURL from "@/assets/effect/Impact_03_Regular_Yellow_400x400.webm";
 import missHRL from "@/assets/effect/Miss_02_White_200x200.webm";
 import { getContainer, getLayers } from "@/stores/container";
 import { tileSize } from "../envSetting";
+import { BattleEvenetSystem } from "../system/BattleEventSystem";
 
 export function playerSelectAttackMovement(
   e: PIXI.FederatedPointerEvent,
@@ -54,7 +55,12 @@ export async function attackMovementToUnit(
     const targetX = Math.floor(target.x / tileSize);
     const targetY = Math.floor(target.y / tileSize);
     // 执行攻击逻辑
+    await BattleEvenetSystem.getInstance().handleEvent("attackEvent", unit, target, attack);
     console.log(target);
+    if (unit.state==='dead'){
+      console.warn("单位已死亡，无法执行攻击");
+      return;
+    }
     // if (target) alert("attack " + target?.name);
     let hitFlag = false;
     let damage = 0;
