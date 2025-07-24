@@ -1,29 +1,25 @@
 {
   "name": "战士 ",
-  "level": 1,
-  "role": "杂兵 游击",
+  "level": 5,
+  "role": "战士",
   "xp": 25,
   "size": "中型",
-  "type": "自然界 活化生物（不死生物）",
-  "hp": 1,
-  "bloodied": 0,
-  "ac": 16,
-  "fortitude": 13,
-  "reflex": 14,
-  "will": 13,
-  "speed": 6,
+  "type": "自然界",
+  "hp": 53,
+  "maxHp": 53,
+  "bloodied": 27,
+  "ac": 23,
+  "fortitude": 21,
+  "reflex": 18,
+  "will": 20,
+  "speed": 5,
   "fly": null,
-  "initiative": 0,
+  "initiative": 2,
   "senses": "",
   "immunities": [
-    "疾病",
-    "毒素"
   ],
   "resistances": [
-    {
-      "type": "黯蚀",
-      "value": 10
-    }
+    
   ],
   "alignment": "无",
   "languages": [
@@ -33,39 +29,37 @@
   "abilities": [
     {
       "name": "Strength",
-      "value": 15,
-      "modifier": 2
+      "value": 20,
+      "modifier": 5
     },
     {
       "name": "Dexterity",
-      "value": 17,
-      "modifier": 3
+      "value": 10,
+      "modifier":0
     },
     {
       "name": "Constitution",
-      "value": 13,
-      "modifier": 1
-    },
-    {
-      "name": "Intelligence",
-      "value": 3,
-      "modifier": -4
-    },
-    {
-      "name": "Wisdom",
       "value": 14,
       "modifier": 2
     },
     {
+      "name": "Intelligence",
+      "value": 10,
+      "modifier": 0
+    },
+    {
+      "name": "Wisdom",
+      "value": 15,
+      "modifier": 2
+    },
+    {
       "name": "Charisma",
-      "value": 3,
-      "modifier": -4
+      "value": 8,
+      "modifier": -1
     }
   ],
   "equipment": [
-    "长剑",
-    "短弓",
-    "20 支箭"
+    
   ],
   "attacks": [
     {
@@ -73,21 +67,23 @@
       "type": "Melee",
       "action": "武器",
       "range": 1,
-      "attackBonus": 6,
+      "attackBonus": 12,
       "target": "ac",
-      "damage": "1d8",
-      "effect": "该骷髅可以在该攻击前快步一格。攻击：射程 20（一个生物）+6vs.AC",
+      "weapon":"1d8",
+      "damage": "1d8+5+1",
+      "effect": "",
       "missEffect": null
     },
     {
-      "name": "短弓",
-      "type": "Ranged",
+      "name": "战斗盾牌",
+      "type": "Melee",
       "action": "武器",
-      "range": 20,
-      "attackBonus": 6,
-      "target": "AC",
-      "damage": "",
-      "effect": null,
+      "range": 1,
+      "attackBonus": 12,
+      "target": "ac",
+      "weapon":"1d6",
+      "damage": "1d6+5+1",
+      "effect": "",
       "missEffect": null
     }
   ],

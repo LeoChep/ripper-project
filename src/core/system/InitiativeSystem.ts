@@ -11,6 +11,7 @@ import { appSetting } from "../envSetting";
 
 import { golbalSetting } from "../golbalSetting";
 import { CharacterCombatController } from "../controller/CharacterCombatController";
+import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
 
 export const InitiativeSheet = [] as InitiativeClass[];
 const initiativeCursor = {
@@ -102,6 +103,7 @@ export async function startCombatTurn() {
       initiativeCursor.pointAt.standerActionNumber = 1;
       initiativeCursor.pointAt.moveActionNumber = 1;
       initiativeCursor.pointAt.minorActionNumber = 1;
+      (initiativeCursor.pointAt.owner.stateMachinePack?.getMachine?.("walk") as WalkStateMachine).onDivideWalk=false;
       //设置Store
       if (initiativeCursor.pointAt.owner.initiative) {
         useInitiativeStore().setIniitiative(

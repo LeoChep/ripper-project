@@ -53,7 +53,6 @@ export class CharCombatMoveController {
       "walk"
     ) as WalkStateMachine;
     if (walkMachine.onDivideWalk) {
-      // console.warn("当前单位正在分割移动，无法进行选择");
       if (walkMachine.leastDivideSpeed > 0) {
         range = walkMachine.leastDivideSpeed;
       }
