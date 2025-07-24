@@ -64,7 +64,7 @@ export class NormalAI implements AIInterface {
         if (isCantAttack) {
           //如果不能攻击,检查是否为拥堵情况
           let noUnit = false;
-          while (!noUnit&&rc) {
+          while (!noUnit && rc) {
             //如果是拥堵情况，往前找到不拥堵位置为止
             rc = path[`${rc.x},${rc.y}`] as unknown as {
               x: number;
@@ -75,13 +75,13 @@ export class NormalAI implements AIInterface {
             golbalSetting?.map?.sprites.forEach((sprite) => {
               const spriteX = Math.floor(sprite.x / tileSize);
               const spriteY = Math.floor(sprite.y / tileSize);
-              if (rc&&rc.x === spriteX && rc.y === spriteY) {
+              if (rc && rc.x === spriteX && rc.y === spriteY) {
                 noUnit = true;
               }
             });
           }
         }
-        if (rc&&rc.step > speed) {
+        if (rc && rc.step > speed) {
           console.log(
             `AI单位 ${unit.name} 的步数 ${rc.step} 超过速度 ${speed}`
           );
@@ -102,7 +102,6 @@ export class NormalAI implements AIInterface {
         if (rc) {
           await UnitMove.moveMovement(result.x, result.y, unit, path);
         }
-      
       }
 
       console.log("aiUnit state", unit);
@@ -111,7 +110,7 @@ export class NormalAI implements AIInterface {
         const enemyX = Math.floor(result.target.x / tileSize);
         const enemyY = Math.floor(result.target.y / tileSize);
         if (attack) {
-          await UnitAttack.attackMovement(enemyX, enemyY, unit, attack, map);
+          await UnitAttack.attackMovementToXY(enemyX, enemyY, unit, attack, map);
         }
       }
     }
@@ -133,9 +132,8 @@ export class NormalAI implements AIInterface {
     const enemyY = Math.floor(targetUnit.y / tileSize);
     console.log(`AI单位尝试攻击: (${enemyX}, ${enemyY})`);
     // 执
-    await UnitAttack.attackMovement(
-      enemyX,
-      enemyY,
+    await UnitAttack.attackMovementToUnit(
+      targetUnit,
       this.owner,
       this.owner.creature?.attacks[0],
       golbalSetting.map
@@ -207,7 +205,6 @@ function findAttackTarget(
   });
   return continueFind;
 }
-
 
 function checkEdges(
   tiledMap: TiledMap,

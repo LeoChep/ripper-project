@@ -7,6 +7,7 @@ import { takeDamage } from "../system/DamageSystem";
 import hitURL from "@/assets/effect/Impact_03_Regular_Yellow_400x400.webm";
 import missHRL from "@/assets/effect/Miss_02_White_200x200.webm";
 import { getContainer, getLayers } from "@/stores/container";
+import { tileSize } from "../envSetting";
 
 export function playerSelectAttackMovement(
   e: PIXI.FederatedPointerEvent,
@@ -26,41 +27,32 @@ export function playerSelectAttackMovement(
   const offsetY = pos.y - container.y;
   const targetX = Math.floor(offsetX / 64);
   const targetY = Math.floor(offsetY / 64);
-  return attackMovement(targetX, targetY, unit, attack, mapPassiable);
+  return attackMovementToXY(targetX, targetY, unit, attack, mapPassiable);
 }
-export async function attackMovement(
-  targetX: number,
-  targetY: number,
+export async function attackMovementToUnit(
+  targetUnit: Unit,
   attacker: Unit,
   attack: CreatureAttack,
   mapPassiable: TiledMap | null
 ) {
-  const unit= attacker;
+  const unit = attacker;
   unit.state = "attack";
   const spriteUnit = unit.animUnit;
   if (!spriteUnit) {
     console.error("动画精灵不存在");
     return;
   }
-  // 获取点击位置
-  const container = getContainer()
+  const container = getContainer();
   if (!container) {
     console.error("container 不存在");
     return;
   }
-  const lineLayer = getLayers().lineLayer
+  const lineLayer = getLayers().lineLayer;
   // 检查目标位置是否在地图范围内
   if (mapPassiable && mapPassiable.sprites) {
-    const target = mapPassiable.sprites.find((sprite) => {
-      const spriteX = Math.floor(sprite.x / 64);
-      const spriteY = Math.floor(sprite.y / 64);
-      const inrange = spriteX === targetX && spriteY === targetY;
-      console.log(
-        `检查目标位置: (${spriteX}, ${spriteY}) 是否在攻击范围内: (${targetX}, ${targetY}) - 结果: ${inrange}`
-      );
-      // 检查
-      return inrange;
-    });
+    const target = targetUnit;
+    const targetX = Math.floor(target.x / tileSize);
+    const targetY = Math.floor(target.y / tileSize);
     // 执行攻击逻辑
     console.log(target);
     // if (target) alert("attack " + target?.name);
@@ -69,7 +61,13 @@ export async function attackMovement(
     if (target) {
       hitFlag = await checkHit(unit, target, attack);
       if (container && lineLayer) {
-       await createMissOrHitAnimation(unit, target, hitFlag, container, lineLayer);
+        await createMissOrHitAnimation(
+          unit,
+          target,
+          hitFlag,
+          container,
+          lineLayer
+        );
       }
 
       if (hitFlag) {
@@ -93,13 +91,51 @@ export async function attackMovement(
     if (target) {
       if (hitFlag) {
         //  alert("攻击命中!");
-       await takeDamage(damage, target, container);
+        await takeDamage(damage, target, container);
       } else {
         // alert("攻击未命中!");
       }
     }
     unit.state = "idle";
   }
+}
+export function attackMovementToXY(
+  targetX: number,
+  targetY: number,
+  attacker: Unit,
+  attack: CreatureAttack,
+  mapPassiable: TiledMap | null
+) {
+  const unit = attacker;
+  unit.state = "attack";
+  const spriteUnit = unit.animUnit;
+  if (!spriteUnit) {
+    console.error("动画精灵不存在");
+    return Promise.resolve({});
+  }
+  // 获取点击位置
+  const container = getContainer();
+  if (!container) {
+    console.error("container 不存在");
+    return Promise.resolve({});
+  }
+  const lineLayer = getLayers().lineLayer;
+  // 检查目标位置是否在地图范围内
+  if (mapPassiable && mapPassiable.sprites) {
+    const target = mapPassiable.sprites.find((sprite) => {
+      const spriteX = Math.floor(sprite.x / 64);
+      const spriteY = Math.floor(sprite.y / 64);
+      const inrange = spriteX === targetX && spriteY === targetY;
+      console.log(
+        `检查目标位置: (${spriteX}, ${spriteY}) 是否在攻击范围内: (${targetX}, ${targetY}) - 结果: ${inrange}`
+      );
+      // 检查
+      return inrange;
+    });
+    // 执行攻击逻辑
+    return attackMovementToUnit(target, unit, attack, mapPassiable);
+  }
+  return Promise.resolve({});
 }
 
 async function playAttackAnim(unit: Unit, targetX: number, targetY: number) {
@@ -176,7 +212,7 @@ async function createMissOrHitAnimation(
 ) {
   let texture: PIXI.Texture;
   let video: HTMLVideoElement | null = null;
-  
+
   video = document.createElement("video");
   if (hitFlag) {
     video.src = hitURL;

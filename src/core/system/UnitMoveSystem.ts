@@ -92,7 +92,7 @@ export const checkPassiable = (
         if (checkUnit.x != x || checkUnit.y != y || unit == checkUnit) {
           return;
         }
-        if (unit.party == checkUnit.party) {
+        if (unit.party == checkUnit.party||checkUnit.state === "dead") {
           return; // 如果是同一方的单位，则跳过
         }
         passiable = false; // 如果有敌人阻挡，则不可通行

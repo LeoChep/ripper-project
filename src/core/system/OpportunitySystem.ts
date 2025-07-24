@@ -3,7 +3,7 @@ import type { Unit } from "../units/Unit";
 import { checkPassiable } from "./AttackSystem";
 import { golbalSetting } from "../golbalSetting";
 import { InitiativeSheet } from "./InitiativeSystem";
-import { attackMovement } from "../action/UnitAttack";
+import { attackMovementToUnit } from "../action/UnitAttack";
 
 export class OpportunitySystem {
   constructor() {
@@ -23,9 +23,9 @@ export class OpportunitySystem {
       if (checkUnit.id === targetUnit.id) {
         return; // 如果是目标单位本身，则跳过
       }
-        if (checkUnit.party === targetUnit.party) {
-          return; // 如果是同一方的单位，则跳过
-        }
+      if (checkUnit.party === targetUnit.party) {
+        return; // 如果是同一方的单位，则跳过
+      }
       // 检查单位是否可以触发借机
       const checkUnitX = Math.floor(checkUnit.x / tileSize);
       const checkUnitY = Math.floor(checkUnit.y / tileSize);
@@ -90,11 +90,9 @@ export class OpportunitySystem {
           );
           if (userChoice) {
             // 执行借机攻击
-            const targetX = Math.floor(targetUnit.x / tileSize);
-            const targetY = Math.floor(targetUnit.y / tileSize);
-            attackMovement(
-              targetX,
-              targetY,
+
+            attackMovementToUnit(
+              targetUnit,
               opportunityUnit,
               attack,
               golbalSetting.map
