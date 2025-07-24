@@ -34,7 +34,7 @@ function playDeathAnim(unit: Unit, container: Container) {
   framesEndPromise.then(() => {
     if (unit.animUnit) {
       unit.animUnit.anims[unit.animUnit.state]?.stop();
-      // unit.animUnit.state = "walk"; // 恢复为行走状态
+      unit.animUnit.eventMode='none'
       setTimeout(() => {
         // 延时一段时间后删除
         if (unit.animUnit) {
