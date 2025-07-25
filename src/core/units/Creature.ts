@@ -1,4 +1,5 @@
 import { Power } from '../power/Power';
+import { Trait } from '../trait/Trait';
 
 export interface CreatureAttack {
     name: string;
@@ -54,7 +55,7 @@ export interface CreatureOptions {
     abilities?: CreatureAbility[];
     equipment?: string[];
     attacks?: CreatureAttack[];
-    traits?: string[];
+    traits?: Trait[];
     notes?: string[];
     powers?: Power[];
 }
@@ -84,7 +85,7 @@ export class Creature {
     abilities: CreatureAbility[];
     equipment: string[];
     maxHp: number;
-    traits: string[];
+    traits: Trait[];
     notes: string[];
     attacks: CreatureAttack[];
     powers: Power[];
@@ -354,10 +355,15 @@ export function createCreatureOptions(txt: string): CreatureOptions {
     }
 
     // 10. 特性
-    const traits: string[] = [];
+    const traits: Trait[] = [];
+    // 这里可以根据需要解析文本中的特性信息并创建 Trait 实例
     // const traitMatch = txt.match(/天使仪态（不处于重伤时）\n([^\n]+)/);
     // if (traitMatch) {
-    //     traits.push(`Angelic Presence (while not bloodied): ${traitMatch[1].trim()}`);
+    //     const trait = new Trait();
+    //     trait.name = "Angelic Presence";
+    //     trait.displayName = "天使仪态";
+    //     trait.description = traitMatch[1].trim();
+    //     traits.push(trait);
     // }
 
     // 11. 备注

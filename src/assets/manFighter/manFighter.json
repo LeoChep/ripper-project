@@ -101,7 +101,13 @@
       "missEffect": null
     }
   ],
-  "traits": [],
+  "traits": [{
+      "name": "CombatChallenge",
+      "displayName": "战斗挑战",
+      "description": "",
+      "icon": "challenge",
+      "type": "combat"
+    }],
   "notes": [
     "Equipment: 长剑, 短弓, 20 支箭"
   ]

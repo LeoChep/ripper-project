@@ -12,17 +12,18 @@
 import CreatureInfo from '../CreatureInfo.vue'
 import TalkPannel from '../TalkPannel/TalkPannel.vue'
 import { ref, onMounted } from 'vue'
-import { getJsonFile, getMapAssetFile, getAnimMetaJsonFile, getAnimActionSpriteJsonFile, getAnimSpriteImgUrl, getDoorSvg } from '@/utils/utils'
-import * as InitiativeController from "@/core/system/InitiativeSystem"
+import {
+    getJsonFile, getMapAssetFile, getAnimMetaJsonFile,
+    getAnimActionSpriteJsonFile, getAnimSpriteImgUrl,
+} from '@/utils/utils'
 import * as PIXI from 'pixi.js'
 import { UnitRightEvent } from '@/core/controller/UnitRightEventController'
 import { TiledMap } from '@/core/MapClass'
 import { UnitAnimSpirite } from '@/core/anim/UnitAnimSprite'
-import { createUnitsFromMapSprites } from '@/core/units/Unit'
+import { createUnitsFromMapSprites, loadTraits } from '@/core/units/Unit'
 import { AnimMetaJson } from '@/core/anim/AnimMetaJson'
 import { createCreature } from '@/core/units/Creature'
 import { setContainer, setLayer } from '@/stores/container'
-import { makeFog } from '@/core/system/FogSystem'
 import { FogSystem } from '@/core/system/FogSystem_unuse'
 import { d1 } from '@/drama/d1'
 import CharacterPannel from '../CharacterPannel/CharacterPannel.vue'
@@ -30,10 +31,10 @@ import { useCharacterStore } from '@/stores/characterStore'
 import { CharacterOutCombatController } from '@/core/controller/CharacterOutCombatController'
 import { createDoorFromDoorObj } from '@/core/units/Door'
 import { createDoorAnimSpriteFromDoor } from '@/core/anim/DoorAnimSprite'
-import * as envSetting  from '@/core/envSetting'
+import * as envSetting from '@/core/envSetting'
 import { golbalSetting } from '@/core/golbalSetting'
 
-const appSetting=envSetting.appSetting;
+const appSetting = envSetting.appSetting;
 onMounted(async () => {
     const app = new PIXI.Application();
     await app.init(appSetting);
@@ -50,7 +51,7 @@ onMounted(async () => {
     setContainer(container);
     setLayer(rlayers);
     //绘制迷雾
-    drawFog(mapPassiable, rlayers, container,app)
+    drawFog(mapPassiable, rlayers, container, app)
     //绘制地图
     const mapView = mapPassiable.textures;
     drawMap(mapView, container, rlayers);
@@ -71,11 +72,11 @@ onMounted(async () => {
     //创建门
     const doors = mapPassiable.doors;
     doors.forEach(async (obj) => {
-        const door=createDoorFromDoorObj(obj);
+        const door = createDoorFromDoorObj(obj);
         const doorSprite = await createDoorAnimSpriteFromDoor(door)
         container.addChild(doorSprite);
         rlayers.controllerLayer.attach(doorSprite);
-    }) 
+    })
 
 
     //绘制格子
@@ -92,7 +93,7 @@ onMounted(async () => {
     units.forEach((unit) => {
         if (unit.party === 'player') {
             characterStore.addCharacter(unit);
-            
+
         }
         unit.stateMachinePack.startPlay();
     });
@@ -100,17 +101,17 @@ onMounted(async () => {
     characterStore.setCharacterOutCombatController(characterOutCombatController);
     CharacterOutCombatController.instance = characterOutCombatController;
     d1.map = mapPassiable;
-    golbalSetting.map= mapPassiable;
+    golbalSetting.map = mapPassiable;
     d1.start();
-    console.log('app',app.stage)
+    console.log('app', app.stage)
 
 
 })
 
-const drawFog = (mapPassiable, rlayers, container,app) => {
+const drawFog = (mapPassiable, rlayers, container, app) => {
     //增加遮罩
     console.log('drawFog', app)
-    const fogSystem = FogSystem.initFog(mapPassiable, container,app);
+    const fogSystem = FogSystem.initFog(mapPassiable, container, app);
     fogSystem.autoDraw();
 }
 
@@ -181,9 +182,9 @@ const drawMap = (mapView, container, rlayers) => {
     const ms = new PIXI.Sprite(mapView)
     ms.zIndex = envSetting.zIndexSetting.mapZindex;
     ms.label = 'map'
-    const allFog=new PIXI.Graphics();
+    const allFog = new PIXI.Graphics();
     container.addChild(allFog);
-    ms.setMask({mask:allFog})
+    ms.setMask({ mask: allFog })
     golbalSetting.mapContainer.addChild(ms);
     rlayers.basicLayer.attach(ms)
 }
@@ -192,9 +193,9 @@ const generateAnimSprite = async (unit, container, rlayers, mapPassiable) => {
 
     const animSpriteUnit = await createAnimSpriteUnits(unit.unitTypeName, unit);
     const unitCreature = await createUnitCreature(unit.unitTypeName, unit);
-
+    loadTraits(unit, unitCreature);
     unit.animUnit = animSpriteUnit;
-    animSpriteUnit.zIndex=envSetting.zIndexSetting.spriteZIndex;
+    animSpriteUnit.zIndex = envSetting.zIndexSetting.spriteZIndex;
     unit.creature = unitCreature;
     console.log('generateAnimSprite', unit, animSpriteUnit)
     addAnimSpriteUnit(unit, container, rlayers, mapPassiable);

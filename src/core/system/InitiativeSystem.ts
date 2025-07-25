@@ -104,6 +104,7 @@ export async function startCombatTurn() {
       initiativeCursor.pointAt.standerActionNumber = 1;
       initiativeCursor.pointAt.moveActionNumber = 1;
       initiativeCursor.pointAt.minorActionNumber = 1;
+      initiativeCursor.pointAt.reactionNumber = 1;
       (
         initiativeCursor.pointAt.owner.stateMachinePack?.getMachine?.(
           "walk"
@@ -173,6 +174,19 @@ export async function endTurn(unit: Unit) {
 export function isInBattle() {
   return initiativeCursor.inBattle;
 }
+export function useReaction(unit: Unit) {
+  if (!unit.initiative) {
+    return false;
+  }
+  if (initiativeCursor.pointAt?.owner === unit) {
+    return false; // 如果当前回合单位是自己，则不能使用反应
+  }
+  if (unit.initiative.reactionNumber >= 1) {
+    unit.initiative.reactionNumber--;
+    return true;
+  }
+  return false;
+}
 export function useMoveAction(unit: Unit) {
   if (!unit.initiative) {
     return false;
@@ -227,6 +241,21 @@ export function useAction(unit: Unit, actionType: string) {
       return true;
     }
   }
+  if (actionType === "reaction") {
+    useReaction(unit);
+  }
+  return false;
+}
+export function checkRectionUseful(unit: Unit) {
+  if (!unit.initiative) {
+    return false;
+  }
+  if (initiativeCursor.pointAt?.owner === unit) {
+    return false; // 如果当前回合单位是自己，则不能使用反应
+  }
+  if (unit.initiative.reactionNumber >= 1) {
+    return true;
+  }
   return false;
 }
 export function checkActionUseful(unit: Unit, actionType: string) {
@@ -241,6 +270,9 @@ export function checkActionUseful(unit: Unit, actionType: string) {
   if (actionType === "minor") {
     if (!(unit.initiative.minorActionNumber >= 1)) passable = false;
   }
+  if (actionType === "reaction") {
+    if (!(unit.initiative.reactionNumber >= 1)) passable = false;
+  }
   return passable;
 }
 
@@ -254,10 +286,14 @@ export function startBattle() {
   }
   CharacterCombatController.instance.inUse = true;
   initiativeCursor.map.sprites.forEach((unit) => {
+    const u= unit as Unit;
     if (unit.party === "player") {
-      const combatChallenge= new CombatChallenge();
-      combatChallenge.owner = unit;
-      combatChallenge.hook();
+      u.traits.forEach((trait)=>{
+        console.log("trait1", trait);
+        if (trait.hookTime='Battle') {
+          trait.hook();
+        }
+      })
     }
   });
   return playStartAnim();
