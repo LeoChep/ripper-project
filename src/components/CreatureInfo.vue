@@ -39,7 +39,7 @@
     <div v-if="creature.traits.length">
       <h3>特性</h3>
       <ul>
-        <li v-for="t in creature.traits" :key="t">{{ t }}</li>
+        <li v-for="t in creature.traits" >{{ t }}</li>
       </ul>
     </div>
     <div v-if="creature.notes.length">
