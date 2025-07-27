@@ -6,6 +6,7 @@ import { InitiativeSheet } from "./InitiativeSystem";
 import { attackMovementToUnit } from "../action/UnitAttack";
 import { WeaponSystem } from "./WeaponSystem";
 import type { Weapon } from "../units/Weapon";
+import type { CreatureAttack } from "../units/Creature";
 
 export class OpportunitySystem {
   constructor() {
@@ -69,15 +70,17 @@ export class OpportunitySystem {
     return opportunityUnits;
   }
   static opportunitysHandle(targetUnit: Unit, opportunityUnits: Unit[]) {
-    const promises = [] as Promise<void>[];
-    opportunityUnits.forEach((opportunityUnit) => {
-      const promise = OpportunitySystem.opportunityHandle(
-        targetUnit,
-        opportunityUnit
-      );
-      promises.push(promise);
+
+    const promise = new Promise<void>(async (resolve) => {
+      for (let i = 0; i < opportunityUnits.length; i++) {
+        await OpportunitySystem.opportunityHandle(
+          targetUnit,
+          opportunityUnits[i]
+        );
+      }
+      resolve();
     });
-    return Promise.all(promises);
+    return promise
   }
   static opportunityHandle(
     targetUnit: Unit,
@@ -93,6 +96,7 @@ export class OpportunitySystem {
           const userChoice = confirm(
             `单位 ${opportunityUnit.name} 可以触发借机攻击，是否执行？`
           );
+          // const userChoice = true;
           if (userChoice) {
             // 执行借机攻击
 
@@ -122,7 +126,25 @@ export class OpportunitySystem {
         return Promise.resolve();
       }
 
-      return opportunityUnit.ai?.opportunityAttack(targetUnit);
+      return new Promise<void>((resolve) => {
+        // const userChoice = confirm(
+        //   `单位 ${opportunityUnit.name} 可以触发借机攻击，是否执行？`
+        // );
+        const userChoice = true;
+        if (userChoice) {
+          attackMovementToUnit(
+            targetUnit,
+            opportunityUnit,
+            opportunityUnit.creature?.attacks?.[0] as CreatureAttack,
+            golbalSetting.map
+          ).then(() => {
+            resolve();
+          });
+          // opportunityUnit.ai?.opportunityAttack(targetUnit).then(() => {
+          //   resolve();
+          // });
+        }
+      });
     }
   }
 }

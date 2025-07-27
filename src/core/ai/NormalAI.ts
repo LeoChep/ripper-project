@@ -137,6 +137,7 @@ export class NormalAI implements AIInterface {
       this.owner.creature?.attacks[0],
       golbalSetting.map
     );
+
   }
 }
 
