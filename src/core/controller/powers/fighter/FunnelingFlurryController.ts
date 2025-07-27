@@ -1,0 +1,249 @@
+import { UnitSystem } from "./../../../system/UnitSystem";
+import { Weapon } from "../../../units/Weapon";
+import type { Unit } from "@/core/units/Unit";
+import { AbstractPwoerController } from "../AbstractPwoerController";
+import { playerSelectAttackMovement } from "@/core/action/UnitAttack";
+import type { CreatureAttack } from "@/core/units/Creature";
+
+import { golbalSetting } from "@/core/golbalSetting";
+import { useStandAction } from "@/core/system/InitiativeSystem";
+import { BasicAttackSelector } from "@/core/selector/BasicAttackSelector";
+import { checkPassiable as atkGridsCheckPassiable } from "@/core/system/AttackSystem";
+import { checkPassiable as moveGridsCheckPassiable } from "@/core/system/UnitMoveSystem";
+import { tileSize } from "@/core/envSetting";
+import { generateWays } from "@/core/utils/PathfinderUtil";
+import { BasicSelector } from "@/core/selector/BasicSelector";
+
+export class FunnelingFlurryController extends AbstractPwoerController {
+  public static isUse: boolean = false;
+  public static instense: FunnelingFlurryController | null = null;
+
+  selectedCharacter: Unit | null = null;
+
+  constructor() {
+    super();
+  }
+
+  doSelect = async (): Promise<any> => {
+    if (!this.preFix()) return Promise.resolve();
+    const { x, y } = this.getXY();
+    const unit = this.selectedCharacter as Unit;
+    const mainAttack1 = this.getAttack(unit, 1);
+    const mainAttack2 = this.getAttack(unit, 2);
+    const grids = generateWays(
+      x,
+      y,
+      mainAttack1.range ?? 1,
+      (x, y, pre, prey) => {
+        return atkGridsCheckPassiable(
+          unit,
+          x * tileSize,
+          y * tileSize,
+          golbalSetting.map
+        );
+      }
+    );
+
+    // 执行攻击选择逻辑
+    const basicAttackSelector = BasicSelector.getInstance().selectBasic(
+      grids,
+      1,
+      "red",
+      true,
+      (gridX, gridY) => {
+        const target = UnitSystem.getInstance().findUnitByGridxy(gridX, gridY);
+        if (target && target !== unit) {
+          return true;
+        }
+        return false;
+      }
+    );
+    this.removeFunction = basicAttackSelector.removeFunction;
+    let resolveCallback = (result: any) => {};
+    const promise = new Promise((resolve) => {
+      resolveCallback = resolve;
+    });
+
+    const result = await basicAttackSelector.promise;
+    let firstaAttackResult;
+    if (result.cancel !== true) {
+      useStandAction(unit);
+      firstaAttackResult = await playerSelectAttackMovement(
+        result.event,
+        unit,
+        mainAttack1,
+        golbalSetting.map
+      );
+      console.log("resolveCallback", {});
+    } else {
+      resolveCallback(result);
+      return promise;
+    }
+    //shift unit position
+    await this.shiftFunc(firstaAttackResult);
+    let firstTarget =
+      (firstaAttackResult as { beAttack: Unit | null }).beAttack ?? null;
+    // 第二次攻击
+    const secondAttackSelector = BasicSelector.getInstance().selectBasic(
+      grids,
+      1,
+      "red",
+      true,
+      (gridX, gridY) => {
+        const secondTarget = UnitSystem.getInstance().findUnitByGridxy(
+          gridX,
+          gridY
+        );
+        if (secondTarget && secondTarget !== firstTarget) {
+          return true;
+        }
+        return false;
+      }
+    );
+    this.removeFunction = secondAttackSelector.removeFunction;
+    const secondResult = await secondAttackSelector.promise;
+    let secondAttackResult;
+    if (secondResult.cancel !== true) {
+      secondAttackResult = await playerSelectAttackMovement(
+        secondResult.event,
+        unit,
+        mainAttack2,
+        golbalSetting.map
+      );
+    } else {
+      resolveCallback(secondResult);
+      return promise;
+    }
+    await this.shiftFunc(secondAttackResult);
+    console.log("resolveCallback", {});
+    resolveCallback({});
+    return promise;
+  };
+  getAttack = (unit: Unit, num: number) => {
+    const weapon = unit.creature?.weapons?.[num - 1];
+    const attack = {} as CreatureAttack;
+    const range = weapon?.range ?? 1; // 默认攻击范围为1
+    const modifer =
+      unit.creature?.abilities?.find((ability) => ability.name === "Strength")
+        ?.modifier ?? 0; // 使用力量作为攻击加值
+    attack.attackBonus = modifer;
+    attack.attackBonus += weapon?.bonus ?? 0; // 添加武器加值
+    attack.attackBonus += 1 + 3 + 1; // 武器大师、擅长加值、战斗专长
+    attack.damage = weapon?.damage ?? "1d6"; // 默认伤害为1d6
+    attack.damage += `+${weapon?.bonus ?? 0}+${modifer}+1`; // 添加攻击加值到伤害
+    attack.name = "Funneling Flurry";
+    attack.type = "melee";
+    attack.range = range;
+    return attack;
+  };
+  shiftFunc = async (
+    attackResult:
+      | {}
+      | {
+          cencil?: undefined;
+          hit?: undefined;
+          damage?: undefined;
+          targetX?: undefined;
+          targetY?: undefined;
+          beAttack?: undefined;
+        }
+      | {
+          cencil: boolean;
+          hit?: undefined;
+          damage?: undefined;
+          targetX?: undefined;
+          targetY?: undefined;
+          beAttack?: undefined;
+        }
+      | {
+          hit: boolean;
+          damage: number;
+          targetX: number;
+          targetY: number;
+          beAttack: Unit | null;
+          cencil?: undefined;
+        }
+      | undefined
+  ) => {
+    console.log("attackResult shiftFunc", attackResult);
+    if (attackResult && "beAttack" in attackResult && attackResult.beAttack) {
+      const beAttack = attackResult.beAttack;
+      const beAttackX = Math.floor(beAttack.x / tileSize);
+      const beAttackY = Math.floor(beAttack.y / tileSize);
+      const fistShiftGrids = generateWays(
+        beAttackX,
+        beAttackY,
+        1,
+        (x, y, preX, preY) => {
+          return moveGridsCheckPassiable(
+            beAttack,
+            preX * tileSize,
+            preY * tileSize,
+            x * tileSize,
+            y * tileSize,
+            golbalSetting.map
+          );
+        }
+      );
+      BasicSelector.getInstance().selectBasic(
+        fistShiftGrids,
+        1,
+        "yellow",
+        true
+      );
+      const firstShiftResult = await BasicSelector.getInstance().promise;
+      if (firstShiftResult.cancel !== true) {
+        console.log("firstShiftResult", firstShiftResult, beAttack);
+        this.shiftAnim(beAttack, firstShiftResult.selected[0]);
+      }
+    }
+  };
+  shiftAnim = (unit: Unit, target: { x: number; y: number }) => {
+    target.x = target.x * tileSize;
+    target.y = target.y * tileSize;
+    let animResolve = () => {};
+    const promise = new Promise<void>((resolve) => {
+      animResolve = resolve;
+    });
+    const interval = setInterval(() => {
+      // 更新单位位置
+      //每次unit向target移动32pixi
+      const dx = tileSize / 4;
+      const dy = tileSize / 4;
+      if (target.x > unit.x + dx) {
+        unit.x += dx;
+      } else if (target.x < unit.x - dx) {
+        unit.x -= dx;
+      }
+      if (target.y > unit.y + dy) {
+        unit.y += dy;
+      } else if (target.y < unit.y - dy) {
+        unit.y -= dy;
+      }
+      console.log("unit.x, unit.y", unit.x, unit.y);
+      // 检查是否到达目标位置
+      console.log("target.x, target.y", target.x, target.y);
+      if (
+        Math.abs(target.x - unit.x) <= dx &&
+        Math.abs(target.y - unit.y) <= dy
+      ) {
+        // 停止移动
+        unit.x = target.x;
+        unit.y = target.y;
+        const spriteUnit = unit.animUnit;
+        if (spriteUnit) {
+          spriteUnit.x = unit.x;
+          spriteUnit.y = unit.y;
+        }
+        clearInterval(interval);
+        animResolve();
+      }
+      const spriteUnit = unit.animUnit;
+      if (spriteUnit) {
+        spriteUnit.x = unit.x;
+        spriteUnit.y = unit.y;
+      }
+    }, 50);
+    return promise;
+  };
+}

@@ -123,7 +123,7 @@ export class CharCombatMoveController {
         graphics.parent.removeChild(graphics);
       }
     };
-    let cannel = false;
+    let cancel = false;
     this.removeFunction = () => {
       removeGraphics();
       resolveCallback({});
@@ -133,11 +133,11 @@ export class CharCombatMoveController {
       console.log("pointerup");
       e.stopPropagation();
       removeGraphics();
-      if (cannel) {
-        return Promise.resolve({ cencel: true });
+      if (cancel) {
+        return Promise.resolve({ cancel: true });
       }
       const result = {} as any;
-      result.cencel = false;
+      result.cancel = false;
       playerSelectMovement(e, unit, container, path, result)?.then(() => {
         console.log("resolveCallback", result);
         resolveCallback(result);

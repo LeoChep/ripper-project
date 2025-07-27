@@ -92,7 +92,7 @@ const actions = computed(() => {
     id: `power_${index}`,
     displayName: power.displayName || power.name, // 使用威能的显示名称或默认名称
     name: power.name,
-    actionType: power.action, // 'standard', 'move', 'minor'
+    actionType: power.actionType, // 'standard', 'move', 'minor'
     powerType: power.type, // 'atwill', 'encounter', 'daily', 'utility'
     power: power // 保存完整的威能对象以供后续使用
   }))

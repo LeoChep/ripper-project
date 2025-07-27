@@ -11,10 +11,13 @@ import {
 } from "@/core/system/InitiativeSystem";
 
 import type { EffectInterface } from "@/core/effect/EffectInterface";
+import { UnitSystem } from "@/core/system/UnitSystem";
+import { WeaponSystem } from "@/core/system/WeaponSystem";
+import type { Weapon } from "@/core/units/Weapon";
 
 export class CombatChallenge extends Trait {
   name = "CombatChallenge";
-  displayName= "战斗挑战";
+  displayName = "战斗挑战";
   description = "战斗挑战";
   icon = "challenge";
   type = "combat";
@@ -42,7 +45,8 @@ export class CombatChallenge extends Trait {
       if (this.owner && checkRectionUseful(this.owner))
         if (
           attacker.party !== this.owner?.party &&
-          this.owner?.party === target.party
+          this.owner?.party === target.party&&
+          this.owner !== target
         ) {
           const attackerX = Math.floor(attacker.x / 64);
           const attackerY = Math.floor(attacker.y / 64);
@@ -61,10 +65,14 @@ export class CombatChallenge extends Trait {
               });
               if (userChoice) {
                 useReaction(this.owner);
+                const attack = WeaponSystem.getInstance().createWeaponAttack(
+                  this.owner,
+                  this.owner.creature?.weapons?.[0] as Weapon
+                );
                 attackMovementToUnit(
                   attacker,
                   this.owner as Unit,
-                  this.owner.creature?.attacks[0] as CreatureAttack,
+                  attack,
                   golbalSetting.map
                 ).then(() => {
                   chooseReolve();

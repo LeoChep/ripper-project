@@ -1,6 +1,5 @@
 import { Power } from "./../power/Power";
 import type { AbstractPwoerController } from "../controller/powers/AbstractPwoerController";
-import { LungingStrikeController } from "../controller/powers/fighter/LungingStrikeController";
 
 import type { Unit } from "../units/Unit";
 
@@ -13,11 +12,14 @@ export class PowerSystem {
     }
     return PowerSystem.instance;
   }
-  addController(powerName: string) {
+  async addController(powerName: string) {
     let powerController: AbstractPwoerController | null = null;
-    if (powerName === "LungingStrike") {
-      powerController = new LungingStrikeController();
+    const powerControllerClass =(await this.getPowerControllerClass(powerName));
+    if (!powerControllerClass) {
+      console.warn(`PowerController class not found for: ${powerName}`);
+      return null;
     }
+    powerController = new powerControllerClass();
     if (!powerController) {
       console.warn(`PowerController for ${powerName} is not defined.`);
       return null;
@@ -25,13 +27,13 @@ export class PowerSystem {
     if (powerController) this.powerControllerPack.push(powerController);
     return powerController;
   }
-  getController(powerName: string): AbstractPwoerController | null {
+  async getController(powerName: string): Promise<AbstractPwoerController | null> {
     let powerController =
       this.powerControllerPack.find(
         (controller) => controller.constructor.name === powerName
       ) || null;
     if (!powerController) {
-      powerController = this.addController(powerName);
+      powerController =await this.addController(powerName);
     }
     return powerController;
   }
@@ -57,5 +59,19 @@ export class PowerSystem {
           (module) => module.ShieldEdgeBlock
         );
     }
+  }
+  getPowerControllerClass(powerName: string) {
+    // 根据 powerName 返回对应的 PowerController 类
+    switch (powerName) {
+      case "LungingStrike":
+        return import("../controller/powers/fighter/LungingStrikeController").then(
+          (module) => module.LungingStrikeController
+        );
+      case "FunnelingFlurry":
+        return import("../controller/powers/fighter/FunnelingFlurryController").then(
+          (module) => module.FunnelingFlurryController
+        );
+    }
+    return null;
   }
 }

@@ -27,6 +27,11 @@ export class StateMachinePack {
     const name = this.owner.state;
     const machine = this.getMachine(name);
     if (machine) {
+      const animUnit=machine.owner.animUnit;
+      if (animUnit) {
+        animUnit.x = this.owner.x;
+        animUnit.y = this.owner.y;
+      }
       machine.doAction();
     } else {
       console.warn(`状态机 ${name} 不存在`);

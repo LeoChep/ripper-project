@@ -4,6 +4,8 @@ import { checkPassiable } from "./AttackSystem";
 import { golbalSetting } from "../golbalSetting";
 import { InitiativeSheet } from "./InitiativeSystem";
 import { attackMovementToUnit } from "../action/UnitAttack";
+import { WeaponSystem } from "./WeaponSystem";
+import type { Weapon } from "../units/Weapon";
 
 export class OpportunitySystem {
   constructor() {
@@ -83,7 +85,10 @@ export class OpportunitySystem {
   ): Promise<void> {
     if (opportunityUnit.party === "player") {
       return new Promise<void>((resolve) => {
-        const attack = opportunityUnit.creature?.attacks[0];
+        const attack = WeaponSystem.getInstance().createWeaponAttack(
+          opportunityUnit,
+          opportunityUnit.creature?.weapons?.[0] as Weapon
+        );
         if (attack) {
           const userChoice = confirm(
             `单位 ${opportunityUnit.name} 可以触发借机攻击，是否执行？`

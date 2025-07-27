@@ -89,7 +89,7 @@
       "name": "LungingStrike",
       "displayName": "突刺击",
       "type": "atwill",
-      "action": "standard",
+      "actionType": "standard",
       "range": null,
       "target": null,
       "description": "突刺击 Lunging Strike  MP\n战士攻击 1\n你一记突刺，击中了本来位于你攻击范围外的敌人。\n遭遇✦武术，武器\n标准动作✦近战武器 + 1触及\n目标： 一个生物\n攻击： 力量 - 1 vs. AC\n命中： 2[W] + 力量调整值的伤害。",
@@ -97,11 +97,23 @@
       "attackBonus": null,
       "missEffect": null
     },
+      {
+"name": "FunnelingFlurry",
+"displayName": "流动疾风斩",
+"type": "encounter",
+"actionType": "standard",
+"range": null,
+"target": null,
+"description": "流动疾风斩 Funneling Flurry  MP\n战士攻击 1\n随着如同毒蛇般的攻击，你将两个敌人逼迫到你认为合适的位置。\n遭遇✦武术，武器\n标准动作✦近战武器\n要求：你必须持用两件近战武器\n目标：两个生物\n攻击：力量 vs. AC （主手武器和副手武器），每个目标一次攻击\n命中：1[W] + 力量调整值的伤害。并且你令目标滑动1格。",
+"damage": null,
+"attackBonus": null,
+"missEffect": null
+    },
     {
       "name": "ShieldEdgeBlock",
       "displayName": "盾缘阻挡",
       "type": "encounter",
-      "action": "rection",
+      "action": "reaction",
       "range": null,
       "target": null,
       "description": "盾缘阻挡 Shield Edge Block  MP2\n战士攻击 3\n你以快速的盾缘猛击阻挡对手的攻势，并接着还以强力挥击。\n遭遇✦武术\n即时中断✦近战1\n要求：\\t你必须使用盾牌\n触发：\\t邻近你的一名敌人以近程或近战攻击对你命中或失手\n目标：\\t触发的敌人\n效果：\\t目标的这次攻击检定受到-4减值。\n攻击：\\t力量 + 2 vs. 强韧\n11级：力量 + 4 vs. 强韧\n命中：\\t2d6 + 力量调整值的伤害。",

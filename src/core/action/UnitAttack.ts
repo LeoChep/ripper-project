@@ -10,6 +10,7 @@ import { createDamageAnim } from "../anim/DamageAnim";
 import { createMissOrHitAnimation } from "../anim/MissOrHitAnim";
 import { playAttackAnim } from "../anim/PlayAttackAnim";
 import { checkHit, getDamage } from "../system/AttackSystem";
+import { tileSize } from "../envSetting";
 
 export function playerSelectAttackMovement(
   e: PIXI.FederatedPointerEvent,
@@ -44,12 +45,12 @@ export async function attackMovementToUnit(
   const spriteUnit = unit.animUnit;
   if (!spriteUnit) {
     console.error("动画精灵不存在");
-    return;
+    return {};
   }
   const container = getContainer();
   if (!container) {
     console.error("container 不存在");
-    return;
+    return {};
   }
   const lineLayer = getLayers().lineLayer;
   // 检查目标位置是否在地图范围内
@@ -80,7 +81,7 @@ export async function attackMovementToUnit(
       );
       if (attacker.state === "dead") {
         console.warn("单位已死亡，无法执行攻击");
-        return;
+        return {};
       }
       hitFlag = hitCheckResult.hit;
       if (container && lineLayer) {
@@ -97,6 +98,10 @@ export async function attackMovementToUnit(
       }
     }
     //播放攻击动画
+    if (target) {
+      targetX = Math.floor(target.x / tileSize) 
+      targetY = Math.floor(target.y / tileSize);
+    }
     await playAttackAnim(unit, targetX, targetY);
 
     //结算
@@ -109,7 +114,7 @@ export async function attackMovementToUnit(
       }
     }
     unit.state = "idle";
-    return { hit: hitFlag, damage: damage, targetX: targetX, targetY: targetY };
+    return { hit: hitFlag, damage: damage, targetX: targetX, targetY: targetY,beAttack: target };
   }
 }
 export function attackMovementToXY(
@@ -126,13 +131,6 @@ export function attackMovementToXY(
     console.error("动画精灵不存在");
     return Promise.resolve({});
   }
-  // 获取点击位置
-  const container = getContainer();
-  if (!container) {
-    console.error("container 不存在");
-    return Promise.resolve({});
-  }
-  const lineLayer = getLayers().lineLayer;
   // 检查目标位置是否在地图范围内
   if (mapPassiable && mapPassiable.sprites) {
     const target = mapPassiable.sprites.find((sprite) => {

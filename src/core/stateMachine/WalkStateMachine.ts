@@ -123,7 +123,7 @@ export class WalkStateMachine extends StateMachine {
     nextY: number,
     path: { x: number; y: number }[]
   ) {
-    const spriteUnit = unit.animUnit;
+    const spriteUnit = unit
     if (!spriteUnit) {
       console.error("动画精灵不存在");
       return;

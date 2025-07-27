@@ -24,7 +24,6 @@ export class NormalAI implements AIInterface {
     const result: any = { canAttack: false };
     const unitX = Math.floor(unit.x / tileSize);
     const unitY = Math.floor(unit.y / tileSize);
-    console.log(`AI单位位置: (${unitX}, ${unitY})`);
     const path = generateWays(
       unitX,
       unitY,
@@ -54,7 +53,6 @@ export class NormalAI implements AIInterface {
         y: number;
         step: number;
       };
-
       let isCantAttack = !result.canAttack;
       if (rc) {
         let speed = 0;
@@ -71,14 +69,15 @@ export class NormalAI implements AIInterface {
               y: number;
               step: number;
             };
-            noUnit = false;
+            noUnit = true;
             golbalSetting?.map?.sprites.forEach((sprite) => {
               const spriteX = Math.floor(sprite.x / tileSize);
               const spriteY = Math.floor(sprite.y / tileSize);
               if (rc && rc.x === spriteX && rc.y === spriteY && sprite.state !== "dead") {
-                noUnit = true;
+                noUnit = false;
               }
             });
+            console.log(`AI单位 ${unit.name} 在 `+rc+` 位置拥堵，继续寻找`);
           }
         }
         if (rc && rc.step > speed) {

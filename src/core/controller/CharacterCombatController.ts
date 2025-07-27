@@ -32,12 +32,12 @@ export class CharacterCombatController {
     ) {
       return;
     }
-    const cencelInfo = {
+    const cancelInfo = {
       from: "moveConrotller",
-      cencel: true,
+      cancel: true,
     };
-    CharCombatAttackController.instense?.removeFunction(cencelInfo);
-    this.powerController?.removeFunction(cencelInfo);
+    CharCombatAttackController.instense?.removeFunction(cancelInfo);
+    this.powerController?.removeFunction(cancelInfo);
     let moveController = CharCombatMoveController.instense;
     if (!moveController) {
       moveController = new CharCombatMoveController();
@@ -47,7 +47,7 @@ export class CharacterCombatController {
     const move = moveController.moveSelect();
     move.then((result) => {
       console.log("moveSelect result", result);
-      if (result?.cencel === false) {
+      if (result?.cancel === false) {
         if (walkMachine.onDivideWalk === true) {
           this.useMoveController();
         }
@@ -68,10 +68,11 @@ export class CharacterCombatController {
 
     return true;
   }
-  usePowerController(power: Power) {
+  async usePowerController(power: Power) {
     if (!this.preCheck() || !this.selectedCharacter) {
       return;
     }
+    console.log("usePowerController", power);
     if (
       !InitiativeSystem.checkActionUseful(
         this.selectedCharacter,
@@ -80,14 +81,14 @@ export class CharacterCombatController {
     ) {
       return;
     }
-    const cencelInfo = {
-      from: power.name + "Conrotller",
-      cencel: true,
+    const cancelInfo = {
+      from: power.name + "Controller",
+      cancel: true,
     };
-    CharCombatAttackController.instense?.removeFunction(cencelInfo);
-    CharCombatMoveController.instense?.removeFunction(cencelInfo);
-    this.powerController?.removeFunction(cencelInfo);
-    const powerController = PowerSystem.getInstance().getController(power.name);
+    CharCombatAttackController.instense?.removeFunction(cancelInfo);
+    CharCombatMoveController.instense?.removeFunction(cancelInfo);
+    this.powerController?.removeFunction(cancelInfo);
+    const powerController = await PowerSystem.getInstance().getController(power.name);
     this.powerController = powerController;
     if (!powerController) {
       console.warn(`PowerController for ${power.name} is not defined.`);
@@ -113,13 +114,13 @@ export class CharacterCombatController {
     ) {
       return;
     }
-    const cencelInfo = {
-      from: "atkConrotller",
-      cencel: true,
+    const cancelInfo = {
+      from: "atkController",
+      cancel: true,
     };
-    CharCombatAttackController.instense?.removeFunction(cencelInfo);
-    CharCombatMoveController.instense?.removeFunction(cencelInfo);
-    this.powerController?.removeFunction(cencelInfo);
+    CharCombatAttackController.instense?.removeFunction(cancelInfo);
+    CharCombatMoveController.instense?.removeFunction(cancelInfo);
+    this.powerController?.removeFunction(cancelInfo);
 
     let atkController = CharCombatAttackController.instense;
     if (!atkController) {

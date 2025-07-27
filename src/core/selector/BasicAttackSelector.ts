@@ -53,7 +53,7 @@ export class BasicAttackSelector {
     golbalSetting.rlayers.spriteLayer.attach(graphics);
     container.addChild(graphics);
     // 点击其他地方移除移动范围
-    let cencel = false;
+    let cancel = false;
     const removeGraphics = () => {
       if (graphics.parent) {
         graphics.parent.removeChild(graphics);
@@ -65,23 +65,23 @@ export class BasicAttackSelector {
       resolveCallback = resolve;
     });
     selector.removeFunction = (input: any) => {
-      cencel = true;
+      cancel = true;
       removeGraphics();
       resolveCallback(input);
     };
     graphics.on("rightdown", (e) => {
       e.stopPropagation();
-      cencel = true;
+      cancel = true;
       removeGraphics();
-      resolveCallback({ cencel: true });
+      resolveCallback({ cancel: true });
     });
 
     const ms = golbalSetting.mapContainer;
     const msRemoveG = (e: { stopPropagation: () => void }) => {
       e.stopPropagation();
-      cencel = true;
+      cancel = true;
       removeGraphics();
-      resolveCallback({ cencel: true });
+      resolveCallback({ cancel: true });
       ms?.off("rightdown", msRemoveG);
     };
     ms?.on("rightdown", msRemoveG);
@@ -89,13 +89,13 @@ export class BasicAttackSelector {
       console.log("pointerup");
       e.stopPropagation();
       removeGraphics();
-      if (cencel) {
-        resolveCallback({ cencel: true });
+      if (cancel) {
+        resolveCallback({ cancel: true });
         return;
       }
 
       resolveCallback({
-        cencel: false,
+        cancel: false,
          event: e,
       });
       // moveMovement(e, unit, container, path);

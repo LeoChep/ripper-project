@@ -9,6 +9,7 @@ import { useStandAction } from "@/core/system/InitiativeSystem";
 import { BasicAttackSelector } from "@/core/selector/BasicAttackSelector";
 import { checkPassiable } from "@/core/system/AttackSystem";
 import { tileSize } from "@/core/envSetting";
+import { WeaponSystem } from "@/core/system/WeaponSystem";
 
 export class LungingStrikeController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -25,20 +26,10 @@ export class LungingStrikeController extends AbstractPwoerController {
     const { x, y } = this.getXY();
     const unit = this.selectedCharacter as Unit;
     const weapon = unit.creature?.weapons?.[0];
-    const attack = {} as CreatureAttack;
-    const range = (weapon?.range ?? 1) + 1; // 默认攻击范围为1
-    const modifer =
-      unit.creature?.abilities?.find((ability) => ability.name === "Strength")
-        ?.modifier ?? 0; // 使用力量作为攻击加值
-    attack.attackBonus = modifer;
-    attack.attackBonus += weapon?.bonus ?? 0; // 添加武器加值
-    attack.attackBonus += 1 + 3 + 1; // 武器大师、擅长加值、战斗专长
-    attack.attackBonus -= 1; // 冲刺攻击减1
-    attack.damage = weapon?.damage ?? "1d6"; // 默认伤害为1d6
-    attack.damage += `+${weapon?.bonus ?? 0}+${modifer}+1`; // 添加攻击加值到伤害
-    attack.name = "Lunging Strike";
-    attack.type = "melee";
-    attack.range = range;
+    const attack = WeaponSystem.getInstance().createWeaponAttack(
+      unit,
+      weapon as Weapon
+    );
     // 执行攻击选择逻辑
     const basicAttackSelector = BasicAttackSelector.selectBasicAttack(
       (x, y, pre, prey) => {
@@ -49,7 +40,7 @@ export class LungingStrikeController extends AbstractPwoerController {
           golbalSetting.map
         );
       },
-      range,
+      weapon?.range ?? 1,
       x,
       y
     );
@@ -59,7 +50,8 @@ export class LungingStrikeController extends AbstractPwoerController {
       resolveCallback = resolve;
     });
     basicAttackSelector.promise?.then((result) => {
-      if (result.cencel !== true) {
+      console.log("basicAttackSelector result", result, result.cancel !== true);
+      if (result.cancel !== true) {
         useStandAction(unit);
         playerSelectAttackMovement(
           result.event,
