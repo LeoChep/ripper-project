@@ -14,6 +14,7 @@ import { tileSize } from "../envSetting";
 import { useStandAction } from "../system/InitiativeSystem";
 import { generateWays } from "../utils/PathfinderUtil";
 import { BasicSelector } from "../selector/BasicSelector";
+import { CharacterController } from "./CharacterController";
 
 export class CharCombatAttackController {
   public static isUse: boolean = false;
@@ -25,6 +26,11 @@ export class CharCombatAttackController {
   }
   attackSelect = (attack: CreatureAttack): Promise<any> => {
     const unit = this.selectedCharacter;
+    if (CharacterController.onAnim) {
+      console.warn("当前有动画正在执行，无法进行攻击选择");
+      return Promise.resolve({});
+    }
+    
     if (unit === null) {
       console.warn("没有选中单位，无法进行选择");
       return Promise.resolve({});

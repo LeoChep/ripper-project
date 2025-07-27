@@ -169,7 +169,13 @@ export class WalkStateMachine extends StateMachine {
       const unitX = Math.floor(this.owner.x / tileSize);
       const unitY = Math.floor(this.owner.y / tileSize);
       if (unitX === this.targetX && unitY === this.targetY) {
-        console.log("到达目标位置，停止移动");
+        spriteUnit.x= this.targetX * tileSize;
+        spriteUnit.y= this.targetY * tileSize;
+        if (this.owner.animUnit) {
+          console.log("到达目标位置，停止移动", this.targetX * tileSize, this.targetY * tileSize, this.owner.animUnit.x, this.owner.animUnit.y);
+        } else {
+          console.log("到达目标位置，停止移动", this.targetX * tileSize, this.targetY * tileSize, "animUnit未定义");
+        }
         this.path = []; // 清空路径
         this.owner.state = "idle"; // 设置单位状态为闲置
         this.callBack(); // 调用回调函数

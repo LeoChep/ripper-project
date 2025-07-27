@@ -12,6 +12,7 @@ import { golbalSetting } from "../golbalSetting";
 import { FogSystem } from "../system/FogSystem_unuse";
 import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
 import type { A } from "vitest/dist/chunks/environment.d.cL3nLXbE.js";
+import { CharacterController } from "./CharacterController";
 const tileSize = 64;
 
 type Rlayer = {
@@ -138,8 +139,12 @@ export class CharCombatMoveController {
       }
       const result = {} as any;
       result.cancel = false;
+      // CharacterController.onAnim = true;
       playerSelectMovement(e, unit, container, path, result)?.then(() => {
         console.log("resolveCallback", result);
+        setTimeout(() => {
+          // CharacterController.onAnim = false;
+        }, 50);
         resolveCallback(result);
       });
       if (

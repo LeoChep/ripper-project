@@ -30,6 +30,8 @@ export class LungingStrikeController extends AbstractPwoerController {
       unit,
       weapon as Weapon
     );
+    if (attack.range)
+    attack.range++;
     // 执行攻击选择逻辑
     const basicAttackSelector = BasicAttackSelector.selectBasicAttack(
       (x, y, pre, prey) => {
@@ -40,7 +42,7 @@ export class LungingStrikeController extends AbstractPwoerController {
           golbalSetting.map
         );
       },
-      weapon?.range ?? 1,
+      attack?.range ?? 1,
       x,
       y
     );

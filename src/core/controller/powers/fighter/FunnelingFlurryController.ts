@@ -13,6 +13,7 @@ import { checkPassiable as moveGridsCheckPassiable } from "@/core/system/UnitMov
 import { tileSize } from "@/core/envSetting";
 import { generateWays } from "@/core/utils/PathfinderUtil";
 import { BasicSelector } from "@/core/selector/BasicSelector";
+import { ShiftAnim } from "@/core/anim/ShiftAnim";
 
 export class FunnelingFlurryController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -140,7 +141,7 @@ export class FunnelingFlurryController extends AbstractPwoerController {
     attackResult:
       | {}
       | {
-          cencil?: undefined;
+          cancel?: undefined;
           hit?: undefined;
           damage?: undefined;
           targetX?: undefined;
@@ -148,7 +149,7 @@ export class FunnelingFlurryController extends AbstractPwoerController {
           beAttack?: undefined;
         }
       | {
-          cencil: boolean;
+          cancel: boolean;
           hit?: undefined;
           damage?: undefined;
           targetX?: undefined;
@@ -161,7 +162,7 @@ export class FunnelingFlurryController extends AbstractPwoerController {
           targetX: number;
           targetY: number;
           beAttack: Unit | null;
-          cencil?: undefined;
+          cancel?: undefined;
         }
       | undefined
   ) => {
@@ -194,56 +195,9 @@ export class FunnelingFlurryController extends AbstractPwoerController {
       const firstShiftResult = await BasicSelector.getInstance().promise;
       if (firstShiftResult.cancel !== true) {
         console.log("firstShiftResult", firstShiftResult, beAttack);
-        this.shiftAnim(beAttack, firstShiftResult.selected[0]);
+        ShiftAnim.shift(beAttack, firstShiftResult.selected[0]);
       }
     }
   };
-  shiftAnim = (unit: Unit, target: { x: number; y: number }) => {
-    target.x = target.x * tileSize;
-    target.y = target.y * tileSize;
-    let animResolve = () => {};
-    const promise = new Promise<void>((resolve) => {
-      animResolve = resolve;
-    });
-    const interval = setInterval(() => {
-      // 更新单位位置
-      //每次unit向target移动32pixi
-      const dx = tileSize / 4;
-      const dy = tileSize / 4;
-      if (target.x > unit.x + dx) {
-        unit.x += dx;
-      } else if (target.x < unit.x - dx) {
-        unit.x -= dx;
-      }
-      if (target.y > unit.y + dy) {
-        unit.y += dy;
-      } else if (target.y < unit.y - dy) {
-        unit.y -= dy;
-      }
-      console.log("unit.x, unit.y", unit.x, unit.y);
-      // 检查是否到达目标位置
-      console.log("target.x, target.y", target.x, target.y);
-      if (
-        Math.abs(target.x - unit.x) <= dx &&
-        Math.abs(target.y - unit.y) <= dy
-      ) {
-        // 停止移动
-        unit.x = target.x;
-        unit.y = target.y;
-        const spriteUnit = unit.animUnit;
-        if (spriteUnit) {
-          spriteUnit.x = unit.x;
-          spriteUnit.y = unit.y;
-        }
-        clearInterval(interval);
-        animResolve();
-      }
-      const spriteUnit = unit.animUnit;
-      if (spriteUnit) {
-        spriteUnit.x = unit.x;
-        spriteUnit.y = unit.y;
-      }
-    }, 50);
-    return promise;
-  };
+ 
 }

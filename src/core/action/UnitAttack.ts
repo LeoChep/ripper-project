@@ -66,7 +66,7 @@ export async function attackMovementToUnit(
     console.log(target);
     if (unit.state === "dead") {
       console.warn("单位已死亡，无法执行攻击");
-      return { cencil: true };
+      return { cancel: true };
     }
     // if (target) alert("attack " + target?.name);
     let hitFlag = false;
@@ -134,6 +134,9 @@ export function attackMovementToXY(
   // 检查目标位置是否在地图范围内
   if (mapPassiable && mapPassiable.sprites) {
     const target = mapPassiable.sprites.find((sprite) => {
+      if (sprite.state === "dead") {
+        return false; // 如果单位已死亡，则不考虑
+      }
       const spriteX = Math.floor(sprite.x / 64);
       const spriteY = Math.floor(sprite.y / 64);
       const inrange = spriteX === targetX && spriteY === targetY;

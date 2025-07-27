@@ -21,6 +21,7 @@ type Rlayer = {
 export class CharacterController {
   public static curser: number = 0;
   public static isUse: boolean = false;
+  public static onAnim: boolean = false;
   public static selectedCharacter: Unit | null = null;
 
   mapPassiable: TiledMap | null = null;

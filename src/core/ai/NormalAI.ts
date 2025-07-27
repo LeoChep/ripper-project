@@ -178,7 +178,7 @@ function findAttackTarget(
     }
   });
   tiledMap.sprites.forEach((sprite) => {
-    if (sprite === unit) {
+    if (sprite === unit||sprite.state === "dead") {
       return; // 如果是自己就跳过
     }
     const spriteX = Math.floor(sprite.x / tileSize);
