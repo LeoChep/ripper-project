@@ -70,7 +70,6 @@ export class OpportunitySystem {
     return opportunityUnits;
   }
   static opportunitysHandle(targetUnit: Unit, opportunityUnits: Unit[]) {
-
     const promise = new Promise<void>(async (resolve) => {
       for (let i = 0; i < opportunityUnits.length; i++) {
         await OpportunitySystem.opportunityHandle(
@@ -80,7 +79,7 @@ export class OpportunitySystem {
       }
       resolve();
     });
-    return promise
+    return promise;
   }
   static opportunityHandle(
     targetUnit: Unit,
@@ -96,7 +95,6 @@ export class OpportunitySystem {
           const userChoice = confirm(
             `单位 ${opportunityUnit.name} 可以触发借机攻击，是否执行？`
           );
-          // const userChoice = true;
           if (userChoice) {
             // 执行借机攻击
 
@@ -125,26 +123,7 @@ export class OpportunitySystem {
         );
         return Promise.resolve();
       }
-
-      return new Promise<void>((resolve) => {
-        // const userChoice = confirm(
-        //   `单位 ${opportunityUnit.name} 可以触发借机攻击，是否执行？`
-        // );
-        const userChoice = true;
-        if (userChoice) {
-          attackMovementToUnit(
-            targetUnit,
-            opportunityUnit,
-            opportunityUnit.creature?.attacks?.[0] as CreatureAttack,
-            golbalSetting.map
-          ).then(() => {
-            resolve();
-          });
-          // opportunityUnit.ai?.opportunityAttack(targetUnit).then(() => {
-          //   resolve();
-          // });
-        }
-      });
+      return opportunityUnit.ai?.opportunityAttack(targetUnit);
     }
   }
 }
