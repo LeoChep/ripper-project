@@ -59,6 +59,7 @@ export class FunnelingFlurryController extends AbstractPwoerController {
         return false;
       }
     );
+    this.graphics=BasicSelector.getInstance().graphics;
     this.removeFunction = basicAttackSelector.removeFunction;
     let resolveCallback = (result: any) => {};
     const promise = new Promise((resolve) => {
@@ -81,7 +82,12 @@ export class FunnelingFlurryController extends AbstractPwoerController {
       return promise;
     }
     //shift unit position
-    await this.shiftFunc(firstaAttackResult);
+    if (
+      firstaAttackResult &&
+      (firstaAttackResult as { hit: boolean }).hit == true
+    ) {
+      await this.shiftFunc(firstaAttackResult);
+    }
     let firstTarget =
       (firstaAttackResult as { beAttack: Unit | null }).beAttack ?? null;
     // 第二次攻击
@@ -115,7 +121,13 @@ export class FunnelingFlurryController extends AbstractPwoerController {
       resolveCallback(secondResult);
       return promise;
     }
-    await this.shiftFunc(secondAttackResult);
+    if (
+      secondAttackResult &&
+      (secondAttackResult as { hit: boolean }).hit == true
+    ) {
+      await this.shiftFunc(secondAttackResult);
+    }
+
     console.log("resolveCallback", {});
     resolveCallback({});
     return promise;
@@ -199,5 +211,4 @@ export class FunnelingFlurryController extends AbstractPwoerController {
       }
     }
   };
- 
 }

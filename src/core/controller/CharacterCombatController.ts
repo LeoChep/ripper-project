@@ -49,7 +49,9 @@ export class CharacterCombatController {
       console.log("moveSelect result", result);
       if (result?.cancel === false) {
         if (walkMachine.onDivideWalk === true) {
-          this.useMoveController();
+          setTimeout(() => {
+            this.useMoveController();
+          }, 50);
         }
       }
     });
@@ -88,7 +90,9 @@ export class CharacterCombatController {
     CharCombatAttackController.instense?.removeFunction(cancelInfo);
     CharCombatMoveController.instense?.removeFunction(cancelInfo);
     this.powerController?.removeFunction(cancelInfo);
-    const powerController = await PowerSystem.getInstance().getController(power.name);
+    const powerController = await PowerSystem.getInstance().getController(
+      power.name
+    );
     this.powerController = powerController;
     if (!powerController) {
       console.warn(`PowerController for ${power.name} is not defined.`);
@@ -97,7 +101,10 @@ export class CharacterCombatController {
     powerController.selectedCharacter = this.selectedCharacter;
     powerController.doSelect().then((result) => {
       console.log("powerController result", result);
-      this.resetDivideWalk();
+      if (!result.cancel && InitiativeSystem.isInBattle()) {
+        this.resetDivideWalk();
+      }
+
       setTimeout(() => {
         if (!result.from && InitiativeSystem.isInBattle()) {
           this.useMoveController();
@@ -137,18 +144,24 @@ export class CharacterCombatController {
       this.selectedCharacter.creature?.abilities.find(
         (ability) => ability.name === "Strength"
       )?.modifier || 0;
-    attack.damage += `+${modifer}`+'+1+'+((this.selectedCharacter.creature?.weapons?.[0].bonus.toString()) ?? '0');
+    attack.damage +=
+      `+${modifer}` +
+      "+1+" +
+      (this.selectedCharacter.creature?.weapons?.[0].bonus.toString() ?? "0");
     attack.name = this.selectedCharacter.creature?.weapons?.[0].name ?? "攻击";
     attack.type = "melee";
     attack.range = this.selectedCharacter.creature?.weapons?.[0].range;
-    attack.attackBonus+= modifer;
+    attack.attackBonus += modifer;
     attack.target = "ac";
-    attack.attackBonus+=1;//武器大师
-    attack.attackBonus+=3;//擅长加值
-    attack.attackBonus+=1;//战斗专长
+    attack.attackBonus += 1; //武器大师
+    attack.attackBonus += 3; //擅长加值
+    attack.attackBonus += 1; //战斗专长
     atkController.attackSelect(attack).then((result) => {
       console.log("attackSelect result", result);
-      this.resetDivideWalk();
+      if (!result.cancel && InitiativeSystem.isInBattle()) {
+        this.resetDivideWalk();
+      }
+
       setTimeout(() => {
         if (!result.from && InitiativeSystem.isInBattle()) {
           this.useMoveController();
@@ -163,6 +176,7 @@ export class CharacterCombatController {
     }
     CharCombatMoveController.instense?.removeFunction();
     CharCombatAttackController.instense?.removeFunction();
+    this.powerController?.removeFunction();
     if (CharacterCombatController.instance) {
       CharacterCombatController.instance.inUse = false;
     }

@@ -29,13 +29,13 @@ export class StateMachinePack {
     if (animUnit) {
       animUnit.x = this.owner.x;
       animUnit.y = this.owner.y;
-      console.log(
-        "执行状态机动作",
-        name,
-        "单位位置:",
-        this.owner.x,
-        this.owner.y
-      );
+      // console.log(
+      //   "执行状态机动作",
+      //   name,
+      //   "单位位置:",
+      //   this.owner.x,
+      //   this.owner.y
+      // );
     }
     if (machine) {
       machine.doAction();
