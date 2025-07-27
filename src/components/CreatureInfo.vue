@@ -23,6 +23,22 @@
       <span v-for="a in creature.abilities" :key="String(a.name)">{{ a.name }} {{ a.value }} ({{ a.modifier >= 0 ? '+' : ''}}{{ a.modifier }})　</span>
     </div>
     <div v-if="creature.equipment.length">装备：{{ creature.equipment.join('，') }}</div>
+    <div v-if="creature.weapons && creature.weapons.length">
+      <h3>武器</h3>
+      <div v-for="weapon in creature.weapons" :key="weapon.name" class="weapon-item">
+        <div>
+          <b>{{ weapon.name }}</b>　类型：{{ weapon.type }}
+        </div>
+        <div>伤害：{{ weapon.damage }}　攻击加值：+{{ weapon.bonus }}</div>
+        <div v-if="weapon.range">射程：{{ weapon.range }}</div>
+        <div v-if="weapon.properties && weapon.properties.length">
+          属性：{{ weapon.properties.join('，') }}
+        </div>
+        <div v-if="weapon.weight">重量：{{ weapon.weight }}</div>
+        <div v-if="weapon.cost">价格：{{ weapon.cost }}</div>
+        <div v-if="weapon.description">描述：{{ weapon.description }}</div>
+      </div>
+    </div>
     <div v-if="creature.attacks.length">
       <h3>攻击方式</h3>
       <ul>
@@ -39,7 +55,33 @@
     <div v-if="creature.traits.length">
       <h3>特性</h3>
       <ul>
-        <li v-for="t in creature.traits" >{{ t }}</li>
+        <li v-for="t in creature.traits" :key="t.name">
+          <b>{{ t.displayName || t.name }}</b>
+          <span v-if="t.description">: {{ t.description }}</span>
+        </li>
+      </ul>
+    </div>
+    <div v-if="creature.powers.length">
+      <h3>威能</h3>
+      <ul>
+        <li v-for="power in creature.powers" :key="power.name">
+          <b>{{ power.displayName }}</b>
+          <!-- <span v-if="power.subName"> ({{ power.subName }})</span>
+          <br>
+          <span>等级：{{ power.level }}　</span>
+          <span>类型：{{ getPowerTypeText(power.useType) }}　</span>
+          <span>动作：{{ getActionTypeText(power.actionType) }}　</span>
+          <span v-if="power.powersource">能量源：{{ power.powersource }}</span>
+          <br>
+          <span v-if="power.rangeText">范围：{{ power.rangeText }}　</span>
+          <span v-if="power.target">目标：{{ power.target }}　</span>
+          <span v-if="power.area">区域：{{ power.area }}</span>
+          <br>
+          <span v-if="power.description">{{ power.description }}</span>
+          <span v-if="power.keyWords&&power.keyWords.length && power.keyWords[0]">
+            <br>关键词：{{ power.keyWords.join('，') }}
+          </span> -->
+        </li>
       </ul>
     </div>
     <div v-if="creature.notes.length">
@@ -59,6 +101,30 @@
 import type { Creature } from '@/core/units/Creature'
 
 defineEmits(['close'])
+
+
+// 获取威能类型文本
+const getPowerTypeText = (type: string) => {
+  const typeMap: Record<string, string> = {
+    'atwill': '随意',
+    'encounter': '遭遇',
+    'daily': '每日',
+    'utility': '辅助'
+  }
+  return typeMap[type] || type
+}
+
+// 获取动作类型文本
+const getActionTypeText = (type: string) => {
+  const typeMap: Record<string, string> = {
+    'standard': '标准动作',
+    'move': '移动动作',
+    'minor': '次要动作',
+    'free': '自由动作',
+    'immediate': '立即动作'
+  }
+  return typeMap[type] || type
+}
 
 const props = defineProps<{ creature: Creature | null }>()
 
@@ -113,5 +179,14 @@ const exportCreature = () => {
 .button-group button {
   margin-top: 0;
   margin-right: 8px;
+}
+.weapon-item {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+.weapon-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
 }
 </style>

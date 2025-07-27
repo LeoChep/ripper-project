@@ -61,6 +61,7 @@ export class CharCombatAttackController {
     basicAttackSelector.promise?.then((result) => {
       if (result.cencel !== true) {
         useStandAction(unit);
+        
         playerSelectAttackMovement(
           result.event,
           unit,

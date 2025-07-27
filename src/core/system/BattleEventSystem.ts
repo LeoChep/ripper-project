@@ -27,7 +27,7 @@ export class BattleEvenetSystem {
     console.log(`Handling event: ${eventName}, args:`,[...args]);
     for (let i = 0; i < length; i++) {
       const event = this.events[i];
-      if (event) {
+      if (event&&event.typeName === eventName) {
         const promise = event.eventHandler(...args);
         allPromise.push(promise);
         await promise;

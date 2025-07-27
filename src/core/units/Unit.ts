@@ -1,5 +1,6 @@
 import { StateMachinePack } from "./../stateMachine/StateMachinePack";
 import { Trait } from "../trait/Trait";
+import { Power } from "../power/Power";
 
 import type { UnitAnimSpirite } from "../anim/UnitAnimSprite";
 import type { Creature } from "@/core/units/Creature";
@@ -9,6 +10,7 @@ import { NormalAI } from "../ai/NormalAI";
 import type { Action } from "../type/Action";
 import { WalkStateMachine } from "../stateMachine/WalkStateMachine";
 import { TriatSystem } from "../system/TraitSystem";
+import { PowerSystem } from "../system/PowerSystem";
 
 export interface UnitOptions {
   id: number;
@@ -22,6 +24,7 @@ export interface UnitOptions {
   gid?: number;
   direction: number; // 方向，0-3 分别表示上、右、下、左
   traits?: Trait[];
+  powers?: Power[];
 }
 
 export class Unit {
@@ -38,6 +41,8 @@ export class Unit {
   height: number;
   effects: any[] = []; // 特效数组
   traits: Trait[];
+  powers: Power[];
+  
   animUnit: UnitAnimSpirite | undefined;
   initiative?: InitiativeClass;
   state: string = "idle"; // 状态，默认为 "idle"
@@ -56,13 +61,14 @@ export class Unit {
     this.unitTypeName = options.unitTypeName;
     this.gid = options.gid;
     this.traits = options.traits || [];
+    this.powers = options.powers || [];
 
     this.stateMachinePack = new StateMachinePack(this); // 初始化状态机包
     this.stateMachinePack.addMachine("walk", new WalkStateMachine(this)); // 添加默认的 AI 状态机
   }
 }
 
-export async function loadTraits(unit: Unit,unitCreated: Creature) {
+export async function loadTraits(unit: Unit, unitCreated: Creature) {
   if (unitCreated.traits.length > 0) {
     for (let i = 0; i < unitCreated.traits.length; i++) {
       const loadTrait = await TriatSystem.getInstance().createTrait(
@@ -76,6 +82,26 @@ export async function loadTraits(unit: Unit,unitCreated: Creature) {
       }
     }
   }
+  
+}
+export async function loadPowers(unit: Unit, unitCreated: Creature) {
+  if (unitCreated.powers.length > 0) {
+    for (let i = 0; i < unitCreated.powers.length; i++) {
+        const powerName = unitCreated.powers[i].name;
+        if (!powerName) {
+            console.warn("powerName is required.");
+            return null;
+        }
+        const power =await PowerSystem.getInstance().createPower(powerName,unit);
+        if (!power) {
+            console.warn(`Power class not found for: ${powerName}`);
+            continue
+        }
+
+        unit.powers[i] = power; // 替换为加载后的 Power 实例
+    }
+  }
+  
 }
 // 工厂函数：根据 map.sprites 生成 Unit 实例数组
 export function createUnitsFromMapSprites(sprites: any[]): Unit[] {

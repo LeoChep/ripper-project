@@ -6,6 +6,7 @@ import type { Unit } from "../units/Unit";
 import * as PIXI from "pixi.js";
 import { playerSelectAttackMovement } from "../action/UnitAttack";
 import { generateWays } from "../utils/PathfinderUtil";
+import { diceRoll } from "../DiceTryer";
 
 
 
@@ -73,3 +74,28 @@ export const checkPassiable = (
 
   return passiable;
 };
+
+export async function checkHit(unit: Unit, target: any, attack: CreatureAttack) {
+  // 检查攻击是否命中
+  const attackBonus = attack.attackBonus || 0; // 攻击加值
+  const targetAC = target.creature?.ac || 10; // 目标护甲等级，默认10
+
+  const roll = parseInt(await diceRoll("1d20+" + attackBonus));
+  console.log(`攻击掷骰: ${roll} vs AC ${targetAC}`);
+  const result = {
+    attackValue: roll,
+    targetAC: targetAC,
+    hit: roll >= targetAC,
+  };
+  return result;
+}
+
+export async function getDamage(unit: Unit, target: any, attack: CreatureAttack) {
+  // 检查攻击是否命中
+  const attackBonus = attack.attackBonus || 0; // 攻击加值
+  const targetAC = target.creature?.ac || 10; // 目标护甲等级，默认10
+
+  const roll = parseInt(await diceRoll(attack.damage));
+  console.log(`攻击掷骰: ${roll} vs AC ${targetAC}`);
+  return roll;
+}

@@ -289,9 +289,16 @@ export function startBattle() {
     const u= unit as Unit;
     if (unit.party === "player") {
       u.traits.forEach((trait)=>{
-        console.log("trait1", trait);
+    
         if (trait.hookTime='Battle') {
           trait.hook();
+        }
+      })
+      console.log("unitForBattle", u);
+        u.powers.forEach((power)=>{
+        console.log("powerForBattle", power);
+        if (power.hookTime='Battle') {
+          power.hook();
         }
       })
     }

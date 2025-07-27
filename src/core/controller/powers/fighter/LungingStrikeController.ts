@@ -1,6 +1,7 @@
+import { Weapon } from "./../../../units/Weapon";
 import type { Unit } from "@/core/units/Unit";
 import { AbstractPwoerController } from "../AbstractPwoerController";
-import {  playerSelectAttackMovement } from "@/core/action/UnitAttack";
+import { playerSelectAttackMovement } from "@/core/action/UnitAttack";
 import type { CreatureAttack } from "@/core/units/Creature";
 
 import { golbalSetting } from "@/core/golbalSetting";
@@ -23,14 +24,21 @@ export class LungingStrikeController extends AbstractPwoerController {
     if (!this.preFix()) return Promise.resolve();
     const { x, y } = this.getXY();
     const unit = this.selectedCharacter as Unit;
+    const weapon = unit.creature?.weapons?.[0];
     const attack = {} as CreatureAttack;
-    const range = 2; // 假设冲刺攻击范围为2
-    // attack.attackBonus =
-    //   unit.creature?.abilities?.find((ability) => ability.name === "Strength")
-    //     ?.modifier ?? 0; // 使用力量作为攻击加值
-    // attack.damage='1d8+'+attack.attackBonus
-        attack.attackBonus =12
-    attack.damage='1d8+7'
+    const range = (weapon?.range ?? 1) + 1; // 默认攻击范围为1
+    const modifer =
+      unit.creature?.abilities?.find((ability) => ability.name === "Strength")
+        ?.modifier ?? 0; // 使用力量作为攻击加值
+    attack.attackBonus = modifer;
+    attack.attackBonus += weapon?.bonus ?? 0; // 添加武器加值
+    attack.attackBonus += 1 + 3 + 1; // 武器大师、擅长加值、战斗专长
+    attack.attackBonus -= 1; // 冲刺攻击减1
+    attack.damage = weapon?.damage ?? "1d6"; // 默认伤害为1d6
+    attack.damage += `+${weapon?.bonus ?? 0}+${modifer}+1`; // 添加攻击加值到伤害
+    attack.name = "Lunging Strike";
+    attack.type = "melee";
+    attack.range = range;
     // 执行攻击选择逻辑
     const basicAttackSelector = BasicAttackSelector.selectBasicAttack(
       (x, y, pre, prey) => {

@@ -20,7 +20,7 @@ import * as PIXI from 'pixi.js'
 import { UnitRightEvent } from '@/core/controller/UnitRightEventController'
 import { TiledMap } from '@/core/MapClass'
 import { UnitAnimSpirite } from '@/core/anim/UnitAnimSprite'
-import { createUnitsFromMapSprites, loadTraits } from '@/core/units/Unit'
+import { createUnitsFromMapSprites, loadPowers, loadTraits } from '@/core/units/Unit'
 import { AnimMetaJson } from '@/core/anim/AnimMetaJson'
 import { createCreature } from '@/core/units/Creature'
 import { setContainer, setLayer } from '@/stores/container'
@@ -194,6 +194,7 @@ const generateAnimSprite = async (unit, container, rlayers, mapPassiable) => {
     const animSpriteUnit = await createAnimSpriteUnits(unit.unitTypeName, unit);
     const unitCreature = await createUnitCreature(unit.unitTypeName, unit);
     loadTraits(unit, unitCreature);
+    loadPowers(unit, unitCreature);
     unit.animUnit = animSpriteUnit;
     animSpriteUnit.zIndex = envSetting.zIndexSetting.spriteZIndex;
     unit.creature = unitCreature;

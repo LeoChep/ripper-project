@@ -27,7 +27,7 @@ export class CharacterCombatController {
       "walk"
     ) as WalkStateMachine;
     if (
-      !InitiativeSystem.checkActionUseful(this.selectedCharacter,'move') &&
+      !InitiativeSystem.checkActionUseful(this.selectedCharacter, "move") &&
       walkMachine.onDivideWalk === false
     ) {
       return;
@@ -73,7 +73,10 @@ export class CharacterCombatController {
       return;
     }
     if (
-      !InitiativeSystem.checkActionUseful(this.selectedCharacter, power.actionType)
+      !InitiativeSystem.checkActionUseful(
+        this.selectedCharacter,
+        power.actionType
+      )
     ) {
       return;
     }
@@ -124,19 +127,33 @@ export class CharacterCombatController {
       CharCombatAttackController.instense = atkController;
     }
     atkController.selectedCharacter = this.selectedCharacter;
-    atkController
-      .attackSelect(
-        this.selectedCharacter.creature?.attacks[0] as CreatureAttack
-      )
-      .then((result) => {
-        console.log("attackSelect result", result);
-        this.resetDivideWalk();
-        setTimeout(() => {
-          if (!result.from && InitiativeSystem.isInBattle()) {
-            this.useMoveController();
-          }
-        }, 90);
-      });
+    const attack = {} as CreatureAttack;
+    attack.damage =
+      this.selectedCharacter.creature?.weapons?.[0].damage ?? "1d6";
+    attack.attackBonus =
+      this.selectedCharacter.creature?.weapons?.[0].bonus ?? 0;
+    const modifer =
+      this.selectedCharacter.creature?.abilities.find(
+        (ability) => ability.name === "Strength"
+      )?.modifier || 0;
+    attack.damage += `+${modifer}`+'+1+'+((this.selectedCharacter.creature?.weapons?.[0].bonus.toString()) ?? '0');
+    attack.name = this.selectedCharacter.creature?.weapons?.[0].name ?? "攻击";
+    attack.type = "melee";
+    attack.range = this.selectedCharacter.creature?.weapons?.[0].range;
+    attack.attackBonus+= modifer;
+    attack.target = "ac";
+    attack.attackBonus+=1;//武器大师
+    attack.attackBonus+=3;//擅长加值
+    attack.attackBonus+=1;//战斗专长
+    atkController.attackSelect(attack).then((result) => {
+      console.log("attackSelect result", result);
+      this.resetDivideWalk();
+      setTimeout(() => {
+        if (!result.from && InitiativeSystem.isInBattle()) {
+          this.useMoveController();
+        }
+      }, 90);
+    });
   }
   endTurn() {
     if (!this.selectedCharacter) {

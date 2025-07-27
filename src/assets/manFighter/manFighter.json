@@ -16,11 +16,8 @@
   "fly": null,
   "initiative": 2,
   "senses": "",
-  "immunities": [
-  ],
-  "resistances": [
-    
-  ],
+  "immunities": [],
+  "resistances": [],
   "alignment": "无",
   "languages": [
     "-"
@@ -35,7 +32,7 @@
     {
       "name": "Dexterity",
       "value": 10,
-      "modifier":0
+      "modifier": 0
     },
     {
       "name": "Constitution",
@@ -58,19 +55,18 @@
       "modifier": -1
     }
   ],
-  "equipment": [
-    
-  ],
-  "attacks": [
+  "equipment": [],
+  "weapons": [
     {
       "name": "长剑",
       "type": "Melee",
       "action": "武器",
       "range": 1,
       "attackBonus": 12,
+      "bonus":1,
       "target": "ac",
-      "weapon":"1d8",
-      "damage": "1d8+5+1",
+      "weapon": "1d8",
+      "damage": "1d8",
       "effect": "",
       "missEffect": null
     },
@@ -80,18 +76,19 @@
       "action": "武器",
       "range": 1,
       "attackBonus": 12,
+       "bonus":1,
       "target": "ac",
-      "weapon":"1d6",
-      "damage": "1d6+5+1",
+      "weapon": "1d6",
+      "damage": "1d6",
       "effect": "",
       "missEffect": null
     }
   ],
   "powers": [
     {
-      "name":"LungingStrike",
+      "name": "LungingStrike",
       "displayName": "突刺击",
-      "type": "encounter",
+      "type": "atwill",
       "action": "standard",
       "range": null,
       "target": null,
@@ -99,15 +96,29 @@
       "damage": null,
       "attackBonus": null,
       "missEffect": null
+    },
+    {
+      "name": "ShieldEdgeBlock",
+      "displayName": "盾缘阻挡",
+      "type": "encounter",
+      "action": "rection",
+      "range": null,
+      "target": null,
+      "description": "盾缘阻挡 Shield Edge Block  MP2\n战士攻击 3\n你以快速的盾缘猛击阻挡对手的攻势，并接着还以强力挥击。\n遭遇✦武术\n即时中断✦近战1\n要求：\\t你必须使用盾牌\n触发：\\t邻近你的一名敌人以近程或近战攻击对你命中或失手\n目标：\\t触发的敌人\n效果：\\t目标的这次攻击检定受到-4减值。\n攻击：\\t力量 + 2 vs. 强韧\n11级：力量 + 4 vs. 强韧\n命中：\\t2d6 + 力量调整值的伤害。",
+      "damage": null,
+      "attackBonus": null,
+      "missEffect": null
     }
   ],
-  "traits": [{
+  "traits": [
+    {
       "name": "CombatChallenge",
       "displayName": "战斗挑战",
       "description": "",
       "icon": "challenge",
       "type": "combat"
-    }],
+    }
+  ],
   "notes": [
     "Equipment: 长剑, 短弓, 20 支箭"
   ]

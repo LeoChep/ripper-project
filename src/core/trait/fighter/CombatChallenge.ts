@@ -27,6 +27,7 @@ export class CombatChallenge extends Trait {
   hook() {
     //使用标记
     const eventHanlder1 = (attacker: Unit, target: Unit) => {
+      if (!target) return Promise.resolve();
       let happen = false;
       ((attacker as any).effects as EffectInterface[]).forEach((effect) => {
         if (effect instanceof BeTargeted) {
@@ -80,6 +81,7 @@ export class CombatChallenge extends Trait {
     const event1 = { typeName: "attackEvent", eventHandler: eventHanlder1 };
     BattleEvenetSystem.getInstance().hookEvent(event1);
     const eventHandler2 = (attacker: Unit, target: Unit) => {
+      if (!target) return Promise.resolve();
       if (this.owner === attacker) {
         const beTargetedEffect = new BeTargeted();
         beTargetedEffect.owner = target;

@@ -1,5 +1,6 @@
 import { Power } from '../power/Power';
 import { Trait } from '../trait/Trait';
+import { Weapon } from './Weapon';
 
 export interface CreatureAttack {
     name: string;
@@ -58,6 +59,7 @@ export interface CreatureOptions {
     traits?: Trait[];
     notes?: string[];
     powers?: Power[];
+    weapons?: Weapon[];
 }
 
 export class Creature {
@@ -89,6 +91,7 @@ export class Creature {
     notes: string[];
     attacks: CreatureAttack[];
     powers: Power[];
+    weapons?: Weapon[];
 
     constructor(options: CreatureOptions) {
         this.name = options.name;
@@ -119,6 +122,7 @@ export class Creature {
         this.traits = options.traits || [];
         this.notes = options.notes || [];
         this.powers = options.powers || [];
+        this.weapons = options.weapons;
     }
 }
 
