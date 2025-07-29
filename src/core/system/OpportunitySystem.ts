@@ -6,7 +6,7 @@ import { InitiativeSheet } from "./InitiativeSystem";
 import { attackMovementToUnit } from "../action/UnitAttack";
 import { WeaponSystem } from "./WeaponSystem";
 import type { Weapon } from "../units/Weapon";
-import type { CreatureAttack } from "../units/Creature";
+
 
 export class OpportunitySystem {
   constructor() {

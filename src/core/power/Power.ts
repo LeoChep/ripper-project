@@ -34,7 +34,8 @@ export class Power {
   trigger: string = "";
   requirement: string = "";
   hookTime: string = "";
-    owner: any;
+  cooldown: number = 0;
+  owner: any;
   hook = () => {};
   constructor(obj: any) {
     if (obj) {

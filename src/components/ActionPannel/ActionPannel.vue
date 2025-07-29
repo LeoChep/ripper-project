@@ -87,7 +87,7 @@ const actions = computed(() => {
   if (!character || !character.powers) {
     return []
   }
-  console.log('获取威能数据:', character.powers)
+  // console.log('获取威能数据:', character.powers)
   const actions=character.powers.map((power, index) => ({
     id: `power_${index}`,
     displayName: power.displayName || power.name, // 使用威能的显示名称或默认名称
@@ -96,7 +96,7 @@ const actions = computed(() => {
     powerType: power.type, // 'atwill', 'encounter', 'daily', 'utility'
     power: power // 保存完整的威能对象以供后续使用
   }))
-  console.log('获取的动作:', actions)
+  // console.log('获取的动作:', actions)
   return actions
 })
 
@@ -109,7 +109,7 @@ watch(() => props.character, (newCharacter) => {
 
 // 过滤动作
 const filteredActions = computed(() => {
-  console.log('过滤动作:', props.character)
+  // console.log('过滤动作:', props.character)
   return actions.value.filter(action =>
     // action.type === activeActionTab.value && 
     action.powerType === activePowerTab.value

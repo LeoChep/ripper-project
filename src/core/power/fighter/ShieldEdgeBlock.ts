@@ -15,7 +15,7 @@ export class ShieldEdgeBlock extends Power {
   description = "你以快速的盾缘猛击阻挡对手的攻势，并接着还以强力挥击。";
   icon = "shield-edge-block";
   type = "fighter";
-  powerType = "reaction";
+  actionType = "reaction";
   cost = 1;
   cooldown = 0;
   range = 1;

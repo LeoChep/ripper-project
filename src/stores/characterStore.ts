@@ -7,11 +7,10 @@ export const useCharacterStore = defineStore("character", {
     characters: [] as Array<Unit>,
     show: false,
     selectedCharacterId: null as number | null,
-    // characterOutCombatController: null as CharacterOutCombatController | null, // 初始化时传入空的参数，实际使用时会替换
+  
   }),
   actions: {
     setCharacterOutCombatController(controller: CharacterOutCombatController) {
-        // this.characterOutCombatController = controller;
     },
     addCharacter(character: Unit) {
       this.characters.push(character);

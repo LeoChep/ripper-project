@@ -1,3 +1,4 @@
+import { MessageTipSystem } from './../system/MessageTipSystem';
 import * as PIXI from "pixi.js";
 import { Unit } from "../units/Unit";
 
@@ -30,7 +31,7 @@ export class CharCombatAttackController {
       console.warn("当前有动画正在执行，无法进行攻击选择");
       return Promise.resolve({});
     }
-    
+
     if (unit === null) {
       console.warn("没有选中单位，无法进行选择");
       return Promise.resolve({});
@@ -57,6 +58,7 @@ export class CharCombatAttackController {
         );
       },)
     const basicAttackSelector = BasicSelector.getInstance().selectBasic(grids,1,"red",true)
+    MessageTipSystem.getInstance().setMessage("请选择攻击目标");
     this.removeFunction = basicAttackSelector.removeFunction;
     let resolveCallback = (result: any) => {};
     const promise = new Promise((resolve) => {
@@ -64,6 +66,7 @@ export class CharCombatAttackController {
     });
     basicAttackSelector.promise?.then((result) => {
       console.log("basicAttackSelector result", result,result.cancel !== true);
+      MessageTipSystem.getInstance().clearMessage();
       if (result.cancel !== true) {
         useStandAction(unit);
         console.log("playerSelectAttackMovement", result.cancel == true, unit, attack, golbalSetting.map);

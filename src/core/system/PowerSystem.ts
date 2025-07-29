@@ -5,7 +5,7 @@ import type { Unit } from "../units/Unit";
 
 export class PowerSystem {
   static instance: PowerSystem | null = null;
-  powerControllerPack: AbstractPwoerController[] = [];
+  powerControllerPack: Map<string, AbstractPwoerController> = new Map();
   static getInstance() {
     if (!PowerSystem.instance) {
       PowerSystem.instance = new PowerSystem();
@@ -24,16 +24,14 @@ export class PowerSystem {
       console.warn(`PowerController for ${powerName} is not defined.`);
       return null;
     }
-    if (powerController) this.powerControllerPack.push(powerController);
+    if (powerController) this.powerControllerPack.set(powerName, powerController);
     return powerController;
   }
   async getController(powerName: string): Promise<AbstractPwoerController | null> {
-    let powerController =
-      this.powerControllerPack.find(
-        (controller) => controller.constructor.name === powerName
-      ) || null;
+    let powerController =this.powerControllerPack.get(powerName);
     if (!powerController) {
-      powerController =await this.addController(powerName);
+      await this.addController(powerName);
+      powerController =this.powerControllerPack.get(powerName) as AbstractPwoerController ;
     }
     return powerController;
   }

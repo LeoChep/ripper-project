@@ -14,6 +14,7 @@ import { tileSize } from "@/core/envSetting";
 import { generateWays } from "@/core/utils/PathfinderUtil";
 import { BasicSelector } from "@/core/selector/BasicSelector";
 import { ShiftAnim } from "@/core/anim/ShiftAnim";
+import { MessageTipSystem } from "@/core/system/MessageTipSystem";
 
 export class FunnelingFlurryController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -59,6 +60,7 @@ export class FunnelingFlurryController extends AbstractPwoerController {
         return false;
       }
     );
+    MessageTipSystem.getInstance().setMessage("请选择主目标");
     this.graphics=BasicSelector.getInstance().graphics;
     this.removeFunction = basicAttackSelector.removeFunction;
     let resolveCallback = (result: any) => {};
@@ -78,6 +80,7 @@ export class FunnelingFlurryController extends AbstractPwoerController {
       );
       console.log("resolveCallback", {});
     } else {
+      MessageTipSystem.getInstance().clearMessage();
       resolveCallback(result);
       return promise;
     }
@@ -86,6 +89,7 @@ export class FunnelingFlurryController extends AbstractPwoerController {
       firstaAttackResult &&
       (firstaAttackResult as { hit: boolean }).hit == true
     ) {
+      
       await this.shiftFunc(firstaAttackResult);
     }
     let firstTarget =
@@ -107,6 +111,7 @@ export class FunnelingFlurryController extends AbstractPwoerController {
         return false;
       }
     );
+    MessageTipSystem.getInstance().setMessage("请选择另一个不同的目标");
     this.removeFunction = secondAttackSelector.removeFunction;
     const secondResult = await secondAttackSelector.promise;
     let secondAttackResult;
@@ -119,6 +124,7 @@ export class FunnelingFlurryController extends AbstractPwoerController {
       );
     } else {
       resolveCallback(secondResult);
+      MessageTipSystem.getInstance().clearMessage();
       return promise;
     }
     if (
@@ -204,7 +210,9 @@ export class FunnelingFlurryController extends AbstractPwoerController {
         "yellow",
         true
       );
+          MessageTipSystem.getInstance().setMessage("请选择滑动位置");
       const firstShiftResult = await BasicSelector.getInstance().promise;
+       MessageTipSystem.getInstance().clearMessage();
       if (firstShiftResult.cancel !== true) {
         console.log("firstShiftResult", firstShiftResult, beAttack);
         ShiftAnim.shift(beAttack, firstShiftResult.selected[0]);

@@ -5,10 +5,13 @@
     <CreatureInfo :creature="selectedCreature" v-if="selectedCreature" @close="selectedCreature = null" />
     <TalkPannel />
     <CharacterPannel />
+    
+     <MessageTipTool />
+
 </template>
 
 <script setup>
-
+import MessageTipTool from '@/components/MessageTipTool/MessageTipTool.vue'
 import CreatureInfo from '../CreatureInfo.vue'
 import TalkPannel from '../TalkPannel/TalkPannel.vue'
 import { ref, onMounted } from 'vue'
