@@ -96,12 +96,11 @@ onMounted(async () => {
     units.forEach((unit) => {
         if (unit.party === 'player') {
             characterStore.addCharacter(unit);
-
         }
         unit.stateMachinePack.startPlay();
     });
+    console.log('角色数据:', characterStore.characters);
     const characterOutCombatController = new CharacterOutCombatController(rlayers, container, mapPassiable)
-    characterStore.setCharacterOutCombatController(characterOutCombatController);
     CharacterOutCombatController.instance = characterOutCombatController;
     d1.map = mapPassiable;
     golbalSetting.map = mapPassiable;

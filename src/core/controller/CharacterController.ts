@@ -6,17 +6,7 @@ import { SelectAnimSprite } from "../anim/SelectAnimSprite";
 import { zIndexSetting } from "../envSetting";
 import { lockOn } from "../anim/LockOnAnim";
 import { golbalSetting } from "../golbalSetting";
-
-const tileSize = 64;
-
-type Rlayer = {
-  basicLayer: PIXI.IRenderLayer;
-  spriteLayer: PIXI.IRenderLayer;
-  lineLayer: PIXI.IRenderLayer;
-  fogLayer: PIXI.IRenderLayer;
-  selectLayer: PIXI.IRenderLayer;
-  controllerLayer: PIXI.IRenderLayer;
-};
+import { useCharacterStore } from "@/stores/characterStore";
 
 export class CharacterController {
   public static curser: number = 0;
@@ -28,8 +18,11 @@ export class CharacterController {
   constructor(mapPassiable: TiledMap) {
     this.mapPassiable = mapPassiable;
   }
-  selectCharacter(unit: Unit) {
+  static selectCharacter(unit: Unit) {
     CharacterController.selectedCharacter = unit;
+    CharacterController.curser = unit.id;
+    console.log("useCharacterStore().selectCharacter(unit):", unit);
+    useCharacterStore().selectCharacter(unit);
   }
   static lookOn() {
     //后续需要单独处理effectContainer的生成与更新
@@ -56,7 +49,6 @@ export class CharacterController {
     arrowSprite.label = "arrow";
     effectContainer.addChild(arrowSprite);
 
- 
     arrowSprite.zIndex = zIndexSetting.spriteZIndex;
 
     const lineLayer = golbalSetting.rlayers.lineLayer;

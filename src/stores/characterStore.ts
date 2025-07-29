@@ -1,30 +1,25 @@
-import { CharacterOutCombatController } from "@/core/controller/CharacterOutCombatController";
 import type { Unit } from "@/core/units/Unit";
-import { defineStore } from "pinia";
-
-export const useCharacterStore = defineStore("character", {
-  state: () => ({
-    characters: [] as Array<Unit>,
-    show: false,
-    selectedCharacterId: null as number | null,
-  
-  }),
-  actions: {
-    setCharacterOutCombatController(controller: CharacterOutCombatController) {
-    },
-    addCharacter(character: Unit) {
-      this.characters.push(character);
-    },
-    selectCharacter(character: Unit) {
-      // CharacterOutCombatController.instance?.selectCharacter(character)
-    },
-
-    setShow(show: boolean){this.show = show},
+let characterStore = {
+  characters: [] as Unit[],
+  show:true,
+  selectedCharacterId: 0,
+  selectedCharacter: null as Unit | null,
+  addCharacter(character: Unit) {
+    this.characters.push(character);
   },
-  getters: {
-
-    getShow(state) {
-      return state.show;
-    }
+  setShow(show: boolean) {
+    this.show = show;
   },
-});
+  getShow() {
+    return this.show;
+  },
+  selectCharacter(character: Unit) {
+    console.log('selectCharacter中角色:', character);
+    this.selectedCharacter = character;
+    this.selectedCharacterId = character.id;
+  },
+};
+
+export const useCharacterStore = () => {
+  return characterStore;
+};

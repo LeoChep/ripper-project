@@ -4,8 +4,7 @@ import * as UnitMoveSystem from "../system/UnitMoveSystem";
 import * as UnitMoveAction from "../action/UnitMove";
 import { generateWays } from "../utils/PathfinderUtil";
 import type { TiledMap } from "../MapClass";
-import { useTalkStateStore } from "@/stores/talkStateStore";
-import { useCharacterStore } from "@/stores/characterStore";
+
 import { golbalSetting } from "../golbalSetting";
 import { CharacterController } from "./CharacterController";
 const tileSize = 64;

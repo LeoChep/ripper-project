@@ -19,58 +19,65 @@
                 <!-- HP 显示 -->
                 <div class="hp-display">
                     <div class="hp-text">HP:{{ hp || 0 }}/{{
-                     maxHp || 0 }}</div>
+                        maxHp || 0 }}</div>
                 </div>
             </div>
-            
+
             <!-- 动作选择面板 -->
-            <ActionPannel 
-                :character="selectedCharacter" 
-                @actionSelected="handleActionSelected" 
-                ref="actionPanelRef" />
+            <ActionPannel :character="selectedCharacter" @actionSelected="handleActionSelected" ref="actionPanelRef" />
         </div>
     </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, toRefs } from 'vue'
 import { useCharacterStore } from '@/stores/characterStore'
 import { getUnitAvatar } from '@/utils/utils'
 import ActionPannel from '../ActionPannel/ActionPannel.vue'
 import { CharacterController } from '@/core/controller/CharacterController'
 import { lockOn } from '@/core/anim/LockOnAnim'
+import { useTalkStateStore } from '@/stores/talkStateStore'
+
+
 const characters = ref([])
-const hp=ref(0)
-const maxHp=ref(0)
+const hp = ref(0)
+const maxHp = ref(0)
+let characterStore = ref(null);
 const show = computed(() => {
-    const characterStore = useCharacterStore();
-    return characterStore.show;
+   return !useTalkStateStore().talkState.onCg
 });
-const characterStore = useCharacterStore();
+
 const selectedIndex = ref(0)
 const selectedCharacter = ref(null)
 const actionPanelRef = ref(null)
 
 onMounted(() => {
     // 可以在这里加载角色数据
-    characters.value = characterStore.characters;
-    if (characters.value.length > 0) {
-        selectedCharacter.value = characters.value[0];
-    }
-    // setInterval(() => {
-    //    const curser=CharacterController.curser;
-    //    characters.value.forEach((character, index) => {
-    //        if (character.id === curser) {
-    //            selectedIndex.value = index;
-    //            selectedCharacter.value = character;
-    //        }
-    //    });
-    //    //刷新hp显示 - 强制触发响应式更新
-    //    if (selectedCharacter.value) {
-    //        // 触发响应式更新，确保HP显示实时刷新
-    //        selectedCharacter.value = { ...selectedCharacter.value };
-    //    }
-    // }, 100);
+    characterStore.value = useCharacterStore();
+    const updataCharacters = () => {
+        characters.value = []
+        const nChartacters = characterStore.value.characters;
+        nChartacters.forEach(character => {
+            characters.value.push(character);
+        });
+    };
+    setInterval(() => {
+        updataCharacters();
+        console.log('角色id:', characterStore.value.selectedCharacterId);
+        if (characters.value.length > 0) {
+            characters.value.forEach((character, index) => {
+                if (character.id === characterStore.value.selectedCharacterId) {
+                    selectedCharacter.value = character;
+                    selectedIndex.value = index;
+                    hp.value = character.creature?.hp || 0;
+                    maxHp.value = character.creature?.maxHp || 0;
+                }
+            });
+        }
+        // selectCharacter.value={...selectedCharacter.value}
+    }, 100);
+
+
 });
 
 // 示例角色数据，可根据实际需求替换

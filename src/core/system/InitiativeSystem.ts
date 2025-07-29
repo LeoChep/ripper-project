@@ -12,7 +12,6 @@ import { appSetting } from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import { CharacterCombatController } from "../controller/CharacterCombatController";
 import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
-import { CombatChallenge } from "../trait/fighter/CombatChallenge";
 
 export const InitiativeSheet = [] as InitiativeClass[];
 const initiativeCursor = {
@@ -138,9 +137,7 @@ export async function startCombatTurn() {
           CharacterCombatController.instance.inUse = true;
         }
         const unit = initiativeCursor.pointAt.owner;
-        CharacterController.curser = unit.id;
-        CharacterController.selectedCharacter = unit;
-        CharacterController.lookOn();
+        CharacterController.selectCharacter(unit);
         CharacterCombatController.instance?.useMoveController();
       }
     }
