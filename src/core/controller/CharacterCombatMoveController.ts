@@ -13,6 +13,7 @@ import { FogSystem } from "../system/FogSystem_unuse";
 import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
 import type { A } from "vitest/dist/chunks/environment.d.cL3nLXbE.js";
 import { CharacterController } from "./CharacterController";
+import { endTurn } from "../system/InitiativeSystem";
 const tileSize = 64;
 
 type Rlayer = {
@@ -31,15 +32,11 @@ export class CharCombatMoveController {
   public static instense = null as CharCombatMoveController | null;
 
   graphics: PIXI.Graphics | null = null;
-  constructor(
-   
-  ) {
-
-
+  constructor() {
     // 初始化逻辑
   }
   moveSelect = () => {
-    console.log("moveSSSS")
+    console.log("moveSSSS");
     const unit = this.selectedCharacter;
     if (unit === null) {
       console.warn("没有选中单位，无法进行移动选择");
@@ -82,7 +79,7 @@ export class CharCombatMoveController {
         preY * tileSize,
         x * tileSize,
         y * tileSize,
-        golbalSetting.map,
+        golbalSetting.map
       );
     });
     // 绘制可移动范围
@@ -133,10 +130,11 @@ export class CharCombatMoveController {
     graphics.on("pointerup", (e) => {
       console.log("pointerup");
       e.stopPropagation();
-      removeGraphics();
       if (cancel) {
-        return Promise.resolve({ cancel: true });
+        cancel=false;
+        return 
       }
+      removeGraphics();
       const result = {} as any;
       result.cancel = false;
       // CharacterController.onAnim = true;
@@ -166,6 +164,20 @@ export class CharCombatMoveController {
           walkMachine.onDivideWalk = false;
         }
       }
+    });
+    graphics.on("rightdown", (e) => {
+      console.log("rightdown");
+      e.stopPropagation();
+      cancel = true;
+      const useConfirm = confirm("是否结束回合？");
+      if (!useConfirm) {
+        return;
+      }
+      removeGraphics();
+      cancel = true;
+      this.removeFunction = () => {};
+      endTurn(unit);
+      resolveCallback({ cancel: true });
     });
     return promise;
   };

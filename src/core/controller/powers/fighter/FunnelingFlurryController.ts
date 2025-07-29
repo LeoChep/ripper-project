@@ -1,6 +1,6 @@
 import { UnitSystem } from "./../../../system/UnitSystem";
 import { Weapon } from "../../../units/Weapon";
-import type { Unit } from "@/core/units/Unit";
+import { Unit } from "@/core/units/Unit";
 import { AbstractPwoerController } from "../AbstractPwoerController";
 import { playerSelectAttackMovement } from "@/core/action/UnitAttack";
 import type { CreatureAttack } from "@/core/units/Creature";
@@ -61,7 +61,7 @@ export class FunnelingFlurryController extends AbstractPwoerController {
       }
     );
     MessageTipSystem.getInstance().setMessage("请选择主目标");
-    this.graphics=BasicSelector.getInstance().graphics;
+    this.graphics = BasicSelector.getInstance().graphics;
     this.removeFunction = basicAttackSelector.removeFunction;
     let resolveCallback = (result: any) => {};
     const promise = new Promise((resolve) => {
@@ -89,7 +89,6 @@ export class FunnelingFlurryController extends AbstractPwoerController {
       firstaAttackResult &&
       (firstaAttackResult as { hit: boolean }).hit == true
     ) {
-      
       await this.shiftFunc(firstaAttackResult);
     }
     let firstTarget =
@@ -114,6 +113,7 @@ export class FunnelingFlurryController extends AbstractPwoerController {
     MessageTipSystem.getInstance().setMessage("请选择另一个不同的目标");
     this.removeFunction = secondAttackSelector.removeFunction;
     const secondResult = await secondAttackSelector.promise;
+    MessageTipSystem.getInstance().clearMessage();
     let secondAttackResult;
     if (secondResult.cancel !== true) {
       secondAttackResult = await playerSelectAttackMovement(
@@ -194,7 +194,7 @@ export class FunnelingFlurryController extends AbstractPwoerController {
         beAttackY,
         1,
         (x, y, preX, preY) => {
-          return moveGridsCheckPassiable(
+          const movePassible = moveGridsCheckPassiable(
             beAttack,
             preX * tileSize,
             preY * tileSize,
@@ -202,6 +202,12 @@ export class FunnelingFlurryController extends AbstractPwoerController {
             y * tileSize,
             golbalSetting.map
           );
+          const shiftPassibleResult = shiftPassible(
+            beAttack,
+            x,
+            y
+          );
+          return movePassible && shiftPassibleResult;
         }
       );
       BasicSelector.getInstance().selectBasic(
@@ -210,9 +216,9 @@ export class FunnelingFlurryController extends AbstractPwoerController {
         "yellow",
         true
       );
-          MessageTipSystem.getInstance().setMessage("请选择滑动位置");
+      MessageTipSystem.getInstance().setMessage("请选择滑动位置");
       const firstShiftResult = await BasicSelector.getInstance().promise;
-       MessageTipSystem.getInstance().clearMessage();
+      MessageTipSystem.getInstance().clearMessage();
       if (firstShiftResult.cancel !== true) {
         console.log("firstShiftResult", firstShiftResult, beAttack);
         ShiftAnim.shift(beAttack, firstShiftResult.selected[0]);
@@ -220,3 +226,19 @@ export class FunnelingFlurryController extends AbstractPwoerController {
     }
   };
 }
+const shiftPassible = (unit: Unit, x: number, y: number) => {
+  const map = golbalSetting.map;
+  const units = map?.sprites;
+  let result = true;
+  units?.forEach((u) => {
+    if (u instanceof Unit && u !== unit) {
+      const unitX = Math.floor(u.x / tileSize);
+      const unitY = Math.floor(u.y / tileSize);
+      if (unitX === x && unitY === y) {
+        result = false;
+      }
+    }
+
+  });
+  return result
+};

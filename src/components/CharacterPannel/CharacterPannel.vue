@@ -44,7 +44,7 @@ const hp = ref(0)
 const maxHp = ref(0)
 let characterStore = ref(null);
 const show = computed(() => {
-   return !useTalkStateStore().talkState.onCg
+    return !useTalkStateStore().talkState.onCg
 });
 
 const selectedIndex = ref(0)
@@ -65,6 +65,12 @@ onMounted(() => {
         updataCharacters();
         console.log('角色id:', characterStore.value.selectedCharacterId);
         if (characters.value.length > 0) {
+            if (!selectedCharacter.value) {
+                CharacterController.curser = characters.value[0].id;
+                characterStore.value.selectedCharacterId = characters.value[0].id;
+                selectedCharacter.value = characters.value[0];
+                selectedIndex.value = 0;
+            }
             characters.value.forEach((character, index) => {
                 if (character.id === characterStore.value.selectedCharacterId) {
                     selectedCharacter.value = character;
@@ -74,7 +80,7 @@ onMounted(() => {
                 }
             });
         }
-        // selectCharacter.value={...selectedCharacter.value}
+
     }, 100);
 
 
@@ -100,6 +106,7 @@ const handleActionSelected = (action) => {
 function selectCharacter(character, index) {
     console.log('选中角色:', character);
     CharacterController.curser = character.id;
+    characterStore.value.selectedCharacterId = character.id;
     selectedIndex.value = index;
     selectedCharacter.value = character;
     lockOn(character.x, character.y);
