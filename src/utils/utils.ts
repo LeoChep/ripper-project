@@ -10,6 +10,23 @@ export const getDoorSvg=(state:string)=>{
 export const getMapAssetFile = (mapName: string) => {
   return new URL(`../assets/map/${mapName}.png`, import.meta.url).href;
 };
+export const getParticleFile = (particleName: string) => {
+  return new URL(`../assets/partics/${particleName}.png`, import.meta.url).href;
+};
+export const getEffectFileUrl = (effectName: string, frameName: string) => {
+
+  return new URL(`../assets/effect/${effectName}/${frameName}.png`, import.meta.url).href;
+};
+export const loadEffectAnim= (effectName: string, frameNum:number) => {
+  const frames: string[] = [];
+  for (let i = 0; i < frameNum; i++) {
+    const num= i.toString().padStart(4, '0');
+    frames.push(
+      new URL(`../assets/effect/${effectName}/frame_${num}_alpha.png`, import.meta.url).href
+    );
+  }
+  return frames;
+}
 export const fetchJsonFile = (jsonUrl: string) => {
   if (jsonUrl.endsWith("undefined")) {
     return new Promise((resolve, reject) => {

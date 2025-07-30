@@ -1,0 +1,135 @@
+<video id="vid" src="./output_alpha.webm"  style="background: red;" crossorigin="anonymous" muted playsinline autoplay="true"></video>
+<canvas id="canvas"></canvas>
+<div id="controls">
+  <button id="startBtn">开始提取帧</button>
+  <button id="stopBtn" disabled>停止提取</button>
+  <span id="status">准备就绪</span>
+</div>
+<div id="progress">
+  <div id="frameInfo">帧数: 0 / 总时长: 0s</div>
+</div>
+
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; }
+  #controls { margin: 10px 0; }
+  button { margin-right: 10px; padding: 8px 16px; }
+  #status { font-weight: bold; }
+  #progress { margin-top: 10px; }
+  canvas { border: 1px solid #ccc; }
+</style>
+
+<script>
+  const video = document.getElementById('vid');
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const status = document.getElementById('status');
+  const frameInfo = document.getElementById('frameInfo');
+  
+  let frameCount = 0;
+  let isExtracting = false;
+  let fps = 18 // 默认FPS，会在视频加载后更新
+  
+  video.onloadedmetadata = () => {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    // 尝试获取视频的实际FPS（可能不准确）
+    fps = 30; // 大多数效果视频是30fps
+    
+    frameInfo.textContent = `视频尺寸: ${video.videoWidth}x${video.videoHeight}, 时长: ${video.duration.toFixed(2)}s`;
+    status.textContent = "视频已加载，点击开始提取";
+  };
+  
+  // 提取单帧的alpha图
+  function extractFrame(frameNumber) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(video, 0, 0);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    
+    // 检查是否有alpha通道数据
+    let hasAlpha = false;
+    for (let i = 3; i < imageData.data.length; i += 4) {
+      if (imageData.data[i] < 255) {
+        hasAlpha = true;
+        break;
+      }
+    }
+    
+    console.log(`帧 ${frameNumber}: Alpha通道${hasAlpha ? '存在' : '不存在'}`);
+    
+    // 导出PNG（保留Alpha通道）
+    canvas.toBlob((blob) => {
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `frame_${frameNumber.toString().padStart(4, '0')}_alpha.png`;
+      link.click();
+      
+      // 清理URL对象
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+    }, 'image/png');
+  }
+  
+  // 逐帧提取函数
+  function extractFrames() {
+    if (!isExtracting) return;
+    
+    const currentTime = frameCount / fps;
+    
+    if (currentTime >= video.duration) {
+      // 提取完成
+      isExtracting = false;
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+      status.textContent = `提取完成！共提取 ${frameCount} 帧`;
+      return;
+    }
+    
+    // 设置视频时间
+    video.currentTime = currentTime;
+    
+    // 等待视频seek完成
+    video.onseeked = () => {
+      extractFrame(frameCount);
+      frameCount++;
+      
+      status.textContent = `正在提取第 ${frameCount} 帧...`;
+      frameInfo.textContent = `帧数: ${frameCount} / 时间: ${currentTime.toFixed(2)}s`;
+      
+      // 延迟一点再处理下一帧，避免过快
+      setTimeout(extractFrames, 100);
+    };
+  }
+  
+  // 开始提取
+  startBtn.onclick = () => {
+    if (video.readyState < 2) {
+      status.textContent = "视频还未加载完成";
+      return;
+    }
+    
+    isExtracting = true;
+    frameCount = 0;
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    status.textContent = "开始提取帧...";
+    
+    video.pause(); // 确保视频暂停
+    extractFrames();
+  };
+  
+  // 停止提取
+  stopBtn.onclick = () => {
+    isExtracting = false;
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    status.textContent = `提取已停止，已提取 ${frameCount} 帧`;
+  };
+  
+  // 错误处理
+  video.onerror = (e) => {
+    console.error("视频加载错误:", e);
+    status.textContent = "视频加载失败";
+  };
+</script>

@@ -3,12 +3,7 @@ import type { Store } from "pinia";
 
 export class MessageTipSystem {
   static instance: MessageTipSystem | null = null;
-  store: Store<
-    "message",
-    { message: string },
-    {},
-    { setMessage(message: string): void; clearMessages(): void }
-  >;
+  store;
   constructor() {
     const store = useMessageStore();
     this.store = store;
@@ -28,5 +23,11 @@ export class MessageTipSystem {
 
   clearMessage(): void {
     this.store.clearMessages();
+  }
+  setBottomMessage(message: string): void {
+    this.store.setBottomMessage(message);
+  } 
+  clearBottomMessage(): void {
+    this.store.clearBottomMessage();
   }
 }

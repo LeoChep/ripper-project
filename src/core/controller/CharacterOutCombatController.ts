@@ -7,6 +7,7 @@ import type { TiledMap } from "../MapClass";
 
 import { golbalSetting } from "../golbalSetting";
 import { CharacterController } from "./CharacterController";
+import { useTalkStateStore } from "@/stores/talkStateStore";
 const tileSize = 64;
 
 type Rlayer = {
@@ -53,6 +54,9 @@ export class CharacterOutCombatController {
   }
 
   unitMove(e: PIXI.FederatedPointerEvent) {
+    if (useTalkStateStore().talkState.onCg){
+      return
+    }
     console.log("unitMove", e);
     this.selectedCharacter = this.mapPassiable?.sprites.find(
       (sprite) => sprite.id === CharacterController.curser

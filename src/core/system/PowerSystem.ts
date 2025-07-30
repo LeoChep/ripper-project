@@ -14,7 +14,7 @@ export class PowerSystem {
   }
   async addController(powerName: string) {
     let powerController: AbstractPwoerController | null = null;
-    const powerControllerClass =(await this.getPowerControllerClass(powerName));
+    const powerControllerClass = await this.getPowerControllerClass(powerName);
     if (!powerControllerClass) {
       console.warn(`PowerController class not found for: ${powerName}`);
       return null;
@@ -24,14 +24,19 @@ export class PowerSystem {
       console.warn(`PowerController for ${powerName} is not defined.`);
       return null;
     }
-    if (powerController) this.powerControllerPack.set(powerName, powerController);
+    if (powerController)
+      this.powerControllerPack.set(powerName, powerController);
     return powerController;
   }
-  async getController(powerName: string): Promise<AbstractPwoerController | null> {
-    let powerController =this.powerControllerPack.get(powerName);
+  async getController(
+    powerName: string
+  ): Promise<AbstractPwoerController | null> {
+    let powerController = this.powerControllerPack.get(powerName);
     if (!powerController) {
       await this.addController(powerName);
-      powerController =this.powerControllerPack.get(powerName) as AbstractPwoerController ;
+      powerController = this.powerControllerPack.get(
+        powerName
+      ) as AbstractPwoerController;
     }
     return powerController;
   }
@@ -62,13 +67,17 @@ export class PowerSystem {
     // 根据 powerName 返回对应的 PowerController 类
     switch (powerName) {
       case "LungingStrike":
-        return import("../controller/powers/fighter/LungingStrikeController").then(
-          (module) => module.LungingStrikeController
-        );
+        return import(
+          "../controller/powers/fighter/LungingStrikeController"
+        ).then((module) => module.LungingStrikeController);
       case "FunnelingFlurry":
-        return import("../controller/powers/fighter/FunnelingFlurryController").then(
-          (module) => module.FunnelingFlurryController
-        );
+        return import(
+          "../controller/powers/fighter/FunnelingFlurryController"
+        ).then((module) => module.FunnelingFlurryController);
+      case "IceRays":
+        return import(
+          "../controller/powers/wizard/IceRaysController"
+        ).then((module) => module.IceRaysController);
     }
     return null;
   }

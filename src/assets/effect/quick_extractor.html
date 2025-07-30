@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>快速帧提取器</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .controls { margin: 20px 0; display: flex; gap: 10px; align-items: center; }
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        .primary { background: #007bff; color: white; }
+        .danger { background: #dc3545; color: white; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .progress { margin: 10px 0; height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden; }
+        .progress-bar { height: 100%; background: #007bff; width: 0%; transition: width 0.3s; }
+        .info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
+        .info-item { text-align: center; padding: 10px; background: #f8f9fa; border-radius: 4px; }
+        video, canvas { max-width: 100%; border: 1px solid #ddd; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🎬 快速帧提取器</h1>
+    
+    <div class="controls">
+        <input type="file" id="videoFile" accept="video/*">
+        <label>FPS: <input type="number" id="fps" value="30" min="1" max="60" style="width:60px"></label>
+        <button id="startBtn" class="primary" disabled>开始提取</button>
+        <button id="stopBtn" class="danger" disabled>停止</button>
+    </div>
+    
+    <div class="progress">
+        <div id="progressBar" class="progress-bar"></div>
+    </div>
+    
+    <div id="status">请选择视频文件</div>
+    
+    <div class="info">
+        <div class="info-item">
+            <div>当前帧</div>
+            <div id="currentFrame">0</div>
+        </div>
+        <div class="info-item">
+            <div>总帧数</div>
+            <div id="totalFrames">0</div>
+        </div>
+        <div class="info-item">
+            <div>已下载</div>
+            <div id="downloaded">0</div>
+        </div>
+    </div>
+    
+    <video id="video" muted style="display:none"></video>
+    <canvas id="canvas" style="display:none"></canvas>
+    
+    <script>
+        const elements = {
+            videoFile: document.getElementById('videoFile'),
+            video: document.getElementById('video'),
+            canvas: document.getElementById('canvas'),
+            startBtn: document.getElementById('startBtn'),
+            stopBtn: document.getElementById('stopBtn'),
+            fps: document.getElementById('fps'),
+            status: document.getElementById('status'),
+            progressBar: document.getElementById('progressBar'),
+            currentFrame: document.getElementById('currentFrame'),
+            totalFrames: document.getElementById('totalFrames'),
+            downloaded: document.getElementById('downloaded')
+        };
+        
+        const ctx = elements.canvas.getContext('2d');
+        let state = {
+            isExtracting: false,
+            frameCount: 0,
+            totalFrames: 0,
+            downloadCount: 0
+        };
+        
+        // 加载视频文件
+        elements.videoFile.onchange = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            elements.video.src = URL.createObjectURL(file);
+            elements.status.textContent = "正在加载视频...";
+        };
+        
+        // 视频加载完成
+        elements.video.onloadedmetadata = function() {
+            elements.canvas.width = this.videoWidth;
+            elements.canvas.height = this.videoHeight;
+            
+            const fps = parseInt(elements.fps.value);
+            state.totalFrames = Math.floor(this.duration * fps);
+            
+            elements.totalFrames.textContent = state.totalFrames;
+            elements.startBtn.disabled = false;
+            elements.status.textContent = `视频已加载 (${this.videoWidth}x${this.videoHeight}, ${this.duration.toFixed(1)}s)`;
+        };
+        
+        // 开始提取
+        elements.startBtn.onclick = async function() {
+            state.isExtracting = true;
+            state.frameCount = 0;
+            state.downloadCount = 0;
+            
+            elements.startBtn.disabled = true;
+            elements.stopBtn.disabled = false;
+            elements.status.textContent = "开始提取帧...";
+            
+            await extractAllFrames();
+        };
+        
+        // 停止提取
+        elements.stopBtn.onclick = function() {
+            state.isExtracting = false;
+            elements.startBtn.disabled = false;
+            elements.stopBtn.disabled = true;
+            elements.status.textContent = `已停止 - 提取了 ${state.downloadCount} 帧`;
+        };
+        
+        // 提取所有帧
+        async function extractAllFrames() {
+            const fps = parseInt(elements.fps.value);
+            
+            while (state.isExtracting && state.frameCount < state.totalFrames) {
+                await extractFrame(state.frameCount, fps);
+                state.frameCount++;
+                updateProgress();
+                
+                // 每5帧暂停一下，避免阻塞
+                if (state.frameCount % 5 === 0) {
+                    await sleep(10);
+                }
+            }
+            
+            if (state.isExtracting) {
+                elements.status.textContent = `✅ 完成！共提取 ${state.downloadCount} 帧`;
+                elements.startBtn.disabled = false;
+                elements.stopBtn.disabled = true;
+                state.isExtracting = false;
+            }
+        }
+        
+        // 提取单帧
+        function extractFrame(frameNumber, fps) {
+            return new Promise((resolve) => {
+                const time = frameNumber / fps;
+                elements.video.currentTime = time;
+                
+                elements.video.onseeked = function() {
+                    // 绘制到canvas
+                    ctx.drawImage(elements.video, 0, 0);
+                    
+                    // 导出PNG
+                    elements.canvas.toBlob(function(blob) {
+                        if (blob) {
+                            downloadBlob(blob, `frame_${frameNumber.toString().padStart(5, '0')}.png`);
+                            state.downloadCount++;
+                        }
+                        resolve();
+                    }, 'image/png', 0.9);
+                };
+            });
+        }
+        
+        // 下载文件
+        function downloadBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            
+            // 清理URL
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+        
+        // 更新进度
+        function updateProgress() {
+            const progress = (state.frameCount / state.totalFrames) * 100;
+            elements.progressBar.style.width = progress + '%';
+            elements.currentFrame.textContent = state.frameCount;
+            elements.downloaded.textContent = state.downloadCount;
+            elements.status.textContent = `提取第 ${state.frameCount} 帧 (${progress.toFixed(1)}%)`;
+        }
+        
+        // 延迟函数
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+</html>

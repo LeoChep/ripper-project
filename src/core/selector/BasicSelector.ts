@@ -4,6 +4,7 @@ import { generateWays } from "../utils/PathfinderUtil";
 import * as PIXI from "pixi.js";
 import * as envSetting from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
+import { MessageTipSystem } from "../system/MessageTipSystem";
 export class BasicSelector {
   public graphics: PIXI.Graphics | null = null;
   public removeFunction: (input: any) => void = () => {};
@@ -38,7 +39,9 @@ export class BasicSelector {
     selector.canCancel = canCancel;
     selector.selected = [];
     selector.selecteNum = selectNum;
-
+    MessageTipSystem.getInstance().setBottomMessage(
+      `已选择 ${this.selected.length}/${this.selecteNum} 个目标`
+    );
     // 选择逻辑
     const path = grids;
     this.drawGrids(path, color);
@@ -51,6 +54,8 @@ export class BasicSelector {
     // 点击其他地方移除移动范围
     this.isCannelClick = false;
     const removeGraphics = () => {
+        MessageTipSystem.getInstance().clearBottomMessage();
+          MessageTipSystem.getInstance().clearMessage()
       if (graphics.parent) {
         graphics.parent.removeChild(graphics);
         selector.removeFunction = () => {};
@@ -67,26 +72,33 @@ export class BasicSelector {
     };
     // 右键取消选择
     graphics.on("rightdown", (e) => {
+      this.isCannelClick = true;
       e.stopPropagation();
+
       if (selector.canCancel && selector.selected.length === 0) {
-        this.isCannelClick = true;
         removeGraphics();
         resolveCallback({ cancel: true });
       } else if (selector.selected.length > 0) {
         selector.selected.pop();
+        MessageTipSystem.getInstance().setBottomMessage(
+          `已选择 ${this.selected.length}/${this.selecteNum} 个目标`
+        );
       }
     });
     //右键区域外
     const ms = golbalSetting.mapContainer;
     const msRemoveG = (e: { stopPropagation: () => void }) => {
       e.stopPropagation();
+      this.isCannelClick = true;
       if (selector.canCancel && selector.selected.length === 0) {
-        this.isCannelClick = true;
         removeGraphics();
         resolveCallback({ cancel: true });
         ms?.off("rightdown", msRemoveG);
       } else if (selector.selected.length > 0) {
         selector.selected.pop();
+        MessageTipSystem.getInstance().setBottomMessage(
+          `已选择 ${this.selected.length}/${this.selecteNum} 个目标`
+        );
       }
     };
     ms?.on("rightdown", msRemoveG);
@@ -95,6 +107,7 @@ export class BasicSelector {
       console.log("pointerup");
       e.stopPropagation();
       if (this.isCannelClick) {
+        this.isCannelClick = false;
         // resolveCallback({ cannel: true });
         return;
       }
@@ -102,17 +115,21 @@ export class BasicSelector {
       const { x, y } = e.data.global;
       const xy = this.getXY(x, y);
       if (!checkPassiable(xy.x, xy.y)) {
-        console.warn("点击位置不可通行");
+        console.warn("点击位置不可用");
         return;
       }
       if (this.selected.length < this.selecteNum) {
         const { x, y } = e.data.global;
         const xy = this.getXY(x, y);
         this.selected.push(xy);
+        MessageTipSystem.getInstance().setBottomMessage(
+          `已选择 ${this.selected.length}/${this.selecteNum} 个目标`
+        );
       }
       if (this.selected.length >= this.selecteNum) {
         // 选择完成
         removeGraphics();
+        MessageTipSystem.getInstance().clearBottomMessage();
         resolveCallback({
           cancel: false,
           event: e,
