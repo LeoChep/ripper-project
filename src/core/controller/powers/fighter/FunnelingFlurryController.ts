@@ -7,7 +7,6 @@ import type { CreatureAttack } from "@/core/units/Creature";
 
 import { golbalSetting } from "@/core/golbalSetting";
 import { useStandAction } from "@/core/system/InitiativeSystem";
-import { BasicAttackSelector } from "@/core/selector/BasicAttackSelector";
 import { checkPassiable as atkGridsCheckPassiable } from "@/core/system/AttackSystem";
 import { checkPassiable as moveGridsCheckPassiable } from "@/core/system/UnitMoveSystem";
 import { tileSize } from "@/core/envSetting";

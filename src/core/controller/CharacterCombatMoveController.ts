@@ -95,8 +95,8 @@ export class CharCombatMoveController {
     }
 
     graphics.eventMode = "static";
-    if (FogSystem.instanse.mask)
-      graphics.setMask({ mask: FogSystem.instanse.mask });
+    // if (FogSystem.instanse.mask)
+    //   graphics.setMask({ mask: FogSystem.instanse.mask });
     const container = golbalSetting.mapContainer;
     if (!container) {
       console.warn("Map container not found.");

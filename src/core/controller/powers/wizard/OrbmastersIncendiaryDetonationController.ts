@@ -1,4 +1,4 @@
-import { distance } from "./../../../system/DoorSystem";
+import { distance } from "../../../system/DoorSystem";
 import type { Unit } from "@/core/units/Unit";
 import { AbstractPwoerController } from "../AbstractPwoerController";
 import type { CreatureAttack } from "@/core/units/Creature";
@@ -18,10 +18,12 @@ import { takeDamage } from "@/core/system/DamageSystem";
 import { createDamageAnim } from "@/core/anim/DamageAnim";
 import { createMissOrHitAnimation } from "@/core/anim/MissOrHitAnim";
 import { toward } from "@/core/anim/UnitAnimSprite";
+import { BrustSelector } from "@/core/selector/BrustSelector";
 
-export class IceRaysController extends AbstractPwoerController {
+export class OrbmastersIncendiaryDetonationController extends AbstractPwoerController {
   public static isUse: boolean = false;
-  public static instense: IceRaysController | null = null;
+  public static instense: OrbmastersIncendiaryDetonationController | null =
+    null;
 
   constructor() {
     super();
@@ -66,52 +68,24 @@ export class IceRaysController extends AbstractPwoerController {
     const promise = new Promise((resolve) => {
       resolveCallback = resolve;
     });
-    const selector = BasicSelector.getInstance().selectBasic(
+    const selector = BrustSelector.getInstance().selectBasic(
       grids,
-      2,
+      1,
+      1 ,
+      "yellow",
       "red",
+
       true,
       () => true
     );
+
     this.graphics = selector.graphics;
     this.removeFunction = selector.removeFunction;
     const result = await selector.promise;
     console.log("icerays", result);
     const selected = result.selected;
     if (result.cancel !== true) {
-      if (selected.length > 0) {
-        const promiseAll = [] as Promise<void>[];
-        for (let i = 0; i < selected.length; i++) {
-          const target = selected[i];
-          toward(unit, target.x, target.y);
-          // 执行冰霜射线动画
-          const targetUnit = UnitSystem.getInstance().findUnitByGridxy(
-            target.x,
-            target.y
-          );
-          const promise = IceRaysController.iceAnim(unit, target.x, target.y);
-          promiseAll.push(promise);
-          if (targetUnit) {
-            const attackPromise = new Promise<void>(async (resolve) => {
-              const hit = await checkHit(unit, targetUnit, iceRayAttack, "Ref");
-                createMissOrHitAnimation(
-                  targetUnit,
-                  hit.hit,
-                );
-              if (hit.hit) {
-                const damage = await getDamage(targetUnit, unit, iceRayAttack);
-                 takeDamage(damage, targetUnit);
-                createDamageAnim(damage.toString(), targetUnit);
-               
-              }
-              resolve();
-            });
-            promiseAll.push(attackPromise);
-          }
-        }
-        await Promise.all(promiseAll);
-        resolveCallback({});
-      }
+      resolveCallback({});
     } else {
       resolveCallback(result);
     }

@@ -78,6 +78,16 @@ export class PowerSystem {
         return import(
           "../controller/powers/wizard/IceRaysController"
         ).then((module) => module.IceRaysController);
+      case "Orbmaster's Incendiary Detonation":
+        return import(
+          "../controller/powers/wizard/OrbmastersIncendiaryDetonationController"
+        ).then(
+          (module) => module.OrbmastersIncendiaryDetonationController
+        );
+      case "Magic Missile":
+        return import(
+          "../controller/powers/wizard/MagicMissileController"
+        ).then((module) => module.MagicMissileController);
     }
     return null;
   }

@@ -14,6 +14,6 @@ export async function diceRoll(s: string): Promise<string> {
     });
   });
   await endPromise;
-  console.log('endPromise',endPromise)
+  console.log('endPromise',endPromise,s)
   return endPromise;
 }

@@ -108,7 +108,7 @@ export async function attackMovementToUnit(
     if (target) {
       if (hitFlag) {
         //  alert("攻击命中!");
-        await takeDamage(damage, target, container);
+        await takeDamage(damage, target);
       } else {
         // alert("攻击未命中!");
       }

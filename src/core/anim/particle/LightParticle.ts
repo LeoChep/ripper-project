@@ -28,7 +28,7 @@ export class LightParticle {
     this.borderParticle = new PIXI.Particle({
       texture: PIXI.Texture.from(basic),
     });
-    const borderHsb = { h: 249, s: 5, b: 30 }; // 较暗的边框
+    const borderHsb = { h: 220, s: 15, b: 30 }; // 较暗的边框，改为蓝色
     this.borderParticle.tint = toHsl([
       borderHsb.h / 360,
       borderHsb.s / 100,
@@ -42,7 +42,7 @@ export class LightParticle {
     this.coreParticle = new PIXI.Particle({
       texture: PIXI.Texture.from(basic),
     });
-    const coreHsb = { h: 249, s: 4, b: 90 }; // 更亮的核心
+    const coreHsb = { h: 220, s: 25, b: 90 }; // 更亮的核心，改为蓝色
     this.coreParticle.tint = toHsl([
       coreHsb.h / 360,
       coreHsb.s / 100,
@@ -83,7 +83,7 @@ export class LightParticle {
 
     // === 边框粒子：稳定发光 ===
     this.borderParticle.alpha = 0.6; // 保持稳定透明度
-    const borderScale = 0.5; // 更大的边框
+    const borderScale = 0.3; // 更大的边框
     this.borderParticle.scaleX = borderScale;
     this.borderParticle.scaleY = borderScale;
     this.borderParticle.x = this.x;
@@ -98,7 +98,7 @@ export class LightParticle {
     this.coreParticle.alpha = finalAlpha;
 
     // 颜色也跟随脉冲变化，增加频闪 时的亮度
-    const coreHsb = { h: 249, s: 4, b: 90 };
+    const coreHsb = { h: 220, s: 25, b: 90 }; // 改为蓝色
     const brightnessPulse = Math.abs(Math.sin(ax)) * 40 + 10;
     const flashBrightness = flashEffect * 30; // 频闪时额外亮度
     coreHsb.b = Math.min(brightnessPulse + flashBrightness, 100);
@@ -112,7 +112,7 @@ export class LightParticle {
     // 缩放效果：基础脉冲 + 频闪时的额外缩放
     const scaleMultiplier = Math.pow(Math.sin(ax * 0.5), 2);
     const baseScale = 0.1; // 更大的核心粒子
-    const scaleRange = 0.2; // 更大的变化范围
+    const scaleRange = 0.1; // 更大的变化范围
     const flashScale = flashEffect * 0.1; // 频闪时额外缩放
     const currentScale = baseScale + scaleMultiplier * scaleRange + flashScale;
 
@@ -184,8 +184,8 @@ export class LightParticle {
       // 拖尾粒子更亮，颜色接近核心粒子
       const brightnessVariation = Math.random() * 15 - 5; // 较小的变化
       const trailHsb = {
-        h: 249 + Math.random() * 5 - 2.5, // 色相轻微变化
-        s: 15 + Math.random() * 5 - 2.5, // 饱和度轻微变化
+        h: 220 + Math.random() * 5 - 2.5, // 色相轻微变化，改为蓝色
+        s: 25 + Math.random() * 5 - 2.5, // 饱和度轻微变化
         b: Math.max(0, Math.min(100, 85 + brightnessVariation)), // 更高的基础亮度
       };
       trailParticle.tint = toHsl([
@@ -256,8 +256,8 @@ export class LightParticle {
       const pulseBrightness = Math.abs(Math.sin(trailPulseTime * 0.4)) * 20;
       const flashBrightness = trailFlashEffect * 15;
       const trailHsb = {
-        h: 249, // 色相保持不变
-        s: Math.max(0, 9 - age * 5), // 饱和度逐渐降低
+        h: 220, // 色相保持不变，改为蓝色
+        s: Math.max(0, 20 - age * 5), // 饱和度逐渐降低
         b: Math.min(
           100,
           Math.max(0, 80 - age * 30 + pulseBrightness + flashBrightness)
@@ -326,7 +326,7 @@ export class LightParticle {
       rayParticle.x = this.x;
       rayParticle.y = this.y;
       // 射线颜色：更亮的蓝色
-      const rayHsb = { h: 240, s: 25, b: 80 }; // 改为更亮的蓝色
+      const rayHsb = { h: 220, s: 35, b: 80 }; // 改为更亮的蓝色
       rayParticle.tint = toHsl([
         rayHsb.h / 360,
         rayHsb.s / 100,
@@ -356,7 +356,7 @@ export class LightParticle {
     this.mainRayParticle.scaleY = 0.16; // 更长
 
     // 主要射线颜色：非常亮的蓝白色
-    const mainRayHsb = { h: 240, s: 4, b: 95 }; // 更亮的蓝色
+    const mainRayHsb = { h: 220, s: 15, b: 95 }; // 更亮的蓝色
     this.mainRayParticle.tint = toHsl([
       mainRayHsb.h / 360,
       mainRayHsb.s / 100,
@@ -446,8 +446,8 @@ export class LightParticle {
       const brightnessVariation = Math.sin(this.palyTime * 0.06 + i * 0.3) * 5;
       const flashBrightness = flashEffect * 25;
       const rayHsb = {
-        h: 249,
-        s: flashEffect > 0 ? 0 : 19, // 频闪时饱和度增加
+        h: 220, // 改为蓝色
+        s: flashEffect > 0 ? 10 : 35, // 频闪时饱和度变化
         b: Math.min(
           100,
           (70 + brightnessVariation + flashBrightness) * fadeRatio
@@ -527,8 +527,8 @@ export class LightParticle {
     const brightnessPulse = Math.sin(this.palyTime * 0.1) * 5;
     const flashBrightness = flashEffect * 30;
     const mainRayHsb = {
-      h: 249,
-      s: flashEffect > 0 ? 0 : 4, // 频闪时饱和度增加
+      h: 220, // 改为蓝色
+      s: flashEffect > 0 ? 10 : 15, // 频闪时饱和度变化
       b:
         flashEffect > 0
           ? 100

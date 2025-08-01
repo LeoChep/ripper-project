@@ -11,7 +11,7 @@ import { diceRoll } from "../DiceTryer";
 
 
 export const checkPassiable = (
-  unit: Unit,
+  unit: {x:number,y:number},
   x: number,
   y: number,
   mapPassiable: TiledMap | null
@@ -75,27 +75,40 @@ export const checkPassiable = (
   return passiable;
 };
 
-export async function checkHit(unit: Unit, target: any, attack: CreatureAttack) {
+export async function checkHit(unit: Unit, target: any, attack: CreatureAttack,against:string = "AC") {
   // 检查攻击是否命中
   const attackBonus = attack.attackBonus || 0; // 攻击加值
   const targetAC = target.creature?.ac || 10; // 目标护甲等级，默认10
+  let targetDef=0
+  if (against === "AC") {
+    targetDef = targetAC;
+  } else if (against === "Ref") {
+    targetDef = target.creature?.reflex || 10; // 默认10
+  } else if (against === "Fort") {
+    targetDef = target.creature?.fortitude || 10; // 默认10
+  } else if (against === "Will") {
+    targetDef = target.creature?.will || 10; // 默认10
+  } else {
+    console.warn(`未知防御类型: ${against}`);
+  }
 
-  const roll = parseInt(await diceRoll("1d20+" + attackBonus));
-  console.log(`攻击掷骰: ${roll} vs AC ${targetAC}`);
+  let rollFormula="1d20";
+  if (attackBonus>0) rollFormula=`1d20+${attackBonus}`;
+else if (attackBonus<0) rollFormula=`1d20${attackBonus}`;
+  const roll = parseInt(await diceRoll(rollFormula));
+  console.log(`攻击掷骰: ${roll} vs  ${against} ${targetDef}` );
   const result = {
     attackValue: roll,
+    targetDef: targetDef,
+    against:against,
     targetAC: targetAC,
-    hit: roll >= targetAC,
+    hit: roll >= targetDef,
   };
   return result;
 }
 
 export async function getDamage(unit: Unit, target: any, attack: CreatureAttack) {
   // 检查攻击是否命中
-  const attackBonus = attack.attackBonus || 0; // 攻击加值
-  const targetAC = target.creature?.ac || 10; // 目标护甲等级，默认10
-
   const roll = parseInt(await diceRoll(attack.damage));
-  console.log(`攻击掷骰: ${roll} vs AC ${targetAC}`);
   return roll;
 }

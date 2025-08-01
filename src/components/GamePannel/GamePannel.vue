@@ -54,7 +54,7 @@ onMounted(async () => {
     setContainer(container);
     setLayer(rlayers);
     //绘制迷雾
-    drawFog(mapPassiable, rlayers, container, app)
+  // drawFog(mapPassiable, rlayers, container, app)
     //绘制地图
     const mapView = mapPassiable.textures;
     drawMap(mapView, container, rlayers);
@@ -184,9 +184,9 @@ const drawMap = (mapView, container, rlayers) => {
     const ms = new PIXI.Sprite(mapView)
     ms.zIndex = envSetting.zIndexSetting.mapZindex;
     ms.label = 'map'
-    const allFog = new PIXI.Graphics();
-    container.addChild(allFog);
-    ms.setMask({ mask: allFog })
+    // const allFog = new PIXI.Graphics();
+    // container.addChild(allFog);
+    //ms.setMask({ mask: allFog })
     golbalSetting.mapContainer.addChild(ms);
     rlayers.basicLayer.attach(ms)
 }

@@ -1,135 +1,335 @@
-<video id="vid" src="./output_alpha.webm"  style="background: red;" crossorigin="anonymous" muted playsinline autoplay="true"></video>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>视频帧提取工具</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+
+<div id="upload-section">
+  <h3>上传视频文件</h3>
+  <input type="file" id="videoUpload" accept="video/*" />
+  <button id="uploadBtn">上传视频</button>
+</div>
+
+<video id="vid" style="background: red;" crossorigin="anonymous" muted playsinline controls></video>
 <canvas id="canvas"></canvas>
+
 <div id="controls">
-  <button id="startBtn">开始提取帧</button>
+  <button id="startBtn" disabled>开始提取帧</button>
   <button id="stopBtn" disabled>停止提取</button>
-  <span id="status">准备就绪</span>
+  <button id="downloadBtn" disabled>下载提取的帧</button>
+  <span id="status">请先上传视频文件</span>
 </div>
 <div id="progress">
   <div id="frameInfo">帧数: 0 / 总时长: 0s</div>
 </div>
 
 <style>
-  body { font-family: Arial, sans-serif; padding: 20px; }
-  #controls { margin: 10px 0; }
-  button { margin-right: 10px; padding: 8px 16px; }
-  #status { font-weight: bold; }
-  #progress { margin-top: 10px; }
-  canvas { border: 1px solid #ccc; }
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  #upload-section {
+    background: #f5f5f5;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 2px dashed #ccc;
+  }
+
+  #upload-section h3 {
+    margin-top: 0;
+    color: #333;
+  }
+
+  #videoUpload {
+    margin-right: 10px;
+    padding: 5px;
+  }
+
+  #controls {
+    margin: 10px 0;
+  }
+
+  button {
+    margin-right: 10px;
+    padding: 8px 16px;
+    background: #007cba;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  button:hover:not(:disabled) {
+    background: #005a8b;
+  }
+
+  button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+
+  #downloadBtn {
+    background: #28a745;
+  }
+
+  #downloadBtn:hover:not(:disabled) {
+    background: #218838;
+  }
+
+  #status {
+    font-weight: bold;
+    color: #333;
+  }
+
+  #progress {
+    margin-top: 10px;
+  }
+
+  canvas {
+    border: 1px solid #ccc;
+    max-width: 100%;
+  }
+
+  video {
+    max-width: 100%;
+    margin: 10px 0;
+  }
 </style>
 
 <script>
   const video = document.getElementById('vid');
   const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { alpha: true }); // ✅ 启用Alpha
   const startBtn = document.getElementById('startBtn');
   const stopBtn = document.getElementById('stopBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const uploadBtn = document.getElementById('uploadBtn');
+  const videoUpload = document.getElementById('videoUpload');
   const status = document.getElementById('status');
   const frameInfo = document.getElementById('frameInfo');
   
+  let nowFrame = 0;
   let frameCount = 0;
   let isExtracting = false;
-  let fps = 18 // 默认FPS，会在视频加载后更新
-  
+  let fps = 18; // 默认FPS，会在视频加载后更新
+  let extractedFrames = []; // 存储提取的帧数据
+
+  // 上传视频处理
+  uploadBtn.onclick = () => {
+    const file = videoUpload.files[0];
+    if (!file) {
+      alert('请先选择一个视频文件');
+      return;
+    }
+
+    if (!file.type.startsWith('video/')) {
+      alert('请选择有效的视频文件');
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    video.src = url;
+    video.load();
+    
+    status.textContent = "正在加载视频...";
+    extractedFrames = []; // 清空之前的帧数据
+    downloadBtn.disabled = true;
+  };
+
+  // 文件选择变化处理
+  videoUpload.onchange = () => {
+    uploadBtn.disabled = !videoUpload.files[0];
+  };
+
   video.onloadedmetadata = () => {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     
-    // 尝试获取视频的实际FPS（可能不准确）
-    fps = 30; // 大多数效果视频是30fps
+    // ✅ 确保Canvas支持透明
+    ctx.globalCompositeOperation = 'source-over';
     
     frameInfo.textContent = `视频尺寸: ${video.videoWidth}x${video.videoHeight}, 时长: ${video.duration.toFixed(2)}s`;
     status.textContent = "视频已加载，点击开始提取";
+    startBtn.disabled = false; // 启用开始按钮
   };
-  
+
   // 提取单帧的alpha图
   function extractFrame(frameNumber) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(video, 0, 0);
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    
-    // 检查是否有alpha通道数据
-    let hasAlpha = false;
-    for (let i = 3; i < imageData.data.length; i += 4) {
-      if (imageData.data[i] < 255) {
-        hasAlpha = true;
-        break;
-      }
-    }
-    
-    console.log(`帧 ${frameNumber}: Alpha通道${hasAlpha ? '存在' : '不存在'}`);
-    
-    // 导出PNG（保留Alpha通道）
-    canvas.toBlob((blob) => {
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `frame_${frameNumber.toString().padStart(4, '0')}_alpha.png`;
-      link.click();
+    return new Promise((resolve) => {
+      // ✅ 清除为透明背景
+      ctx.save();
+      ctx.globalCompositeOperation = 'copy';
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.restore();
       
-      // 清理URL对象
-      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
-    }, 'image/png');
+      // 绘制视频帧
+      ctx.drawImage(video, 0, 0);
+      
+      // 获取图像数据
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      
+      // 🔧 处理Alpha通道（确保透明度正确）
+      let hasRealAlpha = false;
+      for (let i = 0; i < imageData.data.length; i += 4) {
+          const alpha = imageData.data[i + 3];
+          if (alpha > 0 && alpha < 255) {
+              hasRealAlpha = true;
+          }
+          
+          // 处理预乘Alpha或错误的Alpha值
+          if (alpha === 0) {
+              // 确保完全透明的像素RGB也是0
+              imageData.data[i] = 0;     // R
+              imageData.data[i + 1] = 0; // G  
+              imageData.data[i + 2] = 0; // B
+          }
+      }
+      
+      if (frameNumber === 25) {
+          console.log(`帧 ${frameNumber}: 真实Alpha通道${hasRealAlpha ? '存在' : '不存在'}`);
+      }
+      
+      // 将处理后的数据写回Canvas
+      ctx.putImageData(imageData, 0, 0);
+      
+      // 🎯 强制PNG格式并确保质量 - 存储到数组而不是下载
+      canvas.toBlob((blob) => {
+          if (!blob) {
+              console.error('PNG生成失败');
+              resolve();
+              return;
+          }
+          
+          console.log(`帧 ${frameNumber}: PNG大小 ${blob.size} bytes`);
+          
+          // 存储帧数据到数组
+          const fileName = `frame_${frameNumber.toString().padStart(4, '0')}_alpha.png`;
+          extractedFrames.push({
+              blob: blob,
+              filename: fileName
+          });
+          
+          resolve();
+      }, 'image/png', 1.0); // 确保最高质量
+    });
   }
-  
+
   // 逐帧提取函数
-  function extractFrames() {
+  async function extractFrames() {
     if (!isExtracting) return;
-    
+
     const currentTime = frameCount / fps;
-    
+
     if (currentTime >= video.duration) {
       // 提取完成
       isExtracting = false;
       startBtn.disabled = false;
       stopBtn.disabled = true;
-      status.textContent = `提取完成！共提取 ${frameCount} 帧`;
+      downloadBtn.disabled = false;
+      status.textContent = `提取完成！共提取 ${frameCount} 帧，点击下载按钮获取所有帧`;
       return;
     }
-    
+
     // 设置视频时间
     video.currentTime = currentTime;
-    
+
     // 等待视频seek完成
-    video.onseeked = () => {
-      extractFrame(frameCount);
+    video.onseeked = async () => {
+      await extractFrame(frameCount);
       frameCount++;
-      
+
       status.textContent = `正在提取第 ${frameCount} 帧...`;
       frameInfo.textContent = `帧数: ${frameCount} / 时间: ${currentTime.toFixed(2)}s`;
-      
+
       // 延迟一点再处理下一帧，避免过快
       setTimeout(extractFrames, 100);
     };
   }
-  
+
   // 开始提取
   startBtn.onclick = () => {
     if (video.readyState < 2) {
       status.textContent = "视频还未加载完成";
       return;
     }
-    
+
     isExtracting = true;
     frameCount = 0;
+    extractedFrames = []; // 清空之前的帧数据
     startBtn.disabled = true;
     stopBtn.disabled = false;
+    downloadBtn.disabled = true;
     status.textContent = "开始提取帧...";
-    
+
     video.pause(); // 确保视频暂停
     extractFrames();
   };
-  
+
   // 停止提取
   stopBtn.onclick = () => {
     isExtracting = false;
     startBtn.disabled = false;
     stopBtn.disabled = true;
+    if (extractedFrames.length > 0) {
+      downloadBtn.disabled = false;
+    }
     status.textContent = `提取已停止，已提取 ${frameCount} 帧`;
   };
-  
+
+  // 下载所有提取的帧
+  downloadBtn.onclick = async () => {
+    if (extractedFrames.length === 0) {
+      alert('没有可下载的帧');
+      return;
+    }
+
+    status.textContent = '正在打包下载...';
+    downloadBtn.disabled = true;
+
+    try {
+      // 使用JSZip库打包文件
+      const zip = new JSZip();
+      
+      // 添加所有帧到ZIP文件
+      for (let i = 0; i < extractedFrames.length; i++) {
+        const frame = extractedFrames[i];
+        zip.file(frame.filename, frame.blob);
+      }
+
+      // 生成ZIP文件
+      const zipBlob = await zip.generateAsync({type: "blob"});
+      
+      // 下载ZIP文件
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(zipBlob);
+      link.download = `extracted_frames_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.zip`;
+      link.click();
+      
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      
+      status.textContent = `下载完成！共 ${extractedFrames.length} 帧已打包下载`;
+    } catch (error) {
+      console.error('打包下载失败:', error);
+      status.textContent = '打包下载失败，请重试';
+    } finally {
+      downloadBtn.disabled = false;
+    }
+  };
+
   // 错误处理
   video.onerror = (e) => {
     console.error("视频加载错误:", e);
     status.textContent = "视频加载失败";
   };
 </script>
+
+</body>
+</html>

@@ -1,23 +1,24 @@
 import type { Container } from "pixi.js";
 import { Unit } from "../units/Unit";
 import { removeFromInitiativeSheet } from "./InitiativeSystem";
+import { golbalSetting } from "../golbalSetting";
 
-export async function takeDamage(damage: number, unit: Unit, container: Container) {
+export async function takeDamage(damage: number, unit: Unit) {
   if (unit.creature && typeof unit.creature.hp === "number") {
     unit.creature.hp -= damage;
     if (unit.creature.hp <= 0) {
-      await takeDeath(unit, container);
+      await takeDeath(unit);
     }
   }
 }
 
-async function takeDeath(unit: Unit, container: Container) {
+async function takeDeath(unit: Unit) {
   unit.state = "dead"; // 设置单位状态为死亡
-  await playDeathAnim(unit, container);
+  await playDeathAnim(unit);
   removeFromInitiativeSheet(unit);
 }
 
-function playDeathAnim(unit: Unit, container: Container) {
+function playDeathAnim(unit: Unit) {
   unit.direction = 2;
   if (unit.animUnit) {
     unit.animUnit.state = "hurt";
@@ -38,7 +39,9 @@ function playDeathAnim(unit: Unit, container: Container) {
       setTimeout(() => {
         // 延时一段时间后删除
         if (unit.animUnit) {
-          container.removeChild(unit.animUnit);
+          if (unit.animUnit.parent) {
+            unit.animUnit.parent.removeChild(unit.animUnit);
+          }
         }
         //
         animEndResolve();

@@ -70,11 +70,11 @@ export class UnitAnimSpirite extends Container {
   }
 
   // 可以添加自定义方法
-  public update(callback?:any): void {
+  public update(callback?: any): void {
     // 如果当前状态与动画状态不一致，则更新渲染状态
     if (this._state !== this._animationState)
       this.children.forEach((child) => {
-        if (child.label !== this._state&&child.label!=="effect") {
+        if (child.label !== this._state && child.label !== "effect") {
           child.renderable = false;
         }
       });
@@ -97,10 +97,10 @@ export class UnitAnimSpirite extends Container {
         this._state !== this._animationState ||
         this.direction !== this.owner?.direction
       ) {
-        this.anims[this._state].x =0-
-          (this.anims[this._state].width - (this.owner?.width ?? 0)) / 2;
-        this.anims[this._state].y =0-
-          (this.anims[this._state].height - (this.owner?.height ?? 0)) / 2;
+        this.anims[this._state].x =
+          0 - (this.anims[this._state].width - (this.owner?.width ?? 0)) / 2;
+        this.anims[this._state].y =
+          0 - (this.anims[this._state].height - (this.owner?.height ?? 0)) / 2;
         if (this.owner?.direction != null) {
           this.direction = this.owner.direction;
           this.anims[this._state].textures =
@@ -123,22 +123,21 @@ export class UnitAnimSpirite extends Container {
         this.anims["slash"].renderable = true;
       }
     }
-        if (this._state === "hurt") {
+    if (this._state === "hurt") {
       if (this.anims["hurt"]) {
         this.anims["hurt"].renderable = true;
       }
     }
-      if ( this.anims[this.state]&&
-          this.anims[this.state].currentFrame ===
-          this.anims[this.state].textures.length - 1
-          &&
-          this.callback
-        ){
-          this.callback(this)
-          this.callback = undefined; // 清除回调函数
-        }
+    if (
+      this.anims[this.state] &&
+      this.anims[this.state].currentFrame ===
+        this.anims[this.state].textures.length - 1 &&
+      this.callback
+    ) {
+      this.callback(this);
+      this.callback = undefined; // 清除回调函数
+    }
   }
-
 
   public getWASDDirection(): string {
     let dirctionWASD = "";
@@ -180,3 +179,23 @@ export class UnitAnimSpirite extends Container {
     this.addAnimation(name, animSprite);
   }
 }
+export const toward = (unit: { direction: any; x: number; y: number; name: any; },targetX: number,targetY: number) => {
+  let direction = unit.direction;
+  const spriteUnitX = Math.floor(unit.x / 64); // 假设动画
+  const spriteUnitY = Math.floor(unit.y / 64); // 假设动画
+  const dx = targetX - spriteUnitX;
+  const dy = targetY - spriteUnitY;
+  //设置朝向
+  if (Math.abs(dx) >= Math.abs(dy) && Math.abs(dx) > 0) {
+    // 水平移动
+    direction = dx > 0 ? 0 : 1; // 0向右, 1向左
+  } else if (Math.abs(dy) > Math.abs(dx)) {
+    // 垂直移动
+    direction = dy > 0 ? 2 : 3; // 2向下, 3向上
+  }
+  console.log(
+    `单位 ${unit.name} 攻击方向: ${direction}，目标位置: (${targetX}, ${targetY}), dx: ${dx}, dy: ${dy}`
+  );
+  // 设置动画精灵的新位置
+  unit.direction = direction;
+};
