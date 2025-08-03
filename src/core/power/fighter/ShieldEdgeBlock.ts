@@ -30,7 +30,7 @@ export class ShieldEdgeBlock extends Power {
     const eventHanlder1 = (
       attacker: Unit,
       target: Unit,
-      attackCheckResult: { attackValue: number; targetAC: number; hit: boolean }
+      attackCheckResult: { attackValue: number; targetDef: number; hit: boolean }
     ) => {
       if (this.owner && this.owner === target) {
         if (
@@ -40,9 +40,9 @@ export class ShieldEdgeBlock extends Power {
           const attackerX = Math.floor(attacker.x / 64);
           const attackerY = Math.floor(attacker.y / 64);
           const unitX = Math.floor(this.owner.x / 64);
-          const unitT = Math.floor(this.owner.y / 64);
+          const unitY = Math.floor(this.owner.y / 64);
           const dx = Math.abs(attackerX - unitX);
-          const dy = Math.abs(attackerY - unitT);
+          const dy = Math.abs(attackerY - unitY);
           if (dx <= 1 && dy <= 1) {
             if (this.owner.party === "player") {
               let text;
@@ -62,7 +62,7 @@ export class ShieldEdgeBlock extends Power {
               if (userChoice) {
                 attackCheckResult.attackValue -= 4;
                 attackCheckResult.hit =
-                  attackCheckResult.attackValue >= attackCheckResult.targetAC;
+                  attackCheckResult.attackValue >= attackCheckResult.targetDef;
                 useReaction(this.owner);
                 const attack = {} as CreatureAttack;
                 attack.name = "Shield Edge Block";

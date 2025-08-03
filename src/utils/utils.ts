@@ -1,3 +1,4 @@
+import { Assets } from 'pixi.js';
 
 export const getUnitAvatar = (unitTypeName: string) => {
   return new URL(`../assets/${unitTypeName}/avatar.png`, import.meta.url)
@@ -16,6 +17,14 @@ export const getParticleFile = (particleName: string) => {
 export const getEffectFileUrl = (effectName: string, frameName: string) => {
 
   return new URL(`../assets/effect/${effectName}/${frameName}.png`, import.meta.url).href;
+};
+export const getStatusEffectsIconUrl = (effectName: string) => {
+  return new URL(`../assets/effect/statusEffects/${effectName}.svg`, import.meta.url).href;
+};
+export const getStatusEffectsIcon = async (effectName: string) => {
+  const url = getStatusEffectsIconUrl(effectName);
+  await Assets.load(url);
+  
 };
 export const loadEffectAnim= (effectName: string, frameNum:number) => {
   const frames: string[] = [];

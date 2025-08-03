@@ -1,4 +1,4 @@
-import { BeTargeted } from "./../../effect/BeTargeted";
+import { Marked } from "../../buff/Marked";
 import { attackMovementToUnit } from "@/core/action/UnitAttack";
 import { golbalSetting } from "@/core/golbalSetting";
 import { BattleEvenetSystem } from "@/core/system/BattleEventSystem";
@@ -10,10 +10,11 @@ import {
   useReaction,
 } from "@/core/system/InitiativeSystem";
 
-import type { EffectInterface } from "@/core/effect/EffectInterface";
+import type { BuffInterface } from "@/core/buff/BuffInterface";
 import { UnitSystem } from "@/core/system/UnitSystem";
 import { WeaponSystem } from "@/core/system/WeaponSystem";
 import type { Weapon } from "@/core/units/Weapon";
+import { BuffSystem } from "@/core/system/BuffSystem";
 
 export class CombatChallenge extends Trait {
   name = "CombatChallenge";
@@ -32,20 +33,28 @@ export class CombatChallenge extends Trait {
     const eventHanlder1 = (attacker: Unit, target: Unit) => {
       if (!target) return Promise.resolve();
       let happen = false;
-      ((attacker as any).effects as EffectInterface[]).forEach((effect) => {
-        if (effect instanceof BeTargeted) {
-          if (effect.giver === this.owner) {
-            happen = true;
+      console.log("attacker", attacker, "target", target);
+      if (attacker.creature?.buffs) {
+              console.log("attacker.creature?", attacker.creature);
+        attacker.creature.buffs.forEach((effect) => {
+                  console.log("attacker.effect?", effect);
+          if (effect instanceof Marked) {
+            console.log("effect.giver", effect.giver, this.owner);
+            // 如果是被标记的效果，并且是由当前单位施加的
+            if (effect.giver === this.owner) {
+              happen = true;
+            }
           }
-        }
-      });
+        });
+      }
+      console.log("happen", happen);
       if (!happen) {
         return Promise.resolve();
       }
       if (this.owner && checkRectionUseful(this.owner))
         if (
           attacker.party !== this.owner?.party &&
-          this.owner?.party === target.party&&
+          this.owner?.party === target.party &&
           this.owner !== target
         ) {
           const attackerX = Math.floor(attacker.x / 64);
@@ -91,10 +100,10 @@ export class CombatChallenge extends Trait {
     const eventHandler2 = (attacker: Unit, target: Unit) => {
       if (!target) return Promise.resolve();
       if (this.owner === attacker) {
-        const beTargetedEffect = new BeTargeted();
+        const beTargetedEffect = new Marked();
         beTargetedEffect.owner = target;
         beTargetedEffect.giver = this.owner;
-        ((target as any).effects as any[]).push(beTargetedEffect);
+        BuffSystem.getInstance().addTo(beTargetedEffect, target);
       }
       return Promise.resolve();
     };

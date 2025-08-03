@@ -23,6 +23,7 @@ export class CharacterController {
     CharacterController.curser = unit.id;
     console.log("useCharacterStore().selectCharacter(unit):", unit);
     useCharacterStore().selectCharacter(unit);
+    this.lookOn();
   }
   static lookOn() {
     //后续需要单独处理effectContainer的生成与更新

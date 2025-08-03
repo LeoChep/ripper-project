@@ -1,3 +1,5 @@
+import type { BuffInterface } from '../buff/BuffInterface';
+import type { Modifier } from '../modifier/Modifier';
 import { Power } from '../power/Power';
 import { Trait } from '../trait/Trait';
 import { Weapon } from './Weapon';
@@ -92,7 +94,8 @@ export class Creature {
     attacks: CreatureAttack[];
     powers: Power[];
     weapons?: Weapon[];
-
+    modifier: Modifier[] = [];
+    buffs:BuffInterface[] = [];
     constructor(options: CreatureOptions) {
         this.name = options.name;
         this.level = options.level;

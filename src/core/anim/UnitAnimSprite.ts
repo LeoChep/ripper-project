@@ -14,6 +14,7 @@ export class UnitAnimSpirite extends Container {
   private _animationState: string = "";
   public anims: { [key: string]: PIXI.AnimatedSprite } = {};
   public animsSheet: { [key: string]: PIXI.Spritesheet } = {};
+  public statusIcons: { [key: string]: PIXI.Container } = {};
   private callback: any;
   public get animationCallback(): any {
     return this.callback;

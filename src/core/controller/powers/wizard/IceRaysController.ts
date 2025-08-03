@@ -18,6 +18,9 @@ import { takeDamage } from "@/core/system/DamageSystem";
 import { createDamageAnim } from "@/core/anim/DamageAnim";
 import { createMissOrHitAnimation } from "@/core/anim/MissOrHitAnim";
 import { toward } from "@/core/anim/UnitAnimSprite";
+import { Slowed } from "@/core/buff/Slowed";
+import { BuffSystem } from "@/core/system/BuffSystem";
+import { Immobilized } from "@/core/buff/Immobilized";
 
 export class IceRaysController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -94,15 +97,22 @@ export class IceRaysController extends AbstractPwoerController {
           if (targetUnit) {
             const attackPromise = new Promise<void>(async (resolve) => {
               const hit = await checkHit(unit, targetUnit, iceRayAttack, "Ref");
-                createMissOrHitAnimation(
-                  targetUnit,
-                  hit.hit,
-                );
+              createMissOrHitAnimation(targetUnit, hit.hit);
               if (hit.hit) {
                 const damage = await getDamage(targetUnit, unit, iceRayAttack);
-                 takeDamage(damage, targetUnit);
+                takeDamage(damage, targetUnit);
                 createDamageAnim(damage.toString(), targetUnit);
-               
+                const hitEffect = new Immobilized();
+                hitEffect.source= "IceRays";
+                hitEffect.owner = targetUnit;
+                hitEffect.giver = unit;
+                BuffSystem.getInstance().addTo(hitEffect, targetUnit);
+              } else {
+                const missEffect = new Slowed();
+                missEffect.source = "IceRays";
+                missEffect.owner = targetUnit;
+                missEffect.giver = unit;
+                BuffSystem.getInstance().addTo(missEffect, targetUnit);
               }
               resolve();
             });
@@ -134,7 +144,7 @@ export class IceRaysController extends AbstractPwoerController {
     // video.load(); // 触发加载
     // await video.play(); // 兼容自动播放策略
 
-    const sprite = await getAnimSpriteFromPNGpacks("iceRay",77);
+    const sprite = await getAnimSpriteFromPNGpacks("iceRay", 77);
     sprite.x = unit.x + 32;
     sprite.y = unit.y + 32;
     const distance = Math.sqrt(
