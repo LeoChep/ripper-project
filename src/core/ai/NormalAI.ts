@@ -8,6 +8,7 @@ import * as UnitMoveController from "../system/UnitMoveSystem";
 import * as UnitAttack from "../action/UnitAttack";
 import { segmentsIntersect } from "../utils/MathUtil";
 import { golbalSetting } from "../golbalSetting";
+import { ModifierSystem } from "../system/ModifierSystem";
 
 const tileSize = 64; // 假设每个格子的大小为64像素
 export class NormalAI implements AIInterface {
@@ -55,10 +56,8 @@ export class NormalAI implements AIInterface {
       };
       let isCantAttack = !result.canAttack;
       if (rc) {
-        let speed = 0;
-        if (unit.creature?.speed) {
-          speed = unit.creature.speed;
-        }
+        let speed = ModifierSystem.getInstance().getValueStack(unit, "speed").finalValue;
+        
         if (isCantAttack) {
           //如果不能攻击,检查是否为拥堵情况
           let noUnit = false;

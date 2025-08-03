@@ -4,7 +4,7 @@
     <div>等级：{{ creature.level }}　职业：{{ creature.role }}　XP：{{ creature.xp }}</div>
     <div>体型：{{ creature.size }}　类型：{{ creature.type }}</div>
     <div>HP：{{ creature.hp }}（血量线：{{ creature.bloodied }}）</div>
-    <div>AC：{{ creature.ac }}　强韧：{{ creature.fortitude }}　反射：{{ creature.reflex }}　意志：{{ creature.will }}</div>
+    <div>AC：{{ creature.ac }}　强韧：{{ creature.fortitude }}　反射：{{ reflex }}　意志：{{ will }}</div>
     <div>速度：{{ creature.speed }} <span v-if="creature.fly">飞行：{{ creature.fly }}</span></div>
     <div>先攻：{{ creature.initiative }}　感官：{{ creature.senses }}</div>
     <div v-if="creature.immunities.length">免疫：{{ creature.immunities.join('，') }}</div>
@@ -20,7 +20,8 @@
     </div>
     <div v-if="creature.abilities.length">
       能力值：
-      <span v-for="a in creature.abilities" :key="String(a.name)">{{ a.name }} {{ a.value }} ({{ a.modifier >= 0 ? '+' : ''}}{{ a.modifier }})　</span>
+      <span v-for="a in creature.abilities" :key="String(a.name)">{{ a.name }} {{ a.value }} ({{ a.modifier >= 0 ? '+' :
+        '' }}{{ a.modifier }})　</span>
     </div>
     <div v-if="creature.equipment.length">装备：{{ creature.equipment.join('，') }}</div>
     <div v-if="creature.weapons && creature.weapons.length">
@@ -98,11 +99,37 @@
 </template>
 
 <script setup lang="ts">
+import { ModifierSystem } from '@/core/system/ModifierSystem'
 import type { Creature } from '@/core/units/Creature'
+import type { Unit } from '@/core/units/Unit'
+import { onMounted, ref } from 'vue'
 
 defineEmits(['close'])
+const will = ref('')
+const reflex = ref('')
+
+onMounted(() => {
+  // 这里可以添加一些初始化逻辑
+  const getValue = (valuePath: string) => {
+    if (!props.unit) return ''
+    let valueStack = ModifierSystem.getInstance().getValueStack(props.unit, valuePath);
+    let result;
+    result = valueStack.finalValue.toString();
+    if (valueStack.modifiers.length > 0) {
+      result += ` (${valueStack.modifiers.map(m => (m.value + ' ' + m.type)).join(', ')})`;
+    }
+    return result;
+  }
+  setInterval(() => {
+    if (props.unit) {
+      will.value = getValue('will');
+      reflex.value = getValue('reflex');
+    }
+
+  }, 100);
 
 
+})
 // 获取威能类型文本
 const getPowerTypeText = (type: string) => {
   const typeMap: Record<string, string> = {
@@ -126,15 +153,15 @@ const getActionTypeText = (type: string) => {
   return typeMap[type] || type
 }
 
-const props = defineProps<{ creature: Creature | null }>()
+const props = defineProps<{ creature: Creature | null, unit: Unit | null }>()
 
 const exportCreature = () => {
   if (!props.creature) return
-  
+
   const dataStr = JSON.stringify(props.creature, null, 2)
   const dataBlob = new Blob([dataStr], { type: 'application/json' })
   const url = URL.createObjectURL(dataBlob)
-  
+
   const link = document.createElement('a')
   link.href = url
   link.download = `${props.creature.name || 'creature'}.json`
@@ -160,31 +187,39 @@ const exportCreature = () => {
   z-index: 1000;
   font-size: 15px;
 }
+
 .creature-info h2 {
   margin: 0 0 8px 0;
 }
+
 .creature-info h3 {
   margin: 12px 0 4px 0;
 }
+
 .creature-info ul {
   margin: 0 0 0 18px;
   padding: 0;
 }
+
 .creature-info button {
   margin-top: 16px;
 }
+
 .button-group {
   margin-top: 16px;
 }
+
 .button-group button {
   margin-top: 0;
   margin-right: 8px;
 }
+
 .weapon-item {
   margin-bottom: 12px;
   padding-bottom: 8px;
   border-bottom: 1px solid #eee;
 }
+
 .weapon-item:last-child {
   border-bottom: none;
   margin-bottom: 0;

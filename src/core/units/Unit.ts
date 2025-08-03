@@ -72,19 +72,33 @@ export async function loadTraits(unit: Unit, unitCreated: Creature) {
   if (unitCreated.traits.length > 0) {
     for (let i = 0; i < unitCreated.traits.length; i++) {
       const loadTrait = await TriatSystem.getInstance().createTrait(
-        unitCreated.traits[i].name,
+        unitCreated.traits[i],
         unit
       );
       if (loadTrait) {
-        unit.traits[i] = loadTrait; // 替换为加载后的 Trait 实例
+        unitCreated.traits[i] = loadTrait; // 替换为加载后的 Trait 实例
       } else {
         console.warn(`Trait ${unit.traits[i].name} could not be loaded.`);
       }
     }
   }
-  
+    if (unitCreated.feats.length > 0) {
+    for (let i = 0; i < unitCreated.feats.length; i++) {
+      const loadTrait = await TriatSystem.getInstance().createTrait(
+        unitCreated.feats[i],
+        unit,
+        'feat'
+      );
+      if (loadTrait) {
+        unitCreated.feats[i] = loadTrait; // 替换为加载后的 Trait 实例
+      } else {
+        console.warn(`Trait ${unitCreated.feats[i].name} could not be loaded.`);
+      }
+    }
+  }
 }
 export async function loadPowers(unit: Unit, unitCreated: Creature) {
+
   if (unitCreated.powers.length > 0) {
     for (let i = 0; i < unitCreated.powers.length; i++) {
         const powerName = unitCreated.powers[i].name;
@@ -98,7 +112,7 @@ export async function loadPowers(unit: Unit, unitCreated: Creature) {
             continue
         }
 
-        unit.powers[i] = power; // 替换为加载后的 Power 实例
+        unitCreated.powers[i] = power; // 替换为加载后的 Power 实例
     }
   }
   

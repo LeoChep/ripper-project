@@ -11,7 +11,7 @@ export class Immobilized extends BuffInterface {
   isPositive = false; // 正面效果
   owner: Unit | null = null;
   giver: Unit | null = null;
-  modifier: Modifier[] = [];
+  modifiers: Modifier[] = [];
   constructor() {
     super();
     // 初始化效果
@@ -21,6 +21,6 @@ export class Immobilized extends BuffInterface {
       type: "immobilized",
       modifierType: "=",
     });
-    this.modifier.push(modifier);
+    this.modifiers.push(modifier);
   }
 }

@@ -131,6 +131,15 @@
       "type": "combat"
     }
   ],
+  "feats":[
+    {
+      "name": "SuperiorWill"  
+    },
+    {
+      "name": "LightningReflexes"
+    }
+
+  ],
   "notes": [
     "Equipment: 长剑, 短弓, 20 支箭"
   ]

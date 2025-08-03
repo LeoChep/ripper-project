@@ -12,7 +12,7 @@ name = "";
   owner: Unit | null = null;
   giver: Unit | null = null;
   source: string = ""; // Buff来源
-  modifier: Modifier[] = []; // Buff的修饰符列表
+  modifiers: Modifier[] = []; // Buff的修饰符列表
   constructor() {
   
   }

@@ -2,7 +2,7 @@
 
     <div class="game-pannel" id="game-pannel"></div>
     <!-- <img :src="hitURL"> -->
-    <CreatureInfo :creature="selectedCreature" v-if="selectedCreature" @close="selectedCreature = null" />
+    <CreatureInfo :creature="selectedCreature" :unit="selectedUnit" v-if="selectedCreature" @close="selectedCreature = null" />
     <TalkPannel />
     <CharacterPannel />
     
@@ -118,7 +118,7 @@ const drawFog = (mapPassiable, rlayers, container, app) => {
 }
 
 const selectedCreature = ref(null) // 新增
-
+const selectedUnit = ref(null) // 新增
 const createRenderLayers = (app) => {
     const rlayers = {}
     rlayers.basicLayer = new PIXI.RenderLayer()
@@ -263,6 +263,7 @@ const addAnimSpriteUnit = (unit, container, rlayers, mapPassiable) => {
         // alert(`Clicked on unit: ${unit.unitTypeName}`);
         if (unit.creature) {
             selectedCreature.value = unit.creature
+            selectedUnit.value = unit
         }
     });
     golbalSetting.spriteContainer.addChild(animSpriteUnit);

@@ -59,6 +59,7 @@ export interface CreatureOptions {
     equipment?: string[];
     attacks?: CreatureAttack[];
     traits?: Trait[];
+    feats?: Trait[]; //
     notes?: string[];
     powers?: Power[];
     weapons?: Weapon[];
@@ -90,6 +91,7 @@ export class Creature {
     equipment: string[];
     maxHp: number;
     traits: Trait[];
+    feats: Trait[]; // 特性
     notes: string[];
     attacks: CreatureAttack[];
     powers: Power[];
@@ -123,6 +125,7 @@ export class Creature {
         this.equipment = options.equipment || [];
         this.attacks = options.attacks || [];
         this.traits = options.traits || [];
+        this.feats = options.feats || [];
         this.notes = options.notes || [];
         this.powers = options.powers || [];
         this.weapons = options.weapons;

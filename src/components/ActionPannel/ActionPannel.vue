@@ -101,11 +101,11 @@ const actions = computed(() => {
 })
 
 // 监听角色变化，重置选择状态
-watch(() => props.character, (newCharacter) => {
-  selectedAction.value = null
-  attackSelected.value = false
-  moveSelected.value = false
-}, { deep: true })
+// watch(() => props.character, (newCharacter) => {
+//   selectedAction.value = null
+//   attackSelected.value = false
+//   moveSelected.value = false
+// }, { deep: true })
 
 // 过滤动作
 const filteredActions = computed(() => {

@@ -4,7 +4,7 @@ import { golbalSetting } from "@/core/golbalSetting";
 import { BattleEvenetSystem } from "@/core/system/BattleEventSystem";
 import type { CreatureAttack } from "@/core/units/Creature";
 import type { Unit } from "@/core/units/Unit";
-import { Trait } from "../Trait";
+import { Trait, TraitOptions } from "../Trait";
 import {
   checkRectionUseful,
   useReaction,
@@ -25,8 +25,8 @@ export class CombatChallenge extends Trait {
   owner: Unit | null = null; //
   hookTime = "Battle";
 
-  constructor() {
-    super();
+  constructor(traitOptions: TraitOptions) {
+    super(traitOptions || {});
   }
   hook() {
     //使用标记

@@ -285,16 +285,19 @@ export function startBattle() {
   initiativeCursor.map.sprites.forEach((unit) => {
     const u= unit as Unit;
     if (unit.party === "player") {
-      u.traits.forEach((trait)=>{
+      if (!u.creature) {
+       return
+      }
+      u.creature.traits.forEach((trait)=>{
     
         if (trait.hookTime='Battle') {
           trait.hook();
         }
       })
       console.log("unitForBattle", u);
-        u.powers.forEach((power)=>{
+        u.creature.powers.forEach((power)=>{
         console.log("powerForBattle", power);
-        if (power.hookTime='Battle') {
+        if (power.hookTime==='Battle') {
           power.hook();
         }
       })

@@ -12,22 +12,32 @@ export class TriatSystem {
     }
   constructor() {}
 
-  async createTrait(traitName: string, unit: Unit): Promise<Trait | null> {
+  async createTrait(trait: Trait, unit: Unit,type?:string): Promise<Trait | null> {
+    const traitName = trait.name;
     if (!traitName) {
       console.warn("Trait name is required.");
       return null;
     }
-    const TraitClass = this.getTraitClass(traitName) as Promise<typeof Trait>;
+    const TraitClass = this.getTraitClass(trait.name,type) as Promise<typeof Trait>;
     if (!TraitClass) {
       console.warn(`Trait class not found for: ${traitName}`);
       return null;
     }
-    const traitInstance = (new(await TraitClass)());
+    console.log(`TraitSystem.createTrait: ${traitName}`, TraitClass);
+    const traitInstance = (new(await TraitClass)(trait));
+    console.log(`TraitSystem.createTrait: ${traitName}`, traitInstance);
     traitInstance.owner = unit; // 设置 Trait 的 owner 为 Unit
     return traitInstance
   }
-  getTraitClass(traitName: string) {
+  getTraitClass(traitName: string,type?: string) {
     // 根据 traitName 返回对应的 Trait 类
+    if (type === "feat") {
+
+        return import(`../feat/${traitName}`).then(
+          (module) => module[traitName]
+        );
+    
+    }
     switch (traitName) {
       case "CombatChallenge":
         return import("../trait/fighter/CombatChallenge").then(

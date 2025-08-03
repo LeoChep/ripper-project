@@ -9,6 +9,7 @@ import * as PIXI from "pixi.js";
 import type { UnitAnimSpirite } from "../anim/UnitAnimSprite";
 import { tileSize, zIndexSetting } from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
+import { ModifierSystem } from "./ModifierSystem";
 const lineIconLimit = 4;
 export class BuffSystem {
   static instance: BuffSystem | null = null;
@@ -38,6 +39,11 @@ export class BuffSystem {
     }
     buff.owner = unit;
     unit.creature.buffs.push(buff);
+    if (buff.modifiers.length > 0) {
+      for (const modifier of buff.modifiers) {
+        ModifierSystem.getInstance().updatateValueStack(unit, modifier.to);
+      }
+    }
     addIcon(buff);
   }
 }
