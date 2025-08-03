@@ -112,15 +112,18 @@ export class BasicSelector {
         return;
       }
       this.isCannelClick = false;
-      const { x, y } = e.data.global;
+      let { x, y } = e.data.global;
+      console.log("rootContainer", golbalSetting.rootContainer);
+      if (golbalSetting.rootContainer) {
+        x -= golbalSetting.rootContainer.x;
+        y -= golbalSetting.rootContainer.y;
+      }
       const xy = this.getXY(x, y);
       if (!checkPassiable(xy.x, xy.y)) {
         console.warn("点击位置不可用");
         return;
       }
       if (this.selected.length < this.selecteNum) {
-        const { x, y } = e.data.global;
-        const xy = this.getXY(x, y);
         this.selected.push(xy);
         MessageTipSystem.getInstance().setBottomMessage(
           `已选择 ${this.selected.length}/${this.selecteNum} 个目标`
