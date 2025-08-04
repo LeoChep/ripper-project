@@ -8,6 +8,7 @@ import { attackMovementToUnit } from "@/core/action/UnitAttack";
 import type { Creature, CreatureAttack } from "@/core/units/Creature";
 import { golbalSetting } from "@/core/golbalSetting";
 import { BattleEvenetSystem } from "@/core/system/BattleEventSystem";
+import { AbilityValueSystem } from "@/core/system/AbilitiyValueSystem";
 
 export class ShieldEdgeBlock extends Power {
   name = "ShieldEdgeBlock";
@@ -30,7 +31,11 @@ export class ShieldEdgeBlock extends Power {
     const eventHanlder1 = (
       attacker: Unit,
       target: Unit,
-      attackCheckResult: { attackValue: number; targetDef: number; hit: boolean }
+      attackCheckResult: {
+        attackValue: number;
+        targetDef: number;
+        hit: boolean;
+      }
     ) => {
       if (this.owner && this.owner === target) {
         if (
@@ -64,22 +69,11 @@ export class ShieldEdgeBlock extends Power {
                 attackCheckResult.hit =
                   attackCheckResult.attackValue >= attackCheckResult.targetDef;
                 useReaction(this.owner);
-                const attack = {} as CreatureAttack;
-                attack.name = "Shield Edge Block";
-                attack.type = "melee";
 
-                const creature = this.owner.creature as Creature;
-                const modifier =
-                  creature.abilities.find(
-                    (ability) => ability.name === "Strength"
-                  )?.modifier || 0;
-                attack.attackBonus =
-                  Math.floor(this.owner.creature.level / 2) + 2 + modifier;
-                attack.damage = "2d6+" + modifier;
                 attackMovementToUnit(
                   attacker,
                   this.owner as Unit,
-                  attack,
+                  getAttack(this.owner as Unit),
                   golbalSetting.map
                 ).then(() => {
                   chooseReolve();
@@ -99,3 +93,22 @@ export class ShieldEdgeBlock extends Power {
     BattleEvenetSystem.getInstance().hookEvent(event1);
   };
 }
+const getAttack = (unit: Unit) => {
+  const attack = {} as CreatureAttack;
+  const weapon = unit.creature?.weapons?.[0];
+  const range = weapon?.range ?? 1; // 默认攻击范围为1
+  const modifier = AbilityValueSystem.getInstance().getAbilityModifier(
+    unit,
+    "STR"
+  );
+  attack.attackBonus = AbilityValueSystem.getInstance().getLevelModifier(unit);
+  attack.attackBonus += modifier;
+  attack.attackBonus += weapon?.bonus ?? 0; // 添加武器加值
+  attack.attackBonus += weapon?.proficiency ?? 0; // 添加武器熟练加值
+
+  attack.name = weapon?.name ?? "攻击";
+  attack.type = "melee";
+  attack.range = range;
+  attack.damage = "2d6+" + modifier;
+  return attack;
+};

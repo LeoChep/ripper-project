@@ -1,3 +1,4 @@
+import { Modifier } from "./../modifier/Modifier";
 import { Trait, TraitOptions } from "../trait/Trait";
 import type { Unit } from "../units/Unit";
 
@@ -12,6 +13,12 @@ export class WeaponFocus extends Trait {
 
   constructor(traitOptions: TraitOptions) {
     super(traitOptions);
+    const modifier = new Modifier({
+      to: "weaponDamageBonus",
+      value: 1,
+      type: "feat",
+      modifierType: "+",
+    });
+    this.modifiers.push(modifier);
   }
-
 }

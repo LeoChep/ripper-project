@@ -8,7 +8,7 @@ import {
   getDamage,
 } from "@/core/system/AttackSystem";
 import { golbalSetting } from "@/core/golbalSetting";
-import { tileSize } from "@/core/envSetting";
+import { tileSize, zIndexSetting } from "@/core/envSetting";
 import { generateWays } from "@/core/utils/PathfinderUtil";
 import { BasicSelector } from "@/core/selector/BasicSelector";
 
@@ -35,27 +35,27 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
     const { x, y } = this.getXY();
     const unit = this.selectedCharacter as Unit;
     const weapon = unit.creature?.weapons?.[0];
-    const iceRayAttack = {} as CreatureAttack;
-    iceRayAttack.name = "Ice Ray";
-    iceRayAttack.type = "ranged";
-    iceRayAttack.action = "attack";
-    iceRayAttack.range = 10; // Example range
-    iceRayAttack.attackBonus =AbilityValueSystem.getInstance().getLevelModifier(unit); // Example attack bonus
-    iceRayAttack.target = "enemy";
-    iceRayAttack.damage = "1d10"; // Example damage
+    const attack = {} as CreatureAttack;
+    attack.name = "Ice Ray";
+    attack.type = "ranged";
+    attack.action = "attack";
+    attack.range = 10; // Example range
+    attack.attackBonus =AbilityValueSystem.getInstance().getLevelModifier(unit); // Example attack bonus
+    attack.target = "enemy";
+    attack.damage = "1d10"; // Example damage
     const modifer =AbilityValueSystem.getInstance().getAbilityModifier(
       unit,
       "INT"
     );
-    iceRayAttack.attackBonus += modifer;
-    iceRayAttack.attackBonus += weapon?.bonus ?? 0; // 添加武器加值
-    iceRayAttack.attackBonus += 1; // 精准法器
+    attack.attackBonus += modifer;
+    attack.attackBonus += weapon?.bonus ?? 0; // 添加武器加值
+    attack.attackBonus += 1; // 精准法器
     // iceRayAttack.damage += `+${  weapon?.bonus ?? 0}+(${modifer})`; // 添加攻击加值到伤害
-    console.log("icerays attack", iceRayAttack);
+    // console.log("icerays attack", attack);
     const grids = generateWays(
       x,
       y,
-      iceRayAttack.range,
+      attack.range,
       (gridX: any, gridY: any, preX: number, preY: number) => {
         return checkPassiable(
           unit,
@@ -84,8 +84,14 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
     this.removeFunction = selector.removeFunction;
     const result = await selector.promise;
     console.log("icerays", result);
-    const selected = result.selected;
+    const selected = result.selected[0];
     if (result.cancel !== true) {
+      await OrbmastersIncendiaryDetonationController.playAnim(
+        this.selectedCharacter as Unit,
+        selected.x,
+        selected.y,
+        1
+      );
       resolveCallback({});
     } else {
       resolveCallback(result);
@@ -93,36 +99,23 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
     return promise;
   };
 
-  static async iceAnim(
+  static async playAnim(
     unit: Unit,
     gridX: number,
-    gridY: number
+    gridY: number,
+    range:number = 1
   ): Promise<void> {
-    // video = document.createElement("video");
-    // // document.body.appendChild(video);
-    // video.src = RayOfFrost;
 
-    // video.loop = false;
-    // video.autoplay = false;
-    // video.muted = true;
-    // video.preload = "auto"; // 强制预加载
-    // video.load(); // 触发加载
-    // await video.play(); // 兼容自动播放策略
-
-    const sprite = await getAnimSpriteFromPNGpacks("iceRay",77);
-    sprite.x = unit.x + 32;
-    sprite.y = unit.y + 32;
-    const distance = Math.sqrt(
-      (gridX * tileSize - unit.x) ** 2 + (gridY * tileSize - unit.y) ** 2
-    );
-    console.log("distance", distance);
-    sprite.scale = { x: distance / sprite.width, y: 124 / sprite.height };
+console.log("playAnim", unit, gridX, gridY, range);
+    const sprite = await getAnimSpriteFromPNGpacks("FireballExplosion",72);
+    sprite.x = gridX * tileSize + 32;
+    sprite.y = gridY * tileSize + 32;
+    sprite.zIndex = zIndexSetting.spriteZIndex;
+    sprite.scale = {x:(range*2+1) * tileSize / sprite.width, y: (range*2+1)  * tileSize / sprite.height };
+    sprite.scale.x*=1.5;
+    sprite.scale.y*=1.5;
     console.log("sprite scale", sprite.scale);
-    sprite.anchor.set(0, 0.5);
-    sprite.rotation = Math.atan2(
-      gridY * tileSize - unit.y,
-      gridX * tileSize - unit.x
-    );
+    sprite.anchor.set(0.5, 0.5);
 
     const container = golbalSetting.spriteContainer;
     const spriteLayer = golbalSetting.rlayers.spriteLayer;

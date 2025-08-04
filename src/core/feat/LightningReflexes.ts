@@ -18,7 +18,6 @@ export class LightningReflexes extends Trait {
       value: 2, // 增加反应值
       type: "feat",
       modifierType: "+",
-      priority: 100,
     }); // 优先级设置为较高})
     this.modifiers.push(modifier);
   }
