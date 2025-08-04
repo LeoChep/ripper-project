@@ -4,6 +4,7 @@ export interface WeaponOptions {
     damage: string; // e.g. "1d8", "1d6+2"
     bonus?: number; // attack bonus
     range?: number;
+    proficiency?: number; // e.g. proficiency bonus for the weapon
     properties?: string[]; // e.g. ["versatile", "finesse"]
     weight?: number;
     cost?: number;
@@ -16,7 +17,8 @@ export class Weapon {
     damage: string;
     bonus:number=0 ;
     range?: number;
-    properties: string[];
+    proficiency?: number; // e.g. proficiency bonus for the weapon
+    properties?: string[]; // e.g. ["versatile", "finesse"]
     weight?: number;
     cost?: number;
     description?: string;
@@ -31,5 +33,6 @@ export class Weapon {
         this.weight = options.weight;
         this.cost = options.cost;
         this.description = options.description;
+        this.proficiency = options.proficiency || 0;
     }
 }

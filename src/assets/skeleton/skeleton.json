@@ -20,14 +20,17 @@
   "alignment": "无",
   "languages": [ "-" ],
   "skills": [],
-  "abilities": [
-    { "name": "Strength", "value": 15, "modifier": 2 },
-    { "name": "Dexterity", "value": 17, "modifier": 3 },
-    { "name": "Constitution", "value": 13, "modifier": 1 },
-    { "name": "Intelligence", "value": 3, "modifier": -4 },
-    { "name": "Wisdom", "value": 14, "modifier": 2 },
-    { "name": "Charisma", "value": 3, "modifier": -4 }
-  ],
+  "abilities": 
+    {
+      "STR": { "value": 15, "modifier": 2 },
+      "DEX": { "value": 17, "modifier": 3 },
+      "CON": { "value": 13, "modifier": 1 },
+      "INT": { "value": 3, "modifier": -4 },
+      "WIS": { "value": 14, "modifier": 2 },
+      "CHA": { "value": 3, "modifier": -4 }
+    }
+  
+  ,
   "equipment": [ "长剑", "短弓", "20 支箭" ],
   "attacks": [
     {

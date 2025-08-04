@@ -20,6 +20,7 @@ import { createMissOrHitAnimation } from "@/core/anim/MissOrHitAnim";
 import { toward } from "@/core/anim/UnitAnimSprite";
 import { LightParticle } from "@/core/anim/particle/LightParticle";
 import * as PIXI from "pixi.js";
+import { AbilityValueSystem } from "@/core/system/AbilitiyValueSystem";
 
 export class MagicMissileController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -33,23 +34,19 @@ export class MagicMissileController extends AbstractPwoerController {
     if (!this.preFix()) return Promise.resolve();
     const { x, y } = this.getXY();
     const unit = this.selectedCharacter as Unit;
-    const weapon = unit.creature?.weapons?.[0];
     const attack = {} as CreatureAttack;
     attack.name = "Magic Missile";
     attack.type = "ranged";
     attack.action = "attack";
     attack.range = 20; // Example range
-    attack.attackBonus = 12; // Example attack bonus
     attack.target = "enemy";
 
-    const modifer =
-      unit.creature?.abilities?.find(
-        (ability) => ability.name === "Intelligence"
-      )?.modifier ?? 0; // 使用智力作为攻击加值
+    const modifer = AbilityValueSystem.getInstance().getAbilityModifier(
+      unit,
+      "INT"
+    );
     attack.damage = (2 + modifer >= 0 ? (2 + modifer).toString() : "0"); // Example damage
-    attack.attackBonus = modifer;
-    attack.attackBonus += weapon?.bonus ?? 0; // 添加武器加值
-    attack.attackBonus += 1; // 精准法器
+
     // iceRayAttack.damage += `+${  weapon?.bonus ?? 0}+(${modifer})`; // 添加攻击加值到伤害
     console.log("icerays attack", attack);
     const grids = generateWays(

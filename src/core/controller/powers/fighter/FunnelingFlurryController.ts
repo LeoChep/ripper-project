@@ -14,6 +14,7 @@ import { generateWays } from "@/core/utils/PathfinderUtil";
 import { BasicSelector } from "@/core/selector/BasicSelector";
 import { ShiftAnim } from "@/core/anim/ShiftAnim";
 import { MessageTipSystem } from "@/core/system/MessageTipSystem";
+import { AbilityValueSystem } from "@/core/system/AbilitiyValueSystem";
 
 export class FunnelingFlurryController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -141,10 +142,12 @@ export class FunnelingFlurryController extends AbstractPwoerController {
     const weapon = unit.creature?.weapons?.[num - 1];
     const attack = {} as CreatureAttack;
     const range = weapon?.range ?? 1; // 默认攻击范围为1
-    const modifer =
-      unit.creature?.abilities?.find((ability) => ability.name === "Strength")
-        ?.modifier ?? 0; // 使用力量作为攻击加值
-    attack.attackBonus = modifer;
+    const modifer = AbilityValueSystem.getInstance().getAbilityModifier(
+      unit,
+      "STR"
+    );
+    attack.attackBonus = AbilityValueSystem.getInstance().getLevelModifier(unit);
+    attack.attackBonus += modifer;
     attack.attackBonus += weapon?.bonus ?? 0; // 添加武器加值
     attack.attackBonus += 1 + 3 + 1; // 武器大师、擅长加值、战斗专长
     attack.damage = weapon?.damage ?? "1d6"; // 默认伤害为1d6

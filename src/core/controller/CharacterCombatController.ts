@@ -11,6 +11,7 @@ import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
 import { AbstractPwoerController } from "./powers/AbstractPwoerController";
 import { Power } from "../power/Power";
 import { PowerSystem } from "../system/PowerSystem";
+import { WeaponSystem } from "../system/WeaponSystem";
 export class CharacterCombatController {
   public inUse: boolean = false;
   public static instance: CharacterCombatController | null = null;
@@ -135,27 +136,12 @@ export class CharacterCombatController {
       CharCombatAttackController.instense = atkController;
     }
     atkController.selectedCharacter = this.selectedCharacter;
-    const attack = {} as CreatureAttack;
-    attack.damage =
-      this.selectedCharacter.creature?.weapons?.[0].damage ?? "1d6";
-    attack.attackBonus =
-      this.selectedCharacter.creature?.weapons?.[0].bonus ?? 0;
-    const modifer =
-      this.selectedCharacter.creature?.abilities.find(
-        (ability) => ability.name === "Strength"
-      )?.modifier || 0;
-    attack.damage +=
-      `+${modifer}` +
-      "+1+" +
-      (this.selectedCharacter.creature?.weapons?.[0].bonus.toString() ?? "0");
-    attack.name = this.selectedCharacter.creature?.weapons?.[0].name ?? "攻击";
-    attack.type = "melee";
-    attack.range = this.selectedCharacter.creature?.weapons?.[0].range;
-    attack.attackBonus += modifer;
-    attack.target = "ac";
-    attack.attackBonus += 1; //武器大师
-    attack.attackBonus += 3; //擅长加值
-    attack.attackBonus += 1; //战斗专长
+    const attacker=this.selectedCharacter;
+    if (!attacker.creature?.weapons || attacker.creature.weapons.length === 0) {
+      console.warn("没有可用的武器，无法进行攻击选择");
+      return;
+    }
+    const attack = WeaponSystem.getInstance().createWeaponAttack(attacker, attacker.creature?.weapons?.[0]);
     atkController.attackSelect(attack).then((result) => {
       console.log("attackSelect result", result);
       if (!result.cancel && InitiativeSystem.isInBattle()) {

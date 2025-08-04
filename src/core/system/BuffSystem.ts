@@ -46,8 +46,59 @@ export class BuffSystem {
     }
     addIcon(buff);
   }
+  removeBuff(buff: BuffInterface, unit: Unit) {
+    const buffs = unit.creature?.buffs;
+    if (!buffs) {
+      console.warn(`No buffs found for unit: ${unit.name}`);
+      return;
+    }
+    const buffToRemove = buffs.find((b) => b === buff);
+    if (!buffToRemove) {
+      console.warn(`Buff ${buff.name} not found in unit: ${unit.name}`);
+      return;
+    }
+    const index = buffs.indexOf(buffToRemove);
+    if (index === undefined || index < 0) {
+      console.warn(`Buff ${buff.name} not found in unit: ${unit.name}`);
+      return;
+    }
+    buffs.splice(index, 1);
+    updataModifierByBuff(buff);
+    removeIcon(buff);
+    drawBuffs(unit.animUnit!);
+  }
 }
 
+async function updataModifierByBuff(buff: BuffInterface) {
+  if (buff.modifiers.length > 0) {
+    for (let modifier of buff.modifiers) {
+      if (buff.owner && modifier.to)
+        ModifierSystem.getInstance().updatateValueStack(
+          buff.owner!,
+          modifier.to
+        );
+    }
+  }
+}
+async function removeIcon(buff: BuffInterface) {
+  const unit = buff.owner;
+  console.log("Removing icon for buff:", buff.name, "from unit:", unit?.name);
+  if (!unit) {
+    console.error("Buff owner is not defined.");
+    return;
+  }
+  const animUnit = unit.animUnit;
+  if (!animUnit) {
+    console.error("Unit does not have an animation sprite.");
+    return;
+  }
+  const statusIcons = animUnit.statusIcons;
+  if (statusIcons[buff.name]) {
+    animUnit.removeChild(statusIcons[buff.name]);
+    statusIcons[buff.name].destroy();
+    delete statusIcons[buff.name];
+  }
+}
 async function addIcon(buff: BuffInterface) {
   const unit = buff.owner;
   console.log("Adding icon for buff:", buff.name, "to unit:", unit?.name);

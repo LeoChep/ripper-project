@@ -12,6 +12,7 @@ import { appSetting } from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import { CharacterCombatController } from "../controller/CharacterCombatController";
 import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
+import { BattleEvenetSystem } from "./BattleEventSystem";
 
 export const InitiativeSheet = [] as InitiativeClass[];
 const initiativeCursor = {
@@ -156,7 +157,8 @@ export async function endTurn(unit: Unit) {
   if (unit.initiative) {
     unit.initiative.ready = false;
   }
-
+  await BattleEvenetSystem.getInstance().handleEvent("UnitEndTurnEvent", unit);
+  //移除单位的状态
   const stayPromisee = new Promise<void>((resolve) => {
     setTimeout(() => {
       resolve();
@@ -415,6 +417,7 @@ export async function endBattle() {
   while (InitiativeSheet.length > 0) {
     InitiativeSheet.pop();
   }
+  
   await endTurn(CharacterController.selectedCharacter as Unit);
   CharacterController.removeLookOn();
 

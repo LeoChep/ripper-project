@@ -20,6 +20,7 @@ export class Immobilized extends BuffInterface {
       value: 0, // 减少速度
       type: "immobilized",
       modifierType: "=",
+      priority:-1
     });
     this.modifiers.push(modifier);
   }

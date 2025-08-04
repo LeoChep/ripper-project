@@ -23,38 +23,14 @@
     "-"
   ],
   "skills": [],
-  "abilities": [
-    {
-      "name": "Strength",
-      "value": 20,
-      "modifier": 5
-    },
-    {
-      "name": "Dexterity",
-      "value": 10,
-      "modifier": 0
-    },
-    {
-      "name": "Constitution",
-      "value": 14,
-      "modifier": 2
-    },
-    {
-      "name": "Intelligence",
-      "value": 10,
-      "modifier": 0
-    },
-    {
-      "name": "Wisdom",
-      "value": 15,
-      "modifier": 2
-    },
-    {
-      "name": "Charisma",
-      "value": 8,
-      "modifier": -1
-    }
-  ],
+  "abilities": {
+    "STR": { "value": 20, "modifier": 5 },
+    "DEX": { "value": 10, "modifier": 0 },
+    "CON": { "value": 14, "modifier": 2 },
+    "INT": { "value": 10, "modifier": 0 },
+    "WIS": { "value": 15, "modifier": 2 },
+    "CHA": { "value": 8, "modifier": -1 }
+  },
   "equipment": [],
   "weapons": [
     {
@@ -62,7 +38,7 @@
       "type": "Melee",
       "action": "武器",
       "range": 1,
-      "attackBonus": 12,
+      "proficiency": 3,
       "bonus":1,
       "target": "ac",
       "weapon": "1d8",

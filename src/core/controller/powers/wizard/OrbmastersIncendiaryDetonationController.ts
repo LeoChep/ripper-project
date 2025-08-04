@@ -19,6 +19,7 @@ import { createDamageAnim } from "@/core/anim/DamageAnim";
 import { createMissOrHitAnimation } from "@/core/anim/MissOrHitAnim";
 import { toward } from "@/core/anim/UnitAnimSprite";
 import { BrustSelector } from "@/core/selector/BrustSelector";
+import { AbilityValueSystem } from "@/core/system/AbilitiyValueSystem";
 
 export class OrbmastersIncendiaryDetonationController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -39,14 +40,14 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
     iceRayAttack.type = "ranged";
     iceRayAttack.action = "attack";
     iceRayAttack.range = 10; // Example range
-    iceRayAttack.attackBonus = 12; // Example attack bonus
+    iceRayAttack.attackBonus =AbilityValueSystem.getInstance().getLevelModifier(unit); // Example attack bonus
     iceRayAttack.target = "enemy";
     iceRayAttack.damage = "1d10"; // Example damage
-    const modifer =
-      unit.creature?.abilities?.find(
-        (ability) => ability.name === "Intelligence"
-      )?.modifier ?? 0; // 使用智力作为攻击加值
-    iceRayAttack.attackBonus = modifer;
+    const modifer =AbilityValueSystem.getInstance().getAbilityModifier(
+      unit,
+      "INT"
+    );
+    iceRayAttack.attackBonus += modifer;
     iceRayAttack.attackBonus += weapon?.bonus ?? 0; // 添加武器加值
     iceRayAttack.attackBonus += 1; // 精准法器
     // iceRayAttack.damage += `+${  weapon?.bonus ?? 0}+(${modifer})`; // 添加攻击加值到伤害

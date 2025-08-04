@@ -1,6 +1,6 @@
 {
   "name": "狼人",
-  "level": 1,
+  "level": 5,
   "role": "法师",
   "xp": 25,
   "size": "中型",
@@ -19,17 +19,47 @@
   "immunities": [],
   "resistances": [],
   "alignment": "无",
-  "languages": [ "-" ],
-  "skills": [],
-  "abilities": [
-    { "name": "Strength", "value": 15, "modifier": 2 },
-    { "name": "Dexterity", "value": 17, "modifier": 3 },
-    { "name": "Constitution", "value": 13, "modifier": 1 },
-    { "name": "Intelligence", "value": 20, "modifier": 5 },
-    { "name": "Wisdom", "value": 14, "modifier": 2 },
-    { "name": "Charisma", "value": 3, "modifier": -4 }
+  "languages": [
+    "-"
   ],
-  "equipment": [ "长剑", "短弓", "20 支箭" ],
+  "skills": [],
+  "abilities": {
+    "STR": {
+      "name": "Strength",
+      "value": 15,
+      "modifier": 2
+    },
+    "DEX": {
+      "name": "Dexterity",
+      "value": 17,
+      "modifier": 3
+    },
+    "CON": {
+      "name": "Constitution",
+      "value": 13,
+      "modifier": 1
+    },
+    "INT": {
+      "name": "Intelligence",
+      "value": 20,
+      "modifier": 5
+    },
+    "WIS": {
+      "name": "Wisdom",
+      "value": 14,
+      "modifier": 2
+    },
+    "CHA": {
+      "name": "Charisma",
+      "value": 3,
+      "modifier": -4
+    }
+  },
+  "equipment": [
+    "长剑",
+    "短弓",
+    "20 支箭"
+  ],
   "attacks": [
     {
       "name": "长剑",
@@ -43,7 +73,8 @@
       "missEffect": null
     }
   ],
-  "powers":[ {
+  "powers": [
+    {
       "name": "IceRays",
       "displayName": "冰冻射线",
       "type": "encounter",
@@ -55,7 +86,7 @@
       "attackBonus": null,
       "missEffect": null
     },
-  {
+    {
       "name": "Orbmaster's Incendiary Detonation",
       "displayName": "法珠大师之爆炸燃烧弹",
       "type": "encounter",
@@ -79,7 +110,7 @@
       "attackBonus": null,
       "missEffect": null
     },
-     {
+    {
       "name": "Magic Missile",
       "displayName": "魔法飞弹",
       "type": "atwill",
@@ -90,7 +121,10 @@
       "damage": null,
       "attackBonus": null,
       "missEffect": null
-    }],
+    }
+  ],
   "traits": [],
-  "notes": [ "Equipment: 长剑, 短弓, 20 支箭" ]
+  "notes": [
+    "Equipment: 长剑, 短弓, 20 支箭"
+  ]
 }

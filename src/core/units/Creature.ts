@@ -22,9 +22,17 @@ export interface CreatureSkill {
 }
 
 export interface CreatureAbility {
-    name: String
     value: number;
     modifier: number;
+}
+
+export interface CreatureAbilities {
+    STR: CreatureAbility;
+    DEX: CreatureAbility;
+    CON: CreatureAbility;
+    INT: CreatureAbility;
+    WIS: CreatureAbility;
+    CHA: CreatureAbility;
 }
 
 export interface CreatureResistance {
@@ -55,7 +63,7 @@ export interface CreatureOptions {
     alignment?: string;
     languages?: string[];
     skills?: CreatureSkill[];
-    abilities?: CreatureAbility[];
+    abilities?: CreatureAbilities;
     equipment?: string[];
     attacks?: CreatureAttack[];
     traits?: Trait[];
@@ -87,7 +95,7 @@ export class Creature {
     alignment?: string;
     languages: string[];
     skills: CreatureSkill[];
-    abilities: CreatureAbility[];
+    abilities: CreatureAbilities;
     equipment: string[];
     maxHp: number;
     traits: Trait[];
@@ -121,7 +129,14 @@ export class Creature {
         this.alignment = options.alignment;
         this.languages = options.languages || [];
         this.skills = options.skills || [];
-        this.abilities = options.abilities || [];
+        this.abilities = options.abilities || {
+            STR: { value: 10, modifier: 0 },
+            DEX: { value: 10, modifier: 0 },
+            CON: { value: 10, modifier: 0 },
+            INT: { value: 10, modifier: 0 },
+            WIS: { value: 10, modifier: 0 },
+            CHA: { value: 10, modifier: 0 }
+        };
         this.equipment = options.equipment || [];
         this.attacks = options.attacks || [];
         this.traits = options.traits || [];
@@ -256,7 +271,7 @@ export function createCreatureOptions(txt: string): CreatureOptions {
         : [];
 
     // 7. 能力值（每项单独匹配，兼容分行）
-    let abilities: CreatureAbility[] = [];
+    let abilities: CreatureAbilities = {STR: { value: 10, modifier: 0 }, DEX: { value: 10, modifier: 0 }, CON: { value: 10, modifier: 0 }, INT: { value: 10, modifier: 0 }, WIS: { value: 10, modifier: 0 }, CHA: { value: 10, modifier: 0 } };
     const strengthMatch = txt.match(/力量\s*(\d+)[（(]\+?([-\d]+)[)）]/);
     const dexterityMatch = txt.match(/敏捷\s*(\d+)[（(]\+?([-\d]+)[)）]/);
     const constitutionMatch = txt.match(/体质\s*(\d+)[（(]\+?([-\d]+)[)）]/);
@@ -265,22 +280,22 @@ export function createCreatureOptions(txt: string): CreatureOptions {
     const charismaMatch = txt.match(/魅力\s*(\d+)[（(]\+?([-\d]+)[)）]/);
 
     if (strengthMatch) {
-        abilities.push({ name: "Strength", value: parseInt(strengthMatch[1]), modifier: parseInt(strengthMatch[2]) });
+        abilities.STR = { value: parseInt(strengthMatch[1]), modifier: parseInt(strengthMatch[2]) };
     }
     if (dexterityMatch) {
-        abilities.push({ name: "Dexterity", value: parseInt(dexterityMatch[1]), modifier: parseInt(dexterityMatch[2]) });
+        abilities.DEX = { value: parseInt(dexterityMatch[1]), modifier: parseInt(dexterityMatch[2]) };
     }
     if (constitutionMatch) {
-        abilities.push({ name: "Constitution", value: parseInt(constitutionMatch[1]), modifier: parseInt(constitutionMatch[2]) });
+        abilities.CON = { value: parseInt(constitutionMatch[1]), modifier: parseInt(constitutionMatch[2]) };
     }
     if (intelligenceMatch) {
-        abilities.push({ name: "Intelligence", value: parseInt(intelligenceMatch[1]), modifier: parseInt(intelligenceMatch[2]) });
+        abilities.INT = { value: parseInt(intelligenceMatch[1]), modifier: parseInt(intelligenceMatch[2]) };
     }
     if (wisdomMatch) {
-        abilities.push({ name: "Wisdom", value: parseInt(wisdomMatch[1]), modifier: parseInt(wisdomMatch[2]) });
+        abilities.WIS = { value: parseInt(wisdomMatch[1]), modifier: parseInt(wisdomMatch[2]) };
     }
     if (charismaMatch) {
-        abilities.push({ name: "Charisma", value: parseInt(charismaMatch[1]), modifier: parseInt(charismaMatch[2]) });
+        abilities.CHA = { value: parseInt(charismaMatch[1]), modifier: parseInt(charismaMatch[2]) };
     }
 
     // 8. 装备
