@@ -23,7 +23,7 @@ export class OpportunitySystem {
       if (checkUnit === undefined) {
         return;
       }
-      if (checkUnit.id === targetUnit.id) {
+      if (checkUnit == null || checkUnit.id === targetUnit.id) {
         return; // 如果是目标单位本身，则跳过
       }
       if (checkUnit.party === targetUnit.party) {

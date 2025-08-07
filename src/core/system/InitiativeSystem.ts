@@ -13,6 +13,10 @@ import { golbalSetting } from "../golbalSetting";
 import { CharacterCombatController } from "../controller/CharacterCombatController";
 import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
 import { BattleEvenetSystem } from "./BattleEventSystem";
+import {
+  InitiativeSerializer,
+  type SerializedInitiativeData,
+} from "../type/InitiativeSerializer";
 
 export const InitiativeSheet = [] as InitiativeClass[];
 const initiativeCursor = {
@@ -55,7 +59,7 @@ export function removeFromInitiativeSheet(unit: Unit) {
     InitiativeSheet.splice(index, 1);
   }
   unit.initiative = undefined;
-  initiative.owner = undefined;
+  initiative.owner = null;
   if (initiative == initiativeCursor.pointAt) {
     endTurn(unit);
   }
@@ -285,24 +289,23 @@ export function startBattle() {
   }
   CharacterCombatController.instance.inUse = true;
   initiativeCursor.map.sprites.forEach((unit) => {
-    const u= unit as Unit;
+    const u = unit as Unit;
     if (unit.party === "player") {
       if (!u.creature) {
-       return
+        return;
       }
-      u.creature.traits.forEach((trait)=>{
-    
-        if (trait.hookTime='Battle') {
+      u.creature.traits.forEach((trait) => {
+        if ((trait.hookTime = "Battle")) {
           trait.hook();
         }
-      })
+      });
       console.log("unitForBattle", u);
-        u.creature.powers.forEach((power)=>{
+      u.creature.powers.forEach((power) => {
         console.log("powerForBattle", power);
-        if (power.hookTime==='Battle') {
+        if (power.hookTime === "Battle") {
           power.hook();
         }
-      })
+      });
     }
   });
   return playStartAnim();
@@ -417,7 +420,7 @@ export async function endBattle() {
   while (InitiativeSheet.length > 0) {
     InitiativeSheet.pop();
   }
-  
+
   await endTurn(CharacterController.selectedCharacter as Unit);
   CharacterController.removeLookOn();
 
@@ -470,4 +473,49 @@ export async function playEndAnim() {
     }, 1500);
   });
   return animPromise;
+}
+export function getInitRecord() {
+  const initSheet = InitiativeSerializer.serializeArray(InitiativeSheet);
+  const initRecord = {
+    initiativeSheet: initSheet,
+    inBattle: initiativeCursor.inBattle,
+    initiativeCursor: {
+      pointAt: initiativeCursor.pointAt?.owner?.id.toString(),
+    },
+  };
+  return initRecord;
+}
+export function loadInitRecord(initRecord: {
+  initiativeSheet: InitiativeSerializer[];
+  inBattle: boolean;
+  initiativeCursor: { pointAt: string };
+}) {
+  initiativeCursor.map=golbalSetting.map
+  const initiativeSheet = InitiativeSerializer.deserializeArray(
+    initRecord.initiativeSheet,
+    (uid: string) => {
+      return golbalSetting.map?.sprites.find(
+        (item) => item.id.toString() === uid
+      ) 
+    }
+  );
+  InitiativeSheet.splice(0, InitiativeSheet.length, ...initiativeSheet);
+  initiativeCursor.inBattle = initRecord.inBattle;
+  console.log("initiativeCursor", initRecord);
+  if (initRecord.initiativeCursor.pointAt) {
+    const pointAtId = parseInt(initRecord.initiativeCursor.pointAt);
+    console.log("pointAtId", pointAtId);
+    // 查找对应的 InitiativeClass
+    initiativeCursor.pointAt =
+      InitiativeSheet.find((item) => item.owner?.id === pointAtId) || null;
+    if (initiativeCursor.pointAt && initiativeCursor.pointAt.owner) {
+      const unit = initiativeCursor.pointAt.owner;
+      CharacterController.selectCharacter(unit);
+      CharacterCombatController.getInstance().selectedCharacter = unit;
+      CharacterCombatController.getInstance().useMoveController();
+    }
+    console.log('LOAD INIT',initiativeSheet,initiativeCursor)
+  } else {
+    initiativeCursor.pointAt = null;
+  }
 }

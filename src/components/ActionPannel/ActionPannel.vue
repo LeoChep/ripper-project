@@ -172,7 +172,7 @@ const selectAttack = () => {
 const moveSelected = ref(false)
 const selectMove = () => {
   if (!CharacterCombatController.instance.inUse) {
-
+    console.warn('当前无法使用移动控制器')
     return
   }
   if (CharacterCombatController.instance.selectedCharacter.state !== 'idle') {

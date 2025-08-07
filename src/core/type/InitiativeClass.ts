@@ -2,7 +2,7 @@ import type { Unit } from "../units/Unit";
 
 export class InitiativeClass {
     initativeValue: number;
-    owner?: Unit;
+    owner: Unit|null = null; // 可能为 null，表示没有拥有者
     standerActionNumber:number=0;
     minorActionNumber:number=0;
     moveActionNumber:number=0;

@@ -45,6 +45,8 @@ import { DramaSystem } from '@/core/system/DramaSystem'
 import { BuffInterface } from '@/core/buff/BuffInterface'
 import { BuffSerializer } from '@/core/buff/BuffSerializer'
 import { DoorSerializer } from '@/core/units/DoorSerializer'
+import * as InitiativeSystem  from '@/core/system/InitiativeSystem'
+import { CharacterCombatController } from '@/core/controller/CharacterCombatController'
 const appSetting = envSetting.appSetting;
 onMounted(async () => {
     const app = new PIXI.Application();
@@ -186,6 +188,7 @@ const saveGameState = () => {
             };
         });
         const dramaRecord = DramaSystem.getInstance().getRercords();
+        const initRecord = InitiativeSystem.getInitRecord();
         // 收集需要保存的游戏数据
         const gameState = {
 
@@ -194,6 +197,7 @@ const saveGameState = () => {
             edges: edges,
             sprites: sprites,
             dramaRecord: dramaRecord,
+            initiativeRecord: initRecord,
             timestamp: Date.now() // 保存时间戳
         };
 
@@ -278,8 +282,6 @@ const loadGameState = async () => {
         const mapTexture = await PIXI.Assets.load(url);
         map.textures = mapTexture;
         //door 反序列化
-
-       
         if (gameState.doors && gameState.doors.length > 0) {
             map.doors = DoorSerializer.deserializeArray(gameState.doors);
             console.log('恢复的门数据:', map.doors);
@@ -316,7 +318,15 @@ const loadGameState = async () => {
         DramaSystem.getInstance().records = vars;
         DramaSystem.getInstance().setDramaUse(gameState.dramaRecord.use);
         DramaSystem.getInstance().play();
+        if (gameState.initiativeRecord) {
+            InitiativeSystem.loadInitRecord(gameState.initiativeRecord);
+        }
+        if(InitiativeSystem.isInBattle()){
+          CharacterCombatController.getInstance().inUse=true;  
+        }else{
         new CharacterOutCombatController(golbalSetting.rlayers, golbalSetting.rootContainer, map);
+
+        }
 
         console.log('恢复的地图数据2:', map);
         console.log('游戏状态已读取', gameState);

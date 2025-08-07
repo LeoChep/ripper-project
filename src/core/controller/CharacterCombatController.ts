@@ -15,6 +15,12 @@ import { WeaponSystem } from "../system/WeaponSystem";
 export class CharacterCombatController {
   public inUse: boolean = false;
   public static instance: CharacterCombatController | null = null;
+  public static getInstance() {
+    if (!CharacterCombatController.instance) {
+      CharacterCombatController.instance = new CharacterCombatController();
+    }
+    return CharacterCombatController.instance;
+  }
   selectedCharacter: Unit | null = null;
   constructor() {
     // 初始化属性

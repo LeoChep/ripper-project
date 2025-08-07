@@ -244,7 +244,7 @@ export class UnitAnimSpirite extends Container {
   }
   const buff = unit.creature?.buffs;
   if (!buff || buff.length === 0) {
-    console.warn(`No buffs found for unit: ${unit.name} ${unit.id}`);
+   // console.warn(`No buffs found for unit: ${unit.name} ${unit.id}`);
     return;
   }
   const statusIcons = animUnit.statusIcons;
