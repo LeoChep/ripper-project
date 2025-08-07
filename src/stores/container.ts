@@ -1,3 +1,4 @@
+import { golbalSetting } from "@/core/golbalSetting";
 import { defineStore } from "pinia";
 import * as PIXI from "pixi.js";
 let container = null as PIXI.Container<PIXI.ContainerChild> | null;
@@ -10,10 +11,10 @@ const layers = {
   controllerLayer: null as PIXI.IRenderLayer | null,
 };
 export const getContainer = () => {
-  return container;
+  return golbalSetting.rootContainer;
 };
 export const getLayers = () => {
-  return layers;
+  return golbalSetting.rlayers
 };
 export const setContainer = (c: PIXI.Container<PIXI.ContainerChild> | null) => {
   container = c;

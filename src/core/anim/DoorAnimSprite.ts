@@ -2,6 +2,7 @@ import { Container, Sprite, Assets } from "pixi.js";
 import type { Door } from "../units/Door";
 import { getDoorSvg } from "@/utils/utils";
 import { useTalkStateStore } from "@/stores/talkStateStore";
+import { golbalSetting } from "../golbalSetting";
 
 export class DoorAnimSprite extends Container {
   // 门的状态，true 表示打开，false 表示关闭
@@ -92,9 +93,15 @@ export const createDoorAnimSpriteFromDoor = async (door: Door) => {
     console.log("门被点击了，切换状态");
     doorAnimSprite.isOpen = !doorAnimSprite.isOpen;
     doorAnimSprite.owner.isOpen = doorAnimSprite.isOpen;
-    doorAnimSprite.owner.wall.useable = !doorAnimSprite.isOpen;
+    const wall = golbalSetting.map?.edges.find((edge) => {
+      return edge.id === doorAnimSprite.linkedId;
+    });
+    if (!wall) {
+      console.warn("未找到对应的墙体，无法更新墙体状态");
+      return;
+    }
+    wall.useable = !doorAnimSprite.isOpen;
     console.log("门状态切换为:", doorAnimSprite);
- 
   });
   return doorAnimSprite;
 };

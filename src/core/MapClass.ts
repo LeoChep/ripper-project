@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { createDoorFromDoorObj, Door } from "./units/Door";
 
 // 单个区块（chunk）
 export interface TiledMapChunk {
@@ -94,7 +95,7 @@ export class TiledMap {
   }> = [];
   textures?: PIXI.Sprite;
   sprites: any[] = [];
-  doors: any[] = [];
+  doors: Door[] = [];
   constructor(data: any, textures: any) {
     this.compressionlevel = data.compressionlevel;
     this.height = data.height;
@@ -199,7 +200,7 @@ export class TiledMap {
               edges.push(edge);
               if (objectsGroup.name === "door") {
                 // edge.onlyBlock=true;
-                this.doors.push(edge);
+                this.doors.push(createDoorFromDoorObj(edge));
               }
             }
             // 处理最后一个点与第一个点的连线

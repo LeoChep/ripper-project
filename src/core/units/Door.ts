@@ -5,7 +5,7 @@ export class Door {
   public linkedId: number;
   public isOpen: boolean = false;
   public doorSprite: PIXI.Container | null;
-  public wall: any;
+
   public x: number;
   public y: number;
 
@@ -14,10 +14,8 @@ export class Door {
     this.doorSprite = null;
     this.x = x;
     this.y = y;
-    this.wall = golbalSetting.map?.edges.find((edge) => {
-      return edge.id === linkedId;
-    });
-    console.log("Door created at:", x, y, "linkedId:", linkedId, this.wall);
+ 
+    console.log("Door created at:", x, y, "linkedId:", linkedId);
 
     // this.doorSprite.on('pointerdown', this.toggle.bind(this));
   }

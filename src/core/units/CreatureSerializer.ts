@@ -2,6 +2,7 @@ import type { Creature, CreatureOptions } from "./Creature";
 import type { Trait } from "../trait/Trait";
 import type { Power } from "../power/Power";
 import type { Weapon } from "./Weapon";
+import { BuffSerializer } from "../buff/BuffSerializer";
 
 export class CreatureSerializer {
   /**
@@ -52,6 +53,7 @@ export class CreatureSerializer {
       weapons: creature.weapons
         ? this.serializeWeapons(creature.weapons)
         : undefined,
+      buffs: creature.buffs ? BuffSerializer.serializeArray(creature.buffs) : [],
     };
   }
 
@@ -74,7 +76,7 @@ export class CreatureSerializer {
    */
   private static serializePowers(powers: Power[]): any[] {
     return powers.map((power) => {
-       power.keyWords = power.keyWords || [];
+      power.keyWords = power.keyWords || [];
       return {
         name: power.name,
         displayName: power.displayName,

@@ -56,9 +56,9 @@ export const checkPassiable = (
     return false;
   }
 
-  console.log(
-    `检查可视性: 单位位置 (${unit.x}, ${unit.x}), 目标位置 (${x}, ${y})`
-  );
+  // console.log(
+  //   `检查可视性: 单位位置 (${unit.x}, ${unit.x}), 目标位置 (${x}, ${y})`
+  // );
   // 检查单位是否在地图上
   let passiable = true;
   let testx = x;

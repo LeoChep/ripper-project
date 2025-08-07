@@ -19,6 +19,7 @@ export const d1 = {
     for (let i = 0; i < variables.length; i++) {
       d1.variables.set(variables[i].name, variables[i].value);
     }
+    d1.map= golbalSetting.map;
   },
   getVariable(key: string): any {
     if (!d1.variables.has(key)) {

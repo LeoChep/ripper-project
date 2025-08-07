@@ -42,7 +42,9 @@ import * as envSetting from '@/core/envSetting'
 import { golbalSetting } from '@/core/golbalSetting'
 import { CreatureSerializer } from '@/core/units/CreatureSerializer'
 import { DramaSystem } from '@/core/system/DramaSystem'
-
+import { BuffInterface } from '@/core/buff/BuffInterface'
+import { BuffSerializer } from '@/core/buff/BuffSerializer'
+import { DoorSerializer } from '@/core/units/DoorSerializer'
 const appSetting = envSetting.appSetting;
 onMounted(async () => {
     const app = new PIXI.Application();
@@ -125,6 +127,18 @@ const initByMap = async (mapPassiable) => {
     const mapView = mapPassiable.textures;
     drawMap(mapView, container, rlayers);
     console.log(units)
+
+
+    //创建门
+    const doors = mapPassiable.doors;
+    doors.forEach(async (door) => {
+
+        const doorSprite = await createDoorAnimSpriteFromDoor(door)
+        container.addChild(doorSprite);
+        rlayers.controllerLayer.attach(doorSprite);
+    })
+
+    //创建单位
     let createEndPromise = []
     units.forEach((unit) => {
         const promise = generateAnimSprite(unit, container, rlayers, mapPassiable)
@@ -133,15 +147,6 @@ const initByMap = async (mapPassiable) => {
     if (createEndPromise.length > 0)
         await Promise.all(createEndPromise);
     mapPassiable.sprites = units;
-
-    //创建门
-    const doors = mapPassiable.doors;
-    doors.forEach(async (obj) => {
-        const door = createDoorFromDoorObj(obj);
-        const doorSprite = await createDoorAnimSpriteFromDoor(door)
-        container.addChild(doorSprite);
-        rlayers.controllerLayer.attach(doorSprite);
-    })
     const characterStore = useCharacterStore();
     units.forEach((unit) => {
         if (unit.party === 'player') {
@@ -165,7 +170,7 @@ const saveGameState = () => {
     try {
         console.log('保存游戏状态', golbalSetting.map);
         const map = golbalSetting.map;
-        const doors = map.doors;
+        const doors = DoorSerializer.serializeArray(map.doors);
         const edges = map.edges;
         const sprites = map.sprites.map(sprite => {
             return {
@@ -272,7 +277,16 @@ const loadGameState = async () => {
         const url = getMapAssetFile('A')
         const mapTexture = await PIXI.Assets.load(url);
         map.textures = mapTexture;
-        map.doors = gameState.doors || [];
+        //door 反序列化
+
+       
+        if (gameState.doors && gameState.doors.length > 0) {
+            map.doors = DoorSerializer.deserializeArray(gameState.doors);
+            console.log('恢复的门数据:', map.doors);
+        } else {
+            map.doors = [];
+        }
+ 
         map.edges = gameState.edges || [];
 
         map.sprites = createUnitsFromMapSprites(gameState.sprites);
@@ -281,9 +295,21 @@ const loadGameState = async () => {
             if (savedSprite && savedSprite.creature) {
                 sprite.party = savedSprite.party; // 确保有 party 属性
                 sprite.unitTypeName = savedSprite.unitTypeName;
-                sprite.creature = savedSprite.creature
+                sprite.creature = savedSprite.creature;
+                console.log('恢复的角色数据:', sprite.creature.buffs);
+                loadTraits(sprite, sprite.creature);
+                loadPowers(sprite, sprite.creature);
             }
         });
+        for (let i = 0; i < map.sprites.length; i++) {
+
+            const sprite = map.sprites[i];
+            const buffs = sprite.creature.buffs || [];
+            const deserializedBuffs = await BuffSerializer.deserializeArray(buffs);
+            sprite.creature.buffs = deserializedBuffs;
+            console.log('恢复的角色数据:', sprite.creature);
+        }
+
 
         await initByMap(map)
         const vars = gameState.dramaRecord.recorders || [];
@@ -379,12 +405,10 @@ const generateAnimSprite = async (unit, container, rlayers, mapPassiable) => {
     console.log('generateAnimSprite', unit)
     const animSpriteUnit = await createAnimSpriteUnits(unit.unitTypeName, unit);
 
-    const unitCreature = unit.creature;
-    loadTraits(unit, unitCreature);
-    loadPowers(unit, unitCreature);
+
     unit.animUnit = animSpriteUnit;
     animSpriteUnit.zIndex = envSetting.zIndexSetting.spriteZIndex;
-    unit.creature = unitCreature;
+
     console.log('generateAnimSprite', unit, animSpriteUnit)
     addAnimSpriteUnit(unit, container, rlayers, mapPassiable);
     animSpriteUnit.x = Math.round(unit.x / 64) * 64;
@@ -402,6 +426,11 @@ const createUnitCreature = async (unitTypeName, unit) => {
     }
 
     const creature = createCreature(json);
+    const unitCreature = creature
+    unit.creature = unitCreature;
+    loadTraits(unit, unitCreature);
+    loadPowers(unit, unitCreature);
+
     return creature;
 }
 const createAnimSpriteUnits = async (unitTypeName, unit) => {

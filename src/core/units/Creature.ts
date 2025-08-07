@@ -71,6 +71,7 @@ export interface CreatureOptions {
     notes?: string[];
     powers?: Power[];
     weapons?: Weapon[];
+    buffs?: BuffInterface[];
 }
 
 export class Creature {
@@ -143,7 +144,8 @@ export class Creature {
         this.feats = options.feats || [];
         this.notes = options.notes || [];
         this.powers = options.powers || [];
-        this.weapons = options.weapons;
+        this.weapons = options.weapons||[];
+        this.buffs = options.buffs || [];
     }
 }
 
