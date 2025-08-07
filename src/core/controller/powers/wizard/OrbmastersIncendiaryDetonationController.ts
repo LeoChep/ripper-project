@@ -92,6 +92,8 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
         selected.y,
         1
       );
+
+      
       resolveCallback({});
     } else {
       resolveCallback(result);

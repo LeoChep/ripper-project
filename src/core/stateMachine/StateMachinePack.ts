@@ -27,6 +27,7 @@ export class StateMachinePack {
     const machine = this.getMachine(name);
     const animUnit = this.owner.animUnit;
     if (animUnit) {
+      // console.log('执行状态机动作', name, '单位位置:', this.owner, animUnit);
       animUnit.x = this.owner.x;
       animUnit.y = this.owner.y;
       // console.log(
@@ -43,9 +44,5 @@ export class StateMachinePack {
       console.warn(`状态机 ${name} 不存在`);
     }
   }
-  public startPlay(): void {
-    setInterval(() => {
-      this.doAction();
-    }, 1000 / 30); // 每秒60帧
-  }
+ 
 }

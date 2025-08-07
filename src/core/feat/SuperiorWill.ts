@@ -3,7 +3,7 @@ import { Trait, TraitOptions } from "../trait/Trait";
 import type { Unit } from "../units/Unit";
 
 export class SuperiorWill extends Trait {
-  name = "Superior Will";
+  name = "SuperiorWill";
   displayName = "卓越意志";
   description = "增加意志值";
   icon = "superior_will";

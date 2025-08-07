@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { golbalSetting } from "../golbalSetting";
 
 export class Door {
   public linkedId: number;
@@ -8,12 +9,16 @@ export class Door {
   public x: number;
   public y: number;
 
-  constructor(linkedId: number, x: number, y: number, wall: any) {
+  constructor(linkedId: number, x: number, y: number) {
     this.linkedId = linkedId;
     this.doorSprite = null;
     this.x = x;
     this.y = y;
-    this.wall = wall;
+    this.wall = golbalSetting.map?.edges.find((edge) => {
+      return edge.id === linkedId;
+    });
+    console.log("Door created at:", x, y, "linkedId:", linkedId, this.wall);
+
     // this.doorSprite.on('pointerdown', this.toggle.bind(this));
   }
 
@@ -24,5 +29,7 @@ export class Door {
 export function createDoorFromDoorObj(obj: any): Door {
   const x = (obj.x1 + obj.x2) / 2;
   const y = (obj.y1 + obj.y2) / 2;
-  return new Door(obj.id, x, y, obj);
+  const door= new Door(obj.id, x, y);
+  door.isOpen = obj.useable === false ? true : false;
+  return door;
 }

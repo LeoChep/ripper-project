@@ -1,0 +1,5 @@
+0、保存系统
+1、增加区域特效 effectArea
+2、优化事件系统，使用可被持久的event类，event对象的静态属性为args（args里只有可以被持久化的）、
+    achiveID（事件类型id，用于通过一个类图来检索event的pojo创建为可以被hook的对象的方法，创建对应的eventHandle）
+    hook中不得使用this

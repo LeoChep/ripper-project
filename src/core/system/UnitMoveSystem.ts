@@ -34,6 +34,7 @@ export const checkPassiable = (
   let passiable = true;
   if (mapPassiable) {
     const edges = mapPassiable.edges;
+    console.log("检查通行性: 单位位置", prex, prey, "目标位置", x, y,mapPassiable);
     // 检查是否穿过边
     if (edges) {
       // console.log(edges)

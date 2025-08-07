@@ -46,7 +46,6 @@ export class CharacterOutCombatController {
         }
         this.unitMove(e);
       });
-      this.container.addChild(ms);
     } else {
       console.warn('Map sprite ("map") not found in container.');
     }

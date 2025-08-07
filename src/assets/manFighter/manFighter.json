@@ -64,7 +64,7 @@
     {
       "name": "LungingStrike",
       "displayName": "突刺击",
-      "type": "atwill",
+      "useType": "atwill",
       "actionType": "standard",
       "range": null,
       "target": null,
@@ -76,7 +76,7 @@
       {
 "name": "FunnelingFlurry",
 "displayName": "流动疾风斩",
-"type": "encounter",
+"useType": "encounter",
 "actionType": "standard",
 "range": null,
 "target": null,
@@ -88,7 +88,7 @@
     {
       "name": "ShieldEdgeBlock",
       "displayName": "盾缘阻挡",
-      "type": "encounter",
+      "useType": "encounter",
       "action": "reaction",
       "range": null,
       "target": null,

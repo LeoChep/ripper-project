@@ -26,10 +26,7 @@ export class Power {
   postEffect: boolean = true;
   postSpecial: boolean = true;
   autoGenChatPowerCard: boolean = true;
-  sustain: { actionType: string; detail: string } = {
-    actionType: "none",
-    detail: "",
-  };
+
   target: string = "One Creature";
   trigger: string = "";
   requirement: string = "";

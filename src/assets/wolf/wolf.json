@@ -77,7 +77,7 @@
     {
       "name": "IceRays",
       "displayName": "冰冻射线",
-      "type": "encounter",
+      "useType": "encounter",
       "actionType": "standard",
       "range": null,
       "target": null,
@@ -89,7 +89,7 @@
     {
       "name": "Orbmaster's Incendiary Detonation",
       "displayName": "法珠大师之爆炸燃烧弹",
-      "type": "encounter",
+      "useType": "encounter",
       "actionType": "standard",
       "range": null,
       "target": null,
@@ -101,7 +101,7 @@
     {
       "name": "Freezing Burst",
       "displayName": "爆裂冰雹",
-      "type": "atwill",
+      "useType": "atwill",
       "actionType": "standard",
       "range": null,
       "target": null,
@@ -113,7 +113,7 @@
     {
       "name": "Magic Missile",
       "displayName": "魔法飞弹",
-      "type": "atwill",
+      "useType": "atwill",
       "actionType": "standard",
       "range": null,
       "target": null,

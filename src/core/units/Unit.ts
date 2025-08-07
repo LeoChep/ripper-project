@@ -68,40 +68,40 @@ export class Unit {
   }
 }
 
-export async function loadTraits(unit: Unit, unitCreated: Creature) {
-  if (unitCreated.traits.length > 0) {
-    for (let i = 0; i < unitCreated.traits.length; i++) {
+export async function loadTraits(unit: Unit, unitCreature: Creature) {
+  if (unitCreature.traits.length > 0) {
+    for (let i = 0; i < unitCreature.traits.length; i++) {
       const loadTrait = await TriatSystem.getInstance().createTrait(
-        unitCreated.traits[i],
+        unitCreature.traits[i],
         unit
       );
       if (loadTrait) {
-        unitCreated.traits[i] = loadTrait; // 替换为加载后的 Trait 实例
+        unitCreature.traits[i] = loadTrait; // 替换为加载后的 Trait 实例
       } else {
         console.warn(`Trait ${unit.traits[i].name} could not be loaded.`);
       }
     }
   }
-    if (unitCreated.feats.length > 0) {
-    for (let i = 0; i < unitCreated.feats.length; i++) {
+    if (unitCreature.feats.length > 0) {
+    for (let i = 0; i < unitCreature.feats.length; i++) {
       const loadTrait = await TriatSystem.getInstance().createTrait(
-        unitCreated.feats[i],
+        unitCreature.feats[i],
         unit,
         'feat'
       );
       if (loadTrait) {
-        unitCreated.feats[i] = loadTrait; // 替换为加载后的 Trait 实例
+        unitCreature.feats[i] = loadTrait; // 替换为加载后的 Trait 实例
       } else {
-        console.warn(`Trait ${unitCreated.feats[i].name} could not be loaded.`);
+        console.warn(`Trait ${unitCreature.feats[i].name} could not be loaded.`);
       }
     }
   }
 }
-export async function loadPowers(unit: Unit, unitCreated: Creature) {
+export async function loadPowers(unit: Unit, unitCreature: Creature) {
 
-  if (unitCreated.powers.length > 0) {
-    for (let i = 0; i < unitCreated.powers.length; i++) {
-        const powerName = unitCreated.powers[i].name;
+  if (unitCreature.powers.length > 0) {
+    for (let i = 0; i < unitCreature.powers.length; i++) {
+        const powerName = unitCreature.powers[i].name;
         if (!powerName) {
             console.warn("powerName is required.");
             return null;
@@ -112,7 +112,7 @@ export async function loadPowers(unit: Unit, unitCreated: Creature) {
             continue
         }
 
-        unitCreated.powers[i] = power; // 替换为加载后的 Power 实例
+        unitCreature.powers[i] = power; // 替换为加载后的 Power 实例
     }
   }
   

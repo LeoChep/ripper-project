@@ -43,7 +43,8 @@ export class IceRaysController extends AbstractPwoerController {
     iceRayAttack.type = "ranged";
     iceRayAttack.action = "attack";
     iceRayAttack.range = 10; // Example range
-    iceRayAttack.attackBonus = AbilityValueSystem.getInstance().getLevelModifier(unit); // Example attack bonus
+    iceRayAttack.attackBonus =
+      AbilityValueSystem.getInstance().getLevelModifier(unit); // Example attack bonus
     iceRayAttack.target = "enemy";
     iceRayAttack.damage = "1d10"; // Example damage
     const modifer = AbilityValueSystem.getInstance().getAbilityModifier(
@@ -52,7 +53,10 @@ export class IceRaysController extends AbstractPwoerController {
     );
     iceRayAttack.attackBonus += modifer;
     iceRayAttack.attackBonus += weapon?.bonus ?? 0; // 添加武器加值
-    iceRayAttack.attackBonus += ModifierSystem.getInstance().getValueStack(unit,'spellAttack').finalValue; // 精准法器
+    iceRayAttack.attackBonus += ModifierSystem.getInstance().getValueStack(
+      unit,
+      "spellAttack"
+    ).finalValue; // 精准法器
     // iceRayAttack.damage += `+${  weapon?.bonus ?? 0}+(${modifer})`; // 添加攻击加值到伤害
     console.log("icerays attack", iceRayAttack);
     const grids = generateWays(
@@ -106,26 +110,26 @@ export class IceRaysController extends AbstractPwoerController {
                 takeDamage(damage, targetUnit);
                 createDamageAnim(damage.toString(), targetUnit);
                 const hitEffect = new Immobilized();
-                hitEffect.source= "IceRays";
+                hitEffect.source = "IceRays";
                 hitEffect.owner = targetUnit;
                 hitEffect.giver = unit;
                 BuffSystem.getInstance().addTo(hitEffect, targetUnit);
                 new EndTurnRemoveBuffEvent(
                   unit,
                   hitEffect,
-                  2//下回合移除
-                 ).hook();
+                  2 //下回合移除
+                ).hook();
               } else {
                 const missEffect = new Slowed();
                 missEffect.source = "IceRays";
                 missEffect.owner = targetUnit;
                 missEffect.giver = unit;
                 BuffSystem.getInstance().addTo(missEffect, targetUnit);
-                  new EndTurnRemoveBuffEvent(
+                new EndTurnRemoveBuffEvent(
                   unit,
                   missEffect,
-                  2//下回合移除
-                 ).hook();
+                  2 //下回合移除
+                ).hook();
               }
               resolve();
             });

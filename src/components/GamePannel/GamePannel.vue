@@ -1,13 +1,17 @@
 <template>
-
     <div class="game-pannel" id="game-pannel"></div>
     <!-- <img :src="hitURL"> -->
-    <CreatureInfo :creature="selectedCreature" :unit="selectedUnit" v-if="selectedCreature" @close="selectedCreature = null" />
+    <CreatureInfo :creature="selectedCreature" :unit="selectedUnit" v-if="selectedCreature"
+        @close="selectedCreature = null" />
     <TalkPannel />
     <CharacterPannel />
-    
-     <MessageTipTool />
+    <MessageTipTool />
 
+    <!-- 保存和读取按钮 -->
+    <div class="game-controls">
+        <button class="save-button" @click="saveGameState">保存游戏</button>
+        <button class="load-button" @click="loadGameState">读取游戏</button>
+    </div>
 </template>
 
 <script setup>
@@ -23,7 +27,7 @@ import * as PIXI from 'pixi.js'
 import { UnitRightEvent } from '@/core/controller/UnitRightEventController'
 import { TiledMap } from '@/core/MapClass'
 import { UnitAnimSpirite } from '@/core/anim/UnitAnimSprite'
-import { createUnitsFromMapSprites, loadPowers, loadTraits } from '@/core/units/Unit'
+import { createUnitsFromMapSprites, loadPowers, loadTraits, Unit } from '@/core/units/Unit'
 import { AnimMetaJson } from '@/core/anim/AnimMetaJson'
 import { createCreature } from '@/core/units/Creature'
 import { setContainer, setLayer } from '@/stores/container'
@@ -36,6 +40,8 @@ import { createDoorFromDoorObj } from '@/core/units/Door'
 import { createDoorAnimSpriteFromDoor } from '@/core/anim/DoorAnimSprite'
 import * as envSetting from '@/core/envSetting'
 import { golbalSetting } from '@/core/golbalSetting'
+import { CreatureSerializer } from '@/core/units/CreatureSerializer'
+import { DramaSystem } from '@/core/system/DramaSystem'
 
 const appSetting = envSetting.appSetting;
 onMounted(async () => {
@@ -44,8 +50,7 @@ onMounted(async () => {
 
     document.getElementById("game-pannel").appendChild(app.canvas);
 
-    //加载地图
-    const mapPassiable = await loadMap('A')
+    golbalSetting.app = app;
 
     //初始化容器
     const rlayers = createRenderLayers(app)
@@ -54,14 +59,71 @@ onMounted(async () => {
     setContainer(container);
     setLayer(rlayers);
     //绘制迷雾
-  // drawFog(mapPassiable, rlayers, container, app)
+    // drawFog(mapPassiable, rlayers, container, app)
     //绘制地图
+    //加载地图
+    const mapPassiable = await loadMap('A')
+    golbalSetting.map = mapPassiable;
+
+    const spritesOBJ = mapPassiable.sprites
+    console.log('加载的地图数据:', mapPassiable);
+    const units = createUnitsFromMapSprites(spritesOBJ, mapPassiable);
+    const createCreatureEndPromise = []
+    units.forEach((unit) => {
+        unit.y -= 64;
+        const creatCreature = new Promise(async (resolve, reject) => {
+            const unitCreature = await createUnitCreature(unit.unitTypeName, unit);
+            unit.creature = unitCreature;
+            resolve()
+        });
+        createCreatureEndPromise.push(creatCreature);
+    });
+    await Promise.all(createCreatureEndPromise);
+    mapPassiable.sprites = units;
+    console.log('加载的地图数据:', mapPassiable);
+    initByMap(mapPassiable);
+    console.log('加载的地图数据2:', mapPassiable);
+
+
+    //绘制格子
+    drawGrid(app, rlayers);
+
+    //增加键盘监听
+    addListenKeyboard();
+
+
+    //测试剧本
+
+    //初始化玩家角色
+
+    //console.log('角色数据:', characterStore.characters);
+    const characterOutCombatController = new CharacterOutCombatController(rlayers, container, mapPassiable)
+
+
+
+    setInterval(() => {
+        const units = golbalSetting.map.sprites;
+        units.forEach((unit) => {
+            unit.stateMachinePack.doAction();
+        })
+    }, 1000 / 30); // 每秒60帧
+
+    d1.map = mapPassiable;
+
+    DramaSystem.getInstance().setDramaUse('d1');
+    DramaSystem.getInstance().play();
+
+
+})
+const initByMap = async (mapPassiable) => {
+    //创建单位
+    golbalSetting.map = mapPassiable;
+    const container = golbalSetting.rootContainer;
+
+    const rlayers = golbalSetting.rlayers;
+    const units = mapPassiable.sprites
     const mapView = mapPassiable.textures;
     drawMap(mapView, container, rlayers);
-
-    //创建单位
-    const spritesOBJ = mapPassiable.sprites
-    const units = createUnitsFromMapSprites(spritesOBJ, mapPassiable);
     console.log(units)
     let createEndPromise = []
     units.forEach((unit) => {
@@ -80,36 +142,14 @@ onMounted(async () => {
         container.addChild(doorSprite);
         rlayers.controllerLayer.attach(doorSprite);
     })
-
-
-    //绘制格子
-    drawGrid(app, rlayers);
-
-    //增加键盘监听
-    addListenKeyboard(container);
-
-
-    //测试剧本
-
-    //初始化玩家角色
     const characterStore = useCharacterStore();
     units.forEach((unit) => {
         if (unit.party === 'player') {
             characterStore.addCharacter(unit);
         }
-        unit.stateMachinePack.startPlay();
     });
-    console.log('角色数据:', characterStore.characters);
-    const characterOutCombatController = new CharacterOutCombatController(rlayers, container, mapPassiable)
-    CharacterOutCombatController.instance = characterOutCombatController;
-    d1.map = mapPassiable;
-    golbalSetting.map = mapPassiable;
-    d1.start();
-    console.log('app', app.stage)
 
-
-})
-
+}
 const drawFog = (mapPassiable, rlayers, container, app) => {
     //增加遮罩
     console.log('drawFog', app)
@@ -117,8 +157,152 @@ const drawFog = (mapPassiable, rlayers, container, app) => {
     fogSystem.autoDraw();
 }
 
-const selectedCreature = ref(null) // 新增
-const selectedUnit = ref(null) // 新增
+const selectedCreature = ref(null)
+const selectedUnit = ref(null)
+
+// 添加保存游戏状态的方法
+const saveGameState = () => {
+    try {
+        console.log('保存游戏状态', golbalSetting.map);
+        const map = golbalSetting.map;
+        const doors = map.doors;
+        const edges = map.edges;
+        const sprites = map.sprites.map(sprite => {
+            return {
+                id: sprite.id,
+                x: sprite.x,
+                y: sprite.y,
+                width: sprite.width,
+                height: sprite.height,
+                name: sprite.name,
+                unitTypeName: sprite.unitTypeName,
+                party: sprite.party,
+                creature: CreatureSerializer.serializeCreature(sprite.creature)
+            };
+        });
+        const dramaRecord = DramaSystem.getInstance().getRercords();
+        // 收集需要保存的游戏数据
+        const gameState = {
+
+            // 保存完整的地图数据
+            doors: doors,
+            edges: edges,
+            sprites: sprites,
+            dramaRecord: dramaRecord,
+            timestamp: Date.now() // 保存时间戳
+        };
+
+        // 保存到本地存储
+        localStorage.setItem('gameState', JSON.stringify(gameState));
+
+        // 下载 GameState 文件
+        const dataStr = JSON.stringify(gameState, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+
+        const downloadLink = document.createElement('a');
+        downloadLink.href = url;
+        downloadLink.download = `gameState_${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+
+        // 释放 URL 对象
+        URL.revokeObjectURL(url);
+
+        // 显示保存成功消息
+        console.log('游戏状态已保存', gameState);
+        alert('游戏已保存并下载到本地!');
+
+    } catch (error) {
+        console.error('保存游戏状态失败:', error);
+        alert('保存失败，请重试!');
+    }
+};
+
+// 添加读取游戏状态的方法
+const loadGameState = async () => {
+    try {
+        const savedState = localStorage.getItem('gameState');
+
+        if (!savedState) {
+            alert('没有找到存档文件!');
+            return;
+        }
+
+        const gameState = JSON.parse(savedState);
+        const characterStore = useCharacterStore();
+
+        // 确认是否要读取存档
+        const confirmLoad = confirm(`是否要读取存档?\n保存时间: ${new Date(gameState.timestamp).toLocaleString()}`);
+        if (!confirmLoad) {
+            return;
+        }
+        //
+        DramaSystem.getInstance().stop();
+
+        // 清空当前角色数据
+        characterStore.characters = [];
+        const rootContainer = golbalSetting.rootContainer;
+        const clearContainer = (container) => {
+            if (container.children) {
+                const children = container.children;
+                for (let i = container.children.length - 1; i >= 0; i--) {
+                    const child = container.children[i];
+                    children.push(child);
+
+                }
+                children.forEach((child) => {
+                    clearContainer(child);
+                });
+                container.destroy()
+            }
+            else {
+                // container.parent.removeChild(container);
+                container.destroy();
+            }
+        }
+        clearContainer(rootContainer);
+        console.log('清空容器完成', rootContainer.parent);
+        rootContainer.destroy();
+        characterStore.clearCharacters();
+        createContainer(golbalSetting.app, golbalSetting.rlayers);
+        // 恢复角色数据
+        const map = {}
+        const url = getMapAssetFile('A')
+        const mapTexture = await PIXI.Assets.load(url);
+        map.textures = mapTexture;
+        map.doors = gameState.doors || [];
+        map.edges = gameState.edges || [];
+
+        map.sprites = createUnitsFromMapSprites(gameState.sprites);
+        map.sprites.forEach((sprite, index) => {
+            const savedSprite = gameState.sprites[index];
+            if (savedSprite && savedSprite.creature) {
+                sprite.party = savedSprite.party; // 确保有 party 属性
+                sprite.unitTypeName = savedSprite.unitTypeName;
+                sprite.creature = savedSprite.creature
+            }
+        });
+
+        await initByMap(map)
+        const vars = gameState.dramaRecord.recorders || [];
+        DramaSystem.getInstance().records = vars;
+        DramaSystem.getInstance().setDramaUse(gameState.dramaRecord.use);
+        DramaSystem.getInstance().play();
+        new CharacterOutCombatController(golbalSetting.rlayers, golbalSetting.rootContainer, map);
+
+        console.log('恢复的地图数据2:', map);
+        console.log('游戏状态已读取', gameState);
+        console.log('恢复的角色数据:', characterStore.characters);
+        alert('游戏已读取!');
+
+    } catch (error) {
+        console.error('读取游戏状态失败:', error);
+        alert('读取失败，存档文件可能已损坏!');
+    }
+};
+
 const createRenderLayers = (app) => {
     const rlayers = {}
     rlayers.basicLayer = new PIXI.RenderLayer()
@@ -192,9 +376,10 @@ const drawMap = (mapView, container, rlayers) => {
 }
 
 const generateAnimSprite = async (unit, container, rlayers, mapPassiable) => {
-
+    console.log('generateAnimSprite', unit)
     const animSpriteUnit = await createAnimSpriteUnits(unit.unitTypeName, unit);
-    const unitCreature = await createUnitCreature(unit.unitTypeName, unit);
+
+    const unitCreature = unit.creature;
     loadTraits(unit, unitCreature);
     loadPowers(unit, unitCreature);
     unit.animUnit = animSpriteUnit;
@@ -203,7 +388,7 @@ const generateAnimSprite = async (unit, container, rlayers, mapPassiable) => {
     console.log('generateAnimSprite', unit, animSpriteUnit)
     addAnimSpriteUnit(unit, container, rlayers, mapPassiable);
     animSpriteUnit.x = Math.round(unit.x / 64) * 64;
-    animSpriteUnit.y = Math.round(unit.y / 64) * 64 - 64;
+    animSpriteUnit.y = Math.round(unit.y / 64) * 64;
     unit.x = animSpriteUnit.x;
     unit.y = animSpriteUnit.y;
     return unit
@@ -223,6 +408,7 @@ const createAnimSpriteUnits = async (unitTypeName, unit) => {
     // 这里可以根据 unitTypeName 创建不同的动画精灵
     // 例如，如果 unitTypeName 是 'wolf'，则加载对应的动画精    
     //读取animation meta json
+    console.log('创建动画精灵单位:', unitTypeName, unit);
     const testJsonFetchPromise = getAnimMetaJsonFile(unitTypeName)
     const animMetaJson = new AnimMetaJson(await testJsonFetchPromise);
     //遍历获取所有动画组
@@ -269,27 +455,33 @@ const addAnimSpriteUnit = (unit, container, rlayers, mapPassiable) => {
     golbalSetting.spriteContainer.addChild(animSpriteUnit);
 }
 
-const addListenKeyboard = (container) => {
+const addListenKeyboard = () => {
+
     //监听键盘S键
     document.addEventListener('keydown', (event) => {
+        const container = golbalSetting.rootContainer;
+        console.log('keydown', event.key);
         if (event.key === 's') {
             container.y -= 64
         }
     });
     //监听键盘A键
     document.addEventListener('keydown', (event) => {
+        const container = golbalSetting.rootContainer;
         if (event.key === 'a') {
             container.x += 64
         }
     });
     //监听键盘D键
     document.addEventListener('keydown', (event) => {
+        const container = golbalSetting.rootContainer;
         if (event.key === 'd') {
             container.x -= 64
         }
     });
     //监听键盘W键
     document.addEventListener('keydown', (event) => {
+        const container = golbalSetting.rootContainer;
         if (event.key === 'w') {
             container.y += 64
         }
@@ -333,5 +525,50 @@ const drawGrid = (app, rlayers) => {
     width: 800px;
     height: 600px;
     background: white
+}
+
+.game-controls {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    z-index: 1000;
+}
+
+.save-button,
+.load-button {
+    padding: 10px 20px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    min-width: 100px;
+}
+
+.save-button {
+    background-color: #4CAF50;
+}
+
+.save-button:hover {
+    background-color: #45a049;
+}
+
+.save-button:active {
+    background-color: #3d8b40;
+}
+
+.load-button {
+    background-color: #2196F3;
+}
+
+.load-button:hover {
+    background-color: #1976D2;
+}
+
+.load-button:active {
+    background-color: #1565C0;
 }
 </style>

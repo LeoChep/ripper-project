@@ -1,9 +1,10 @@
-import type { Container } from "pixi.js";
+import type { Application, Container } from "pixi.js";
 // If you are using @pixi/layers, import IRenderLayer from there:
 import type { IRenderLayer } from "pixi.js";
 import { TiledMap } from "./MapClass";
 
 export const golbalSetting = {
+    app: null as null | Application,
     rootContainer: null as null | Container,
     spriteContainer: null as null | Container,
     mapContainer: null as null | Container,

@@ -3,7 +3,7 @@ import { Trait, TraitOptions } from "../trait/Trait";
 import type { Unit } from "../units/Unit";
 
 export class WeaponFocus extends Trait {
-  name = "Weapon Focus";
+  name = "WeaponFocus";
   displayName = "武器专攻";
   description = "";
   icon = "weapon_focus";

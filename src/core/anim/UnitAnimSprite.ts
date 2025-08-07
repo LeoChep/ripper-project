@@ -26,6 +26,7 @@ export class UnitAnimSpirite extends Container {
 
   constructor(unit: Unit | undefined) {
     super();
+
     this.owner = unit;
     // 可以在这里初始化你的自定义属性
     this.onRender = () => {
@@ -177,6 +178,7 @@ export class UnitAnimSpirite extends Container {
     // play the animation on a loop
     // animSprite.play();
     animSprite.label = name;
+    animSprite.anchor.set(0, 0); // 设置锚点为左上角，避免偏移
     this.addAnimation(name, animSprite);
   }
 }

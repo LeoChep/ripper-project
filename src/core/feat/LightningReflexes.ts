@@ -3,7 +3,7 @@ import { Trait, type TraitOptions } from "../trait/Trait";
 import type { Unit } from "../units/Unit";
 
 export class LightningReflexes extends Trait {
-  name = "Lightning Reflexes";
+  name = "LightningReflexes";
   displayName = "闪电反射";
   description = "增加反射";
   icon = "lightning_reflexes";

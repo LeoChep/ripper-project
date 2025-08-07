@@ -93,6 +93,8 @@ export const createDoorAnimSpriteFromDoor = async (door: Door) => {
     doorAnimSprite.isOpen = !doorAnimSprite.isOpen;
     doorAnimSprite.owner.isOpen = doorAnimSprite.isOpen;
     doorAnimSprite.owner.wall.useable = !doorAnimSprite.isOpen;
+    console.log("门状态切换为:", doorAnimSprite);
+ 
   });
   return doorAnimSprite;
 };

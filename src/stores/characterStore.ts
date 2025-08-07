@@ -1,4 +1,5 @@
 import type { Unit } from "@/core/units/Unit";
+
 let characterStore = {
   characters: [] as Unit[],
   show:true,
@@ -6,6 +7,9 @@ let characterStore = {
   selectedCharacter: null as Unit | null,
   addCharacter(character: Unit) {
     this.characters.push(character);
+  },
+  clearCharacters() {
+    this.characters = [];
   },
   setShow(show: boolean) {
     this.show = show;
