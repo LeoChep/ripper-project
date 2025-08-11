@@ -45,8 +45,9 @@ import { DramaSystem } from '@/core/system/DramaSystem'
 import { BuffInterface } from '@/core/buff/BuffInterface'
 import { BuffSerializer } from '@/core/buff/BuffSerializer'
 import { DoorSerializer } from '@/core/units/DoorSerializer'
-import * as InitiativeSystem  from '@/core/system/InitiativeSystem'
+import * as InitiativeSystem from '@/core/system/InitiativeSystem'
 import { CharacterCombatController } from '@/core/controller/CharacterCombatController'
+import { Saver } from '@/core/saver/Saver'
 const appSetting = envSetting.appSetting;
 onMounted(async () => {
     const app = new PIXI.Application();
@@ -170,40 +171,8 @@ const selectedUnit = ref(null)
 // 添加保存游戏状态的方法
 const saveGameState = () => {
     try {
-        console.log('保存游戏状态', golbalSetting.map);
-        const map = golbalSetting.map;
-        const doors = DoorSerializer.serializeArray(map.doors);
-        const edges = map.edges;
-        const sprites = map.sprites.map(sprite => {
-            return {
-                id: sprite.id,
-                x: sprite.x,
-                y: sprite.y,
-                width: sprite.width,
-                height: sprite.height,
-                name: sprite.name,
-                unitTypeName: sprite.unitTypeName,
-                party: sprite.party,
-                creature: CreatureSerializer.serializeCreature(sprite.creature)
-            };
-        });
-        const dramaRecord = DramaSystem.getInstance().getRercords();
-        const initRecord = InitiativeSystem.getInitRecord();
-        // 收集需要保存的游戏数据
-        const gameState = {
-
-            // 保存完整的地图数据
-            doors: doors,
-            edges: edges,
-            sprites: sprites,
-            dramaRecord: dramaRecord,
-            initiativeRecord: initRecord,
-            timestamp: Date.now() // 保存时间戳
-        };
-
-        // 保存到本地存储
-        localStorage.setItem('gameState', JSON.stringify(gameState));
-
+        Saver.saveGameState();
+        const gameState = Saver.gameState;
         // 下载 GameState 文件
         const dataStr = JSON.stringify(gameState, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -233,14 +202,11 @@ const saveGameState = () => {
 const loadGameState = async () => {
     try {
         const savedState = localStorage.getItem('gameState');
-
         if (!savedState) {
             alert('没有找到存档文件!');
             return;
         }
-
         const gameState = JSON.parse(savedState);
-        const characterStore = useCharacterStore();
 
         // 确认是否要读取存档
         const confirmLoad = confirm(`是否要读取存档?\n保存时间: ${new Date(gameState.timestamp).toLocaleString()}`);
@@ -249,96 +215,59 @@ const loadGameState = async () => {
         }
         //
         DramaSystem.getInstance().stop();
-
-        // 清空当前角色数据
-        characterStore.characters = [];
-        const rootContainer = golbalSetting.rootContainer;
-        const clearContainer = (container) => {
-            if (container.children) {
-                const children = container.children;
-                for (let i = container.children.length - 1; i >= 0; i--) {
-                    const child = container.children[i];
-                    children.push(child);
-
-                }
-                children.forEach((child) => {
-                    clearContainer(child);
-                });
-                container.destroy()
-            }
-            else {
-                // container.parent.removeChild(container);
-                container.destroy();
-            }
-        }
-        clearContainer(rootContainer);
-        console.log('清空容器完成', rootContainer.parent);
-        rootContainer.destroy();
-        characterStore.clearCharacters();
+        clear()
+        await Saver.loadGameState(gameState);
         createContainer(golbalSetting.app, golbalSetting.rlayers);
-        // 恢复角色数据
-        const map = {}
         const url = getMapAssetFile('A')
         const mapTexture = await PIXI.Assets.load(url);
+        const map = golbalSetting.map;
         map.textures = mapTexture;
-        //door 反序列化
-        if (gameState.doors && gameState.doors.length > 0) {
-            map.doors = DoorSerializer.deserializeArray(gameState.doors);
-            console.log('恢复的门数据:', map.doors);
-        } else {
-            map.doors = [];
-        }
- 
-        map.edges = gameState.edges || [];
-
-        map.sprites = createUnitsFromMapSprites(gameState.sprites);
-        map.sprites.forEach((sprite, index) => {
-            const savedSprite = gameState.sprites[index];
-            if (savedSprite && savedSprite.creature) {
-                sprite.party = savedSprite.party; // 确保有 party 属性
-                sprite.unitTypeName = savedSprite.unitTypeName;
-                sprite.creature = savedSprite.creature;
-                console.log('恢复的角色数据:', sprite.creature.buffs);
-                loadTraits(sprite, sprite.creature);
-                loadPowers(sprite, sprite.creature);
-            }
-        });
-        for (let i = 0; i < map.sprites.length; i++) {
-
-            const sprite = map.sprites[i];
-            const buffs = sprite.creature.buffs || [];
-            const deserializedBuffs = await BuffSerializer.deserializeArray(buffs);
-            sprite.creature.buffs = deserializedBuffs;
-            console.log('恢复的角色数据:', sprite.creature);
-        }
-
-
-        await initByMap(map)
-        const vars = gameState.dramaRecord.recorders || [];
-        DramaSystem.getInstance().records = vars;
-        DramaSystem.getInstance().setDramaUse(gameState.dramaRecord.use);
+        await initByMap(map);
         DramaSystem.getInstance().play();
-        if (gameState.initiativeRecord) {
-            InitiativeSystem.loadInitRecord(gameState.initiativeRecord);
+        if (InitiativeSystem.isInBattle()) {
+            CharacterCombatController.getInstance().inUse = true;
+        } else {
+            new CharacterOutCombatController(
+                golbalSetting.rlayers,
+                golbalSetting.rootContainer,
+                map
+            );
         }
-        if(InitiativeSystem.isInBattle()){
-          CharacterCombatController.getInstance().inUse=true;  
-        }else{
-        new CharacterOutCombatController(golbalSetting.rlayers, golbalSetting.rootContainer, map);
-
-        }
-
-        console.log('恢复的地图数据2:', map);
-        console.log('游戏状态已读取', gameState);
-        console.log('恢复的角色数据:', characterStore.characters);
-        alert('游戏已读取!');
-
+        console.log("恢复的地图数据2:", map);
+        console.log("游戏状态已读取", gameState);
+        // console.log("恢复的角色数据:", characterStore.characters);
+        alert("游戏已读取!");
     } catch (error) {
         console.error('读取游戏状态失败:', error);
         alert('读取失败，存档文件可能已损坏!');
     }
 };
-
+const clear = () => {
+    const characterStore = useCharacterStore();
+    characterStore.characters = [];
+    const rootContainer = golbalSetting.rootContainer;
+    const clearContainer = (container) => {
+        if (container.children) {
+            const children = container.children;
+            for (let i = container.children.length - 1; i >= 0; i--) {
+                const child = container.children[i];
+                children.push(child);
+            }
+            children.forEach((child) => {
+                clearContainer(child);
+            });
+            container.destroy()
+        }
+        else {
+            // container.parent.removeChild(container);
+            container.destroy();
+        }
+    }
+    clearContainer(rootContainer);
+    console.log('清空容器完成', rootContainer.parent);
+    rootContainer.destroy();
+    characterStore.clearCharacters();
+}
 const createRenderLayers = (app) => {
     const rlayers = {}
     rlayers.basicLayer = new PIXI.RenderLayer()

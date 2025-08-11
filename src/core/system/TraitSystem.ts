@@ -37,10 +37,11 @@ export class TriatSystem {
           (module) => module[traitName]
         );
     
+        
     }
     switch (traitName) {
       case "CombatChallenge":
-        return import("../trait/fighter/CombatChallenge").then(
+        return import("../trait/fighter/CombatChallenge/CombatChallenge").then(
           (module) => module.CombatChallenge
         );
     }

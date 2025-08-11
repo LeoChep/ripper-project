@@ -1,5 +1,6 @@
 import type { Modifier } from "../modifier/Modifier";
 import type { Unit } from "../units/Unit";
+import { UuidUtil } from "../utils/UuidUtil";
 
 export abstract class BuffInterface {
   uid: string = ""; // Buff的唯一标识符
@@ -14,6 +15,6 @@ name = "";
   source: string = ""; // Buff来源
   modifiers: Modifier[] = []; // Buff的修饰符列表
   constructor() {
-  
+     this.uid=UuidUtil.generate()
   }
 }

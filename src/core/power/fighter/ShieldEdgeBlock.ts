@@ -90,7 +90,7 @@ export class ShieldEdgeBlock extends Power {
       return Promise.resolve();
     };
     const event1 = { typeName: "hitCheckEvent", eventHandler: eventHanlder1 };
-    BattleEvenetSystem.getInstance().hookEvent(event1);
+   // BattleEvenetSystem.getInstance().hookEvent(event1);
   };
 }
 const getAttack = (unit: Unit) => {

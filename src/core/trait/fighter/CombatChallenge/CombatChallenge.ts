@@ -1,10 +1,10 @@
-import { Marked } from "../../buff/Marked";
+import { Marked } from "../../../buff/Marked";
 import { attackMovementToUnit } from "@/core/action/UnitAttack";
 import { golbalSetting } from "@/core/golbalSetting";
 import { BattleEvenetSystem } from "@/core/system/BattleEventSystem";
 import type { CreatureAttack } from "@/core/units/Creature";
 import type { Unit } from "@/core/units/Unit";
-import { Trait, TraitOptions } from "../Trait";
+import { Trait, TraitOptions } from "../../Trait";
 import {
   checkRectionUseful,
   useReaction,
@@ -96,7 +96,7 @@ export class CombatChallenge extends Trait {
       return Promise.resolve();
     };
     const event1 = { typeName: "attackEvent", eventHandler: eventHanlder1 };
-    BattleEvenetSystem.getInstance().hookEvent(event1);
+    //BattleEvenetSystem.getInstance().hookEvent(event1);
     const eventHandler2 = (attacker: Unit, target: Unit) => {
       if (!target) return Promise.resolve();
       if (this.owner === attacker) {
@@ -109,6 +109,6 @@ export class CombatChallenge extends Trait {
     };
 
     const event2 = { typeName: "attackEvent", eventHandler: eventHandler2 };
-    BattleEvenetSystem.getInstance().hookEvent(event2);
+    //BattleEvenetSystem.getInstance().hookEvent(event2);
   }
 }

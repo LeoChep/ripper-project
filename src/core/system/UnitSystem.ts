@@ -42,6 +42,11 @@ export class UnitSystem {
     });
     return target;
   }
+  getUnitById(id: string): Unit | null {
+    const map = golbalSetting.map;
+    if (!map) return null;
+    return map.sprites.find((sprite: Unit) => sprite.id === parseInt(id)) || null;
+  }
   constructor() {
     // 初始化逻辑
   }

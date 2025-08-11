@@ -1,5 +1,5 @@
 import type { BuffInterface } from "../buff/BuffInterface";
-import type { Unit } from "../units/Unit";
+import { Unit } from "../units/Unit";
 import {
   getDoorSvg,
   getStatusEffectsIcon,
@@ -13,11 +13,15 @@ import { ModifierSystem } from "./ModifierSystem";
 
 export class BuffSystem {
   static instance: BuffSystem | null = null;
+
   static getInstance() {
     if (!BuffSystem.instance) {
       BuffSystem.instance = new BuffSystem();
     }
     return BuffSystem.instance;
+  }
+   findBuffInUnit(unit:Unit,buffId:string){
+    return unit.creature?.buffs?.find((buff) => buff.uid === buffId);
   }
   async addTo(buff: BuffInterface, unit: Unit) {
     console.log("Adding buff:", buff.name, "to unit:", unit.name);
@@ -29,14 +33,14 @@ export class BuffSystem {
       unit.creature.buffs = [];
     }
     // 检查是否已存在相同的Buff
-    if (
-      unit.creature.buffs.some(
-        (existingBuff) => existingBuff.name === buff.name
-      )
-    ) {
-      console.warn(`Buff ${buff.name} is already applied to the unit.`);
-      return;
-    }
+    // if (
+    //   unit.creature.buffs.some(
+    //     (existingBuff) => existingBuff.name === buff.name
+    //   )
+    // ) {
+    //   console.warn(`Buff ${buff.name} is already applied to the unit.`);
+    //   return;
+    // }
     buff.owner = unit;
     unit.creature.buffs.push(buff);
     if (buff.modifiers.length > 0) {
@@ -99,4 +103,5 @@ async function removeIcon(buff: BuffInterface) {
     statusIcons[buff.name].destroy();
     delete statusIcons[buff.name];
   }
+ 
 }
