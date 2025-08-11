@@ -4,11 +4,11 @@ import { BuffSystem } from "../system/BuffSystem";
 import type { Unit } from "../units/Unit";
 import type { EventSerializeData } from "./EventSerializeData";
 import { EventSerializer } from "./EventSerializer";
-import type { GameEvent } from "./Event";
+import { GameEvent } from "./Event";
 import { UuidUtil } from "../utils/UuidUtil";
 import { UnitSystem } from "../system/UnitSystem";
 
-export class EndTurnRemoveBuffEvent implements GameEvent {
+export class EndTurnRemoveBuffEvent extends GameEvent {
   // 结束回合时移除增益效果事件
   static readonly type = "UnitEndTurnEvent";
   static readonly name = "EndTurnRemoveBuffEvent";
@@ -21,6 +21,7 @@ export class EndTurnRemoveBuffEvent implements GameEvent {
     turnCount: number,
     uid?: string
   ) {
+    super();
     this.endTurnUnit = endTurnUnit;
     this.buff = buff;
     this.turnCount = turnCount; // 记录回合数
@@ -30,7 +31,7 @@ export class EndTurnRemoveBuffEvent implements GameEvent {
       endTurnUnitId: this.endTurnUnit.id.toString(),
       buffId: this.buff.uid,
       turnCount: this.turnCount,
-      buffOwnerId: this?.buff?.owner?.id.toString()
+      buffOwnerId: this?.buff?.owner?.id.toString(),
     };
   }
   eventId: string;
@@ -65,7 +66,7 @@ export class EndTurnRemoveBuffEvent implements GameEvent {
     }
   };
 
-  getSerializer(): EventSerializer {
+  static getSerializer(): EventSerializer {
     return EndTurnRemoveBuffEventSerializer.getInstance();
   }
   hook = () => {
@@ -87,7 +88,8 @@ export class EndTurnRemoveBuffEventSerializer extends EventSerializer {
   }
 
   deserialize(data: EventSerializeData): EndTurnRemoveBuffEvent | null {
-    const { endTurnUnitId, buffOwnerId, buffId, turnCount } = data.eventData as any;
+    const { endTurnUnitId, buffOwnerId, buffId, turnCount } =
+      data.eventData as any;
     const endTurnUnit = UnitSystem.getInstance().getUnitById(endTurnUnitId);
     if (!endTurnUnit) return null;
     const buffOwner = UnitSystem.getInstance().getUnitById(buffOwnerId);
@@ -95,8 +97,13 @@ export class EndTurnRemoveBuffEventSerializer extends EventSerializer {
     const buff = BuffSystem.getInstance().findBuffInUnit(buffOwner, buffId);
     console.log("反序列化的增益效果:", buff);
     if (!buff) return null;
-    const event = new EndTurnRemoveBuffEvent(endTurnUnit, buff, turnCount,data.eventId);
-     console.log("反序列化的事件数据:", event);
+    const event = new EndTurnRemoveBuffEvent(
+      endTurnUnit,
+      buff,
+      turnCount,
+      data.eventId
+    );
+    console.log("反序列化的事件数据:", event);
     return event;
   }
 }

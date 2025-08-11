@@ -29,7 +29,7 @@ export class CombatChallengeGiveEvent extends UnitAttackEvent {
     this.eventData.ownerId = owner?.id;
   }
 
-  getSerializer(): EventSerializer {
+ static getSerializer(): EventSerializer {
     return CombatChallengeGiveSerializer.getInstance();
   }
   hook = () => {
