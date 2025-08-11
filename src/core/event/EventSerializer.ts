@@ -2,6 +2,13 @@ import type { GameEvent } from "./Event";
 import type { EventSerializeData } from "./EventSerializeData";
 
 export class EventSerializer {
+  static instance: EventSerializer;
+  static getInstance(): EventSerializer {
+    if (!this.instance) {
+      this.instance = new EventSerializer();
+    }
+    return this.instance;
+  }
   serialize(event: GameEvent): EventSerializeData {
     return {
       eventId: event.eventId,
@@ -11,7 +18,7 @@ export class EventSerializer {
     };
   }
 
-   deserialize(data: EventSerializeData): GameEvent|null {
+   deserialize(data: EventSerializeData,eventClass?: new (...args: any[]) => GameEvent): GameEvent|null {
     return  {} as GameEvent
   }
 }

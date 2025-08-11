@@ -6,7 +6,7 @@ export interface GameEvent {
   eventName: string;
   eventId:string;
   eventData: any;
-  eventHandler: (...args: any[]) => Promise<void>;
+  eventHandler: (...args: any[]) => Promise<any>;
 
   getSerializer(): EventSerializer;
 }

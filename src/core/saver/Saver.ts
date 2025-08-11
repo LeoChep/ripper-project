@@ -16,6 +16,9 @@ import { CharacterCombatController } from "../controller/CharacterCombatControll
 import { CharacterOutCombatController } from "../controller/CharacterOutCombatController";
 import type { EventSerializeData } from "../event/EventSerializeData";
 import { EventDeserializerFactory } from "../event/EventDeserializerFactory";
+import type { EndTurnRemoveBuffEvent } from "../event/EndTurnRemoveBuffEvent";
+import type { UnitAttackEvent } from "../event/UnitAttackAbstractEvent";
+import type { GameEvent } from "../event/Event";
 
 export class Saver {
   static gameState: any;
@@ -78,10 +81,13 @@ export class Saver {
         }
       }
     });
+    const findSprite = (id: string) => {
+      return map.sprites.find((sprite) => sprite.id === parseInt(id)) ;
+    };
     for (let i = 0; i < map.sprites.length; i++) {
       const sprite = map.sprites[i];
       const buffs = sprite.creature.buffs || [];
-      const deserializedBuffs = await BuffSerializer.deserializeArray(buffs,undefined,()=>sprite);
+      const deserializedBuffs = await BuffSerializer.deserializeArray(buffs,undefined,findSprite);
       sprite.creature.buffs = deserializedBuffs;
       console.log("恢复的角色数据:", sprite.creature);
     }
@@ -124,8 +130,9 @@ export class Saver {
     }
     //加载战斗事件
     const eventSerializeDatas = gameState.eventRecord || [];
-    const events=[];
+    const events: (GameEvent)[]=[];
     eventSerializeDatas.forEach((eventSerializeData:EventSerializeData) => {
+      console.log("反序列化事件:", eventSerializeData);
         const deserializer = EventDeserializerFactory.getDeserializer(eventSerializeData.eventName);
         if (deserializer) {
             const event = deserializer.deserialize(eventSerializeData);
@@ -135,6 +142,7 @@ export class Saver {
             }
         }
     })
+    console.log("加载的战斗事件:", events);
 
   }
 }
