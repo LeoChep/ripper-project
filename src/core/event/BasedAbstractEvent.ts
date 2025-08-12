@@ -8,47 +8,42 @@ import { GameEvent } from "./Event";
 import { UuidUtil } from "../utils/UuidUtil";
 import { UnitSystem } from "../system/UnitSystem";
 
-export abstract class UnitAttackEvent extends GameEvent {
+export abstract class BasedAbstractEvent extends GameEvent {
   // 结束回合时移除增益效果事件
-  static readonly type = "attackEvent";
+  static type = "attackEvent";
   static name = "UnitAttackEvent";
-  attacker: Unit | null; // 发起攻击的单位
-  target: Unit | null; // 目标单位
 
-  constructor(attacker: Unit | null, target: Unit | null, uid?: string) {
+
+  constructor(uid?: string) {
     super();
-    this.attacker = attacker;
-    this.target = target;
+
     this.eventId = uid ? uid : UuidUtil.generate();
-    this.eventData = {
-      attackerId: attacker?.id,
-      targetId: target?.id,
-    };
+    this.eventData = {};
   }
   eventId: string;
   eventData: any;
-  eventType = UnitAttackEvent.type;
-  eventName = UnitAttackEvent.name;
+  eventType = BasedAbstractEvent.type;
+  eventName = BasedAbstractEvent.name;
   eventHandler = async (...args: any[]) => {
     return Promise.resolve({} as any);
   };
 
   static getSerializer(): EventSerializer {
-    return UnitAttackSerializer.getInstance();
+    return BasedEventSerializer.getInstance();
   }
   hook = () => {
     BattleEvenetSystem.getInstance().hookEvent(this); // 将事件挂钩到战斗事件系统
   };
 }
 
-export abstract class UnitAttackSerializer extends EventSerializer {
-  static instance: UnitAttackSerializer;
+export abstract class BasedEventSerializer extends EventSerializer {
+  static instance: BasedEventSerializer;
 
-  serialize(event: UnitAttackEvent): EventSerializeData {
+  serialize(event: BasedAbstractEvent): EventSerializeData {
     const data = super.serialize(event);
     data.eventName = "UnitAttackEvent";
     return data;
   }
 
-  abstract deserialize(data: EventSerializeData): UnitAttackEvent | null;
+  abstract deserialize(data: EventSerializeData): BasedAbstractEvent | null;
 }

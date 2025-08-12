@@ -3,7 +3,7 @@ import { attackMovementToUnit } from "@/core/action/UnitAttack";
 import { Marked } from "@/core/buff/Marked";
 import type { EventSerializeData } from "@/core/event/EventSerializeData";
 import { EventSerializer } from "@/core/event/EventSerializer";
-import { UnitAttackEvent, UnitAttackSerializer } from "@/core/event/UnitAttackAbstractEvent";
+import { BasedAbstractEvent, BasedEventSerializer } from "@/core/event/BasedAbstractEvent";
 import { golbalSetting } from "@/core/golbalSetting";
 import { BattleEvenetSystem } from "@/core/system/BattleEventSystem";
 import {
@@ -15,12 +15,12 @@ import { WeaponSystem } from "@/core/system/WeaponSystem";
 import type { Unit } from "@/core/units/Unit";
 import type { Weapon } from "@/core/units/Weapon";
 
-export class CombatChallengeUseEvent extends UnitAttackEvent {
+export class CombatChallengeUseEvent extends BasedAbstractEvent {
   static readonly type = "attackEvent";
   static readonly name = "CombatChallengeUseEvent";
   owner: Unit | null = null; // 挑战者单位
   constructor(owner:Unit, uid?: string) {
-    super(null,null,uid);
+    super(uid);
     this.owner = owner;
     this.eventData.ownerId = owner?.id;
   }
@@ -98,7 +98,7 @@ export class CombatChallengeUseEvent extends UnitAttackEvent {
     return Promise.resolve();
   };
 }
-export class CombatChallengeUseSerializer extends UnitAttackSerializer{
+export class CombatChallengeUseSerializer extends BasedEventSerializer{
   static instance: CombatChallengeUseSerializer;
   static getInstance(): CombatChallengeUseSerializer {
     if (!this.instance) {
@@ -111,7 +111,7 @@ export class CombatChallengeUseSerializer extends UnitAttackSerializer{
     data.eventName = "CombatChallengeUseEvent";
     return data;
   }
-  deserialize(data: EventSerializeData): UnitAttackEvent | null {
+  deserialize(data: EventSerializeData): BasedAbstractEvent | null {
       const { ownerId} = data.eventData;
       if (!ownerId ) return null;
       const owner = UnitSystem.getInstance().getUnitById(ownerId);

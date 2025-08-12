@@ -4,9 +4,9 @@ import { EndTurnRemoveBuffEvent } from "@/core/event/EndTurnRemoveBuffEvent";
 import type { EventSerializeData } from "@/core/event/EventSerializeData";
 import { EventSerializer } from "@/core/event/EventSerializer";
 import {
-  UnitAttackEvent,
-  UnitAttackSerializer,
-} from "@/core/event/UnitAttackAbstractEvent";
+  BasedAbstractEvent,
+  BasedEventSerializer,
+} from "@/core/event/BasedAbstractEvent";
 import { golbalSetting } from "@/core/golbalSetting";
 import { BattleEvenetSystem } from "@/core/system/BattleEventSystem";
 import { BuffSystem } from "@/core/system/BuffSystem";
@@ -19,12 +19,12 @@ import { WeaponSystem } from "@/core/system/WeaponSystem";
 import type { Unit } from "@/core/units/Unit";
 import type { Weapon } from "@/core/units/Weapon";
 
-export class CombatChallengeGiveEvent extends UnitAttackEvent {
+export class CombatChallengeGiveEvent extends BasedAbstractEvent {
   static readonly type = "attackEvent";
   static readonly name = "CombatChallengeGiveEvent";
   owner: Unit | null = null; // 挑战者单位
   constructor(owner: Unit, uid?: string) {
-    super(null, null, uid);
+    super(uid);
     this.owner = owner;
     this.eventData.ownerId = owner?.id;
   }
@@ -47,7 +47,7 @@ export class CombatChallengeGiveEvent extends UnitAttackEvent {
     return Promise.resolve();
   };
 }
-export class CombatChallengeGiveSerializer extends UnitAttackSerializer {
+export class CombatChallengeGiveSerializer extends BasedEventSerializer {
   static instance: CombatChallengeGiveSerializer;
   static getInstance(): CombatChallengeGiveSerializer {
     if (!this.instance) {
@@ -60,7 +60,7 @@ export class CombatChallengeGiveSerializer extends UnitAttackSerializer {
     data.eventName = "CombatChallengeGiveEvent";
     return data;
   }
-  deserialize(data: EventSerializeData): UnitAttackEvent | null {
+  deserialize(data: EventSerializeData): BasedAbstractEvent | null {
     const { ownerId} = data.eventData;
     if (!ownerId ) return null;
     const owner = UnitSystem.getInstance().getUnitById(ownerId);

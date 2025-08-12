@@ -1,5 +1,5 @@
 import type { Unit } from "@/core/units/Unit";
-import { Power } from "../Power";
+import { Power } from "../../Power";
 import {
   checkRectionUseful,
   useReaction,

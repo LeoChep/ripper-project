@@ -17,7 +17,7 @@ import { CharacterOutCombatController } from "../controller/CharacterOutCombatCo
 import type { EventSerializeData } from "../event/EventSerializeData";
 import { EventDeserializerFactory } from "../event/EventDeserializerFactory";
 import type { EndTurnRemoveBuffEvent } from "../event/EndTurnRemoveBuffEvent";
-import type { UnitAttackEvent } from "../event/UnitAttackAbstractEvent";
+import type { BasedAbstractEvent } from "../event/BasedAbstractEvent";
 import type { GameEvent } from "../event/Event";
 
 export class Saver {

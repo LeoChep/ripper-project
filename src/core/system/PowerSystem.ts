@@ -58,7 +58,7 @@ export class PowerSystem {
     // 根据 traitName 返回对应的 Trait 类
     switch (powerName) {
       case "ShieldEdgeBlock":
-        return import("../power/fighter/ShieldEdgeBlock").then(
+        return import("../power/fighter/ShieldEdgeBlock/ShieldEdgeBlock").then(
           (module) => module.ShieldEdgeBlock
         );
     }
