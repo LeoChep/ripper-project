@@ -9,6 +9,7 @@ import type { Creature, CreatureAttack } from "@/core/units/Creature";
 import { golbalSetting } from "@/core/golbalSetting";
 import { BattleEvenetSystem } from "@/core/system/BattleEventSystem";
 import { AbilityValueSystem } from "@/core/system/AbilitiyValueSystem";
+import { ShieldEdgeBlockEvent } from "./ShieldEdgeBlockEvent";
 
 export class ShieldEdgeBlock extends Power {
   name = "ShieldEdgeBlock";
@@ -28,7 +29,7 @@ export class ShieldEdgeBlock extends Power {
   }
 
   hook = () => {
-    
-   // BattleEvenetSystem.getInstance().hookEvent(event1);
+    const event=new ShieldEdgeBlockEvent(this.owner)
+    BattleEvenetSystem.getInstance().hookEvent(event);
   };
 }

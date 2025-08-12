@@ -18,6 +18,7 @@ import { UnitSystem } from "@/core/system/UnitSystem";
 import { WeaponSystem } from "@/core/system/WeaponSystem";
 import type { Unit } from "@/core/units/Unit";
 import type { Weapon } from "@/core/units/Weapon";
+import * as InitiativeSystem from "@/core/system/InitiativeSystem";
 
 export class CombatChallengeGiveEvent extends BasedAbstractEvent {
   static readonly type = "attackEvent";
@@ -29,11 +30,11 @@ export class CombatChallengeGiveEvent extends BasedAbstractEvent {
     this.eventData.ownerId = owner?.id;
   }
 
- static getSerializer(): EventSerializer {
+  static getSerializer(): EventSerializer {
     return CombatChallengeGiveSerializer.getInstance();
   }
-    getSerializer(): EventSerializer {
-      return CombatChallengeGiveEvent.getSerializer();
+  getSerializer(): EventSerializer {
+    return CombatChallengeGiveEvent.getSerializer();
   }
   hook = () => {
     BattleEvenetSystem.getInstance().hookEvent(this);
@@ -45,7 +46,11 @@ export class CombatChallengeGiveEvent extends BasedAbstractEvent {
       beTargetedEffect.owner = target;
       beTargetedEffect.giver = this.owner;
       BuffSystem.getInstance().addTo(beTargetedEffect, target);
-      new EndTurnRemoveBuffEvent(this.owner, beTargetedEffect,2).hook();
+      if (InitiativeSystem.checkIsTurn(this.owner)) {
+        new EndTurnRemoveBuffEvent(this.owner, beTargetedEffect, 2).hook();
+      } else {
+        new EndTurnRemoveBuffEvent(this.owner, beTargetedEffect, 1).hook();
+      }
     }
     return Promise.resolve();
   };
@@ -64,8 +69,8 @@ export class CombatChallengeGiveSerializer extends BasedEventSerializer {
     return data;
   }
   deserialize(data: EventSerializeData): BasedAbstractEvent | null {
-    const { ownerId} = data.eventData;
-    if (!ownerId ) return null;
+    const { ownerId } = data.eventData;
+    if (!ownerId) return null;
     const owner = UnitSystem.getInstance().getUnitById(ownerId);
     if (!owner) return null;
     const event = new CombatChallengeGiveEvent(owner, data.eventId);

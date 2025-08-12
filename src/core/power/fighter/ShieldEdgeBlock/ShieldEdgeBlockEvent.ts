@@ -1,3 +1,4 @@
+
 import { ShieldEdgeBlock } from "./ShieldEdgeBlock";
 
 import { attackMovementToUnit } from "@/core/action/UnitAttack";
@@ -22,7 +23,7 @@ import type { CreatureAttack } from "@/core/units/Creature";
 import { AbilityValueSystem } from "@/core/system/AbilitiyValueSystem";
 
 export class ShieldEdgeBlockEvent extends BasedAbstractEvent {
-  static readonly type = "attackEvent";
+  static readonly type = "hitCheckEvent";
   static readonly name = "ShieldEdgeBlockEvent";
   owner: Unit | null = null; // 持盾单位
   constructor(owner: Unit, uid?: string) {
@@ -31,9 +32,12 @@ export class ShieldEdgeBlockEvent extends BasedAbstractEvent {
     this.eventData.ownerId = owner?.id;
   }
 
-  // static getSerializer(): EventSerializer {
-  //   return CombatChallengeUseSerializer.getInstance();
-  // }
+  static getSerializer(): EventSerializer {
+    return ShieldEdgeBlockEventSerializer.getInstance();
+  }
+  getSerializer(): EventSerializer {
+    return ShieldEdgeBlockEvent.getSerializer();
+  }
   hook = () => {
     BattleEvenetSystem.getInstance().hookEvent(this);
   };
@@ -118,3 +122,25 @@ const getAttack = (unit: Unit) => {
   attack.damage = "2d6+" + modifier;
   return attack;
 };
+export class ShieldEdgeBlockEventSerializer extends BasedEventSerializer{
+  static instance: ShieldEdgeBlockEventSerializer;
+  static getInstance(): ShieldEdgeBlockEventSerializer {
+    if (!this.instance) {
+      this.instance = new ShieldEdgeBlockEventSerializer();
+    }
+    return this.instance;
+  }
+  serialize(event: ShieldEdgeBlockEvent): EventSerializeData {
+    const data = super.serialize(event);
+    data.eventName = "ShieldEdgeBlockEvent";
+    return data;
+  }
+  deserialize(data: EventSerializeData): BasedAbstractEvent | null {
+      const { ownerId} = data.eventData;
+      if (!ownerId ) return null;
+      const owner = UnitSystem.getInstance().getUnitById(ownerId);
+      if (!owner) return null;
+      const event = new ShieldEdgeBlockEvent(owner,data.eventId);
+      return event;
+  }
+}

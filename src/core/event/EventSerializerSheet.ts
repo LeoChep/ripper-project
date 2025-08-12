@@ -1,3 +1,4 @@
+import { ShieldEdgeBlockEvent } from "../power/fighter/ShieldEdgeBlock/ShieldEdgeBlockEvent";
 import { CombatChallengeGiveEvent } from "../trait/fighter/CombatChallenge/CombatChallengeGiveEvent";
 import { CombatChallengeUseEvent } from "../trait/fighter/CombatChallenge/CombatChallengeUseEvent";
 import { EndTurnRemoveBuffEvent } from "./EndTurnRemoveBuffEvent";
@@ -24,17 +25,20 @@ export class EventSerializerSheet {
     this._eventSerializer.set(name, serializer);
   }
 }
+interface EventClassWithSerializer {
+  name: string;
+  getSerializer: () => EventSerializer;
+}
+
+function registerEventSerializer(eventClass: EventClassWithSerializer) {
+  EventSerializerSheet.getInstance().registerEventSerializer(
+    eventClass.name,
+    eventClass.getSerializer()
+  );
+}
 function initEventSerializer(): void {
-  EventSerializerSheet.getInstance().registerEventSerializer(
-    CombatChallengeGiveEvent.name,
-    CombatChallengeGiveEvent.getSerializer()
-  );
-  EventSerializerSheet.getInstance().registerEventSerializer(
-    CombatChallengeUseEvent.name,
-    CombatChallengeGiveEvent.getSerializer()
-  );
-  EventSerializerSheet.getInstance().registerEventSerializer(
-    EndTurnRemoveBuffEvent.name,
-    EndTurnRemoveBuffEvent.getSerializer()
-  );
+  registerEventSerializer(CombatChallengeUseEvent);
+  registerEventSerializer(CombatChallengeGiveEvent);
+  registerEventSerializer(EndTurnRemoveBuffEvent);
+  registerEventSerializer(ShieldEdgeBlockEvent)
 }
