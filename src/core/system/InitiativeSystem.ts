@@ -17,6 +17,7 @@ import {
   InitiativeSerializer,
   type SerializedInitiativeData,
 } from "../type/InitiativeSerializer";
+import { lockOn } from "../anim/LockOnAnim";
 
 export const InitiativeSheet = [] as InitiativeClass[];
 const initiativeCursor = {
@@ -131,6 +132,7 @@ export async function startCombatTurn() {
           initiativeCursor.pointAt.owner.ai?.autoAction &&
           initiativeCursor.map
         ) {
+          lockOn(initiativeCursor.pointAt.owner.x, initiativeCursor.pointAt.owner.y);
           initiativeCursor.pointAt.owner.ai.autoAction(
             initiativeCursor.pointAt.owner,
             initiativeCursor.map
@@ -311,7 +313,7 @@ export function startBattle() {
   return playStartAnim();
 }
 export async function playStartAnim() {
-  const container = golbalSetting.rootContainer;
+  const container = golbalSetting.tipContainer;
   const lineLayer = getLayers().lineLayer;
   //
   const graphics = new PIXI.Graphics();
@@ -355,11 +357,11 @@ export async function playStartAnim() {
   return animPromise;
 }
 async function playAnim(unit: Unit) {
-  const container = golbalSetting.rootContainer;
+  const container = golbalSetting.tipContainer
   const lineLayer = getLayers().lineLayer;
   //
   const graphics = new PIXI.Graphics();
-  graphics.rect(0, 0, appSetting.width, appSetting.height);
+  graphics.rect(-(container?.x ?? 0), -(container?.y ?? 0), appSetting.width, appSetting.height);
   let color = 0xff0000; // 默认颜色为红色
   if (unit.party === "player") {
     color = 0x0000ff;
@@ -386,8 +388,8 @@ async function playAnim(unit: Unit) {
     },
   });
   text.anchor.set(0.5);
-  text.x = appSetting.width / 2;
-  text.y = appSetting.height / 2;
+  text.x = appSetting.width / 2 - (container?.x ?? 0);
+  text.y = appSetting.height / 2 - (container?.y ?? 0);
   if (container && lineLayer) {
     container.addChild(text);
     lineLayer.attach(text);
@@ -431,7 +433,7 @@ export async function endBattle() {
   }
 }
 export async function playEndAnim() {
-  const container = golbalSetting.rootContainer;
+  const container = golbalSetting.tipContainer;
   const lineLayer = getLayers().lineLayer;
   //
   const graphics = new PIXI.Graphics();

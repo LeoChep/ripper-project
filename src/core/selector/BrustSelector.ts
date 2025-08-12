@@ -1,4 +1,4 @@
-import { tileSize } from './../envSetting';
+import { tileSize } from "./../envSetting";
 
 import { generateWays } from "../utils/PathfinderUtil";
 import * as PIXI from "pixi.js";
@@ -53,7 +53,7 @@ export class BrustSelector {
     // 选择逻辑
     const path = grids;
     this.graphics = this.drawGrids(path, color);
-       this.graphics.eventMode = "static";
+    this.graphics.eventMode = "static";
     selector.promise = Promise.resolve({});
     const graphics = selector.graphics;
     if (!graphics) {
@@ -61,7 +61,12 @@ export class BrustSelector {
       return selector;
     }
     selector.graphics?.on("pointermove", (e) => {
-      const targetXY = this.getXY(e.data.global.x, e.data.global.y);
+      if (!golbalSetting.rootContainer) {
+        return;
+      }
+      const x = e.data.global.x - golbalSetting.rootContainer?.x;
+      const y = e.data.global.y - golbalSetting.rootContainer?.y;
+      const targetXY = this.getXY(x, y);
       console.log("pointermove", targetXY);
       this.drawBrustRange(targetXY, brustColor, brustRange);
     });
@@ -130,14 +135,22 @@ export class BrustSelector {
         return;
       }
       this.isCannelClick = false;
-      const { x, y } = e.data.global;
+      if (!golbalSetting.rootContainer) {
+        return;
+      }
+      const x = e.data.global.x - golbalSetting.rootContainer?.x;
+      const y = e.data.global.y - golbalSetting.rootContainer?.y;
       const xy = this.getXY(x, y);
       if (!checkPassiable(xy.x, xy.y)) {
         console.warn("点击位置不可用");
         return;
       }
       if (this.selected.length < this.selecteNum) {
-        const { x, y } = e.data.global;
+        if (!golbalSetting.rootContainer) {
+          return;
+        }
+        const x = e.data.global.x - golbalSetting.rootContainer?.x;
+        const y = e.data.global.y - golbalSetting.rootContainer?.y;
         const xy = this.getXY(x, y);
         this.selected.push(xy);
         MessageTipSystem.getInstance().setBottomMessage(
@@ -174,7 +187,7 @@ export class BrustSelector {
     this.brustGraphics = new PIXI.Graphics();
 
     const { x, y } = targetXY;
-    
+
     const brustGrids = generateWays(
       x,
       y,

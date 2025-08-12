@@ -792,8 +792,8 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":118,
-                 "y":320
+                 "x":508.666666666667,
+                 "y":896
                 }, 
                 {
                  "gid":739,
@@ -881,8 +881,140 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":119,
-                 "y":251
+                 "x":381.666666666667,
+                 "y":899
+                }, 
+                {
+                 "gid":830,
+                 "height":64,
+                 "id":57,
+                 "name":"skeletonArcher4",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"skeleton"
+                        }, 
+                        {
+                         "name":"party",
+                         "type":"string",
+                         "value":"skeletons"
+                        }, 
+                        {
+                         "name":"unitTypeName",
+                         "type":"string",
+                         "value":"skeletonArcher"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":377.333333333333,
+                 "y":1085.33333333333
+                }, 
+                {
+                 "gid":830,
+                 "height":64,
+                 "id":58,
+                 "name":"skeletonArcher3",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"skeleton"
+                        }, 
+                        {
+                         "name":"party",
+                         "type":"string",
+                         "value":"skeletons"
+                        }, 
+                        {
+                         "name":"unitTypeName",
+                         "type":"string",
+                         "value":"skeletonArcher"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":506.666666666667,
+                 "y":1088
+                }, 
+                {
+                 "gid":830,
+                 "height":64,
+                 "id":59,
+                 "name":"skeletonArcher2",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"skeleton"
+                        }, 
+                        {
+                         "name":"party",
+                         "type":"string",
+                         "value":"skeletons"
+                        }, 
+                        {
+                         "name":"unitTypeName",
+                         "type":"string",
+                         "value":"skeletonArcher"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":633.333333333333,
+                 "y":1084
+                }, 
+                {
+                 "gid":830,
+                 "height":64,
+                 "id":60,
+                 "name":"skeletonArcher",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"skeleton"
+                        }, 
+                        {
+                         "name":"party",
+                         "type":"string",
+                         "value":"skeletons"
+                        }, 
+                        {
+                         "name":"unitTypeName",
+                         "type":"string",
+                         "value":"skeletonArcher"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":704,
+                 "y":958.666666666667
                 }],
          "offsetx":4,
          "offsety":0,
@@ -892,8 +1024,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":5,
- "nextobjectid":53,
+ "nextlayerid":6,
+ "nextobjectid":61,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
@@ -948,6 +1080,19 @@
          "name":"walk",
          "spacing":0,
          "tilecount":36,
+         "tileheight":64,
+         "tilewidth":64
+        }, 
+        {
+         "columns":13,
+         "firstgid":829,
+         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/skeletonArcher\/anim\/standard\/slash.png",
+         "imageheight":256,
+         "imagewidth":832,
+         "margin":0,
+         "name":"slash",
+         "spacing":0,
+         "tilecount":52,
          "tileheight":64,
          "tilewidth":64
         }],

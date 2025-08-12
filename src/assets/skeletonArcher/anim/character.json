@@ -1,0 +1,103 @@
+{
+  "bodyTypeName": "male",
+  "url": "https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/#?body=Skeleton_skeleton&head=Skeleton_skeleton&weapon=Normal_medium&eyebrows=none_Thin_Eyebrows",
+  "spritesheets": "https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/spritesheets/",
+  "version": 1,
+  "datetime": "2025/8/12 12:33:46",
+  "credits": [
+    {
+      "fileName": "body/bodies/skeleton/skeleton.png",
+      "licenses": "OGA-BY 3.0,CC-BY-SA 3.0,GPL 3.0",
+      "authors": "bluecarrot16,Johannes Sjölund (wulax),Stephen Challener (Redshrike)",
+      "urls": "https://opengameart.org/content/liberated-pixel-cup-lpc-base-assets-sprites-map-tiles,https://opengameart.org/content/lpc-medieval-fantasy-character-sprites,https://opengameart.org/content/lpc-skeleton,https://opengameart.org/content/lpc-character-bases",
+      "notes": ""
+    },
+    {
+      "fileName": "head/heads/skeleton/adult/skeleton.png",
+      "licenses": "OGA-BY 3.0,CC-BY-SA 3.0,GPL 3.0",
+      "authors": "bluecarrot16,Johannes Sjölund (wulax),Stephen Challener (Redshrike)",
+      "urls": "https://opengameart.org/content/liberated-pixel-cup-lpc-base-assets-sprites-map-tiles,https://opengameart.org/content/lpc-medieval-fantasy-character-sprites,https://opengameart.org/content/lpc-skeleton,https://opengameart.org/content/lpc-character-bases",
+      "notes": ""
+    },
+    {
+      "fileName": "weapon/ranged/bow/normal/universal/background/medium.png",
+      "licenses": "OGA-BY 3.0+,GPL 3.0,CC-BY 4.0",
+      "authors": "Johannes Sjölund (wulax),Pierre Vigier (pvigier)",
+      "urls": "https://opengameart.org/content/lpc-medieval-fantasy-character-sprites,https://opengameart.org/content/lpc-walk-animations-for-bows",
+      "notes": "original by wulax, walk animations by pvigier, split into layers and tweaked for v3 character bases by bluecarrot16. pvigier has agreed to license this sheet as OGA-BY 3.0+."
+    },
+    {
+      "fileName": "weapon/ranged/bow/normal/universal/foreground/medium.png",
+      "licenses": "OGA-BY 3.0+,GPL 3.0,CC-BY 4.0",
+      "authors": "Johannes Sjölund (wulax),Pierre Vigier (pvigier)",
+      "urls": "https://opengameart.org/content/lpc-medieval-fantasy-character-sprites,https://opengameart.org/content/lpc-walk-animations-for-bows",
+      "notes": "original by wulax, walk animations by pvigier, split into layers and tweaked for v3 character bases by bluecarrot16. pvigier has agreed to license this sheet as OGA-BY 3.0+."
+    },
+    {
+      "fileName": "weapon/ranged/bow/normal/walk/background/medium.png",
+      "licenses": "OGA-BY 3.0+,GPL 3.0,CC-BY 4.0",
+      "authors": "Johannes Sjölund (wulax),Pierre Vigier (pvigier)",
+      "urls": "https://opengameart.org/content/lpc-medieval-fantasy-character-sprites,https://opengameart.org/content/lpc-walk-animations-for-bows",
+      "notes": "original by wulax, walk animations by pvigier, split into layers and tweaked for v3 character bases by bluecarrot16. pvigier has agreed to license this sheet as OGA-BY 3.0+."
+    },
+    {
+      "fileName": "weapon/ranged/bow/normal/walk/foreground/medium.png",
+      "licenses": "OGA-BY 3.0+,GPL 3.0,CC-BY 4.0",
+      "authors": "Johannes Sjölund (wulax),Pierre Vigier (pvigier)",
+      "urls": "https://opengameart.org/content/lpc-medieval-fantasy-character-sprites,https://opengameart.org/content/lpc-walk-animations-for-bows",
+      "notes": "original by wulax, walk animations by pvigier, split into layers and tweaked for v3 character bases by bluecarrot16. pvigier has agreed to license this sheet as OGA-BY 3.0+."
+    }
+  ],
+  "layers": [
+    {
+      "fileName": "weapon/ranged/bow/normal/universal/background/medium.png",
+      "zPos": -1,
+      "parentName": "weapon",
+      "name": "Normal",
+      "variant": "medium",
+      "supportedAnimations": "shoot,hurt"
+    },
+    {
+      "fileName": "weapon/ranged/bow/normal/walk/background/medium.png",
+      "zPos": -1,
+      "custom_animation": "walk_128",
+      "parentName": "weapon",
+      "name": "Normal",
+      "variant": "medium",
+      "supportedAnimations": "shoot,hurt"
+    },
+    {
+      "fileName": "body/bodies/skeleton/skeleton.png",
+      "zPos": 10,
+      "parentName": "body",
+      "name": "Skeleton",
+      "variant": "skeleton",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering"
+    },
+    {
+      "fileName": "head/heads/skeleton/adult/skeleton.png",
+      "zPos": 100,
+      "parentName": "head",
+      "name": "Skeleton",
+      "variant": "skeleton",
+      "supportedAnimations": "spellcast,thrust,walk,slash,shoot,hurt,watering,idle,jump,run,sit,emote,climb,combat,1h_slash,1h_backslash,1h_halfslash"
+    },
+    {
+      "fileName": "weapon/ranged/bow/normal/universal/foreground/medium.png",
+      "zPos": 140,
+      "parentName": "weapon",
+      "name": "Normal",
+      "variant": "medium",
+      "supportedAnimations": "shoot,hurt"
+    },
+    {
+      "fileName": "weapon/ranged/bow/normal/walk/foreground/medium.png",
+      "zPos": 141,
+      "custom_animation": "walk_128",
+      "parentName": "weapon",
+      "name": "Normal",
+      "variant": "medium",
+      "supportedAnimations": "shoot,hurt"
+    }
+  ]
+}

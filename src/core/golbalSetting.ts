@@ -8,6 +8,7 @@ export const golbalSetting = {
     rootContainer: null as null | Container,
     spriteContainer: null as null | Container,
     mapContainer: null as null | Container,
+    tipContainer: null as null | Container,
     rlayers: {
         basicLayer: null as null | IRenderLayer,
         spriteLayer: null as null | IRenderLayer,

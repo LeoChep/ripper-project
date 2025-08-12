@@ -83,7 +83,7 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
     this.graphics = selector.graphics;
     this.removeFunction = selector.removeFunction;
     const result = await selector.promise;
-    console.log("icerays", result);
+
     const selected = result.selected[0];
     if (result.cancel !== true) {
       await OrbmastersIncendiaryDetonationController.playAnim(

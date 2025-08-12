@@ -1,0 +1,81 @@
+{
+  "name": "朽坏骷髅 (Decrepit Skeleton)",
+  "level": 1,
+  "role": "杂兵 游击",
+  "xp": 25,
+  "size": "中型",
+  "type": "自然界 活化生物（不死生物）",
+  "hp": 100,
+  "bloodied": 0,
+  "ac": 16,
+  "fortitude": 13,
+  "reflex": 14,
+  "will": 13,
+  "speed": 6,
+  "fly": null,
+  "initiative": 0,
+  "senses": "",
+  "immunities": [
+    "疾病",
+    "毒素"
+  ],
+  "resistances": [
+    {
+      "type": "黯蚀",
+      "value": 10
+    }
+  ],
+  "alignment": "无",
+  "languages": [
+    "-"
+  ],
+  "skills": [],
+  "abilities": {
+    "STR": {
+      "value": 15,
+      "modifier": 2
+    },
+    "DEX": {
+      "value": 17,
+      "modifier": 3
+    },
+    "CON": {
+      "value": 13,
+      "modifier": 1
+    },
+    "INT": {
+      "value": 3,
+      "modifier": -4
+    },
+    "WIS": {
+      "value": 14,
+      "modifier": 2
+    },
+    "CHA": {
+      "value": 3,
+      "modifier": -4
+    }
+  },
+  "equipment": [
+    "长剑",
+    "短弓",
+    "20 支箭"
+  ],
+  "attacks": [
+    {
+      "name": "短弓",
+      "type": "Ranged",
+      "action": "武器",
+      "range": 20,
+      "attackBonus": 6,
+      "damage": "1d8",
+      "target": "AC",
+      "effect": null,
+      "missEffect": null
+    }
+  ],
+  "traits": [],
+  "notes": [
+    "Equipment: 长剑, 短弓, 20 支箭"
+  ]
+}

@@ -2,6 +2,7 @@ export const zIndexSetting={
     spriteZIndex: 20,
     mapZindex: 10,
     doorZindex: 30,
+    tipZIndex: 200
 }
 export const tileSize = 64; // 格子大小
 

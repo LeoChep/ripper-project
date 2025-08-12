@@ -60,7 +60,7 @@ const startEvent = async () => {
 const door1Event = async () => {
   const talkStore = useTalkStateStore();
   const door1 = golbalSetting.map?.edges?.find(
-    (edge: { id: number }) => edge.id === 10
+    (edge: { id: number }) => edge.id === 44
   );
   if (door1?.useable === true) {
     return;

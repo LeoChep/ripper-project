@@ -64,12 +64,12 @@ onMounted(async () => {
     setContainer(container);
     setLayer(rlayers);
     //绘制迷雾
-    // drawFog(mapPassiable, rlayers, container, app)
+
     //绘制地图
     //加载地图
     const mapPassiable = await loadMap('A')
     golbalSetting.map = mapPassiable;
-
+    drawFog(mapPassiable, rlayers, container, app)
     const spritesOBJ = mapPassiable.sprites
     console.log('加载的地图数据:', mapPassiable);
     const units = createUnitsFromMapSprites(spritesOBJ, mapPassiable);
@@ -306,18 +306,22 @@ const createContainer = (app, rlayers) => {
     app.stage.addChild(container);
     const spriteContainer = new PIXI.Container();
     const mapContainer = new PIXI.Container();
+    const tipContainer = new PIXI.Container();
     spriteContainer.label = 'spriteContainer';
     mapContainer.label = 'mapContainer';
     container.addChild(spriteContainer);
     container.addChild(mapContainer);
+    app.stage.addChild(tipContainer);
     spriteContainer.zIndex = envSetting.zIndexSetting.spriteZIndex;
     mapContainer.zIndex = envSetting.zIndexSetting.mapZindex;
+    tipContainer.zIndex = envSetting.zIndexSetting.tipZIndex;
     // spriteContainer.eventMode = 'none';
     // mapContainer.eventMode = 'none';  
     // 设置全局变量
     golbalSetting.spriteContainer = spriteContainer;
     golbalSetting.mapContainer = mapContainer;
     golbalSetting.rootContainer = container;
+    golbalSetting.tipContainer = tipContainer;
     return container
 }
 
@@ -333,9 +337,9 @@ const drawMap = (mapView, container, rlayers) => {
     const ms = new PIXI.Sprite(mapView)
     ms.zIndex = envSetting.zIndexSetting.mapZindex;
     ms.label = 'map'
-    // const allFog = new PIXI.Graphics();
-    // container.addChild(allFog);
-    //ms.setMask({ mask: allFog })
+    const allFog = new PIXI.Graphics();
+    container.addChild(allFog);
+    ms.setMask({ mask: allFog })
     golbalSetting.mapContainer.addChild(ms);
     rlayers.basicLayer.attach(ms)
 }
