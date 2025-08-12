@@ -3,7 +3,10 @@ import type { Door } from "../units/Door";
 import { getDoorSvg } from "@/utils/utils";
 import { useTalkStateStore } from "@/stores/talkStateStore";
 import { golbalSetting } from "../golbalSetting";
-
+import * as InitiativeSystem from "@/core/system/InitiativeSystem";
+import { CharacterCombatController } from "../controller/CharacterCombatController";
+import { CharacterOutCombatController } from "../controller/CharacterOutCombatController";
+import { CharacterController } from "../controller/CharacterController";
 export class DoorAnimSprite extends Container {
   // 门的状态，true 表示打开，false 表示关闭
   private _isOpen: boolean = false;
@@ -47,11 +50,11 @@ export class DoorAnimSprite extends Container {
   private createTooltip() {
     // 创建像素风格文本样式
     const style = new TextStyle({
-      fontFamily: "monospace", // 使用等宽字体模拟像素字体
-      fontSize: 12,
+      // fontFamily: "monospace", // 使用等宽字体模拟像素字体
+      fontSize: 13,
       fill: 0xffeb3b, // 金黄色文字，符合奇幻风格
       stroke: 0x8b4513, // 棕色描边
-      dropShadow: true,
+      // dropShadow: true,
     });
 
     // 创建提示容器
@@ -61,10 +64,10 @@ export class DoorAnimSprite extends Container {
 
     // 创建背景图形
     this.tooltipBg = new Graphics();
-    
+
     // 创建文本
     this.tooltip = new Text("", style);
-    
+
     // 添加到容器
     this.tooltipContainer.addChild(this.tooltipBg);
     this.tooltipContainer.addChild(this.tooltip);
@@ -73,27 +76,30 @@ export class DoorAnimSprite extends Container {
 
   private drawTooltipBackground(width: number, height: number) {
     if (!this.tooltipBg) return;
-    
+
     this.tooltipBg.clear();
-    
+
     // 像素风格的边框设计
     const padding = 6;
     const borderWidth = 2;
-    
+
     // 外边框 - 深棕色
     this.tooltipBg.lineStyle(borderWidth, 0x4a2c17);
     this.tooltipBg.beginFill(0x1a1a1a, 0.9); // 半透明黑色背景
     this.tooltipBg.drawRect(0, 0, width + padding * 2, height + padding * 2);
     this.tooltipBg.endFill();
-    
+
     // 内边框 - 金色
     this.tooltipBg.lineStyle(1, 0xffd700);
     this.tooltipBg.beginFill(0x2d1810, 0.95); // 深棕色内背景
-    this.tooltipBg.drawRect(borderWidth, borderWidth, 
-      width + padding * 2 - borderWidth * 2, 
-      height + padding * 2 - borderWidth * 2);
+    this.tooltipBg.drawRect(
+      borderWidth,
+      borderWidth,
+      width + padding * 2 - borderWidth * 2,
+      height + padding * 2 - borderWidth * 2
+    );
     this.tooltipBg.endFill();
-    
+
     // 添加装饰性的像素点（模拟古老羊皮纸效果）
     this.tooltipBg.beginFill(0xffd700, 0.3);
     // 左上角装饰
@@ -106,8 +112,18 @@ export class DoorAnimSprite extends Container {
     this.tooltipBg.drawRect(2, height + padding * 2 - 4, 1, 1);
     this.tooltipBg.drawRect(4, height + padding * 2 - 5, 1, 1);
     // 右下角装饰
-    this.tooltipBg.drawRect(width + padding * 2 - 4, height + padding * 2 - 4, 1, 1);
-    this.tooltipBg.drawRect(width + padding * 2 - 6, height + padding * 2 - 5, 1, 1);
+    this.tooltipBg.drawRect(
+      width + padding * 2 - 4,
+      height + padding * 2 - 4,
+      1,
+      1
+    );
+    this.tooltipBg.drawRect(
+      width + padding * 2 - 6,
+      height + padding * 2 - 5,
+      1,
+      1
+    );
     this.tooltipBg.endFill();
   }
 
@@ -115,11 +131,24 @@ export class DoorAnimSprite extends Container {
     if (this.tooltip) {
       // 使用更有奇幻风格的文本
       this.tooltip.text = this.isOpen ? "✧ 关门 ✧" : "✧ 开门 ✧";
-      
+      if (InitiativeSystem.isInBattle()) {
+        const checkResult = inBattleAction(this.owner);
+        if (checkResult.useful) {
+          this.tooltip.text += "(次要动作)";
+        } else {
+          this.tooltip.text += checkResult.info;
+        }
+      }else {
+        const checkResult = outBattleAction(this.owner);
+         this.tooltip.text += checkResult.info;
+      }
+
+    
+
       // 重新绘制背景以适应文本大小
       const textBounds = this.tooltip.getBounds();
       this.drawTooltipBackground(textBounds.width, textBounds.height);
-      
+
       // 居中文本
       this.tooltip.x = 6; // padding
       this.tooltip.y = 6; // padding
@@ -130,20 +159,21 @@ export class DoorAnimSprite extends Container {
     if (this.tooltipContainer) {
       this.updateTooltipText();
       this.tooltipContainer.visible = true;
-      
+
       // 将提示框定位到鼠标位置附近，但避免超出屏幕
       const globalPos = event.data.global;
       let x = globalPos.x - this.x + 15;
       let y = globalPos.y - this.y - 40;
-      
+
       // 简单的边界检查
-      if (x + this.tooltipContainer.width > 800) { // 假设屏幕宽度
+      if (x + this.tooltipContainer.width > 800) {
+        // 假设屏幕宽度
         x = globalPos.x - this.x - this.tooltipContainer.width - 15;
       }
       if (y < 0) {
         y = globalPos.y - this.y + 25;
       }
-      
+
       this.tooltipContainer.x = x;
       this.tooltipContainer.y = y;
     }
@@ -199,12 +229,8 @@ export class DoorAnimSprite extends Container {
 
     doorAnimSprite.on("pointermove", (event) => {
       if (doorAnimSprite.tooltipContainer?.visible) {
-        const globalPos = event.data.global;
-        let x =  40;
+        let x = 40;
         let y = 20;
-        
-     
-        
         doorAnimSprite.tooltipContainer.x = x;
         doorAnimSprite.tooltipContainer.y = y;
       }
@@ -239,6 +265,15 @@ export const createDoorAnimSpriteFromDoor = async (door: Door) => {
     if (talkStore.talkState.onCg) {
       return;
     }
+    if (InitiativeSystem.isInBattle()) {
+      if (!inBattleAction(door).useful) {
+        return;
+      }
+    } else {
+      if (!outBattleAction(door).useful) {
+        return;
+      }
+    }
     console.log("门被点击了，切换状态");
     doorAnimSprite.isOpen = !doorAnimSprite.isOpen;
     doorAnimSprite.owner.isOpen = doorAnimSprite.isOpen;
@@ -253,4 +288,38 @@ export const createDoorAnimSpriteFromDoor = async (door: Door) => {
     console.log("门状态切换为:", doorAnimSprite);
   });
   return doorAnimSprite;
+};
+const outBattleAction = (door: Door) => {
+  const selectedCharacter = CharacterOutCombatController.getInstance().selectedCharacter;
+  if (!selectedCharacter) return { info: "未选择角色", useful: false };
+  const doorX = door.x;
+  const doorY = door.y;
+  const unitX = selectedCharacter.x;
+  const unitY = selectedCharacter.y;
+  const dis = Math.max(Math.abs(doorX - unitX), Math.abs(doorY - unitY));
+  if (dis > 64) {
+    return { info: "距离过远", useful: false };
+  }
+  return { info: "动作可用", useful: true };
+};
+const inBattleAction = (door: Door) => {
+  const selectedCharacter =
+    CharacterCombatController.getInstance().selectedCharacter;
+  if (!selectedCharacter) return { info: "未选择角色", useful: false };
+  let actionUseful = false;
+  const doorX = door.x;
+  const doorY = door.y;
+  const unitX = selectedCharacter.x;
+  const unitY = selectedCharacter.y;
+  const dis = Math.max(Math.abs(doorX - unitX), Math.abs(doorY - unitY));
+  if (dis > 64) {
+    return { info: "距离过远", useful: false };
+  }
+
+  actionUseful = InitiativeSystem.checkActionUseful(selectedCharacter, "minor");
+
+  if (actionUseful && selectedCharacter)
+    InitiativeSystem.useMinorAction(selectedCharacter);
+  else return { info: "动作不足", useful: false };
+  return { info: "动作可用", useful: true };
 };

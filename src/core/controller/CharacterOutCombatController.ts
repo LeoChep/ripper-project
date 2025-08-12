@@ -20,27 +20,25 @@ type Rlayer = {
 };
 
 export class CharacterOutCombatController {
-  public static isUse:boolean = false;
-  container: PIXI.Container;
+  public static isUse: boolean = false;
+  static instance: CharacterOutCombatController | null = null;
+  public static getInstance() {
+    if (!CharacterOutCombatController.instance) {
+      CharacterOutCombatController.instance =
+        new CharacterOutCombatController();
+    }
+    return CharacterOutCombatController.instance;
+  }
   selectedCharacter: Unit | null = null;
-  rlayer: Rlayer;
-  mapPassiable: TiledMap | null = null;
-  constructor(
-    rlayer: Rlayer,
-    container: PIXI.Container<PIXI.ContainerChild>,
-    mapPassiable: TiledMap
-  ) {
-    this.rlayer = rlayer;
-    this.container = container;
-    this.mapPassiable = mapPassiable;
 
+  constructor() {
     const ms = golbalSetting.mapContainer;
     if (ms) {
       console.log("ms", ms);
       ms.eventMode = "static";
       ms.on("pointerdown", (e: PIXI.FederatedPointerEvent) => {
         console.log("map click", e);
-      
+
         if (!CharacterOutCombatController.isUse) {
           return;
         }
@@ -53,11 +51,12 @@ export class CharacterOutCombatController {
   }
 
   unitMove(e: PIXI.FederatedPointerEvent) {
-    if (useTalkStateStore().talkState.onCg){
-      return
+    const mapPassiable = golbalSetting.map;
+    if (useTalkStateStore().talkState.onCg) {
+      return;
     }
     console.log("unitMove", e);
-    this.selectedCharacter = this.mapPassiable?.sprites.find(
+    this.selectedCharacter = mapPassiable?.sprites.find(
       (sprite) => sprite.id === CharacterController.curser
     );
     if (!this.selectedCharacter) {
@@ -73,16 +72,18 @@ export class CharacterOutCombatController {
         preY * tileSize,
         x * tileSize,
         y * tileSize,
-        this.mapPassiable
+        mapPassiable
       );
     });
 
     console.log("Path generated:", path);
-    const result={}as any
+    const result = {} as any;
+    const container = golbalSetting.rootContainer;
+    if (!container) return;
     UnitMoveAction.playerSelectMovement(
       e,
       this.selectedCharacter,
-      this.container,
+      container,
       path,
       result
     );

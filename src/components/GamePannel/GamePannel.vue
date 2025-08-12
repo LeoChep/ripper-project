@@ -102,7 +102,7 @@ onMounted(async () => {
     //初始化玩家角色
 
     //console.log('角色数据:', characterStore.characters);
-    const characterOutCombatController = new CharacterOutCombatController(rlayers, container, mapPassiable)
+    const characterOutCombatController = CharacterOutCombatController.getInstance();
 
 
 

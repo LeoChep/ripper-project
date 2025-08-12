@@ -218,8 +218,8 @@ export function useMinorAction(unit: Unit) {
   if (!unit.initiative) {
     return false;
   }
-  if (unit.initiative.standerActionNumber >= 1) {
-    unit.initiative.standerActionNumber--;
+  if (unit.initiative.minorActionNumber >= 1) {
+    unit.initiative.minorActionNumber--;
     return true;
   }
   return false;
