@@ -13,7 +13,6 @@ export abstract class BasedAbstractEvent extends GameEvent {
   static type = "attackEvent";
   static name = "UnitAttackEvent";
 
-
   constructor(uid?: string) {
     super();
 
@@ -30,6 +29,9 @@ export abstract class BasedAbstractEvent extends GameEvent {
 
   static getSerializer(): EventSerializer {
     return BasedEventSerializer.getInstance();
+  }
+  getSerializer(): EventSerializer {
+    return BasedAbstractEvent.getSerializer();
   }
   hook = () => {
     BattleEvenetSystem.getInstance().hookEvent(this); // 将事件挂钩到战斗事件系统

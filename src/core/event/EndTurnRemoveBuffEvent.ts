@@ -69,6 +69,9 @@ export class EndTurnRemoveBuffEvent extends GameEvent {
   static getSerializer(): EventSerializer {
     return EndTurnRemoveBuffEventSerializer.getInstance();
   }
+  getSerializer(): EventSerializer {
+    return EndTurnRemoveBuffEvent.getSerializer();
+  }
   hook = () => {
     BattleEvenetSystem.getInstance().hookEvent(this); // 将事件挂钩到战斗事件系统
   };

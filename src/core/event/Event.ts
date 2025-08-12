@@ -11,4 +11,7 @@ export abstract class GameEvent {
   static getSerializer(): EventSerializer {
     throw new Error("Method not implemented.");
   }
+  getSerializer(): EventSerializer {
+    return GameEvent.getSerializer();
+  }
 }

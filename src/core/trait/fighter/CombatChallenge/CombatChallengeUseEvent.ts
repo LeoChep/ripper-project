@@ -28,6 +28,9 @@ export class CombatChallengeUseEvent extends BasedAbstractEvent {
   static getSerializer(): EventSerializer {
     return CombatChallengeUseSerializer.getInstance();
   }
+  getSerializer(): EventSerializer {
+      return CombatChallengeUseEvent.getSerializer();
+  }
   hook = () => {
     BattleEvenetSystem.getInstance().hookEvent(this);
   };
