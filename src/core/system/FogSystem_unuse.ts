@@ -8,26 +8,17 @@ import * as PIXI from "pixi.js";
 import { golbalSetting } from "../golbalSetting";
 const tileSize = 64;
 export class FogSystem {
-  mapPassiable: TiledMap;
- static instanse:FogSystem;
-  containers: PIXI.Container<PIXI.ContainerChild>;
+  static instanse: FogSystem;
   fog: PIXI.Graphics | null = null;
   mask: PIXI.Container | null = null;
-  app: PIXI.Application;
-  constructor(
-    mapPassiable: TiledMap,
-    containers: PIXI.Container<PIXI.ContainerChild>,
-    app: PIXI.Application
-  ) {
-    this.mapPassiable = mapPassiable;
-
-    this.containers = containers;
-    this.app = app;
-    console.log("app", app);
+  constructor() {
     FogSystem.instanse = this;
   }
   caculteVersionByUnit = (unit: Unit) => {
-    const mapPassiable = this.mapPassiable;
+    const mapPassiable = golbalSetting.map;
+    if (!mapPassiable) {
+      return;
+    }
     const edge = mapPassiable.edges;
     // console.log("caculteVersionByUnit", edge);
 
@@ -85,7 +76,11 @@ export class FogSystem {
   };
 
   caculteVersionByPlayers = () => {
-    const units = this.mapPassiable.sprites;
+    const map = golbalSetting.map;
+    if (!map) {
+      return;
+    }
+    const units = map.sprites;
     const versionPolysPointsData: {
       unitId: any;
       visiblePoints: { [key: string]: { x: number; y: number } | null };
@@ -94,6 +89,9 @@ export class FogSystem {
       if (unit.party === "player") {
         const visiblePoints = this.caculteVersionByUnit(unit);
         // 将可见点添加到地图上
+        if (!visiblePoints) {
+          return;
+        }
         versionPolysPointsData.push({
           unitId: unit.id,
           visiblePoints: visiblePoints,
@@ -113,10 +111,14 @@ export class FogSystem {
       };
     }[]
   ) => {
-    const mapPassiable = this.mapPassiable;
+    const mapPassiable = golbalSetting.map;
     // 创建一个覆盖整个地图的黑色层
-
-    if (this.mask) {
+    const container = golbalSetting.rootContainer;
+    if (!container) {
+      console.error("Root container not found");
+      return;
+    }
+    if (this.mask && container.getChildByLabel("fogWarMask")) {
       this.mask.children.forEach((child) => {
         if (child instanceof PIXI.Graphics) {
           child.destroy();
@@ -125,7 +127,8 @@ export class FogSystem {
       this.mask.removeChildren();
     } else {
       this.mask = new PIXI.Container();
-      this.containers.addChild(this.mask);
+      this.mask.label = "fogWarMask";
+      container.addChild(this.mask);
     }
     const visiblePointsArr = data;
     const bigVisition = new PIXI.Graphics();
@@ -145,16 +148,15 @@ export class FogSystem {
       visitions.addChild(bigVisition);
       if (golbalSetting.mapContainer) {
         golbalSetting.mapContainer.children.forEach((child) => {
-                child.setMask({mask:bigVisition});
+          child.setMask({ mask: bigVisition });
         });
       }
       if (golbalSetting.spriteContainer) {
         golbalSetting.spriteContainer.children.forEach((child) => {
-          child.setMask({mask:bigVisition});
+          child.setMask({ mask: bigVisition });
         });
       }
-      this.mask.eventMode='none'
- 
+      this.mask.eventMode = "none";
     }
   };
   autoDraw() {
@@ -184,7 +186,7 @@ export class FogSystem {
     containers: PIXI.Container<PIXI.ContainerChild>,
     app: PIXI.Application
   ) {
-    const fogSystem = new FogSystem(mapPassiable, containers, app);
+    const fogSystem = new FogSystem();
     // 创建一个覆盖整个地图的黑色层
 
     return fogSystem;
