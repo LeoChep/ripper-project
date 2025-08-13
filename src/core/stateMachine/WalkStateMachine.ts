@@ -4,12 +4,13 @@ import { StateMachine } from "./StateMachine";
 const tileSize = 64; // 假设每个格子的大小为64像素
 export class WalkStateMachine extends StateMachine {
   public currentState: string | null = null;
+  public walkType: "normal" | "step" = "normal";
   private path: {
     x: number;
     y: number;
   }[] = [];
   public onDivideWalk: boolean = false; // 是否分割行走
-  public leastDivideSpeed:number = 0//剩余
+  public leastDivideSpeed: number = 0; //剩余
   private targetX: number = 0;
   private targetY: number = 0;
   private pauseMove: boolean = false;
@@ -48,42 +49,21 @@ export class WalkStateMachine extends StateMachine {
     const nextX = nextPathPoint.x * tileSize;
     const nextY = nextPathPoint.y * tileSize;
     //借机判断
-    const unitX = Math.floor((this.owner.x+tileSize/2) / tileSize);
-    const unitY = Math.floor((this.owner.y+tileSize/2) / tileSize);
+    const unitX = Math.floor((this.owner.x + tileSize / 2) / tileSize);
+    const unitY = Math.floor((this.owner.y + tileSize / 2) / tileSize);
     //判断是否需要移动到新的格子
     let haveMoveToNewTile = true;
     if (unitX === nextPathPoint.x && unitY === nextPathPoint.y) {
-      haveMoveToNewTile = false; // 如果当前单位已经在目标格子上，则不需要移动
+      haveMoveToNewTile = false; //
     }
     if (haveMoveToNewTile) {
-      console.log(`单位 (${unitX}, ${unitY}) 移动到目标格子 (${nextPathPoint.x}, ${nextPathPoint.y})`);
-      // 检查是否有单位可以触
-      const mayOpportunityUnit = OpportunitySystem.getOpportunityUnit(
-        unitX,
-        unitY,
-        this.owner
+      console.log(
+        `单位 (${unitX}, ${unitY}) 移动到目标格子 (${nextPathPoint.x}, ${nextPathPoint.y})`
       );
-      const opportunityUnit: Unit[] = [];
-      if (mayOpportunityUnit.length > 0) {
-        // 如果有单位可以触发借机，则暂停移动
-        mayOpportunityUnit.forEach((unit) => {
-          if (!this.haveOpportunity.includes(unit.id)) {
-            this.haveOpportunity.push(unit.id);
-            opportunityUnit.push(unit);
-          }
-        });
-      }
-      if (opportunityUnit.length > 0) {
-        // 如果有多个单位可以触发借机，则按照 InitiativeSheet 的顺序处理
-        this.pauseMove = true; // 暂停移动
-        OpportunitySystem.opportunitysHandle(this.owner, opportunityUnit).then(
-          () => {
-            this.pauseMove = false; // 恢复移动
-          }
-        );
-      } else {
-        console.log("没有单位可以触发借机");
-      }
+      // 检查是否有单位可以触
+      if (this.walkType!='step')
+      this.checkOpportunity(unitX, unitY);
+
     }
     //
     console.log("nextpoint", nextPathPoint);
@@ -123,7 +103,7 @@ export class WalkStateMachine extends StateMachine {
     nextY: number,
     path: { x: number; y: number }[]
   ) {
-    const spriteUnit = unit
+    const spriteUnit = unit;
     if (!spriteUnit) {
       console.error("动画精灵不存在");
       return;
@@ -169,12 +149,23 @@ export class WalkStateMachine extends StateMachine {
       const unitX = Math.floor(this.owner.x / tileSize);
       const unitY = Math.floor(this.owner.y / tileSize);
       if (unitX === this.targetX && unitY === this.targetY) {
-        spriteUnit.x= this.targetX * tileSize;
-        spriteUnit.y= this.targetY * tileSize;
+        spriteUnit.x = this.targetX * tileSize;
+        spriteUnit.y = this.targetY * tileSize;
         if (this.owner.animUnit) {
-          console.log("到达目标位置，停止移动", this.targetX * tileSize, this.targetY * tileSize, this.owner.animUnit.x, this.owner.animUnit.y);
+          console.log(
+            "到达目标位置，停止移动",
+            this.targetX * tileSize,
+            this.targetY * tileSize,
+            this.owner.animUnit.x,
+            this.owner.animUnit.y
+          );
         } else {
-          console.log("到达目标位置，停止移动", this.targetX * tileSize, this.targetY * tileSize, "animUnit未定义");
+          console.log(
+            "到达目标位置，停止移动",
+            this.targetX * tileSize,
+            this.targetY * tileSize,
+            "animUnit未定义"
+          );
         }
         this.path = []; // 清空路径
         this.owner.state = "idle"; // 设置单位状态为闲置
@@ -183,4 +174,32 @@ export class WalkStateMachine extends StateMachine {
       }
     }
   }
+  checkOpportunity = (unitX: number, unitY: number) => {
+    const mayOpportunityUnit = OpportunitySystem.getOpportunityUnit(
+      unitX,
+      unitY,
+      this.owner
+    );
+    const opportunityUnit: Unit[] = [];
+    if (mayOpportunityUnit.length > 0) {
+      // 如果有单位可以触发借机，则暂停移动
+      mayOpportunityUnit.forEach((unit) => {
+        if (!this.haveOpportunity.includes(unit.id)) {
+          this.haveOpportunity.push(unit.id);
+          opportunityUnit.push(unit);
+        }
+      });
+    }
+    if (opportunityUnit.length > 0) {
+      // 如果有多个单位可以触发借机，则按照 InitiativeSheet 的顺序处理
+      this.pauseMove = true; // 暂停移动
+      OpportunitySystem.opportunitysHandle(this.owner, opportunityUnit).then(
+        () => {
+          this.pauseMove = false; // 恢复移动
+        }
+      );
+    } else {
+      console.log("没有单位可以触发借机");
+    }
+  };
 }

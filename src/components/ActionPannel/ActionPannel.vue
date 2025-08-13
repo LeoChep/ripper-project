@@ -10,6 +10,9 @@
           <button :class="['action-btn', { selected: moveSelected === true }]" @click="selectMove()">
             移动
           </button>
+          <button :class="['action-btn', { selected: stepSelected === true }]" @click="selectStep()">
+            快步
+          </button>
           <button :class="['action-btn',]" @click="endTurn()">
             结束回合
           </button>
@@ -88,7 +91,7 @@ const actions = computed(() => {
     return []
   }
   // console.log('获取威能数据:', character.powers)
-  const actions=character.powers.map((power, index) => ({
+  const actions = character.powers.map((power, index) => ({
     id: `power_${index}`,
     displayName: power.displayName || power.name, // 使用威能的显示名称或默认名称
     name: power.name,
@@ -163,8 +166,9 @@ const selectAttack = () => {
     return
   }
   activePowerTab.value = null
-  attackSelected.value = true
+  attackSelected.value = false
   moveSelected.value = false
+  stepSelected.value = false
   selectedAction.value = null // 清除选中的动作
   CharacterCombatController.instance.useAttackController()
 }
@@ -183,6 +187,22 @@ const selectMove = () => {
   activePowerTab.value = null
   attackSelected.value = false
   moveSelected.value = true
+  selectedAction.value = null // 清除选中的动作
+}
+const selectStep = () => {
+  if (!CharacterCombatController.instance.inUse) {
+    console.warn('当前无法使用移动控制器')
+    return
+  }
+  if (CharacterCombatController.instance.selectedCharacter.state !== 'idle') {
+    console.warn('当前角色状态不允许移动')
+    return
+  }
+  CharacterCombatController.instance.useStepController()
+  activePowerTab.value = null
+  attackSelected.value = false
+  moveSelected.value = false
+  stepSelected.value = true
   selectedAction.value = null // 清除选中的动作
 }
 const endTurn = () => {

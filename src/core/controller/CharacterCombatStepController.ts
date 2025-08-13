@@ -3,13 +3,11 @@ import { Unit } from "../units/Unit";
 import * as UnitMoveSystem from "../system/UnitMoveSystem";
 
 import { generateWays } from "../utils/PathfinderUtil";
-
 import { playerSelectMovement } from "../action/UnitMove";
 import { useInitiativeStore } from "@/stores/initiativeStore";
 import * as envSetting from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
-import { endTurn } from "../system/InitiativeSystem";
 const tileSize = 64;
 
 type Rlayer = {
@@ -21,11 +19,11 @@ type Rlayer = {
   controllerLayer: PIXI.IRenderLayer;
 };
 
-export class CharCombatMoveController {
+export class CharCombatStepController {
   public static isUse: boolean = false;
 
   selectedCharacter: Unit | null = null;
-  public static instense = null as CharCombatMoveController | null;
+  public static instense = null as CharCombatStepController | null;
 
   graphics: PIXI.Graphics | null = null;
   constructor() {
@@ -42,15 +40,10 @@ export class CharCombatMoveController {
       this.removeFunction();
     }
     //显示可移动范围
-    let range = unit.creature?.speed ?? 0;
+    let range = 1;
     const walkMachine = unit.stateMachinePack.getMachine(
       "walk"
     ) as WalkStateMachine;
-    if (walkMachine.onDivideWalk) {
-      if (walkMachine.leastDivideSpeed > 0) {
-        range = walkMachine.leastDivideSpeed;
-      }
-    }
 
     const tileSize = 64;
     const graphics = new PIXI.Graphics();
@@ -106,7 +99,7 @@ export class CharCombatMoveController {
     container.addChild(graphics);
 
     this.graphics = graphics;
-    // 点击其他地方移除移动范围
+
     let resolveCallback: (arg0: any) => void = () => {};
     const promise = new Promise<any>((resolve) => {
       resolveCallback = resolve;
@@ -118,24 +111,24 @@ export class CharCombatMoveController {
       }
     };
     let cancel = false;
-    this.removeFunction = () => {
-      removeGraphics();
-      resolveCallback({});
-      this.removeFunction = () => {};
-    };
+
     graphics.on("pointerup", (e) => {
       console.log("pointerup");
       e.stopPropagation();
       if (cancel) {
-        cancel=false;
-        return 
+        cancel = false;
+        return;
       }
       removeGraphics();
       const result = {} as any;
       result.cancel = false;
+      
       // CharacterController.onAnim = true;
+      const walktype = (unit.stateMachinePack.getMachine("walk") as WalkStateMachine).walkType;
+      (unit.stateMachinePack.getMachine("walk") as WalkStateMachine).walkType = "step";
       playerSelectMovement(e, unit, container, path, result)?.then(() => {
         console.log("resolveCallback", result);
+           (unit.stateMachinePack.getMachine("walk") as WalkStateMachine).walkType = walktype
         setTimeout(() => {
           // CharacterController.onAnim = false;
         }, 50);
@@ -162,19 +155,23 @@ export class CharCombatMoveController {
       }
     });
     graphics.on("rightdown", (e) => {
-      console.log("rightdown");
-      e.stopPropagation();
       cancel = true;
-      const useConfirm = confirm("是否结束回合？");
-      if (!useConfirm) {
-        return;
-      }
-      removeGraphics();
-      cancel = true;
-      this.removeFunction = () => {};
-      endTurn(unit);
-      resolveCallback({ cancel: true });
+      this.removeFunction();
     });
+    const ms = golbalSetting.rootContainer;
+    const removeFunction = (info: any) => {
+      removeGraphics();
+      if (info.from) {
+        resolveCallback(info);
+      } else {
+        resolveCallback({ cancel: true });
+      }
+
+      ms?.removeListener("rightdown", removeFunction);
+      this.removeFunction = () => {};
+    };
+    this.removeFunction = removeFunction;
+    ms?.on("rightdown", removeFunction);
     return promise;
   };
   removeFunction = (args?: any) => {};

@@ -12,6 +12,7 @@ import { AbstractPwoerController } from "./powers/AbstractPwoerController";
 import { Power } from "../power/Power";
 import { PowerSystem } from "../system/PowerSystem";
 import { WeaponSystem } from "../system/WeaponSystem";
+import { CharCombatStepController } from "./CharacterCombatStepController";
 export class CharacterCombatController {
   public inUse: boolean = false;
   public static instance: CharacterCombatController | null = null;
@@ -44,6 +45,7 @@ export class CharacterCombatController {
       cancel: true,
     };
     CharCombatAttackController.instense?.removeFunction(cancelInfo);
+    CharCombatStepController.instense?.removeFunction(cancelInfo);
     this.powerController?.removeFunction(cancelInfo);
     let moveController = CharCombatMoveController.instense;
     if (!moveController) {
@@ -134,6 +136,7 @@ export class CharacterCombatController {
     };
     CharCombatAttackController.instense?.removeFunction(cancelInfo);
     CharCombatMoveController.instense?.removeFunction(cancelInfo);
+    CharCombatStepController.instense?.removeFunction(cancelInfo);
     this.powerController?.removeFunction(cancelInfo);
 
     let atkController = CharCombatAttackController.instense;
@@ -142,13 +145,53 @@ export class CharacterCombatController {
       CharCombatAttackController.instense = atkController;
     }
     atkController.selectedCharacter = this.selectedCharacter;
-    const attacker=this.selectedCharacter;
+    const attacker = this.selectedCharacter;
     if (!attacker.creature?.weapons || attacker.creature.weapons.length === 0) {
       console.warn("没有可用的武器，无法进行攻击选择");
       return;
     }
-    const attack = WeaponSystem.getInstance().createWeaponAttack(attacker, attacker.creature?.weapons?.[0]);
+    const attack = WeaponSystem.getInstance().createWeaponAttack(
+      attacker,
+      attacker.creature?.weapons?.[0]
+    );
     atkController.attackSelect(attack).then((result) => {
+      console.log("attackSelect result", result);
+      if (!result.cancel && InitiativeSystem.isInBattle()) {
+        this.resetDivideWalk();
+      }
+
+      setTimeout(() => {
+        if (!result.from && InitiativeSystem.isInBattle()) {
+          this.useMoveController();
+        }
+      }, 90);
+    });
+  }
+  useStepController() {
+    if (!this.preCheck() || !this.selectedCharacter) {
+      return;
+    }
+    if (!InitiativeSystem.checkActionUseful(this.selectedCharacter, "move")) {
+      return;
+    }
+    const cancelInfo = {
+      from: "stepController",
+      cancel: true,
+    };
+    CharCombatStepController.instense?.removeFunction(cancelInfo);
+    CharCombatAttackController.instense?.removeFunction(cancelInfo);
+    CharCombatMoveController.instense?.removeFunction(cancelInfo);
+    CharCombatStepController.instense?.removeFunction(cancelInfo);
+    this.powerController?.removeFunction(cancelInfo);
+
+    let controller = CharCombatStepController.instense;
+    if (!controller) {
+      controller = new CharCombatStepController();
+      CharCombatStepController.instense = controller;
+    }
+    controller.selectedCharacter = this.selectedCharacter;
+
+    controller.moveSelect().then((result) => {
       console.log("attackSelect result", result);
       if (!result.cancel && InitiativeSystem.isInBattle()) {
         this.resetDivideWalk();
