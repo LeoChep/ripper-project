@@ -88,6 +88,11 @@ export class PowerSystem {
         return import(
           "../controller/powers/wizard/MagicMissileController"
         ).then((module) => module.MagicMissileController);
+
+      case "ChargeAttack":
+        return import(
+          "../controller/powers/fighter/ChargeAttackController"
+        ).then((module) => module.ChargeAttackController);
     }
     return null;
   }

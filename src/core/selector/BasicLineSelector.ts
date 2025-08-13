@@ -1,27 +1,27 @@
-import { checkPassiable } from "./../system/FogSystem";
-import { tileSize } from "./../envSetting";
+import { checkPassiable } from "../system/FogSystem";
+import { tileSize } from "../envSetting";
 import { generateWays } from "../utils/PathfinderUtil";
 import * as PIXI from "pixi.js";
 import * as envSetting from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import { MessageTipSystem } from "../system/MessageTipSystem";
-export class BasicSelector {
+export class BasicLineSelector {
   public graphics: PIXI.Graphics | null = null;
   public removeFunction: (input: any) => void = () => {};
   public promise: Promise<any> | null = null;
-  static getInstance(): BasicSelector {
-    if (BasicSelector.instance) {
-      return BasicSelector.instance;
+  static getInstance(): BasicLineSelector {
+    if (BasicLineSelector.instance) {
+      return BasicLineSelector.instance;
     }
-    BasicSelector.instance = new BasicSelector();
-    return BasicSelector.instance;
+    BasicLineSelector.instance = new BasicLineSelector();
+    return BasicLineSelector.instance;
   }
   public canCancel: boolean = true;
   public isCannelClick: boolean = false; // 记录事件是否是取消点击，用于区分左右键
   public selected: { x: number; y: number }[] = [];
   public selecteNum: number = 0;
-  private static instance: BasicSelector | null = null;
-  // 选择基本攻击
+  private static instance: BasicLineSelector | null = null;
+
   public selectBasic(
     grids: {
       [key: string]: {
@@ -34,8 +34,8 @@ export class BasicSelector {
     color: string,
     canCancel: boolean = true,
     checkPassiable: (gridX: number, gridY: number) => boolean = () => true
-  ): BasicSelector {
-    const selector = BasicSelector.getInstance();
+  ): BasicLineSelector {
+    const selector = BasicLineSelector.getInstance();
     selector.canCancel = canCancel;
     selector.selected = [];
     selector.selecteNum = selectNum;
@@ -64,7 +64,7 @@ export class BasicSelector {
         selector.removeFunction = () => {};
       }
     };
-
+    
     graphics.on("pointerup", (e) => {
       console.log("pointerup");
       e.stopPropagation();

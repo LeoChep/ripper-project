@@ -24,12 +24,30 @@
   ],
   "skills": [],
   "abilities": {
-    "STR": { "value": 20, "modifier": 5 },
-    "DEX": { "value": 10, "modifier": 0 },
-    "CON": { "value": 14, "modifier": 2 },
-    "INT": { "value": 10, "modifier": 0 },
-    "WIS": { "value": 15, "modifier": 2 },
-    "CHA": { "value": 8, "modifier": -1 }
+    "STR": {
+      "value": 20,
+      "modifier": 5
+    },
+    "DEX": {
+      "value": 10,
+      "modifier": 0
+    },
+    "CON": {
+      "value": 14,
+      "modifier": 2
+    },
+    "INT": {
+      "value": 10,
+      "modifier": 0
+    },
+    "WIS": {
+      "value": 15,
+      "modifier": 2
+    },
+    "CHA": {
+      "value": 8,
+      "modifier": -1
+    }
   },
   "equipment": [],
   "weapons": [
@@ -39,7 +57,7 @@
       "action": "武器",
       "range": 1,
       "proficiency": 3,
-      "bonus":1,
+      "bonus": 1,
       "target": "ac",
       "weapon": "1d8",
       "damage": "1d8",
@@ -52,7 +70,7 @@
       "action": "武器",
       "range": 1,
       "attackBonus": 12,
-       "bonus":1,
+      "bonus": 1,
       "target": "ac",
       "weapon": "1d6",
       "damage": "1d6",
@@ -73,17 +91,29 @@
       "attackBonus": null,
       "missEffect": null
     },
-      {
-"name": "FunnelingFlurry",
-"displayName": "流动疾风斩",
-"useType": "encounter",
-"actionType": "standard",
-"range": null,
-"target": null,
-"description": "流动疾风斩 Funneling Flurry  MP\n战士攻击 1\n随着如同毒蛇般的攻击，你将两个敌人逼迫到你认为合适的位置。\n遭遇✦武术，武器\n标准动作✦近战武器\n要求：你必须持用两件近战武器\n目标：两个生物\n攻击：力量 vs. AC （主手武器和副手武器），每个目标一次攻击\n命中：1[W] + 力量调整值的伤害。并且你令目标滑动1格。",
-"damage": null,
-"attackBonus": null,
-"missEffect": null
+    {
+      "name": "FunnelingFlurry",
+      "displayName": "流动疾风斩",
+      "useType": "encounter",
+      "actionType": "standard",
+      "range": null,
+      "target": null,
+      "description": "流动疾风斩 Funneling Flurry  MP\n战士攻击 1\n随着如同毒蛇般的攻击，你将两个敌人逼迫到你认为合适的位置。\n遭遇✦武术，武器\n标准动作✦近战武器\n要求：你必须持用两件近战武器\n目标：两个生物\n攻击：力量 vs. AC （主手武器和副手武器），每个目标一次攻击\n命中：1[W] + 力量调整值的伤害。并且你令目标滑动1格。",
+      "damage": null,
+      "attackBonus": null,
+      "missEffect": null
+    },
+    {
+      "name": "ChargeAttack",
+      "displayName": "冲锋",
+      "useType": "encounter",
+      "actionType": "standard",
+      "range": null,
+      "target": null,
+      "description": "流动疾风斩 Funneling Flurry  MP\n战士攻击 1\n随着如同毒蛇般的攻击，你将两个敌人逼迫到你认为合适的位置。\n遭遇✦武术，武器\n标准动作✦近战武器\n要求：你必须持用两件近战武器\n目标：两个生物\n攻击：力量 vs. AC （主手武器和副手武器），每个目标一次攻击\n命中：1[W] + 力量调整值的伤害。并且你令目标滑动1格。",
+      "damage": null,
+      "attackBonus": null,
+      "missEffect": null
     },
     {
       "name": "ShieldEdgeBlock",
@@ -107,14 +137,13 @@
       "type": "combat"
     }
   ],
-  "feats":[
+  "feats": [
     {
-      "name": "SuperiorWill"  
+      "name": "SuperiorWill"
     },
     {
       "name": "LightningReflexes"
     }
-
   ],
   "notes": [
     "Equipment: 长剑, 短弓, 20 支箭"
