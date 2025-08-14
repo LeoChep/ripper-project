@@ -126,10 +126,10 @@ export class ChargeAttackController extends AbstractPwoerController {
     const moveEnd =
       linePathGrid[`${result.selected[0].x},${result.selected[0].y}`];
     if (moveEnd.step <= 2) {
-      MessageTipSystem.getInstance().setMessage("冲锋需要至少移动2格");
       this.removeFunction();
       resolveCallback({});
     } else {
+      MessageTipSystem.getInstance().clearMessage();
       useAction(unit, "standard");
       await moveMovement(moveEnd.x, moveEnd.y, unit, linePathGrid);
       await attackMovementToXY(

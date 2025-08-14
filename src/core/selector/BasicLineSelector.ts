@@ -1,4 +1,3 @@
-
 import { checkPassiable } from "../system/FogSystem";
 import { tileSize } from "../envSetting";
 import { generateWays } from "../utils/PathfinderUtil";
@@ -61,7 +60,7 @@ export class BasicLineSelector {
     color: string,
     canCancel: boolean = true,
     checkPassiable: (gridX: number, gridY: number) => boolean = () => true,
-    scanFunction: (scanData:ScanData) => any = () => {},
+    scanFunction: (scanData: ScanData) => any = () => {},
     startPos?: { x: number; y: number } // 添加起始位置参数
   ): BasicLineSelector {
     const selector = BasicLineSelector.getInstance();
@@ -141,27 +140,6 @@ export class BasicLineSelector {
       }
     });
 
-    selector.removeFunction = (input: any) => {
-      this.isCannelClick = true;
-      removeGraphics();
-      resolveCallback(input);
-    };
-
-    graphics.on("rightdown", (e) => {
-      this.isCannelClick = true;
-      e.stopPropagation();
-
-      if (selector.canCancel && selector.selected.length === 0) {
-        removeGraphics();
-        resolveCallback({ cancel: true });
-      } else if (selector.selected.length > 0) {
-        selector.selected.pop();
-        MessageTipSystem.getInstance().setBottomMessage(
-          `已选择 ${this.selected.length}/${this.selecteNum} 个目标`
-        );
-      }
-    });
-
     const ms = golbalSetting.mapContainer;
     console.log("golbalSetting", golbalSetting);
     const scanInPIXI = (x: number, y: number, inRange: boolean = false) => {
@@ -182,10 +160,10 @@ export class BasicLineSelector {
             const scanData: ScanData = {
               x,
               y,
-              pixix:x,
-              pixiy:y,
-              gridx:Math.floor(x / tileSize),
-              gridy:Math.floor(y / tileSize),
+              pixix: x,
+              pixiy: y,
+              gridx: Math.floor(x / tileSize),
+              gridy: Math.floor(y / tileSize),
               inRange,
               linePathGrid: this.linePathGrid,
               startPosition: selector.startPosition,
@@ -200,13 +178,37 @@ export class BasicLineSelector {
       }
     };
     // 添加鼠标移动事件监听
-    ms?.on("pointermove", (e) => {
-      console.log("ms point", ms);
+    const scanInPIXIEvent = (e: { x: number; y: number }) => {
       scanInPIXI(e.x, e.y);
-    });
-    graphics.on("pointermove", (e) => {
+    };
+    const scanInPIXIEventInGraphics = (e: { x: number; y: number }) => {
       scanInPIXI(e.x, e.y, true);
+    };
+    ms?.on("pointermove", scanInPIXIEvent);
+    graphics.on("pointermove", scanInPIXIEventInGraphics);
+    graphics.on("rightdown", (e) => {
+      this.isCannelClick = true;
+      e.stopPropagation();
+
+      if (selector.canCancel && selector.selected.length === 0) {
+        removeGraphics();
+        ms?.off("pointermove", scanInPIXIEvent);
+        resolveCallback({ cancel: true });
+      } else if (selector.selected.length > 0) {
+        selector.selected.pop();
+        MessageTipSystem.getInstance().setBottomMessage(
+          `已选择 ${this.selected.length}/${this.selecteNum} 个目标`
+        );
+      }
     });
+    selector.removeFunction = (input: any) => {
+      this.isCannelClick = true;
+      removeGraphics();
+      ms?.off("pointermove", scanInPIXIEvent);
+      graphics.off("pointermove", scanInPIXIEventInGraphics);
+      resolveCallback(input);
+    };
+
     // 添加鼠标离开事件监听
     // graphics?.on("pointerleave", (e) => {
     //   let { x, y } = e.data.global;
