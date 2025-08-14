@@ -29,7 +29,7 @@ export class CharacterOutCombatController {
     }
     return CharacterOutCombatController.instance;
   }
-  selectedCharacter: Unit | null = null;
+
 
   constructor() {
     const ms = golbalSetting.mapContainer;
@@ -56,18 +56,18 @@ export class CharacterOutCombatController {
       return;
     }
     console.log("unitMove", e);
-    this.selectedCharacter = mapPassiable?.sprites.find(
+    const selectedCharacter = mapPassiable?.sprites.find(
       (sprite) => sprite.id === CharacterController.curser
     );
-    if (!this.selectedCharacter) {
+    if (!selectedCharacter) {
       console.warn("No character selected for movement.");
       return;
     }
-    const startX = Math.floor(this.selectedCharacter.x / tileSize);
-    const startY = Math.floor(this.selectedCharacter.y / tileSize);
+    const startX = Math.floor(selectedCharacter.x / tileSize);
+    const startY = Math.floor(selectedCharacter.y / tileSize);
     const path = generateWays(startX, startY, 20, (x, y, preX, preY) => {
       return UnitMoveSystem.checkPassiable(
-        this.selectedCharacter!,
+        selectedCharacter!,
         preX * tileSize,
         preY * tileSize,
         x * tileSize,
@@ -82,7 +82,7 @@ export class CharacterOutCombatController {
     if (!container) return;
     UnitMoveAction.playerSelectMovement(
       e,
-      this.selectedCharacter,
+     selectedCharacter,
       container,
       path,
       result

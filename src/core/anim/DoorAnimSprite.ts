@@ -138,12 +138,12 @@ export class DoorAnimSprite extends Container {
         } else {
           this.tooltip.text += checkResult.info;
         }
-      }else {
+      } else {
         const checkResult = outBattleAction(this.owner);
-         this.tooltip.text += checkResult.info;
+        if (checkResult) {
+          this.tooltip.text += checkResult.info;
+        }
       }
-
-    
 
       // 重新绘制背景以适应文本大小
       const textBounds = this.tooltip.getBounds();
@@ -266,11 +266,18 @@ export const createDoorAnimSpriteFromDoor = async (door: Door) => {
       return;
     }
     if (InitiativeSystem.isInBattle()) {
-      if (!inBattleAction(door).useful) {
+      if (inBattleAction(door).useful == false) {
         return;
+      } else {
+        const selectedCharacter =
+          CharacterCombatController.getInstance().selectedCharacter;
+        if (selectedCharacter) {
+          InitiativeSystem.useMinorAction(selectedCharacter);
+        }
       }
     } else {
-      if (!outBattleAction(door).useful) {
+      const outBattleResult = outBattleAction(door);
+      if (!outBattleResult || !outBattleResult.useful) {
         return;
       }
     }
@@ -290,7 +297,13 @@ export const createDoorAnimSpriteFromDoor = async (door: Door) => {
   return doorAnimSprite;
 };
 const outBattleAction = (door: Door) => {
-  const selectedCharacter = CharacterOutCombatController.getInstance().selectedCharacter;
+  const map = golbalSetting.map;
+  if (!map) {
+    return;
+  }
+  const selectedCharacter = map.sprites.find(
+    (sprite) => sprite.id === CharacterController.curser
+  );
   if (!selectedCharacter) return { info: "未选择角色", useful: false };
   const doorX = door.x;
   const doorY = door.y;
@@ -318,8 +331,7 @@ const inBattleAction = (door: Door) => {
 
   actionUseful = InitiativeSystem.checkActionUseful(selectedCharacter, "minor");
 
-  if (actionUseful && selectedCharacter)
-    InitiativeSystem.useMinorAction(selectedCharacter);
-  else return { info: "动作不足", useful: false };
+  if (!actionUseful && selectedCharacter)
+    return { info: "动作不足", useful: false };
   return { info: "动作可用", useful: true };
 };

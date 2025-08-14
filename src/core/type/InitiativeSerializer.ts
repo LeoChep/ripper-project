@@ -1,6 +1,7 @@
 import { InitiativeClass } from "./InitiativeClass";
 import type { Unit } from "../units/Unit";
 
+
 /**
  * InitiativeClass 序列化数据接口
  */
@@ -101,7 +102,7 @@ export class InitiativeSerializer {
 
     // 恢复所有属性
     initiative.standerActionNumber = this._data.standerActionNumber;
-    initiative.minorActionNumber = this._data.minorActionNumber;
+    initiative.minorActionNumber = this._data.minorActionNumber
     initiative.moveActionNumber = this._data.moveActionNumber;
     initiative.reactionNumber = this._data.reactionNumber;
     initiative.ready = this._data.ready;
@@ -160,6 +161,7 @@ export class InitiativeSerializer {
     serializedData: InitiativeSerializer[],
     unitResolver?: (uid: string) => Unit | null
   ): InitiativeClass[] {
+    console.log("InitiativeSerializer.deserializeArray", serializedData);
     return serializedData.map((data) => {
       const serializer = new InitiativeSerializer(data._data);
       return serializer.deserialize(unitResolver);
