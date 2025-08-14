@@ -7,13 +7,17 @@ import type { CreatureAttack } from "@/core/units/Creature";
 import { golbalSetting } from "@/core/golbalSetting";
 
 import { checkPassiable as moveGridsCheckPassiable } from "@/core/system/UnitMoveSystem";
+import { checkPassiable as attackCheckPassiable } from "@/core/system/AttackSystem";
 import { tileSize } from "@/core/envSetting";
 import { generateWays } from "@/core/utils/PathfinderUtil";
 import { BasicSelector } from "@/core/selector/BasicSelector";
 import { ShiftAnim } from "@/core/anim/ShiftAnim";
 import { MessageTipSystem } from "@/core/system/MessageTipSystem";
 import { AbilityValueSystem } from "@/core/system/AbilitiyValueSystem";
-import { BasicLineSelector } from "@/core/selector/BasicLineSelector";
+import {
+  BasicLineSelector,
+  type ScanData,
+} from "@/core/selector/BasicLineSelector";
 import { moveMovement } from "@/core/action/UnitMove";
 import {
   attackMovementToUnit,
@@ -41,8 +45,9 @@ export class ChargeAttackController extends AbstractPwoerController {
     const unit = this.selectedCharacter as Unit;
     const mainAttack1 = this.getAttack(unit, 1);
     const speed = unit.creature?.speed;
+
     console.log("unit speed", speed);
-    const grids = generateWays(x, y, speed ? speed : 0, (x, y, prex, prey) => {
+    const grids = generateWays(x, y, (speed ? speed : 0)+1, (x, y, prex, prey) => {
       return checkPassiable(
         unit,
         prex * tileSize,
@@ -52,7 +57,51 @@ export class ChargeAttackController extends AbstractPwoerController {
         golbalSetting.map
       );
     });
+    const scanFunction = (scanData: ScanData) => {
+      let outSpeedFlag = false;
+      let tooShortFlag = false;
+      let beBlockFlag = false;
+      const linePath = scanData.linePathGrid;
+      if (!linePath) return;
+      const gridx = scanData.gridx;
+      const gridy = scanData.gridy;
+      Object.keys(linePath).forEach((key) => {
+        const [x, y] = key.split(",").map(Number);
+        if (linePath[key] && linePath[key].step > (speed ?? 0)) {
+          outSpeedFlag = true;
+        }
+        const unitInGrid=UnitSystem.getInstance().findUnitByGridxy(x, y);
+        if (unitInGrid && unitInGrid !== unit&&unitInGrid.party!=unit.party&&unitInGrid.state !== "dead") {
+          if (unitInGrid.x!=gridx&&unitInGrid.y!=gridy) {
+            beBlockFlag = true;
+          }
+        }
+      })
 
+      const targetGrid = linePath[`${gridx},${gridy}`];
+      if (targetGrid && targetGrid.step <= 2) {
+        tooShortFlag = true;
+      }
+      if (targetGrid){
+         const noBeblockByWall=attackCheckPassiable(unit, targetGrid.x * tileSize, targetGrid.y * tileSize, golbalSetting.map);
+         if (!noBeblockByWall)
+          beBlockFlag = true;
+        }
+       
+      if (outSpeedFlag) {
+        MessageTipSystem.getInstance().setMessage("超出冲锋范围");
+        return;
+      }
+      if (tooShortFlag) {
+        MessageTipSystem.getInstance().setMessage("冲锋需要至少移动2格");
+        return;
+      }
+      if (beBlockFlag) {
+        MessageTipSystem.getInstance().setMessage("冲锋路径被阻挡");
+        return;
+      }
+      MessageTipSystem.getInstance().clearMessage();
+    };
     // 执行攻击选择逻辑
     const basicAttackSelector = BasicLineSelector.getInstance().selectBasic(
       grids,
@@ -60,6 +109,7 @@ export class ChargeAttackController extends AbstractPwoerController {
       "blue",
       true,
       () => true,
+      scanFunction,
       { x: x, y: y }
     );
     MessageTipSystem.getInstance().setMessage("请选择主目标");
@@ -80,7 +130,7 @@ export class ChargeAttackController extends AbstractPwoerController {
       this.removeFunction();
       resolveCallback({});
     } else {
-      useAction(unit,'standard');
+      useAction(unit, "standard");
       await moveMovement(moveEnd.x, moveEnd.y, unit, linePathGrid);
       await attackMovementToXY(
         result.selected[0].x,

@@ -1,3 +1,4 @@
+
 import { checkPassiable } from "../system/FogSystem";
 import { tileSize } from "../envSetting";
 import { generateWays } from "../utils/PathfinderUtil";
@@ -5,7 +6,22 @@ import * as PIXI from "pixi.js";
 import * as envSetting from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import { MessageTipSystem } from "../system/MessageTipSystem";
-
+export type ScanData = {
+  x: number;
+  y: number;
+  inRange: boolean;
+  linePathGrid: {
+    [key: string]: { x: number; y: number; step: number } | null;
+  };
+  startPosition: { x: number; y: number } | null;
+  oldXY: { x: number; y: number };
+  selected: { x: number; y: number }[];
+  selecteNum: number;
+  pixix: number;
+  pixiy: number;
+  gridx: number;
+  gridy: number;
+};
 export class BasicLineSelector {
   public graphics: PIXI.Graphics | null = null;
   public removeFunction: (input: any) => void = () => {};
@@ -28,8 +44,9 @@ export class BasicLineSelector {
   public isCannelClick: boolean = false;
   public selected: { x: number; y: number }[] = [];
   public selecteNum: number = 0;
-  private linePathGrid: { [key: string]: { x: number; y: number; step: number } | null } =
-    {};
+  private linePathGrid: {
+    [key: string]: { x: number; y: number; step: number } | null;
+  } = {};
   private static instance: BasicLineSelector | null = null;
 
   public selectBasic(
@@ -44,6 +61,7 @@ export class BasicLineSelector {
     color: string,
     canCancel: boolean = true,
     checkPassiable: (gridX: number, gridY: number) => boolean = () => true,
+    scanFunction: (scanData:ScanData) => any = () => {},
     startPos?: { x: number; y: number } // 添加起始位置参数
   ): BasicLineSelector {
     const selector = BasicLineSelector.getInstance();
@@ -118,7 +136,7 @@ export class BasicLineSelector {
           cancel: false,
           event: e,
           selected: this.selected,
-          linePathGrid: this.linePathGrid
+          linePathGrid: this.linePathGrid,
         });
       }
     });
@@ -146,13 +164,8 @@ export class BasicLineSelector {
 
     const ms = golbalSetting.mapContainer;
     console.log("golbalSetting", golbalSetting);
-    // 添加鼠标移动事件监听
-    ms?.on("pointermove", (e) => {
-      console.log("ms point", ms);
-
+    const scanInPIXI = (x: number, y: number, inRange: boolean = false) => {
       if (selector.startPosition) {
-        let { x, y } = e.data.global;
-
         if (golbalSetting.rootContainer) {
           x -= golbalSetting.rootContainer.x;
           y -= golbalSetting.rootContainer.y;
@@ -163,15 +176,36 @@ export class BasicLineSelector {
           const distance = Math.sqrt(dx * dx + dy * dy);
           if (distance > 5) {
             this.oldXY = { x, y };
+            console.log("uppreviewLine");
             selector.updatePreviewLine(selector.startPosition, { x: x, y: y });
+
+            const scanData: ScanData = {
+              x,
+              y,
+              pixix:x,
+              pixiy:y,
+              gridx:Math.floor(x / tileSize),
+              gridy:Math.floor(y / tileSize),
+              inRange,
+              linePathGrid: this.linePathGrid,
+              startPosition: selector.startPosition,
+              oldXY: this.oldXY,
+              selected: this.selected,
+              selecteNum: this.selecteNum,
+            };
+            scanFunction(scanData);
           }
         }
         // const targetXY = selector.getXY(x, y);
       }
+    };
+    // 添加鼠标移动事件监听
+    ms?.on("pointermove", (e) => {
+      console.log("ms point", ms);
+      scanInPIXI(e.x, e.y);
     });
     graphics.on("pointermove", (e) => {
-  
-      golbalSetting.mapContainer?.emit("pointermove", e);
+      scanInPIXI(e.x, e.y, true);
     });
     // 添加鼠标离开事件监听
     // graphics?.on("pointerleave", (e) => {
@@ -276,7 +310,9 @@ export class BasicLineSelector {
     // 路径优化：移除不必要的中间格子
     const optimizedPath = this.optimizePath(passedGridsList);
     //记录路径
-    const linePathGrid: { [key: string]: { x: number; y: number; step: number } | null } = {};
+    const linePathGrid: {
+      [key: string]: { x: number; y: number; step: number } | null;
+    } = {};
     for (let i = 1; i < optimizedPath.length; i++) {
       const preGrid = optimizedPath[i - 1];
       const grid = optimizedPath[i];
