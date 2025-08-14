@@ -229,19 +229,19 @@ export function useAction(unit: Unit, actionType: string) {
     return false;
   }
   if (actionType === "standard") {
-    if (!(unit.initiative.standerActionNumber >= 1)) {
+    if ((unit.initiative.standerActionNumber >= 1)) {
       unit.initiative.standerActionNumber--;
       return true;
     }
   }
   if (actionType === "move") {
-    if (!(unit.initiative.moveActionNumber >= 1)) {
+    if ((unit.initiative.moveActionNumber >= 1)) {
       unit.initiative.moveActionNumber--;
       return true;
     }
   }
   if (actionType === "minor") {
-    if (!(unit.initiative.minorActionNumber >= 1)) {
+    if ((unit.initiative.minorActionNumber >= 1)) {
       unit.initiative.minorActionNumber--;
       return true;
     }

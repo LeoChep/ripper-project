@@ -185,10 +185,12 @@ const selectMove = () => {
   }
   CharacterCombatController.instance.useMoveController()
   activePowerTab.value = null
+    stepSelected.value = false
   attackSelected.value = false
   moveSelected.value = true
   selectedAction.value = null // 清除选中的动作
 }
+const stepSelected = ref(false)
 const selectStep = () => {
   if (!CharacterCombatController.instance.inUse) {
     console.warn('当前无法使用移动控制器')

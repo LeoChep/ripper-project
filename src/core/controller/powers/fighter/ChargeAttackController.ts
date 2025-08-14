@@ -14,6 +14,16 @@ import { ShiftAnim } from "@/core/anim/ShiftAnim";
 import { MessageTipSystem } from "@/core/system/MessageTipSystem";
 import { AbilityValueSystem } from "@/core/system/AbilitiyValueSystem";
 import { BasicLineSelector } from "@/core/selector/BasicLineSelector";
+import { moveMovement } from "@/core/action/UnitMove";
+import {
+  attackMovementToUnit,
+  attackMovementToXY,
+  playerSelectAttackMovement,
+} from "@/core/action/UnitAttack";
+import { WeaponSystem } from "@/core/system/WeaponSystem";
+import { segmentsIntersect } from "@/core/utils/MathUtil";
+import type { TiledMap } from "@/core/MapClass";
+import { useAction, useStandAction } from "@/core/system/InitiativeSystem";
 
 export class ChargeAttackController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -30,23 +40,18 @@ export class ChargeAttackController extends AbstractPwoerController {
     const { x, y } = this.getXY();
     const unit = this.selectedCharacter as Unit;
     const mainAttack1 = this.getAttack(unit, 1);
-    const speed=unit.creature?.speed;
-    console.log('unit speed', speed);
-    const grids = generateWays(
-      x,
-      y,
-      speed ? speed : 0,
-      (x, y, prex, prey) => {
-        return moveGridsCheckPassiable(
-          unit,
-          prex * tileSize,
-          prey * tileSize,
-          x * tileSize,
-          y * tileSize,
-          golbalSetting.map
-        );
-      }
-    );
+    const speed = unit.creature?.speed;
+    console.log("unit speed", speed);
+    const grids = generateWays(x, y, speed ? speed : 0, (x, y, prex, prey) => {
+      return checkPassiable(
+        unit,
+        prex * tileSize,
+        prey * tileSize,
+        x * tileSize,
+        y * tileSize,
+        golbalSetting.map
+      );
+    });
 
     // 执行攻击选择逻辑
     const basicAttackSelector = BasicLineSelector.getInstance().selectBasic(
@@ -54,6 +59,8 @@ export class ChargeAttackController extends AbstractPwoerController {
       1,
       "blue",
       true,
+      () => true,
+      { x: x, y: y }
     );
     MessageTipSystem.getInstance().setMessage("请选择主目标");
     this.graphics = BasicSelector.getInstance().graphics;
@@ -64,9 +71,30 @@ export class ChargeAttackController extends AbstractPwoerController {
     });
 
     const result = await basicAttackSelector.promise;
-  
+
+    const linePathGrid = result.linePathGrid;
+    const moveEnd =
+      linePathGrid[`${result.selected[0].x},${result.selected[0].y}`];
+    if (moveEnd.step <= 2) {
+      MessageTipSystem.getInstance().setMessage("冲锋需要至少移动2格");
+      this.removeFunction();
+      resolveCallback({});
+    } else {
+      useAction(unit,'standard');
+      await moveMovement(moveEnd.x, moveEnd.y, unit, linePathGrid);
+      await attackMovementToXY(
+        result.selected[0].x,
+        result.selected[0].y,
+        unit,
+        mainAttack1,
+        golbalSetting.map
+      ).then(() => {
+        console.log("resolveCallback", {});
+        resolveCallback({});
+      });
+    }
+
     console.log("resolveCallback", {});
-    resolveCallback({});
     return promise;
   };
   getAttack = (unit: Unit, num: number) => {
@@ -77,7 +105,8 @@ export class ChargeAttackController extends AbstractPwoerController {
       unit,
       "STR"
     );
-    attack.attackBonus = AbilityValueSystem.getInstance().getLevelModifier(unit);
+    attack.attackBonus =
+      AbilityValueSystem.getInstance().getLevelModifier(unit);
     attack.attackBonus += modifer;
     attack.attackBonus += weapon?.bonus ?? 0; // 添加武器加值
     attack.attackBonus += 1 + 3 + 1; // 武器大师、擅长加值、战斗专长
@@ -88,90 +117,112 @@ export class ChargeAttackController extends AbstractPwoerController {
     attack.range = range;
     return attack;
   };
-  shiftFunc = async (
-    attackResult:
-      | {}
-      | {
-          cancel?: undefined;
-          hit?: undefined;
-          damage?: undefined;
-          targetX?: undefined;
-          targetY?: undefined;
-          beAttack?: undefined;
-        }
-      | {
-          cancel: boolean;
-          hit?: undefined;
-          damage?: undefined;
-          targetX?: undefined;
-          targetY?: undefined;
-          beAttack?: undefined;
-        }
-      | {
-          hit: boolean;
-          damage: number;
-          targetX: number;
-          targetY: number;
-          beAttack: Unit | null;
-          cancel?: undefined;
-        }
-      | undefined
-  ) => {
-    console.log("attackResult shiftFunc", attackResult);
-    if (attackResult && "beAttack" in attackResult && attackResult.beAttack) {
-      const beAttack = attackResult.beAttack;
-      const beAttackX = Math.floor(beAttack.x / tileSize);
-      const beAttackY = Math.floor(beAttack.y / tileSize);
-      const fistShiftGrids = generateWays(
-        beAttackX,
-        beAttackY,
-        1,
-        (x, y, preX, preY) => {
-          const movePassible = moveGridsCheckPassiable(
-            beAttack,
-            preX * tileSize,
-            preY * tileSize,
-            x * tileSize,
-            y * tileSize,
-            golbalSetting.map
-          );
-          const shiftPassibleResult = shiftPassible(
-            beAttack,
-            x,
-            y
-          );
-          return movePassible && shiftPassibleResult;
-        }
-      );
-      BasicSelector.getInstance().selectBasic(
-        fistShiftGrids,
-        1,
-        "yellow",
-        true
-      );
-      MessageTipSystem.getInstance().setMessage("请选择滑动位置");
-      const firstShiftResult = await BasicSelector.getInstance().promise;
-      MessageTipSystem.getInstance().clearMessage();
-      if (firstShiftResult.cancel !== true) {
-        console.log("firstShiftResult", firstShiftResult, beAttack);
-        ShiftAnim.shift(beAttack, firstShiftResult.selected[0]);
-      }
-    }
-  };
 }
-const shiftPassible = (unit: Unit, x: number, y: number) => {
-  const map = golbalSetting.map;
-  const units = map?.sprites;
-  let result = true;
-  units?.forEach((u) => {
-    if (u instanceof Unit && u !== unit) {
-      const unitX = Math.floor(u.x / tileSize);
-      const unitY = Math.floor(u.y / tileSize);
-      if (unitX === x && unitY === y) {
-        result = false;
-      }
-    }
+export const checkPassiable = (
+  unit: Unit,
+  prex: number,
+  prey: number,
+  x: number,
+  y: number,
+  mapPassiable: TiledMap | null
+) => {
+  if (!mapPassiable) {
+    return false;
+  }
+  const mapWidth = mapPassiable.width * mapPassiable.tilewidth;
+  const mapHeight = mapPassiable.height * mapPassiable.tileheight;
+  if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
+    return false;
+  }
 
-  });
-  return result
+  // console.log(`检查通行性: 单位位置 (${prey}, ${prey}), 目标位置 (${x}, ${y})`);
+  // 检查单位是否在地图上
+  let passiable = true;
+  if (mapPassiable) {
+    const edges = mapPassiable.edges;
+    console.log(
+      "检查通行性: 单位位置",
+      prex,
+      prey,
+      "目标位置",
+      x,
+      y,
+      mapPassiable
+    );
+    // 检查是否穿过边
+    if (edges) {
+      // console.log(edges)
+      // 检查是否有对象在指定位置
+      // 遍历对象组中的所有对象
+      edges.forEach(
+        (edge: {
+          useable: boolean;
+          x1: number;
+          y1: number;
+          x2: number;
+          y2: number;
+        }) => {
+          if (edge.useable === false) {
+            return; // 如果边不可用，则跳过
+          }
+          let testx = x;
+          let testy = y;
+
+          // 获取两个格子的四个顶点和中点
+          const pointsA = [
+            { x: prex + 32, y: prey + 32 },
+            { x: prex, y: prey },
+            { x: prex + 64, y: prey },
+            { x: prex + 64, y: prey + 64 },
+            { x: prex, y: prey + 64 },
+          ];
+          const pointsB = [
+            { x: testx + 32, y: testy + 32 },
+            { x: testx, y: testy },
+            { x: testx + 64, y: testy },
+            { x: testx + 64, y: testy + 64 },
+            { x: testx, y: testy + 64 },
+          ];
+          // 检查所有中点的连线
+          let intersectCount = 0;
+          for (let i = 0; i < 1; i++) {
+            if (
+              segmentsIntersect(
+                pointsA[i].x,
+                pointsA[i].y,
+                pointsB[i].x,
+                pointsB[i].y,
+                edge.x1,
+                edge.y1,
+                edge.x2,
+                edge.y2
+              )
+            ) {
+              intersectCount++;
+            }
+          }
+          if (intersectCount >= 1) {
+            passiable = false;
+            return;
+          }
+        }
+      );
+    }
+    // 检查是否被敌人阻挡
+    const units = mapPassiable.sprites as Unit[];
+    if (units) {
+      units.forEach((checkUnit) => {
+        if (checkUnit.x != prex || checkUnit.y != prey || unit == checkUnit) {
+          return;
+        }
+        if (unit.party == checkUnit.party || checkUnit.state === "dead") {
+          return; // 如果是同一方的单位，则跳过
+        }
+        passiable = false; // 如果有敌人阻挡，则不可通行
+        // 检查是否与敌人相交
+      });
+    }
+  }
+
+  return passiable;
 };

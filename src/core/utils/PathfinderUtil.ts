@@ -25,7 +25,8 @@ export function generateWays(
   const queue: { x: number; y: number; step: number }[] = [];
 
   // 用二维数组记录每个格子的前驱节点
-  const path: { [key: string]: { x: number; y: number; step: number } | null } = {};
+  const path: { [key: string]: { x: number; y: number; step: number } | null } =
+    {};
 
   queue.push({ x: startX, y: startY, step: 0 });
   visited.add(`${startX},${startY}`);
@@ -47,7 +48,6 @@ export function generateWays(
       { dx: -1, dy: 1 },
     ];
     for (const dir of dirs) {
-   
       const nx = x + dir.dx;
       const ny = y + dir.dy;
       const key = `${nx},${ny}`;
@@ -64,4 +64,38 @@ export function generateWays(
   }
   // path 是一个以 "x,y" 为 key 的对象，记录每个格子的前驱节点
   return path;
+}
+
+export function generateLineGrids(
+  x: number,
+  y: number,
+  range: number,
+  endX: number,
+  endY: number,
+  checkFunction = defultCheckFunction,
+  endCheckFunction = defultEndCheckFunction
+) {
+  const checkShorter = (
+    nextX: number,
+    nextY: number,
+    preX: number,
+    preY: number
+  ) => {
+    let checkFuncResult=checkFunction(nextX, nextY, preX, preY);
+    let lineShorterCheck=false
+    const preDis = Math.max(Math.abs(endX - preX), Math.abs(endY - preY));
+    const nextDis = Math.max(Math.abs(endX - nextX), Math.abs(endY - nextY));
+    if (nextDis < preDis) {
+      lineShorterCheck=true;
+    }
+    return checkFuncResult&&lineShorterCheck;
+  };
+  const ways = generateWays(
+    x,
+    y,
+    range,
+    checkShorter,
+    endCheckFunction
+  );
+  return ways;
 }

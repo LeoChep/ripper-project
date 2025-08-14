@@ -316,7 +316,8 @@ const createContainer = (app, rlayers) => {
     mapContainer.zIndex = envSetting.zIndexSetting.mapZindex;
     tipContainer.zIndex = envSetting.zIndexSetting.tipZIndex;
     // spriteContainer.eventMode = 'none';
-    // mapContainer.eventMode = 'none';  
+    mapContainer.eventMode = 'dynamic';  
+       mapContainer.interactiveChildren = true
     // 设置全局变量
     golbalSetting.spriteContainer = spriteContainer;
     golbalSetting.mapContainer = mapContainer;
