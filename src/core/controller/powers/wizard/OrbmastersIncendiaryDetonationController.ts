@@ -40,10 +40,11 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
     attack.type = "ranged";
     attack.action = "attack";
     attack.range = 10; // Example range
-    attack.attackBonus =AbilityValueSystem.getInstance().getLevelModifier(unit); // Example attack bonus
+    attack.attackBonus =
+      AbilityValueSystem.getInstance().getLevelModifier(unit); // Example attack bonus
     attack.target = "enemy";
     attack.damage = "1d10"; // Example damage
-    const modifer =AbilityValueSystem.getInstance().getAbilityModifier(
+    const modifer = AbilityValueSystem.getInstance().getAbilityModifier(
       unit,
       "INT"
     );
@@ -62,7 +63,7 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
           gridY * tileSize,
           golbalSetting.map
         );
-      }
+      },
     });
     let resolveCallback = (value: any) => {};
     const promise = new Promise((resolve) => {
@@ -71,7 +72,7 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
     const selector = BrustSelector.getInstance().selectBasic(
       grids,
       1,
-      1 ,
+      1,
       "yellow",
       "red",
 
@@ -83,9 +84,8 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
     this.removeFunction = selector.removeFunction;
     const result = await selector.promise;
 
-
     if (result.cancel !== true) {
-          const selected = result.selected[0];
+      const selected = result.selected[0];
       await OrbmastersIncendiaryDetonationController.playAnim(
         this.selectedCharacter as Unit,
         selected.x,
@@ -93,7 +93,6 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
         1
       );
 
-      
       resolveCallback({});
     } else {
       console.log("result.cancel", result);
@@ -106,17 +105,19 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
     unit: Unit,
     gridX: number,
     gridY: number,
-    range:number = 1
+    range: number = 1
   ): Promise<void> {
-
-console.log("playAnim", unit, gridX, gridY, range);
-    const sprite = await getAnimSpriteFromPNGpacks("FireballExplosion",72);
+    console.log("playAnim", unit, gridX, gridY, range);
+    const sprite = await getAnimSpriteFromPNGpacks("FireballExplosion", 72);
     sprite.x = gridX * tileSize + 32;
     sprite.y = gridY * tileSize + 32;
     sprite.zIndex = zIndexSetting.spriteZIndex;
-    sprite.scale = {x:(range*2+1) * tileSize / sprite.width, y: (range*2+1)  * tileSize / sprite.height };
-    sprite.scale.x*=1.5;
-    sprite.scale.y*=1.5;
+    sprite.scale = {
+      x: ((range * 2 + 1) * tileSize) / sprite.width,
+      y: ((range * 2 + 1) * tileSize) / sprite.height,
+    };
+    sprite.scale.x *= 1.5;
+    sprite.scale.y *= 1.5;
     console.log("sprite scale", sprite.scale);
     sprite.anchor.set(0.5, 0.5);
 
