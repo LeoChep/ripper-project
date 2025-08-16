@@ -65,15 +65,19 @@ export class CharacterOutCombatController {
     }
     const startX = Math.floor(selectedCharacter.x / tileSize);
     const startY = Math.floor(selectedCharacter.y / tileSize);
-    const path = generateWays(startX, startY, 20, (x, y, preX, preY) => {
-      return UnitMoveSystem.checkPassiable(
-        selectedCharacter!,
-        preX * tileSize,
-        preY * tileSize,
-        x * tileSize,
-        y * tileSize,
-        mapPassiable
-      );
+    const path = generateWays({
+      start: { x: startX, y: startY },
+      range: 20,
+      checkFunction: (x: number, y: number, preX: number, preY: number) => {
+        return UnitMoveSystem.checkPassiable(
+          selectedCharacter!,
+          preX * tileSize,
+          preY * tileSize,
+          x * tileSize,
+          y * tileSize,
+          mapPassiable
+        );
+      }
     });
 
     console.log("Path generated:", path);

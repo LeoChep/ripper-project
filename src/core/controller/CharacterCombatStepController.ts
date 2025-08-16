@@ -61,15 +61,19 @@ export class CharCombatStepController {
     const startX = Math.floor(centerX / tileSize);
     const startY = Math.floor(centerY / tileSize);
     // path 是一个以 "x,y" 为 key 的对象，记录每个格子的前驱节点
-    const path = generateWays(startX, startY, range, (x, y, preX, preY) => {
-      return UnitMoveSystem.checkPassiable(
-        unit,
-        preX * tileSize,
-        preY * tileSize,
-        x * tileSize,
-        y * tileSize,
-        golbalSetting.map
-      );
+    const path = generateWays({
+      start: { x: startX, y: startY },
+      range: range,
+      checkFunction: (x: number, y: number, preX: number, preY: number) => {
+        return UnitMoveSystem.checkPassiable(
+          unit,
+          preX * tileSize,
+          preY * tileSize,
+          x * tileSize,
+          y * tileSize,
+          golbalSetting.map
+        );
+      }
     });
     // 绘制可移动范围
     graphics.clear();

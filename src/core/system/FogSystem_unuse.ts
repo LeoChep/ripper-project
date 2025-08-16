@@ -3,7 +3,6 @@ import type { TiledMap } from "../MapClass";
 import type { Unit } from "../units/Unit";
 
 import { segmentsIntersect } from "../utils/MathUtil";
-import { generateWays } from "../utils/PathfinderUtil";
 import * as PIXI from "pixi.js";
 import { golbalSetting } from "../golbalSetting";
 const tileSize = 64;

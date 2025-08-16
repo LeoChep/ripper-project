@@ -22,7 +22,11 @@ export class BasicAttackSelector {
     const selector = new BasicAttackSelector();
     const tileSize = envSetting.tileSize;
     // 选择攻击逻辑
-    const path = generateWays(startX, startY, range, checkPassiable);
+    const path = generateWays({
+      start: { x: startX, y: startY },
+      range: range,
+      checkFunction: checkPassiable
+    });
     const graphics = new PIXI.Graphics();
     selector.graphics = graphics;
     graphics.alpha = 0.4;

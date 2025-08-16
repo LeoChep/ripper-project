@@ -60,7 +60,7 @@
     "短弓",
     "20 支箭"
   ],
-  "attacks": [
+  "weapons": [
     {
       "name": "长剑",
       "type": "Melee",

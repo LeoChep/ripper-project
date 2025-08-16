@@ -25,21 +25,20 @@ export class NormalAI implements AIInterface {
     const result: any = { canAttack: false };
     const unitX = Math.floor(unit.x / tileSize);
     const unitY = Math.floor(unit.y / tileSize);
-    const path = generateWays(
-      unitX,
-      unitY,
-      99,
-      (nx, ny, x, y) => {
+    const path = generateWays({
+      start: { x: unitX, y: unitY },
+      range: 99,
+      checkFunction: (nx: number, ny: number, x: number, y: number) => {
         return findAttackTarget(nx, ny, x, y, unit, map, result);
       },
-      () => {
+      endCheckFunction: () => {
         if (result.target && result.canAttack) {
           return true;
         } else {
           return false;
         }
       }
-    );
+    });
     console.log(
       "AI路径计算结果:",
       path,

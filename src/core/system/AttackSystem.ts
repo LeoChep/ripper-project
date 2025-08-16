@@ -7,11 +7,10 @@ import * as PIXI from "pixi.js";
 import { playerSelectAttackMovement } from "../action/UnitAttack";
 import { generateWays } from "../utils/PathfinderUtil";
 import { diceRoll } from "../DiceTryer";
-
-
+import { tileSize } from "../envSetting";
 
 export const checkPassiable = (
-  unit: {x:number,y:number},
+  unit:Unit,
   x: number,
   y: number,
   mapPassiable: TiledMap | null
@@ -30,31 +29,38 @@ export const checkPassiable = (
         }
         let testx = x;
         let testy = y;
-
+        const unitx=x;
+        const unity=y;
         // 获取两个格子的四个顶点和中点
-        const pointsA = [
-          { x: unit.x + 32, y: unit.y + 32 },
-          { x: unit.x, y: unit.y },
-          { x: unit.x + 64, y: unit.y },
-          { x: unit.x + 64, y: unit.y + 64 },
-          { x: unit.x, y: unit.y + 64 },
-        ];
+        const size = unit?.creature ? unit.creature.size : undefined;
+
+        // 构建范围数组
+        const rangeArrA = [];
+        let range = 1; // 默认范围为0，可根据需要调整
+        if (size === "big") {
+          range = 2;
+        }
+
+        for (let dx = 0; dx < range; dx++) {
+          for (let dy = 0; dy < range; dy++) {
+            rangeArrA.push({
+              x: unitx + dx * tileSize,
+              y: unity + dy * tileSize,
+            });
+          }
+        }
         const pointsB = [
           { x: testx + 32, y: testy + 32 },
-          { x: testx, y: testy },
-          { x: testx + 64, y: testy },
-          { x: testx + 64, y: testy + 64 },
-          { x: testx, y: testy + 64 },
         ];
         // 检查所有中点的连线
         let intersectCount = 0;
-        for (let i = 0; i < 1; i++) {
+        for (let i = 0; i < rangeArrA.length; i++) {
           if (
             segmentsIntersect(
-              pointsA[i].x,
-              pointsA[i].y,
-              pointsB[i].x,
-              pointsB[i].y,
+              rangeArrA[i].x,
+              rangeArrA[i].y,
+              pointsB[0].x,
+              pointsB[0].y,
               edge.x1,
               edge.y1,
               edge.x2,
@@ -64,7 +70,7 @@ export const checkPassiable = (
             intersectCount++;
           }
         }
-        if (intersectCount >= 1) {
+        if (intersectCount >= rangeArrA.length) {
           passiable = false;
           return;
         }
@@ -75,11 +81,16 @@ export const checkPassiable = (
   return passiable;
 };
 
-export async function checkHit(unit: Unit, target: any, attack: CreatureAttack,against:string = "AC") {
+export async function checkHit(
+  unit: Unit,
+  target: any,
+  attack: CreatureAttack,
+  against: string = "AC"
+) {
   // 检查攻击是否命中
   const attackBonus = attack.attackBonus || 0; // 攻击加值
   const targetAC = target.creature?.ac || 10; // 目标护甲等级，默认10
-  let targetDef=0
+  let targetDef = 0;
   if (against === "AC") {
     targetDef = targetAC;
   } else if (against === "Ref") {
@@ -92,22 +103,26 @@ export async function checkHit(unit: Unit, target: any, attack: CreatureAttack,a
     console.warn(`未知防御类型: ${against}`);
   }
 
-  let rollFormula="1d20";
-  if (attackBonus>0) rollFormula=`1d20+${attackBonus}`;
-else if (attackBonus<0) rollFormula=`1d20${attackBonus}`;
+  let rollFormula = "1d20";
+  if (attackBonus > 0) rollFormula = `1d20+${attackBonus}`;
+  else if (attackBonus < 0) rollFormula = `1d20${attackBonus}`;
   const roll = parseInt(await diceRoll(rollFormula));
-  console.log(`攻击掷骰: ${roll} vs  ${against} ${targetDef}` );
+  console.log(`攻击掷骰: ${roll} vs  ${against} ${targetDef}`);
   const result = {
     attackValue: roll,
     targetDef: targetDef,
-    against:against,
+    against: against,
     targetAC: targetAC,
     hit: roll >= targetDef,
   };
   return result;
 }
 
-export async function getDamage(unit: Unit, target: any, attack: CreatureAttack) {
+export async function getDamage(
+  unit: Unit,
+  target: any,
+  attack: CreatureAttack
+) {
   // 检查攻击是否命中
   const roll = parseInt(await diceRoll(attack.damage));
   return roll;

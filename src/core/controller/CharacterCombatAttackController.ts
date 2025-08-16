@@ -49,14 +49,18 @@ export class CharCombatAttackController {
     const startX = Math.floor(centerX / tileSize);
     const startY = Math.floor(centerY / tileSize);
     const range = attack.range ? attack.range : 1; // 默认攻击范围为1
-    const grids=generateWays(startX,startY,range,  (x, y, pre, prey) => {
+    const grids = generateWays({
+      start: { x: startX, y: startY },
+      range: range,
+      checkFunction: (x: number, y: number, preX: number, preY: number) => {
         return checkPassiable(
           unit,
           x * tileSize,
           y * tileSize,
           golbalSetting.map
         );
-      },)
+      }
+    });
     const basicAttackSelector = BasicSelector.getInstance().selectBasic(grids,1,"red",true)
     MessageTipSystem.getInstance().setMessage("请选择攻击目标");
     this.removeFunction = basicAttackSelector.removeFunction;

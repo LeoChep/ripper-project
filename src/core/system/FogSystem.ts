@@ -11,15 +11,24 @@ function calculateFogOfWar(unit: Unit, mapPassiable: TiledMap | null) {
   const centerY = unit.y;
   const startX = Math.floor(centerX / tileSize);
   const startY = Math.floor(centerY / tileSize);
-  const path = generateWays(startX, startY, 20, (x, y, preX, preY) => {
-    return checkPassiable(
-      unit,
-      preX * tileSize,
-      preY * tileSize,
-      x * tileSize,
-      y * tileSize,
-      mapPassiable
-    );
+  const path = generateWays({
+    start: { x: startX, y: startY },
+    range: 20,
+    checkFunction: (
+      x: number,
+      y: number,
+      preX: number,
+      preY: number
+    ) => {
+      return checkPassiable(
+        unit,
+        preX * tileSize,
+        preY * tileSize,
+        x * tileSize,
+        y * tileSize,
+        mapPassiable
+      );
+    }
   });
   return path;
 }

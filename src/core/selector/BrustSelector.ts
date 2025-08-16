@@ -6,6 +6,7 @@ import * as envSetting from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import { MessageTipSystem } from "../system/MessageTipSystem";
 import { checkPassiable } from "../system/AttackSystem";
+import type { Unit } from "../units/Unit";
 
 export class BrustSelector {
   public graphics: PIXI.Graphics | null = null;
@@ -188,19 +189,24 @@ export class BrustSelector {
 
     const { x, y } = targetXY;
 
-    const brustGrids = generateWays(
-      x,
-      y,
-      range,
-      (gridX: number, gridY: number, preX: number, preY: number) => {
+    const brustGrids = generateWays({
+      start: { x, y },
+      range: range,
+      checkFunction: (
+        gridX: number,
+        gridY: number,
+        preX: number,
+        preY: number
+      ) => {
+        // If you have a unit context, replace `null` with the actual unit
         return checkPassiable(
-          { x: x * tileSize, y: y * tileSize },
+          { x: x * tileSize, y: y * tileSize } as Unit,
           gridX * tileSize,
           gridY * tileSize,
           golbalSetting.map
         );
-      }
-    );
+      },
+    });
     this.brustGraphics = this.drawGrids(brustGrids, color);
     this.brustGraphics.eventMode = "none";
     if (!golbalSetting.rlayers.selectLayer || !golbalSetting.spriteContainer) {

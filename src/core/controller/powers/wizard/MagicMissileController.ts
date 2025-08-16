@@ -49,11 +49,10 @@ export class MagicMissileController extends AbstractPwoerController {
 
     // iceRayAttack.damage += `+${  weapon?.bonus ?? 0}+(${modifer})`; // 添加攻击加值到伤害
     console.log("icerays attack", attack);
-    const grids = generateWays(
-      x,
-      y,
-      attack.range,
-      (gridX: any, gridY: any, preX: number, preY: number) => {
+    const grids = generateWays({
+      start: { x, y },
+      range: attack.range,
+      checkFunction: (gridX: any, gridY: any, preX: number, preY: number) => {
         return checkPassiable(
           unit,
           gridX * tileSize,
@@ -61,7 +60,7 @@ export class MagicMissileController extends AbstractPwoerController {
           golbalSetting.map
         );
       }
-    );
+    });
     let resolveCallback = (value: any) => {};
     const promise = new Promise((resolve) => {
       resolveCallback = resolve;

@@ -59,11 +59,10 @@ export class IceRaysController extends AbstractPwoerController {
     ).finalValue; // 精准法器
     // iceRayAttack.damage += `+${  weapon?.bonus ?? 0}+(${modifer})`; // 添加攻击加值到伤害
     console.log("icerays attack", iceRayAttack);
-    const grids = generateWays(
-      x,
-      y,
-      iceRayAttack.range,
-      (gridX: any, gridY: any, preX: number, preY: number) => {
+    const grids = generateWays({
+      start: { x, y },
+      range: iceRayAttack.range,
+      checkFunction: (gridX: any, gridY: any, preX: number, preY: number) => {
         return checkPassiable(
           unit,
           gridX * tileSize,
@@ -71,7 +70,7 @@ export class IceRaysController extends AbstractPwoerController {
           golbalSetting.map
         );
       }
-    );
+    });
     let resolveCallback = (value: any) => {};
     const promise = new Promise((resolve) => {
       resolveCallback = resolve;

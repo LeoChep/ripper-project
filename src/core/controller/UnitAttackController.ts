@@ -138,13 +138,17 @@ const attackSelect = (
   const centerY = spriteUnit.y;
   const startX = Math.floor(centerX / tileSize);
   const startY = Math.floor(centerY / tileSize);
-  const path = generateWays(startX, startY, range, (x, y, preX, preY) => {
-    return checkPassiable(
-      unit,
-      x * tileSize,
-      y * tileSize,
-      mapPassiable
-    );
+  const path = generateWays({
+    start: { x: startX, y: startY },
+    range: range,
+    checkFunction: (x: number, y: number, preX: number, preY: number) => {
+      return checkPassiable(
+        unit,
+        x * tileSize,
+        y * tileSize,
+        mapPassiable
+      );
+    }
   });
   // 绘制可移动范围
   graphics.clear();

@@ -47,15 +47,19 @@ export class ChargeAttackController extends AbstractPwoerController {
     const speed = unit.creature?.speed;
 
     console.log("unit speed", speed);
-    const grids = generateWays(x, y, (speed ? speed : 0)+1, (x, y, prex, prey) => {
-      return checkPassiable(
-        unit,
-        prex * tileSize,
-        prey * tileSize,
-        x * tileSize,
-        y * tileSize,
-        golbalSetting.map
-      );
+    const grids = generateWays({
+      start: { x, y },
+      range: (speed ? speed : 0) + 1,
+      checkFunction: (nx: number, ny: number, prex: number, prey: number) => {
+        return checkPassiable(
+          unit,
+          prex * tileSize,
+          prey * tileSize,
+          nx * tileSize,
+          ny * tileSize,
+          golbalSetting.map
+        );
+      }
     });
     const scanFunction = (scanData: ScanData) => {
       let outSpeedFlag = false;

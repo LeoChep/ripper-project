@@ -52,11 +52,10 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
     attack.attackBonus += 1; // 精准法器
     // iceRayAttack.damage += `+${  weapon?.bonus ?? 0}+(${modifer})`; // 添加攻击加值到伤害
     // console.log("icerays attack", attack);
-    const grids = generateWays(
-      x,
-      y,
-      attack.range,
-      (gridX: any, gridY: any, preX: number, preY: number) => {
+    const grids = generateWays({
+      start: { x, y },
+      range: attack.range,
+      checkFunction: (gridX: any, gridY: any, preX: number, preY: number) => {
         return checkPassiable(
           unit,
           gridX * tileSize,
@@ -64,7 +63,7 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
           golbalSetting.map
         );
       }
-    );
+    });
     let resolveCallback = (value: any) => {};
     const promise = new Promise((resolve) => {
       resolveCallback = resolve;

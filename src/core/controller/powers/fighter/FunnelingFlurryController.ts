@@ -32,19 +32,18 @@ export class FunnelingFlurryController extends AbstractPwoerController {
     const unit = this.selectedCharacter as Unit;
     const mainAttack1 = this.getAttack(unit, 1);
     const mainAttack2 = this.getAttack(unit, 2);
-    const grids = generateWays(
-      x,
-      y,
-      mainAttack1.range ?? 1,
-      (x, y, pre, prey) => {
+    const grids = generateWays({
+      start: { x, y },
+      range: mainAttack1.range ?? 1,
+      checkFunction: (gridX: number, gridY: number, preX: number, preY: number) => {
         return atkGridsCheckPassiable(
           unit,
-          x * tileSize,
-          y * tileSize,
+          gridX * tileSize,
+          gridY * tileSize,
           golbalSetting.map
         );
       }
-    );
+    });
 
     // 执行攻击选择逻辑
     const basicAttackSelector = BasicSelector.getInstance().selectBasic(
@@ -191,11 +190,15 @@ export class FunnelingFlurryController extends AbstractPwoerController {
       const beAttack = attackResult.beAttack;
       const beAttackX = Math.floor(beAttack.x / tileSize);
       const beAttackY = Math.floor(beAttack.y / tileSize);
-      const fistShiftGrids = generateWays(
-        beAttackX,
-        beAttackY,
-        1,
-        (x, y, preX, preY) => {
+      const fistShiftGrids = generateWays({
+        start: { x: beAttackX, y: beAttackY },
+        range: 1,
+        checkFunction: (
+          x: number,
+          y: number,
+          preX: number,
+          preY: number
+        ) => {
           const movePassible = moveGridsCheckPassiable(
             beAttack,
             preX * tileSize,
@@ -211,7 +214,7 @@ export class FunnelingFlurryController extends AbstractPwoerController {
           );
           return movePassible && shiftPassibleResult;
         }
-      );
+      });
       BasicSelector.getInstance().selectBasic(
         fistShiftGrids,
         1,

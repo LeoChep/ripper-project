@@ -27,13 +27,14 @@ export abstract class AbstractPwoerController {
     }
     let canuse = false;
     const unitPowers = unit?.creature?.powers;
-    unitPowers?.forEach((power) => {
-      if (power.name === this.powerName) {
-        canuse = power.canUse();
-      }
-    });
+    // unitPowers?.forEach((power) => {
+    //   if (power.name === this.powerName) {
+    //     canuse = power.canUse();
+    //   }
+    // });
 
-    return canuse;
+    // return canuse;
+    return true
   };
   use = () => {
     const unit = this.selectedCharacter;

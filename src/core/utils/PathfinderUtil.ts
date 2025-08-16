@@ -10,15 +10,17 @@ const defultCheckFunction = (
 const defultEndCheckFunction = () => {
   return false;
 };
-export function generateWays(
-  x: number,
-  y: number,
-  range: number,
-  checkFunction = defultCheckFunction,
-  endCheckFunction = defultEndCheckFunction
-) {
-  const startX = x;
-  const startY = y;
+type GeneraWaysOptions = {
+  start: { x: number; y: number } | { x: number; y: number }[];
+  endCheckFunction?: () => boolean;
+  checkFunction?: (x: number, y: number, preX: number, preY: number) => boolean;
+  range?: number;
+};
+export function generateWays(generaWaysOptions: GeneraWaysOptions) {
+  const range = generaWaysOptions.range || 0;
+  const endCheckFunction =
+    generaWaysOptions.endCheckFunction || defultEndCheckFunction;
+  const checkFunction = generaWaysOptions.checkFunction || defultCheckFunction;
   //使用切比雪夫距离绘制
   // 使用广度优先搜索(BFS)绘制可移动范围，并记录路径
   const visited = new Set<string>();
@@ -27,10 +29,23 @@ export function generateWays(
   // 用二维数组记录每个格子的前驱节点
   const path: { [key: string]: { x: number; y: number; step: number } | null } =
     {};
+  let startX: number;
+  let startY: number;
+  if (Array.isArray(generaWaysOptions.start)) {
+    // If start is an array, use the first element as the starting point
 
-  queue.push({ x: startX, y: startY, step: 0 });
-  visited.add(`${startX},${startY}`);
-  path[`${startX},${startY}`] = null;
+    for (const start of generaWaysOptions.start) {
+      queue.push({ x: start.x, y: start.y, step: 0 });
+      visited.add(`${start.x},${start.y}`);
+      path[`${start.x},${start.y}`] = null;
+    }
+  } else {
+    startX = generaWaysOptions.start.x;
+    startY = generaWaysOptions.start.y;
+    queue.push({ x: startX, y: startY, step: 0 });
+    visited.add(`${startX},${startY}`);
+    path[`${startX},${startY}`] = null;
+  }
 
   while (queue.length > 0) {
     const { x, y, step } = queue.shift()!;
@@ -81,21 +96,21 @@ export function generateLineGrids(
     preX: number,
     preY: number
   ) => {
-    let checkFuncResult=checkFunction(nextX, nextY, preX, preY);
-    let lineShorterCheck=false
+    let checkFuncResult = checkFunction(nextX, nextY, preX, preY);
+    let lineShorterCheck = false;
     const preDis = Math.max(Math.abs(endX - preX), Math.abs(endY - preY));
     const nextDis = Math.max(Math.abs(endX - nextX), Math.abs(endY - nextY));
     if (nextDis < preDis) {
-      lineShorterCheck=true;
+      lineShorterCheck = true;
     }
-    return checkFuncResult&&lineShorterCheck;
+    return checkFuncResult && lineShorterCheck;
   };
-  const ways = generateWays(
-    x,
-    y,
-    range,
-    checkShorter,
-    endCheckFunction
-  );
+
+  const ways = generateWays({
+    start: { x, y },
+    endCheckFunction,
+    checkFunction: checkShorter,
+    range
+  });
   return ways;
 }
