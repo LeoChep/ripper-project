@@ -67,7 +67,7 @@ export class ChargeAttackController extends AbstractPwoerController {
       const gridy = scanData.gridy;
       Object.keys(linePath).forEach((key) => {
         const [x, y] = key.split(",").map(Number);
-        if (linePath[key] && linePath[key].step > (speed ?? 0)) {
+        if (linePath[key] && linePath[key].step > (speed ?? 0)+1) {
           outSpeedFlag = true;
         }
         const unitInGrid=UnitSystem.getInstance().findUnitByGridxy(x, y);

@@ -792,7 +792,7 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":508.666666666667,
+                 "x":508.667,
                  "y":896
                 }, 
                 {
@@ -881,7 +881,7 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":381.666666666667,
+                 "x":381.667,
                  "y":899
                 }, 
                 {
@@ -914,8 +914,8 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":377.333333333333,
-                 "y":1085.33333333333
+                 "x":377.333,
+                 "y":1085.33
                 }, 
                 {
                  "gid":830,
@@ -947,7 +947,7 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":506.666666666667,
+                 "x":506.667,
                  "y":1088
                 }, 
                 {
@@ -980,7 +980,7 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":633.333333333333,
+                 "x":633.333,
                  "y":1084
                 }, 
                 {
@@ -1014,7 +1014,40 @@
                  "visible":true,
                  "width":64,
                  "x":704,
-                 "y":958.666666666667
+                 "y":958.667
+                }, 
+                {
+                 "gid":792,
+                 "height":132,
+                 "id":62,
+                 "name":"bigSkeleton",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"skeleton"
+                        }, 
+                        {
+                         "name":"party",
+                         "type":"string",
+                         "value":"skeletons"
+                        }, 
+                        {
+                         "name":"unitTypeName",
+                         "type":"string",
+                         "value":"bigSkeleton"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":138.666666666667,
+                 "x":380,
+                 "y":449.333333333333
                 }],
          "offsetx":4,
          "offsety":0,
@@ -1025,7 +1058,7 @@
          "y":0
         }],
  "nextlayerid":6,
- "nextobjectid":61,
+ "nextobjectid":63,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

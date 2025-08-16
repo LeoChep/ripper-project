@@ -13,7 +13,24 @@ export class UnitAnimSpirite extends Container {
   private _state: string = "walk"; // 例如 'walking', 'attacking', 'idle' 等
 
   private owner: Unit | undefined;
+  private frameSize: { width: number; height: number } = { width: 64, height:64 };
+  private visisualSize: { width: number; height: number } = { width: 64, height:64 };
 
+  public getFrameSize(): { width: number; height: number } {
+    return this.frameSize;
+  }
+
+  public setFrameSize(size: { width: number; height: number }): void {
+    this.frameSize = size;
+  }
+
+  public get visisualSizeValue(): { width: number; height: number } {
+    return this.visisualSize;
+  }
+
+  public set visisualSizeValue(size: { width: number; height: number }) {
+    this.visisualSize = size;
+  }
   // 动画执行状态
   private _animationState: string = "";
   public anims: { [key: string]: PIXI.AnimatedSprite } = {};
@@ -103,10 +120,11 @@ export class UnitAnimSpirite extends Container {
         this._state !== this._animationState ||
         this.direction !== this.owner?.direction
       ) {
+        //调整位置
         this.anims[this._state].x =
-          0 - (this.anims[this._state].width - (this.owner?.width ?? 0)) / 2;
+          0 - (this.anims[this._state].width - (this.visisualSize.width ?? 0)) / 2;
         this.anims[this._state].y =
-          0 - (this.anims[this._state].height - (this.owner?.height ?? 0)) / 2;
+          0 - (this.anims[this._state].height - (this.visisualSize.height ?? 0)) / 2;
         if (this.owner?.direction != null) {
           this.direction = this.owner.direction;
           this.anims[this._state].textures =
@@ -177,6 +195,8 @@ export class UnitAnimSpirite extends Container {
     const animSprite = new PIXI.AnimatedSprite(
       spritesheet.animations[animKeys[0]]
     );
+    animSprite.scale = this.visisualSize.width / this.frameSize.width;
+    console.log("动画精灵的视觉大小:", this.visisualSize);
     animSprite.animationSpeed = 0.1666;
     animSprite.textures = spritesheet.animations[animKeys[0]];
     animSprite.renderable = false;

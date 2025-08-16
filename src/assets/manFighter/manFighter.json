@@ -106,7 +106,7 @@
     {
       "name": "ChargeAttack",
       "displayName": "冲锋",
-      "useType": "encounter",
+      "useType": "atwill",
       "actionType": "standard",
       "range": null,
       "target": null,

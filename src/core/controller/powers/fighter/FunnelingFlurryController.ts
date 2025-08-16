@@ -21,13 +21,13 @@ export class FunnelingFlurryController extends AbstractPwoerController {
   public static instense: FunnelingFlurryController | null = null;
 
   selectedCharacter: Unit | null = null;
-
+  powerName = "FunnelingFlurry";
   constructor() {
     super();
   }
 
   doSelect = async (): Promise<any> => {
-    if (!this.preFix()) return Promise.resolve();
+
     const { x, y } = this.getXY();
     const unit = this.selectedCharacter as Unit;
     const mainAttack1 = this.getAttack(unit, 1);

@@ -108,10 +108,12 @@ export class CharacterCombatController {
       return;
     }
     powerController.selectedCharacter = this.selectedCharacter;
+    if (!powerController.preFix()) return ;
     powerController.doSelect().then((result) => {
       console.log("powerController result", result);
       if (!result.cancel && InitiativeSystem.isInBattle()) {
         this.resetDivideWalk();
+        powerController.use();
       }
 
       setTimeout(() => {

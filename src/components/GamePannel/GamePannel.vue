@@ -6,7 +6,7 @@
     <TalkPannel />
     <CharacterPannel />
     <MessageTipTool />
-
+    <!-- <FormationEditorButton /> -->
     <!-- 保存和读取按钮 -->
     <div class="game-controls">
         <button class="save-button" @click="saveGameState">保存游戏</button>
@@ -15,6 +15,7 @@
 </template>
 
 <script setup>
+import FormationEditorButton from '@/components/TeamPannel/FormationEditorButton.vue'
 import MessageTipTool from '@/components/MessageTipTool/MessageTipTool.vue'
 import CreatureInfo from '../CreatureInfo.vue'
 import TalkPannel from '../TalkPannel/TalkPannel.vue'
@@ -75,7 +76,7 @@ onMounted(async () => {
     const units = createUnitsFromMapSprites(spritesOBJ, mapPassiable);
     const createCreatureEndPromise = []
     units.forEach((unit) => {
-        unit.y -= 64;
+        unit.y -= unit.height;
         const creatCreature = new Promise(async (resolve, reject) => {
             const unitCreature = await createUnitCreature(unit.unitTypeName, unit);
             unit.creature = unitCreature;
@@ -316,8 +317,8 @@ const createContainer = (app, rlayers) => {
     mapContainer.zIndex = envSetting.zIndexSetting.mapZindex;
     tipContainer.zIndex = envSetting.zIndexSetting.tipZIndex;
     // spriteContainer.eventMode = 'none';
-    mapContainer.eventMode = 'dynamic';  
-       mapContainer.interactiveChildren = true
+    mapContainer.eventMode = 'dynamic';
+    mapContainer.interactiveChildren = true
     // 设置全局变量
     golbalSetting.spriteContainer = spriteContainer;
     golbalSetting.mapContainer = mapContainer;
@@ -386,6 +387,15 @@ const createAnimSpriteUnits = async (unitTypeName, unit) => {
     const animMetaJson = new AnimMetaJson(await testJsonFetchPromise);
     //遍历获取所有动画组
     const animSpriteUnit = new UnitAnimSpirite(unit)
+
+    animSpriteUnit.setFrameSize({ width: animMetaJson.frameSize, height: animMetaJson.frameSize });
+    if (unit.creature) {
+        console.log("单位的视觉大小:", animSpriteUnit.visisualSizeValue,unit.creature.size);
+        if (unit.creature.size == 'big')
+            animSpriteUnit.visisualSizeValue = { width: 128, height: 128 };
+    } else {
+        animSpriteUnit.visisualSize = { width: 64, height: 64 };
+    }
     animMetaJson.getAllExportedAnimations().forEach(async (anim) => {
         console.log(anim)
         const spriteUrl = getAnimSpriteImgUrl(unitTypeName, anim, 'standard');

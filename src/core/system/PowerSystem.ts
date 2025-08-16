@@ -61,6 +61,10 @@ export class PowerSystem {
         return import("../power/fighter/ShieldEdgeBlock/ShieldEdgeBlock").then(
           (module) => module.ShieldEdgeBlock
         );
+      case "FunnelingFlurry":
+        return import("../power/fighter/FunnelingFlurry/FunnelingFlurry").then(
+          (module) => module.FunnelingFlurry
+        );
     }
   }
   getPowerControllerClass(powerName: string) {
@@ -75,15 +79,13 @@ export class PowerSystem {
           "../controller/powers/fighter/FunnelingFlurryController"
         ).then((module) => module.FunnelingFlurryController);
       case "IceRays":
-        return import(
-          "../controller/powers/wizard/IceRaysController"
-        ).then((module) => module.IceRaysController);
+        return import("../controller/powers/wizard/IceRaysController").then(
+          (module) => module.IceRaysController
+        );
       case "Orbmaster's Incendiary Detonation":
         return import(
           "../controller/powers/wizard/OrbmastersIncendiaryDetonationController"
-        ).then(
-          (module) => module.OrbmastersIncendiaryDetonationController
-        );
+        ).then((module) => module.OrbmastersIncendiaryDetonationController);
       case "Magic Missile":
         return import(
           "../controller/powers/wizard/MagicMissileController"

@@ -76,41 +76,9 @@ export class CreatureSerializer {
    */
   private static serializePowers(powers: Power[]): any[] {
     return powers.map((power) => {
-      power.keyWords = power.keyWords || [];
-      return {
-        name: power.name,
-        displayName: power.displayName,
-        description: power.description,
-        keyWords: [...power.keyWords],
-        level: power.level,
-        powersource: power.powersource,
-        secondPowersource: power.secondPowersource,
-        subName: power.subName,
-        prepared: power.prepared,
-        powerType: power.powerType,
-        powerSubtype: power.powerSubtype,
-        useType: power.useType,
-        actionType: power.actionType,
-        requirements: power.requirements,
-        weaponType: power.weaponType,
-        weaponUse: power.weaponUse,
-        rangeType: power.rangeType,
-        rangeTextShort: power.rangeTextShort,
-        rangeText: power.rangeText,
-        rangePower: power.rangePower,
-        area: power.area,
-        rechargeRoll: power.rechargeRoll,
-        rechargeCondition: power.rechargeCondition,
-        damageShare: power.damageShare,
-        postEffect: power.postEffect,
-        postSpecial: power.postSpecial,
-        autoGenChatPowerCard: power.autoGenChatPowerCard,
-        target: power.target,
-        trigger: power.trigger,
-        requirement: power.requirement,
-        hookTime: power.hookTime,
-        cooldown: power.cooldown,
-      };
+      if (power.serializeData)
+      return power.serializeData();
+      else return power
     });
   }
 

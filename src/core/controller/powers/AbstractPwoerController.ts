@@ -6,7 +6,7 @@ import * as PIXI from "pixi.js";
 export abstract class AbstractPwoerController {
   static isUse: boolean;
   static instense: AbstractPwoerController | null;
-
+  powerName: string = "";
   selectedCharacter: Unit | null = null;
 
   graphics: PIXI.Graphics | null = null;
@@ -25,15 +25,32 @@ export abstract class AbstractPwoerController {
     if (!spriteUnit) {
       return false;
     }
-    return true;
+    let canuse = false;
+    const unitPowers = unit?.creature?.powers;
+    unitPowers?.forEach((power) => {
+      if (power.name === this.powerName) {
+        canuse = power.canUse();
+      }
+    });
+
+    return canuse;
+  };
+  use = () => {
+    const unit = this.selectedCharacter;
+    const unitPowers = unit?.creature?.powers;
+    unitPowers?.forEach((power) => {
+      if (power.name === this.powerName) {
+        power.use();
+      }
+    });
   };
   getXY = () => {
     const unit = this.selectedCharacter;
     const spriteUnit = unit?.animUnit;
     const centerX = spriteUnit?.x;
     const centerY = spriteUnit?.y;
-    const startX = Math.floor((centerX?centerX:0) / tileSize);
-    const startY = Math.floor((centerY?centerY:0) / tileSize);
+    const startX = Math.floor((centerX ? centerX : 0) / tileSize);
+    const startY = Math.floor((centerY ? centerY : 0) / tileSize);
     return { x: startX, y: startY };
   };
   removeFunction = (args?: any) => {};
