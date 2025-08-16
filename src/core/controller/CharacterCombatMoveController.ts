@@ -106,11 +106,7 @@ export class CharCombatMoveController {
       if (!path[`${selected.x},${selected.y}`]) {
         return;
       }
-      playerSelectMovement(result.event, unit, path, result)?.then(() => {
-        setTimeout(() => {
-          // CharacterController.onAnim = false;
-        }, 50);
-      });
+      await playerSelectMovement(result.event, unit, path, result);
       if (
         unit.initiative &&
         typeof unit.initiative.moveActionNumber === "number"

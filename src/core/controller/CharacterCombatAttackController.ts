@@ -1,4 +1,4 @@
-import { MessageTipSystem } from './../system/MessageTipSystem';
+import { MessageTipSystem } from "./../system/MessageTipSystem";
 import * as PIXI from "pixi.js";
 import { Unit } from "../units/Unit";
 
@@ -59,9 +59,13 @@ export class CharCombatAttackController {
           y * tileSize,
           golbalSetting.map
         );
-      }
+      },
     });
-    const basicAttackSelector = BasicSelector.getInstance().selectBasic(grids,1,"red",true)
+    const basicAttackSelector = BasicAttackSelector.getInstance().selectBasic({
+      unit: unit,
+      range: range,
+      color: "red",
+    });
     MessageTipSystem.getInstance().setMessage("请选择攻击目标");
     this.removeFunction = basicAttackSelector.removeFunction;
     let resolveCallback = (result: any) => {};
@@ -69,11 +73,17 @@ export class CharCombatAttackController {
       resolveCallback = resolve;
     });
     basicAttackSelector.promise?.then((result) => {
-      console.log("basicAttackSelector result", result,result.cancel !== true);
+      console.log("basicAttackSelector result", result, result.cancel !== true);
       MessageTipSystem.getInstance().clearMessage();
       if (result.cancel !== true) {
         useStandAction(unit);
-        console.log("playerSelectAttackMovement", result.cancel == true, unit, attack, golbalSetting.map);
+        console.log(
+          "playerSelectAttackMovement",
+          result.cancel == true,
+          unit,
+          attack,
+          golbalSetting.map
+        );
         playerSelectAttackMovement(
           result.event,
           unit,

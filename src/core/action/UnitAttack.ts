@@ -11,6 +11,7 @@ import { createMissOrHitAnimation } from "../anim/MissOrHitAnim";
 import { playAttackAnim } from "../anim/PlayAttackAnim";
 import { checkHit, getDamage } from "../system/AttackSystem";
 import { tileSize } from "../envSetting";
+import { UnitSystem } from "../system/UnitSystem";
 
 export function playerSelectAttackMovement(
   e: PIXI.FederatedPointerEvent,
@@ -132,23 +133,11 @@ export function attackMovementToXY(
     return Promise.resolve({});
   }
   // 检查目标位置是否在地图范围内
-  if (mapPassiable && mapPassiable.sprites) {
-    const target = mapPassiable.sprites.find((sprite) => {
-      if (sprite.state === "dead") {
-        return false; // 如果单位已死亡，则不考虑
-      }
-      const spriteX = Math.floor(sprite.x / 64);
-      const spriteY = Math.floor(sprite.y / 64);
-      const inrange = spriteX === targetX && spriteY === targetY;
-      console.log(
-        `检查目标位置: (${spriteX}, ${spriteY}) 是否在攻击范围内: (${targetX}, ${targetY}) - 结果: ${inrange}`
-      );
-      // 检查
-      return inrange;
-    });
+    const targetUnit=UnitSystem.getInstance().findUnitByGridxy(targetX, targetY);
     // 执行攻击逻辑
+    if (targetUnit){
     return attackMovementToUnit(
-      target,
+      targetUnit,
       unit,
       attack,
       mapPassiable,
