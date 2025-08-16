@@ -83,8 +83,9 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
     this.removeFunction = selector.removeFunction;
     const result = await selector.promise;
 
-    const selected = result.selected[0];
+
     if (result.cancel !== true) {
+          const selected = result.selected[0];
       await OrbmastersIncendiaryDetonationController.playAnim(
         this.selectedCharacter as Unit,
         selected.x,
@@ -95,6 +96,7 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
       
       resolveCallback({});
     } else {
+      console.log("result.cancel", result);
       resolveCallback(result);
     }
     return promise;

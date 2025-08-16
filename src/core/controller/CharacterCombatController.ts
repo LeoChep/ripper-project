@@ -62,6 +62,11 @@ export class CharacterCombatController {
             this.useMoveController();
           }, 50);
         }
+      }else if (!result){
+        console.log("moveSelect result", result);
+         setTimeout(() => {
+            this.useMoveController();
+          }, 50);
       }
     });
   }
