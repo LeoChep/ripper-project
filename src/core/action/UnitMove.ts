@@ -6,7 +6,6 @@ import * as PIXI from "pixi.js";
 export const playerSelectMovement = (
   event: PIXI.FederatedPointerEvent,
   unit: Unit,
-  container: PIXI.Container<PIXI.ContainerChild>,
   path: { [key: string]: { x: number; y: number; step: number } | null },
   result: any
 ) => {

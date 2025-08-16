@@ -16,6 +16,17 @@ export class UnitSystem {
     }
     const gridx = Math.floor(pixiX / 64);
     const gridy = Math.floor(pixiY / 64);
+
+    return this.findUnitByGridxy(gridx, gridy);
+  }
+  findUnitByGridxy(x: number, y: number): Unit | null {
+    if (!golbalSetting.map) {
+      console.warn("地图或单位列表未初始化");
+      return null;
+    }
+    // 在所有单位中查找与给定格子坐标匹配的单位
+   const gridx = x;
+    const gridy = y;
     // 在所有单位中查找与给定坐标匹配的单位
     const target = golbalSetting.map.sprites.find((sprite) => {
       const spriteX = Math.floor(sprite.x / 64);
@@ -29,21 +40,6 @@ export class UnitSystem {
         (pos) => pos.x === gridx && pos.y === gridy
       );
 
-      // 检查
-      return inrange;
-    });
-    return target;
-  }
-  findUnitByGridxy(x: number, y: number): Unit | null {
-    if (!golbalSetting.map) {
-      console.warn("地图或单位列表未初始化");
-      return null;
-    }
-    // 在所有单位中查找与给定格子坐标匹配的单位
-    const target = golbalSetting.map.sprites.find((sprite) => {
-      const spriteX = Math.floor(sprite.x / 64);
-      const spriteY = Math.floor(sprite.y / 64);
-      const inrange = spriteX === x && spriteY === y;
       // 检查
       return inrange;
     });

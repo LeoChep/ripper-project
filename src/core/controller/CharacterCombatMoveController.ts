@@ -26,7 +26,7 @@ export class CharCombatMoveController {
 
   selectedCharacter: Unit | null = null;
   public static instense = null as CharCombatMoveController | null;
-
+  sizeGraphics: PIXI.Graphics | null = null;
   graphics: PIXI.Graphics | null = null;
   constructor() {
     // 初始化逻辑
@@ -53,9 +53,7 @@ export class CharCombatMoveController {
     }
 
     const tileSize = 64;
-    const graphics = new PIXI.Graphics();
-    graphics.alpha = 0.4;
-    graphics.zIndex = envSetting.zIndexSetting.mapZindex;
+
     const spriteUnit = unit.animUnit;
     console.log("spriteUnits", unit);
     if (!spriteUnit) {
@@ -80,36 +78,35 @@ export class CharCombatMoveController {
           y * tileSize,
           golbalSetting.map
         );
-      }
+      },
     });
     // 绘制可移动范围
-    graphics.clear();
-    if (path) {
-      Object.keys(path).forEach((key) => {
-        const [x, y] = key.split(",").map(Number);
-        const drawX = x * tileSize;
-        const drawY = y * tileSize;
-        graphics.rect(drawX, drawY, tileSize, tileSize);
-        graphics.fill({ color: 0x66ccff });
-      });
-    }
-
-    graphics.eventMode = "static";
-    // if (FogSystem.instanse.mask)
-    //   graphics.setMask({ mask: FogSystem.instanse.mask });
-    const container = golbalSetting.mapContainer;
-    if (!container) {
-      console.warn("Map container not found.");
+    const graphics = drawGraphics(path, unit);
+    if (!graphics) {
       return Promise.resolve({});
     }
-    if (!golbalSetting.rlayers.spriteLayer) {
-      console.warn("Sprite layer not found in global settings.");
-      return Promise.resolve({});
-    }
-    golbalSetting.rlayers.spriteLayer.attach(graphics);
-    container.addChild(graphics);
 
     this.graphics = graphics;
+
+    this.graphics?.on("pointermove", (e) => {
+      if (!golbalSetting.rootContainer) {
+        return;
+      }
+      const x = e.data.global.x - golbalSetting.rootContainer?.x;
+      const y = e.data.global.y - golbalSetting.rootContainer?.y;
+      const targetXY = getXY(x, y);
+      // console.log("pointermove", targetXY);
+      if (this.sizeGraphics?.parent) {
+        this.sizeGraphics.clear();
+        this.sizeGraphics.parent.removeChild(this.sizeGraphics);
+        this.sizeGraphics.destroy();
+      }
+      if (path[`${targetXY.x},${targetXY.y}`]) {
+        this.sizeGraphics = drawSizeGrids(targetXY, unit, "blue");
+      }else{
+         this.sizeGraphics = drawSizeGrids(targetXY, unit, "red");
+      }
+    });
     // 点击其他地方移除移动范围
     let resolveCallback: (arg0: any) => void = () => {};
     const promise = new Promise<any>((resolve) => {
@@ -119,6 +116,11 @@ export class CharCombatMoveController {
     const removeGraphics = () => {
       if (graphics.parent) {
         graphics.parent.removeChild(graphics);
+      }
+      if (this.sizeGraphics?.parent) {
+        // this.sizeGraphics.clear();
+        this.sizeGraphics.parent.removeChild(this.sizeGraphics);
+        // this.sizeGraphics.destroy();
       }
     };
     let cancel = false;
@@ -130,15 +132,23 @@ export class CharCombatMoveController {
     graphics.on("pointerup", (e) => {
       console.log("pointerup");
       e.stopPropagation();
+      const targetXy = getXY(
+        e.data.global.x - (golbalSetting.rootContainer?.x ?? 0),
+        e.data.global.y - (golbalSetting.rootContainer?.y ?? 0)
+      )
+      if (!path[`${targetXy.x},${targetXy.y}`]) {
+        return
+      }
       if (cancel) {
-        cancel=false;
-        return 
+        cancel = false;
+        return;
       }
       removeGraphics();
       const result = {} as any;
       result.cancel = false;
       // CharacterController.onAnim = true;
-      playerSelectMovement(e, unit, container, path, result)?.then(() => {
+      
+      playerSelectMovement(e, unit, path, result)?.then(() => {
         console.log("resolveCallback", result);
         setTimeout(() => {
           // CharacterController.onAnim = false;
@@ -183,4 +193,114 @@ export class CharCombatMoveController {
   };
   removeFunction = (args?: any) => {};
   // 添加你的方法和属性
+}
+const drawGraphics = (
+  path: { [x: string]: { x: number; y: number; step: number } | null },
+  unit: Unit
+) => {
+  const graphics = new PIXI.Graphics();
+  graphics.alpha = 0.4;
+  graphics.zIndex = envSetting.zIndexSetting.spriteZIndex+1;
+  const grids = new Set<string>();
+  if (path) {
+    Object.keys(path).forEach((key) => {
+      const [x, y] = key.split(",").map(Number);
+      grids.add(`${x},${y}`);
+      const size = unit.creature ? unit.creature.size : undefined;
+
+      // 构建范围数组
+      const rangeArrA = [];
+      let range = 1; // 默认范围为0，可根据需要调整
+      if (size === "big") {
+        range = 2;
+      }
+
+      for (let dx = 0; dx < range; dx++) {
+        for (let dy = 0; dy < range; dy++) {
+          rangeArrA.push({
+            x: x + dx,
+            y: y + dy,
+          });
+        }
+      }
+      for (const grid of rangeArrA) {
+        grids.add(`${grid.x},${grid.y}`);
+      }
+    });
+  }
+  for (const grid of grids) {
+    const [x, y] = grid.split(",").map(Number);
+    const drawX = x * tileSize;
+    const drawY = y * tileSize;
+    graphics.rect(drawX, drawY, tileSize, tileSize);
+    graphics.fill({ color: 0x66ccff });
+  }
+
+  graphics.eventMode = "static";
+  // if (FogSystem.instanse.mask)
+  //   graphics.setMask({ mask: FogSystem.instanse.mask });
+  const container = golbalSetting.spriteContainer;
+  if (!container) {
+    console.warn("Map container not found.");
+    return;
+  }
+  if (!golbalSetting.rlayers.spriteLayer) {
+    console.warn("Sprite layer not found in global settings.");
+    return;
+  }
+  golbalSetting.rlayers.spriteLayer.attach(graphics);
+  container.addChild(graphics);
+  return graphics;
+};
+const drawSizeGrids = (
+  target: { x: number; y: number },
+  unit: Unit,
+  color: string
+) => {
+  const graphics = new PIXI.Graphics();
+  graphics.alpha = 0.4;
+  graphics.zIndex = envSetting.zIndexSetting.spriteZIndex+1;
+  // 绘制可移动范围
+  const size = unit.creature ? unit.creature.size : undefined;
+  const grids = [];
+  let range = 1; // 默认范围为0，可根据需要调整
+  if (size === "big") {
+    range = 2;
+  }
+
+  for (let dx = 0; dx < range; dx++) {
+    for (let dy = 0; dy < range; dy++) {
+      grids.push({
+        x: target.x + dx,
+        y: target.y + dy,
+      });
+    }
+  }
+
+  if (grids) {
+    grids.forEach((grid) => {
+      const drawX = grid.x * tileSize;
+      const drawY = grid.y * tileSize;
+      graphics.rect(drawX, drawY, tileSize, tileSize);
+      graphics.fill({ color: color });
+    });
+  }
+  graphics.eventMode = "none";
+  // path 是一个以 "x,y" 为 key 的对象，记录每个格子的前驱节点
+
+  const container = golbalSetting.spriteContainer;
+  if (!container) {
+    console.warn("Map container not found.");
+    return graphics;
+  }
+  if (!golbalSetting.rlayers.spriteLayer) {
+    console.warn("Sprite layer not found in global settings.");
+    return graphics;
+  }
+  golbalSetting.rlayers.spriteLayer.attach(graphics);
+  container.addChild(graphics);
+  return graphics;
+};
+function getXY(x: number, y: number) {
+  return { x: Math.floor(x / tileSize), y: Math.floor(y / tileSize) };
 }

@@ -87,7 +87,7 @@ export class CharacterOutCombatController {
     UnitMoveAction.playerSelectMovement(
       e,
      selectedCharacter,
-      container,
+      
       path,
       result
     );

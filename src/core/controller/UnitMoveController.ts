@@ -145,7 +145,7 @@ export const moveSelect = (
       return;
     }
     
-    playerSelectMovement(e, unit, container, path,{});
+    playerSelectMovement(e, unit, path,{});
     if (
       unit.initiative &&
       typeof unit.initiative.moveActionNumber === "number"

@@ -130,7 +130,7 @@ export class CharCombatStepController {
       // CharacterController.onAnim = true;
       const walktype = (unit.stateMachinePack.getMachine("walk") as WalkStateMachine).walkType;
       (unit.stateMachinePack.getMachine("walk") as WalkStateMachine).walkType = "step";
-      playerSelectMovement(e, unit, container, path, result)?.then(() => {
+      playerSelectMovement(e, unit, path, result)?.then(() => {
         console.log("resolveCallback", result);
            (unit.stateMachinePack.getMachine("walk") as WalkStateMachine).walkType = walktype
         setTimeout(() => {
