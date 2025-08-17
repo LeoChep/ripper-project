@@ -10,6 +10,8 @@ import { BasicAttackSelector } from "@/core/selector/BasicAttackSelector";
 import { checkPassiable } from "@/core/system/AttackSystem";
 import { tileSize } from "@/core/envSetting";
 import { WeaponSystem } from "@/core/system/WeaponSystem";
+import type { FederatedPointerEvent } from "pixi.js";
+import { UnitSystem } from "@/core/system/UnitSystem";
 
 export class LungingStrikeController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -33,25 +35,17 @@ export class LungingStrikeController extends AbstractPwoerController {
     if (attack.range)
     attack.range++;
     // 执行攻击选择逻辑
-    const basicAttackSelector = BasicAttackSelector.selectBasicAttack(
-      (x, y, pre, prey) => {
-        return checkPassiable(
-          unit,
-          x * tileSize,
-          y * tileSize,
-          golbalSetting.map
-        );
-      },
-      attack?.range ?? 1,
-      x,
-      y
-    );
+    const basicAttackSelector = BasicAttackSelector.getInstance().selectBasic({
+      unit: unit,
+      range: attack.range,
+      color: "red",
+    });
     this.removeFunction = basicAttackSelector.removeFunction;
     let resolveCallback = (result: any) => {};
     const promise = new Promise((resolve) => {
       resolveCallback = resolve;
     });
-    basicAttackSelector.promise?.then((result) => {
+    basicAttackSelector.promise?.then((result: { cancel: boolean; event: FederatedPointerEvent; }) => {
       console.log("basicAttackSelector result", result, result.cancel !== true);
       if (result.cancel !== true) {
         useStandAction(unit);

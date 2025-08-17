@@ -72,7 +72,7 @@ export const checkPassiableBySize = (
   y: number
 ) => {
   let passiable = true;
-  console.log('checkPassiableBySize')
+  // console.log('checkPassiableBySize')
   const mapPassiable = golbalSetting.map;
   if (mapPassiable) {
     const edges = mapPassiable.edges;
@@ -90,7 +90,7 @@ export const checkPassiableBySize = (
         });
       }
     }
-      console.log("rangeArrA", rangeArrA.length);
+      // console.log("rangeArrA", rangeArrA.length);
     // 检查是否穿过边
     if (edges) {
       // console.log(edges)

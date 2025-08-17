@@ -44,6 +44,7 @@ export class BasicSelector {
     );
     // 选择逻辑
     const path = grids;
+    console.log("path", path);
     this.drawGrids(path, color);
     selector.promise = Promise.resolve({});
     let resolveCallback: (arg0: any) => void = () => {};

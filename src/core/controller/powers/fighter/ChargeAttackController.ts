@@ -87,7 +87,7 @@ export class ChargeAttackController extends AbstractPwoerController {
         tooShortFlag = true;
       }
       if (targetGrid){
-         const noBeblockByWall=attackCheckPassiable(unit, targetGrid.x * tileSize, targetGrid.y * tileSize, golbalSetting.map);
+         const noBeblockByWall=attackCheckPassiable(unit, targetGrid.x * tileSize, targetGrid.y * tileSize);
          if (!noBeblockByWall)
           beBlockFlag = true;
         }

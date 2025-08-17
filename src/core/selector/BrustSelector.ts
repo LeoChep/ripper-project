@@ -200,10 +200,9 @@ export class BrustSelector {
       ) => {
         // If you have a unit context, replace `null` with the actual unit
         return checkPassiable(
-          { x: x * tileSize, y: y * tileSize } as Unit,
-          gridX * tileSize,
-          gridY * tileSize,
-          golbalSetting.map
+          { x: x*tileSize , y: y*tileSize  } as Unit,
+          gridX,
+          gridY ,
         );
       },
     });

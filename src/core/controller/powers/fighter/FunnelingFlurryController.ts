@@ -38,9 +38,8 @@ export class FunnelingFlurryController extends AbstractPwoerController {
       checkFunction: (gridX: number, gridY: number, preX: number, preY: number) => {
         return atkGridsCheckPassiable(
           unit,
-          gridX * tileSize,
-          gridY * tileSize,
-          golbalSetting.map
+          gridX ,
+          gridY ,
         );
       }
     });

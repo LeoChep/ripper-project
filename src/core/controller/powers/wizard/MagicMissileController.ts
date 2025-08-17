@@ -55,9 +55,9 @@ export class MagicMissileController extends AbstractPwoerController {
       checkFunction: (gridX: any, gridY: any, preX: number, preY: number) => {
         return checkPassiable(
           unit,
-          gridX * tileSize,
-          gridY * tileSize,
-          golbalSetting.map
+          gridX ,
+          gridY ,
+      
         );
       }
     });
