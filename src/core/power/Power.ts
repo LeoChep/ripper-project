@@ -22,6 +22,8 @@ export class Power {
   area: number = 0;
   rechargeRoll: string = "";
   rechargeCondition: string = "";
+  hitText: string = "";
+  missText: string = "";
   damageShare: boolean = false;
   postEffect: boolean = true;
   postSpecial: boolean = true;

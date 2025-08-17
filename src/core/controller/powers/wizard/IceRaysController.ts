@@ -29,6 +29,7 @@ export class IceRaysController extends AbstractPwoerController {
   public static isUse: boolean = false;
   public static instense: IceRaysController | null = null;
   powerName = "IceRays";
+
   constructor() {
     super();
   }

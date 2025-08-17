@@ -42,10 +42,22 @@
     <!-- 动作按钮区域 -->
     <div class="action-buttons">
       <button v-for="action in filteredActions" :key="action.id"
-        :class="['action-btn', { selected: selectedAction?.id === action.id }]" @click="selectAction(action)">
+        :class="['action-btn', { selected: selectedAction?.id === action.id }]" 
+        @click="selectAction(action)"
+        @mouseenter="showTooltip(action, $event)"
+        @mouseleave="hideTooltip"
+        @mousemove="updateTooltipPosition($event)">
         {{ action.displayName }}
       </button>
     </div>
+
+    <!-- 威能详情悬浮窗 -->
+    <PowerTooltip 
+      :power="tooltipPower" 
+      :visible="tooltipVisible" 
+      :mouseX="mouseX" 
+      :mouseY="mouseY" 
+    />
 
     <!-- 状态提示栏 -->
     <div class="status-bar">
@@ -66,6 +78,7 @@
 <script setup>
 import { CharacterCombatController } from '@/core/controller/CharacterCombatController'
 import { computed, ref, watch } from 'vue'
+import PowerTooltip from '@/components/PowerTooltip/PowerTooltip.vue'
 
 // Props
 const props = defineProps({
@@ -83,6 +96,12 @@ const activeActionTab = ref('standard')
 const activePowerTab = ref('atwill')
 const selectedAction = ref(null)
 const remainingActionPoints = ref(3)
+
+// 悬浮窗相关数据
+const tooltipVisible = ref(false)
+const tooltipPower = ref(null)
+const mouseX = ref(0)
+const mouseY = ref(0)
 
 // 从角色获取威能数据
 const actions = computed(() => {
@@ -218,6 +237,24 @@ const endTurn = () => {
   }
   CharacterCombatController.instance.endTurn()
 }
+
+// 悬浮窗方法
+const showTooltip = (action, event) => {
+  tooltipPower.value = action.power
+  tooltipVisible.value = true
+  updateTooltipPosition(event)
+}
+
+const hideTooltip = () => {
+  tooltipVisible.value = false
+  tooltipPower.value = null
+}
+
+const updateTooltipPosition = (event) => {
+  mouseX.value = event.clientX
+  mouseY.value = event.clientY
+}
+
 // 暴露给父组件的方法
 defineExpose({
   resetSelection() {
