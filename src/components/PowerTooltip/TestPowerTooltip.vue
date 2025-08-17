@@ -100,6 +100,28 @@ const testPowers = ref([
     hitText: "目标恢复1d4+4点生命值并可立即进行一次豁免",
     missText: null,
     canUse: () => false
+  },
+  {
+    name: "ComplexSpell",
+    displayName: "复杂威能测试",
+    description: "这是一个用于测试高度计算的复杂威能，包含了大量的描述文本来验证悬浮窗的位置调整是否正确工作。它应该能够根据内容的多少自动调整位置，避免超出屏幕边界。",
+    actionType: "standard",
+    useType: "daily",
+    level: "5",
+    powersource: "arcane",
+    keyWords: ["fire", "thunder", "implement", "zone"],
+    rangeText: "远程 20",
+    target: "区域爆发3，目标区域内所有敌人",
+    area: 3,
+    requirements: "奥法法器",
+    cooldown: 0,
+    currentCooldown: 0,
+    maxUses: 1,
+    currentUses: 0,
+    prepared: true,
+    hitText: "3d6+5点火焰伤害和2d4点雷鸣伤害，目标被击倒并着火（持续伤害5，豁免终止）。在目标区域创建一个火焰地带，持续到遭遇结束，任何进入或在地带内开始回合的敌人受到5点火焰伤害。",
+    missText: "一半火焰伤害，无雷鸣伤害，目标不被击倒，但仍然着火（持续伤害3，豁免终止）。仍然创建火焰地带但持续时间减半。",
+    canUse: () => true
   }
 ])
 

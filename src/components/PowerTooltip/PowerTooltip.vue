@@ -152,28 +152,123 @@ const canUsePower = computed(() => {
   return true
 })
 
+// 计算威能详情的预估高度
+const calculateTooltipHeight = (power) => {
+  if (!power) return 100
+  
+  let height = 0
+  
+  // 威能标题区域 (标题 + 类型标签)
+  height += 50
+  
+  // 基本信息区域
+  let basicInfoRows = 0
+  if (power.level) basicInfoRows++
+  if (power.keyWords && power.keyWords.length > 0 && power.keyWords[0]) basicInfoRows++
+  if (basicInfoRows > 0) {
+    height += basicInfoRows * 18 + 15 // 每行18px + 区域边距
+  }
+  
+  // 使用信息区域
+  let usageInfoRows = 0
+  if (power.rangeText || power.rangeType) usageInfoRows++
+  if (power.target) usageInfoRows++
+  if (power.area && power.area > 0) usageInfoRows++
+  if (power.requirements) usageInfoRows++
+  if (usageInfoRows > 0) {
+    height += usageInfoRows * 18 + 15
+  }
+  
+  // 冷却信息区域
+  if (props.showCooldownInfo) {
+    let cooldownRows = 0
+    if (power.cooldown && power.cooldown > 0) cooldownRows++
+    if (power.maxUses && power.maxUses > 0) cooldownRows++
+    if (power.currentCooldown && power.currentCooldown > 0) cooldownRows++
+    if (cooldownRows > 0) {
+      height += cooldownRows * 18 + 15
+    }
+  }
+  
+  // 命中效果
+  if (power.hitText) {
+    const textLength = power.hitText.length
+    const estimatedLines = Math.max(1, Math.ceil(textLength / 40)) // 每行约40个字符
+    height += estimatedLines * 16 + 25 // 16px行高 + 标签和边距
+  }
+  
+  // 失手效果
+  if (power.missText) {
+    const textLength = power.missText.length
+    const estimatedLines = Math.max(1, Math.ceil(textLength / 40))
+    height += estimatedLines * 16 + 25
+  }
+  
+  // 描述文本
+  if (power.description) {
+    const textLength = power.description.length
+    const estimatedLines = Math.max(1, Math.ceil(textLength / 40))
+    height += estimatedLines * 18 + 30 // 稍大的行高和边距
+  }
+  
+  // 状态指示器
+  height += 40
+  
+  // 容器内边距
+  height += 30
+  
+  // 确保最小高度，但不设置最大高度限制
+  return Math.max(height, 120)
+}
+
 // 计算提示框位置
 const tooltipStyle = computed(() => {
   if (!props.visible) return { display: 'none' }
   
-  const offset = 10
+  const offset = 15
+  const tooltipWidth = 320
+  const tooltipHeight = calculateTooltipHeight(props.power)
+  const screenWidth = window.innerWidth
+  const screenHeight = window.innerHeight
+  
   let left = props.mouseX + offset
   let top = props.mouseY + offset
   
-  // 简单的边界检测，避免提示框超出屏幕
-  if (left + 300 > window.innerWidth) {
-    left = props.mouseX - 300 - offset
+  // 水平位置调整
+  if (left + tooltipWidth > screenWidth) {
+    left = props.mouseX - tooltipWidth - offset
+    if (left < 0) {
+      left = screenWidth - tooltipWidth - 10
+    }
   }
   
-  if (top + 200 > window.innerHeight) {
-    top = props.mouseY - 200 - offset
+  // 垂直位置调整 - 根据实际计算的高度
+  const bottomSpace = screenHeight - props.mouseY
+  const topSpace = props.mouseY
+  
+  if (bottomSpace < tooltipHeight + offset && topSpace > tooltipHeight + offset) {
+    // 底部空间不足且顶部有足够空间，显示在鼠标上方
+    top = props.mouseY - tooltipHeight - offset
+  } else if (top + tooltipHeight > screenHeight) {
+    // 如果底部超出，尝试贴底显示
+    top = screenHeight - tooltipHeight - 10
+    
+    // 如果贴底后顶部也超出，则居中显示在可见区域
+    if (top < 10) {
+      top = Math.max(10, (screenHeight - tooltipHeight) / 2)
+    }
   }
+  
+  // 确保最小边距
+  left = Math.max(10, Math.min(left, screenWidth - tooltipWidth - 10))
+  top = Math.max(10, Math.min(top, screenHeight - tooltipHeight - 10))
   
   return {
     position: 'fixed',
     left: `${left}px`,
     top: `${top}px`,
-    zIndex: 9999
+    zIndex: 9999,
+    width: `${tooltipWidth}px`
   }
 })
 
@@ -208,10 +303,10 @@ const getPowerTypeText = (type) => {
   border: 2px solid #444;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-  max-width: 300px;
-  min-width: 250px;
+  width: 320px;
   pointer-events: none;
   backdrop-filter: blur(5px);
+  overflow: hidden;
 }
 
 .tooltip-content {
@@ -219,6 +314,7 @@ const getPowerTypeText = (type) => {
   color: #fff;
   font-size: 12px;
   line-height: 1.4;
+  overflow: hidden;
 }
 
 /* 威能标题 */
@@ -362,24 +458,5 @@ const getPowerTypeText = (type) => {
   background: rgba(231, 76, 60, 0.3);
   color: #e74c3c;
   border: 1px solid #e74c3c;
-}
-
-/* 滚动条样式 */
-.tooltip-content::-webkit-scrollbar {
-  width: 4px;
-}
-
-.tooltip-content::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-}
-
-.tooltip-content::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 2px;
-}
-
-.tooltip-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
 }
 </style>
