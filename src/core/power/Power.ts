@@ -24,6 +24,7 @@ export class Power {
   rechargeCondition: string = "";
   hitText: string = "";
   missText: string = "";
+  effectText: string = "";
   damageShare: boolean = false;
   postEffect: boolean = true;
   postSpecial: boolean = true;
