@@ -4,11 +4,13 @@ import type { AIInterface } from "../type/AIInterface";
 import * as InitiativeController from "../system/InitiativeSystem";
 import { generateWays } from "../utils/PathfinderUtil";
 import * as UnitMove from "../action/UnitMove";
-import * as UnitMoveController from "../system/UnitMoveSystem";
+import * as UnitMoveSystem from "../system/UnitMoveSystem";
+import * as AttackSystem from "../system/AttackSystem";
 import * as UnitAttack from "../action/UnitAttack";
 import { segmentsIntersect } from "../utils/MathUtil";
 import { golbalSetting } from "../golbalSetting";
 import { ModifierSystem } from "../system/ModifierSystem";
+import { UnitSystem } from "../system/UnitSystem";
 
 const tileSize = 64; // 假设每个格子的大小为64像素
 export class NormalAI implements AIInterface {
@@ -37,7 +39,7 @@ export class NormalAI implements AIInterface {
         } else {
           return false;
         }
-      }
+      },
     });
     console.log(
       "AI路径计算结果:",
@@ -55,8 +57,11 @@ export class NormalAI implements AIInterface {
       };
       let isCantAttack = !result.canAttack;
       if (rc) {
-        let speed = ModifierSystem.getInstance().getValueStack(unit, "speed").finalValue;
-        
+        let speed = ModifierSystem.getInstance().getValueStack(
+          unit,
+          "speed"
+        ).finalValue;
+
         if (isCantAttack) {
           //如果不能攻击,检查是否为拥堵情况
           let noUnit = false;
@@ -71,11 +76,16 @@ export class NormalAI implements AIInterface {
             golbalSetting?.map?.sprites.forEach((sprite) => {
               const spriteX = Math.floor(sprite.x / tileSize);
               const spriteY = Math.floor(sprite.y / tileSize);
-              if (rc && rc.x === spriteX && rc.y === spriteY && sprite.state !== "dead") {
+              if (
+                rc &&
+                rc.x === spriteX &&
+                rc.y === spriteY &&
+                sprite.state !== "dead"
+              ) {
                 noUnit = false;
               }
             });
-            console.log(`AI单位 ${unit.name} 在 `+rc+` 位置拥堵，继续寻找`);
+            console.log(`AI单位 ${unit.name} 在 ` + rc + ` 位置拥堵，继续寻找`);
           }
         }
         if (rc && rc.step > speed) {
@@ -107,7 +117,13 @@ export class NormalAI implements AIInterface {
         const enemyX = Math.floor(result.target.x / tileSize);
         const enemyY = Math.floor(result.target.y / tileSize);
         if (attack) {
-          await UnitAttack.attackMovementToXY(enemyX, enemyY, unit, attack, map);
+          await UnitAttack.attackMovementToXY(
+            enemyX,
+            enemyY,
+            unit,
+            attack,
+            map
+          );
         }
       }
     }
@@ -135,7 +151,6 @@ export class NormalAI implements AIInterface {
       this.owner.creature?.attacks[0],
       golbalSetting.map
     );
-
   }
 }
 
@@ -152,7 +167,7 @@ function findAttackTarget(
   let continueFind = true;
   let passiable = true;
   if (tiledMap) {
-    passiable = UnitMoveController.checkPassiable(
+    passiable = UnitMoveSystem.checkPassiable(
       unit,
       x * tileSize,
       y * tileSize,
@@ -165,42 +180,80 @@ function findAttackTarget(
     return false; // 如果不可通行，直接返回
   }
   let noUnit = true;
-  tiledMap.sprites.forEach((sprite) => {
-    if (sprite === unit) {
-      return; // 如果是自己就跳过
-    }
-    const spriteX = Math.floor(sprite.x / tileSize);
-    const spriteY = Math.floor(sprite.y / tileSize);
-    if (x === spriteX && y === spriteY&&sprite.state !== "dead") {
-      //如果这个点有单位
-      noUnit = false; //有单位
-    }
+  const findUnitInThisPoint = UnitSystem.getInstance().findUnitByGridxy(x, y);
+  if (
+    findUnitInThisPoint &&
+    findUnitInThisPoint !== unit &&
+    findUnitInThisPoint.state !== "dead"
+  ) {
+    noUnit = false;
+  }
+  //获得攻击范围内格子
+  const size = unit?.creature?.size ? unit.creature.size : "middle";
+  const grids = UnitSystem.getInstance().getGridsBySize(x, y, size);
+  const unitSettingx = x ;
+  const unitSettingy = y ;
+  const attakRangeWays = generateWays({
+    start: grids,
+    range: unit.creature?.attacks[0].range,
+    checkFunction: (x, y, prex, prey) => {
+      return AttackSystem.checkPassiableBySize(
+        size,
+        unitSettingx,
+        unitSettingy,
+        x,
+        y
+      );
+    },
   });
-  tiledMap.sprites.forEach((sprite) => {
-    if (sprite === unit||sprite.state === "dead") {
-      return; // 如果是自己就跳过
-    }
-    const spriteX = Math.floor(sprite.x / tileSize);
-    const spriteY = Math.floor(sprite.y / tileSize);
-    if (sprite.party !== unit.party) {
-      let attackable = checkEdges(tiledMap, spriteX, spriteY, x, y);
-      //检测敌人是否在这个触及内,并且无障碍
-      const dx = Math.abs(spriteX - x);
-      const dy = Math.abs(spriteY - y);
-      const dis = Math.max(dx, dy);
-
-      if (dis <= (unit.creature?.attacks[0].range ?? 1) && attackable) {
-        //找到了就不需要继续寻找了,并且这个点没别人
-        if (noUnit) {
-          continueFind = false;
-          result.canAttack = true;
-        }
-        result.x = x;
-        result.y = y;
-        result.target = sprite;
+  Object.keys(attakRangeWays).forEach((key) => {
+    const [x, y] = key.split(",").map(Number);
+    const findUnitInThisPoint = UnitSystem.getInstance().findUnitByGridxy(x, y);
+    if (findUnitInThisPoint) {
+      if (
+        findUnitInThisPoint === unit ||
+        findUnitInThisPoint.state === "dead"
+      ) {
+        return; // 如果是自己就跳过
       }
+      if (findUnitInThisPoint.party === unit.party) {
+        return;
+      }
+      // 找到了单位
+      if (noUnit) {
+        continueFind = false;
+        result.canAttack = true;
+      }
+      result.x = unitSettingx;
+      result.y = unitSettingy;
+      result.target = findUnitInThisPoint;
     }
   });
+  // tiledMap.sprites.forEach((sprite) => {
+  //   if (sprite === unit||sprite.state === "dead") {
+  //     return; // 如果是自己就跳过
+  //   }
+  //   const spriteX = Math.floor(sprite.x / tileSize);
+  //   const spriteY = Math.floor(sprite.y / tileSize);
+  //   if (sprite.party !== unit.party) {
+  //     let attackable = checkEdges(tiledMap, spriteX, spriteY, x, y);
+  //     //检测敌人是否在这个触及内,并且无障碍
+  //     const dx = Math.abs(spriteX - x);
+  //     const dy = Math.abs(spriteY - y);
+  //     const dis = Math.max(dx, dy);
+
+  //     if (dis <= (unit.creature?.attacks[0].range ?? 1) && attackable) {
+  //       //找到了就不需要继续寻找了,并且这个点没别人
+  //       if (noUnit) {
+  //         continueFind = false;
+  //         result.canAttack = true;
+  //       }
+  //       result.x = x;
+  //       result.y = y;
+  //       result.target = sprite;
+  //     }
+  //   }
+  // });
   return continueFind;
 }
 

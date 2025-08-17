@@ -1,11 +1,10 @@
 import { tileSize } from "./../envSetting";
 
-import { generateWays } from "../utils/PathfinderUtil";
 import * as PIXI from "pixi.js";
 import * as envSetting from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import { MessageTipSystem } from "../system/MessageTipSystem";
-import { checkPassiable } from "../system/AttackSystem";
+
 import type { Unit } from "../units/Unit";
 
 export class MoveSelector {

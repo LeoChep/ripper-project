@@ -8,6 +8,7 @@ import { golbalSetting } from "../golbalSetting";
 import { MessageTipSystem } from "../system/MessageTipSystem";
 import type { Unit } from "../units/Unit";
 import { UnitSystem } from "../system/UnitSystem";
+import * as AttackSystem from "../system/AttackSystem";
 export class BasicAttackSelector {
   public graphics: PIXI.Graphics | null = null;
   public removeFunction: (input: any) => void = () => {};
@@ -31,7 +32,7 @@ export class BasicAttackSelector {
     selectNum?: number,
     color?: string,
     canCancel?: boolean,
-    checkPassiable?: (gridX: number, gridY: number) => boolean
+    checkPassiable?: (x:number,y:number)=>boolean
     } = {}): BasicAttackSelector {
     const {
       unit,
@@ -39,13 +40,14 @@ export class BasicAttackSelector {
       selectNum = 1,
       color = "#ff0000",
       canCancel = true,
-      checkPassiable = () => true
+      checkPassiable = (x,y)=>true
     } = options;
 
     const selector = BasicAttackSelector.getInstance();
     selector.canCancel = canCancel;
     selector.selected = [];
     selector.selecteNum = selectNum;
+    
     MessageTipSystem.getInstance().setBottomMessage(
       `已选择 ${this.selected.length}/${this.selecteNum} 个目标`
     );
@@ -55,7 +57,9 @@ export class BasicAttackSelector {
       return selector;
     }
     const grids = UnitSystem.getInstance().getUnitGrids(unit);
-    const path = generateWays({ start: grids, range: range, checkFunction: checkPassiable });
+    const size=unit.creature?.size;
+    const path = generateWays({ start: grids, range: range, checkFunction:
+      (x,y,...args)=>{return AttackSystem.checkPassiable(unit,x,y)} });
     this.drawGrids(path, color);
     selector.promise = Promise.resolve({});
     let resolveCallback: (arg0: any) => void = () => {};

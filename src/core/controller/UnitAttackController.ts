@@ -144,9 +144,8 @@ const attackSelect = (
     checkFunction: (x: number, y: number, preX: number, preY: number) => {
       return checkPassiable(
         unit,
-        x * tileSize,
-        y * tileSize,
-        mapPassiable
+        x ,
+        y ,
       );
     }
   });

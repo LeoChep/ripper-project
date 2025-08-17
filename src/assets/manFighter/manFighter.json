@@ -55,7 +55,7 @@
       "name": "长剑",
       "type": "Melee",
       "action": "武器",
-      "range": 1,
+      "range": 2,
       "proficiency": 3,
       "bonus": 1,
       "target": "ac",

@@ -25,7 +25,7 @@ export class UnitSystem {
       return null;
     }
     // 在所有单位中查找与给定格子坐标匹配的单位
-   const gridx = x;
+    const gridx = x;
     const gridy = y;
     // 在所有单位中查找与给定坐标匹配的单位
     const target = golbalSetting.map.sprites.find((sprite) => {
@@ -51,7 +51,12 @@ export class UnitSystem {
       return [];
     }
     const size = unit.creature.size;
-
+    const spriteX = Math.floor(unit.x / 64);
+    const spriteY = Math.floor(unit.y / 64);
+    return this.getGridsBySize(spriteX,spriteY,size);
+  
+  }
+  getGridsBySize(x: number, y: number, size: string) {
     // 构建范围数组
     const rangeArr = [];
     let range = 1; // 默认范围为0，可根据需要调整
@@ -60,8 +65,8 @@ export class UnitSystem {
     }
 
     // 需要定义 spriteX 和 spriteY，假设 unit 有 x 和 y 属性
-    const spriteX = Math.floor((unit).x / 64);
-    const spriteY = Math.floor((unit).y / 64);
+    const spriteX = x;
+    const spriteY = y;
 
     for (let dx = 0; dx < range; dx++) {
       for (let dy = 0; dy < range; dy++) {

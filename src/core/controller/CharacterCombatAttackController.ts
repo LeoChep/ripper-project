@@ -44,23 +44,10 @@ export class CharCombatAttackController {
       return Promise.resolve({});
     }
     //
-    const centerX = spriteUnit.x;
-    const centerY = spriteUnit.y;
-    const startX = Math.floor(centerX / tileSize);
-    const startY = Math.floor(centerY / tileSize);
+
+
     const range = attack.range ? attack.range : 1; // 默认攻击范围为1
-    const grids = generateWays({
-      start: { x: startX, y: startY },
-      range: range,
-      checkFunction: (x: number, y: number, preX: number, preY: number) => {
-        return checkPassiable(
-          unit,
-          x * tileSize,
-          y * tileSize,
-          golbalSetting.map
-        );
-      },
-    });
+
     const basicAttackSelector = BasicAttackSelector.getInstance().selectBasic({
       unit: unit,
       range: range,
