@@ -21,6 +21,7 @@ import type { Unit } from "@/core/units/Unit";
 import type { Weapon } from "@/core/units/Weapon";
 import type { CreatureAttack } from "@/core/units/Creature";
 import { AbilityValueSystem } from "@/core/system/AbilitiyValueSystem";
+import { checkPassiable } from "@/core/system/AttackSystem";
 
 export class ShieldEdgeBlockEvent extends BasedAbstractEvent {
   static readonly type = "hitCheckEvent";
@@ -55,13 +56,14 @@ export class ShieldEdgeBlockEvent extends BasedAbstractEvent {
         attacker.party !== this.owner?.party &&
         checkRectionUseful(this.owner)
       ) {
-        const attackerX = Math.floor(attacker.x / 64);
-        const attackerY = Math.floor(attacker.y / 64);
-        const unitX = Math.floor(this.owner.x / 64);
-        const unitY = Math.floor(this.owner.y / 64);
-        const dx = Math.abs(attackerX - unitX);
-        const dy = Math.abs(attackerY - unitY);
-        if (dx <= 1 && dy <= 1) {
+        const grids=UnitSystem.getInstance().getUnitGrids(attacker);
+        let canCounter=false;
+        for (let {x,y} of grids){
+          let canCounterThePoint= checkPassiable(this.owner,x,y);
+          if (canCounterThePoint) canCounter=true
+          break;
+        }
+        if (canCounter) {
           if (this.owner.party === "player") {
             let text;
             if (attackCheckResult.hit) {

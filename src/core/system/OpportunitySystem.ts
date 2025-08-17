@@ -34,16 +34,16 @@ export class OpportunitySystem {
       const checkUnitY = Math.floor(checkUnit.y / tileSize);
       //用一个数组矩阵来存储checkUnit的周围八个格子
       const arroundGrids = UnitSystem.getInstance().getGridsArround(checkUnit);
-      const surroundingTiles = [
-        [checkUnitX - 1, checkUnitY - 1], // 左上
-        [checkUnitX, checkUnitY - 1], // 上
-        [checkUnitX + 1, checkUnitY - 1], // 右
-        [checkUnitX - 1, checkUnitY], // 左
-        [checkUnitX + 1, checkUnitY], // 右
-        [checkUnitX - 1, checkUnitY + 1], // 左下
-        [checkUnitX, checkUnitY + 1], // 下
-        [checkUnitX + 1, checkUnitY + 1], // 右下
-      ];
+      // const surroundingTiles = [
+      //   [checkUnitX - 1, checkUnitY - 1], // 左上
+      //   [checkUnitX, checkUnitY - 1], // 上
+      //   [checkUnitX + 1, checkUnitY - 1], // 右
+      //   [checkUnitX - 1, checkUnitY], // 左
+      //   [checkUnitX + 1, checkUnitY], // 右
+      //   [checkUnitX - 1, checkUnitY + 1], // 左下
+      //   [checkUnitX, checkUnitY + 1], // 下
+      //   [checkUnitX + 1, checkUnitY + 1], // 右下
+      // ];
       // 检查目标位置是否在周围八个格子内
       let isInRangeFaze = false;
       for (const { x, y } of arroundGrids) {

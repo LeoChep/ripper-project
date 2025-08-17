@@ -77,6 +77,9 @@ export class CharacterCombatController {
     this.selectedCharacter = golbalSetting.map.sprites.find(
       (sprite) => sprite.id === CharacterController.curser
     );
+    if ( !(this.selectedCharacter?.state === "idle"))
+      return false
+   
     if (!this.selectedCharacter) {
       console.warn("没有选中单位，无法进行操作选择");
       return false;

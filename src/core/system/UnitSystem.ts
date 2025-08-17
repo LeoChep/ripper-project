@@ -79,7 +79,7 @@ export class UnitSystem {
       range = 2;
     }
     range++;
-    const arroundGrids = this.getGridsByRange(spriteX, spriteY, range);
+    const arroundGrids = this.getGridsByRange(spriteX-1, spriteY-1, range);
     const girds = this.getGridsByRange(spriteX, spriteY, range - 1);
     //从 arroundGrids中删去Grids的部分
     // 从 arroundGrids 中删去 girds 的部分
