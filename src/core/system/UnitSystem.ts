@@ -53,27 +53,58 @@ export class UnitSystem {
     const size = unit.creature.size;
     const spriteX = Math.floor(unit.x / 64);
     const spriteY = Math.floor(unit.y / 64);
-    return this.getGridsBySize(spriteX,spriteY,size);
-  
+    return this.getGridsBySize(spriteX, spriteY, size);
   }
-  getGridsBySize(x: number, y: number, size: string) {
-    // 构建范围数组
-    const rangeArr = [];
-    let range = 1; // 默认范围为0，可根据需要调整
-    if (size === "big") {
-      range = 2;
-    }
-
-    // 需要定义 spriteX 和 spriteY，假设 unit 有 x 和 y 属性
+  getGridsByRange(x: number, y: number, range: number) {
     const spriteX = x;
     const spriteY = y;
-
+    const rangeArr = [];
     for (let dx = 0; dx < range; dx++) {
       for (let dy = 0; dy < range; dy++) {
         rangeArr.push({ x: spriteX + dx, y: spriteY + dy });
       }
     }
     return rangeArr;
+  }
+  getGridsArround(unit: Unit) {
+    if (!unit.creature) {
+      console.warn("unit.creature 未定义");
+      return [];
+    }
+    const size = unit.creature.size;
+    const spriteX = Math.floor(unit.x / 64);
+    const spriteY = Math.floor(unit.y / 64);
+    let range = 1; // 默认范围为0，可根据需要调整
+    if (size === "big") {
+      range = 2;
+    }
+    range++;
+    const arroundGrids = this.getGridsByRange(spriteX, spriteY, range);
+    const girds = this.getGridsByRange(spriteX, spriteY, range - 1);
+    //从 arroundGrids中删去Grids的部分
+    // 从 arroundGrids 中删去 girds 的部分
+    for (let i = arroundGrids.length - 1; i >= 0; i--) {
+      if (
+        girds.some(
+          (g) => g.x === arroundGrids[i].x && g.y === arroundGrids[i].y
+        )
+      ) {
+        arroundGrids.splice(i, 1);
+      }
+    }
+
+    return arroundGrids;
+  }
+  getGridsBySize(x: number, y: number, size: string) {
+    // 构建范围数组
+
+    let range = 1; // 默认范围为0，可根据需要调整
+    if (size === "big") {
+      range = 2;
+    }
+
+    // 需要定义 spriteX 和 spriteY，假设 unit 有 x 和 y 属性
+    return this.getGridsByRange(x, y, range);
   }
   getUnitById(id: string): Unit | null {
     const map = golbalSetting.map;
@@ -84,5 +115,14 @@ export class UnitSystem {
   }
   constructor() {
     // 初始化逻辑
+  }
+  checkUnitInGrid(unit:Unit,x:number,y:number){
+    const grids=this.getUnitGrids(unit);
+    for(const grid of grids){
+      if(grid.x===x&&grid.y===y){
+        return true;
+      }
+    }
+    return false;
   }
 }

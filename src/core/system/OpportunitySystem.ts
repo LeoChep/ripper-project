@@ -6,7 +6,7 @@ import { InitiativeSheet } from "./InitiativeSystem";
 import { attackMovementToUnit } from "../action/UnitAttack";
 import { WeaponSystem } from "./WeaponSystem";
 import type { Weapon } from "../units/Weapon";
-
+import { UnitSystem } from "./UnitSystem";
 
 export class OpportunitySystem {
   constructor() {
@@ -33,6 +33,7 @@ export class OpportunitySystem {
       const checkUnitX = Math.floor(checkUnit.x / tileSize);
       const checkUnitY = Math.floor(checkUnit.y / tileSize);
       //用一个数组矩阵来存储checkUnit的周围八个格子
+      const arroundGrids = UnitSystem.getInstance().getGridsArround(checkUnit);
       const surroundingTiles = [
         [checkUnitX - 1, checkUnitY - 1], // 左上
         [checkUnitX, checkUnitY - 1], // 上
@@ -45,9 +46,11 @@ export class OpportunitySystem {
       ];
       // 检查目标位置是否在周围八个格子内
       let isInRangeFaze = false;
-      for (const [x, y] of surroundingTiles) {
-        if (x === targetX && y === targetY) {
+      for (const { x, y } of arroundGrids) {
+        if (UnitSystem.getInstance().checkUnitInGrid(targetUnit, x, y)) {
           isInRangeFaze = true; // 如果目标位置在周围八个格子内，返回 true
+          //  console.log("目标位置在单位周围格子内", x, y);
+          break;
         }
       }
       let isInrange = false;
@@ -55,13 +58,15 @@ export class OpportunitySystem {
         `检查单位 ${checkUnit.name} 是否可以触发借机: `,
         isInRangeFaze
       );
+      const grids = UnitSystem.getInstance().getUnitGrids(targetUnit);
       if (isInRangeFaze) {
-        isInrange = checkPassiable(
-          checkUnit,
-          targetUnit.x,
-          targetUnit.y,
-          golbalSetting.map
-        );
+        for (let { x, y } of grids) {
+          let isthePointInRangeCheck = checkPassiable(checkUnit, x, y);
+          if (isthePointInRangeCheck) {
+            isInrange = true;
+            break;
+          }
+        }
       }
       if (isInrange) {
         opportunityUnits.push(checkUnit);

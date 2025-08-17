@@ -135,7 +135,7 @@ export function attackMovementToXY(
   // 检查目标位置是否在地图范围内
     const targetUnit=UnitSystem.getInstance().findUnitByGridxy(targetX, targetY);
     // 执行攻击逻辑
-    if (targetUnit){
+    // if (targetUnit){
     return attackMovementToUnit(
       targetUnit,
       unit,
@@ -144,7 +144,8 @@ export function attackMovementToXY(
       targetX,
       targetY
     );
-  }
+  // }
+    unit.state = "idle";
   return Promise.resolve({});
 }
 
