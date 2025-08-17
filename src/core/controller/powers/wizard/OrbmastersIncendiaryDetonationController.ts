@@ -25,7 +25,7 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
   public static isUse: boolean = false;
   public static instense: OrbmastersIncendiaryDetonationController | null =
     null;
-
+  powerName='OrbmastersIncendiaryDetonation'
   constructor() {
     super();
   }

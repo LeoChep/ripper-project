@@ -2,18 +2,18 @@
 import { Power } from "../../Power";
 
 
-export class FunnelingFlurry extends Power {
-  name = "FunnelingFlurry";
-  displayName = "流动疾风斩";
-  description = "随着如同毒蛇般的攻击，你将两个敌人逼迫到你认为合适的位置。";
+export class IceRays extends Power {
+  name = "IceRays";
+  displayName = "冰冻射线";
+  description = "";
   icon = "shield-edge-block";
   type = "fighter";
   actionType = "standard";
   useType: string = "encounter";
   cost = 1;
-  cooldown = 3;
+  cooldown = 5;
   range = 1;
-  targetType = "one";
+  targetType = "two";
 
   owner = null as any; // 反应的拥有者
   constructor() {

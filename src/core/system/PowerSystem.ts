@@ -45,9 +45,12 @@ export class PowerSystem {
       console.warn("powerName  is required.");
       return null;
     }
-    const PowerClass = this.getPowerClass(powerName) as Promise<typeof Power>;
+    let PowerClass = this.getPowerClass(powerName) as Promise<typeof Power>;
+    await PowerClass;
+    console.log("powerclass", await PowerClass, powerName);
     if (!PowerClass) {
       console.warn(`Trait class not found for: ${powerName}`);
+      // PowerClass = Promise.resolve(Power);
       return null;
     }
     const powerInstance = new (await PowerClass)({});
@@ -57,6 +60,10 @@ export class PowerSystem {
   getPowerClass(powerName: string) {
     // 根据 traitName 返回对应的 Trait 类
     switch (powerName) {
+      case "ChargeAttack":
+        return import("../power/fighter/ChargeAttack/ChargeAttack").then(
+          (module) => module.ChargeAttack
+        );
       case "ShieldEdgeBlock":
         return import("../power/fighter/ShieldEdgeBlock/ShieldEdgeBlock").then(
           (module) => module.ShieldEdgeBlock
@@ -65,6 +72,22 @@ export class PowerSystem {
         return import("../power/fighter/FunnelingFlurry/FunnelingFlurry").then(
           (module) => module.FunnelingFlurry
         );
+      case "LungingStrike":
+        return import("../power/fighter/LungingStrike/LungingStrike").then(
+          (module) => module.LungingStrike
+        );
+      case "IceRays":
+        return import("../power/wizard/IceRays/IceRays").then(
+          (module) => module.IceRays
+        );
+      case "MagicMissile":
+        return import("../power/wizard/MagicMissile/MagicMissile").then(
+          (module) => module.MagicMissile
+        );
+      case "OrbmastersIncendiaryDetonation":
+        return import(
+          "../power/wizard/OrbmastersIncendiaryDetonation/OrbmastersIncendiaryDetonation"
+        ).then((module) => module.OrbmastersIncendiaryDetonation);
     }
   }
   getPowerControllerClass(powerName: string) {
@@ -82,11 +105,11 @@ export class PowerSystem {
         return import("../controller/powers/wizard/IceRaysController").then(
           (module) => module.IceRaysController
         );
-      case "Orbmaster's Incendiary Detonation":
+      case "OrbmastersIncendiaryDetonation":
         return import(
           "../controller/powers/wizard/OrbmastersIncendiaryDetonationController"
         ).then((module) => module.OrbmastersIncendiaryDetonationController);
-      case "Magic Missile":
+      case "MagicMissile":
         return import(
           "../controller/powers/wizard/MagicMissileController"
         ).then((module) => module.MagicMissileController);

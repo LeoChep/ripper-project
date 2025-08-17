@@ -18,7 +18,7 @@ export class LungingStrikeController extends AbstractPwoerController {
   public static instense: LungingStrikeController | null = null;
 
   selectedCharacter: Unit | null = null;
-
+  powerName = "LungingStrike";
   constructor() {
     super();
   }

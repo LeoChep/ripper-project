@@ -3,7 +3,7 @@
   "level": 5,
   "role": "法师",
   "xp": 25,
-  "size": "big",
+  "size": "中型",
   "type": "",
   "hp": 15,
   "maxHp": 15,
@@ -87,7 +87,7 @@
       "missEffect": null
     },
     {
-      "name": "Orbmaster's Incendiary Detonation",
+      "name": "OrbmastersIncendiaryDetonation",
       "displayName": "法珠大师之爆炸燃烧弹",
       "useType": "encounter",
       "actionType": "standard",
@@ -99,7 +99,7 @@
       "missEffect": null
     },
     {
-      "name": "Freezing Burst",
+      "name": "FreezingBurst",
       "displayName": "爆裂冰雹",
       "useType": "atwill",
       "actionType": "standard",
@@ -111,7 +111,7 @@
       "missEffect": null
     },
     {
-      "name": "Magic Missile",
+      "name": "MagicMissile",
       "displayName": "魔法飞弹",
       "useType": "atwill",
       "actionType": "standard",

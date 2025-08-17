@@ -32,7 +32,7 @@ import { useAction, useStandAction } from "@/core/system/InitiativeSystem";
 export class ChargeAttackController extends AbstractPwoerController {
   public static isUse: boolean = false;
   public static instense: ChargeAttackController | null = null;
-
+  powerName='ChargeAttack'
   selectedCharacter: Unit | null = null;
 
   constructor() {
@@ -61,6 +61,7 @@ export class ChargeAttackController extends AbstractPwoerController {
         );
       }
     });
+    let canCharge = false;
     const scanFunction = (scanData: ScanData) => {
       let outSpeedFlag = false;
       let tooShortFlag = false;
@@ -76,7 +77,9 @@ export class ChargeAttackController extends AbstractPwoerController {
         }
         const unitInGrid=UnitSystem.getInstance().findUnitByGridxy(x, y);
         if (unitInGrid && unitInGrid !== unit&&unitInGrid.party!=unit.party&&unitInGrid.state !== "dead") {
-          if (unitInGrid.x!=gridx&&unitInGrid.y!=gridy) {
+          const finalChargeTarget=UnitSystem.getInstance().findUnitByGridxy(gridx, gridy);
+          if (unitInGrid!=finalChargeTarget) {
+            console.log('unitInGrid at charge',unitInGrid,finalChargeTarget)
             beBlockFlag = true;
           }
         }
@@ -87,24 +90,28 @@ export class ChargeAttackController extends AbstractPwoerController {
         tooShortFlag = true;
       }
       if (targetGrid){
-         const noBeblockByWall=attackCheckPassiable(unit, targetGrid.x * tileSize, targetGrid.y * tileSize);
+         const noBeblockByWall=attackCheckPassiable(unit, targetGrid.x , targetGrid.y );
          if (!noBeblockByWall)
           beBlockFlag = true;
         }
        
       if (outSpeedFlag) {
         MessageTipSystem.getInstance().setMessage("超出冲锋范围");
+        canCharge = false;
         return;
       }
       if (tooShortFlag) {
         MessageTipSystem.getInstance().setMessage("冲锋需要至少移动2格");
+        canCharge = false;
         return;
       }
       if (beBlockFlag) {
         MessageTipSystem.getInstance().setMessage("冲锋路径被阻挡");
+        canCharge = false;
         return;
       }
       MessageTipSystem.getInstance().clearMessage();
+      canCharge = true;
     };
     // 执行攻击选择逻辑
     const basicAttackSelector = BasicLineSelector.getInstance().selectBasic(
@@ -112,7 +119,7 @@ export class ChargeAttackController extends AbstractPwoerController {
       1,
       "blue",
       true,
-      () => true,
+      () => {return canCharge},
       scanFunction,
       { x: x, y: y }
     );

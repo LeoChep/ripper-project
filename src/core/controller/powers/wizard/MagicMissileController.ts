@@ -25,7 +25,7 @@ import { AbilityValueSystem } from "@/core/system/AbilitiyValueSystem";
 export class MagicMissileController extends AbstractPwoerController {
   public static isUse: boolean = false;
   public static instense: MagicMissileController | null = null;
-
+  powerName='MagicMissile'
   constructor() {
     super();
   }

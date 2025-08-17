@@ -28,7 +28,7 @@ import { AbilityValueSystem } from "@/core/system/AbilitiyValueSystem";
 export class IceRaysController extends AbstractPwoerController {
   public static isUse: boolean = false;
   public static instense: IceRaysController | null = null;
-
+  powerName = "IceRays";
   constructor() {
     super();
   }
@@ -63,12 +63,8 @@ export class IceRaysController extends AbstractPwoerController {
       start: { x, y },
       range: iceRayAttack.range,
       checkFunction: (gridX: any, gridY: any, preX: number, preY: number) => {
-        return checkPassiable(
-          unit,
-          gridX ,
-          gridY ,
-        );
-      }
+        return checkPassiable(unit, gridX, gridY);
+      },
     });
     let resolveCallback = (value: any) => {};
     const promise = new Promise((resolve) => {

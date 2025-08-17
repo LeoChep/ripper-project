@@ -1,4 +1,5 @@
 import { tileSize } from "@/core/envSetting";
+import { useAction } from "@/core/system/InitiativeSystem";
 import type { Unit } from "@/core/units/Unit";
 
 import * as PIXI from "pixi.js";
@@ -27,21 +28,30 @@ export abstract class AbstractPwoerController {
     }
     let canuse = false;
     const unitPowers = unit?.creature?.powers;
-    // unitPowers?.forEach((power) => {
-    //   if (power.name === this.powerName) {
-    //     canuse = power.canUse();
-    //   }
-    // });
+    console.log("power can use", unitPowers, this.powerName);
+    unitPowers?.forEach((power) => {
+      if (power.name === this.powerName) {
+         console.log("power can use", power,canuse);
+        canuse = power.canUse();
+        console.log("power can use", power,canuse);
+      }
+    });
 
-    // return canuse;
-    return true
+    return canuse;
+    return true;
   };
   use = () => {
     const unit = this.selectedCharacter;
+    if (!unit) {
+      console.warn("没有选中单位，无法使用技能");
+      return;
+    }
     const unitPowers = unit?.creature?.powers;
     unitPowers?.forEach((power) => {
       if (power.name === this.powerName) {
         power.use();
+        const actionType=power.actionType;
+        useAction(unit, actionType);
       }
     });
   };
