@@ -62,6 +62,18 @@
         </div>
       </div>
 
+      <!-- 命中效果 -->
+      <div class="power-hit-info" v-if="power.hitText">
+        <div class="effect-label">命中：</div>
+        <div class="effect-text">{{ power.hitText }}</div>
+      </div>
+
+      <!-- 失手效果 -->
+      <div class="power-miss-info" v-if="power.missText">
+        <div class="effect-label">失手：</div>
+        <div class="effect-text">{{ power.missText }}</div>
+      </div>
+
       <!-- 威能描述 -->
       <div class="power-description" v-if="power.description">
         <div class="description-label">描述：</div>
@@ -267,6 +279,43 @@ const getPowerTypeText = (type) => {
 .value {
   color: #fff;
   flex: 1;
+}
+
+/* 命中/失手效果 */
+.power-hit-info,
+.power-miss-info {
+  margin-bottom: 8px;
+  padding: 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.power-hit-info {
+  border-left: 3px solid #2ecc71;
+}
+
+.power-miss-info {
+  border-left: 3px solid #e74c3c;
+}
+
+.effect-label {
+  font-weight: bold;
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+.power-hit-info .effect-label {
+  color: #2ecc71;
+}
+
+.power-miss-info .effect-label {
+  color: #e74c3c;
+}
+
+.effect-text {
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.4;
 }
 
 /* 威能描述 */

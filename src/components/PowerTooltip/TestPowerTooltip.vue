@@ -53,6 +53,8 @@ const testPowers = ref([
     maxUses: 1,
     currentUses: 0,
     prepared: true,
+    hitText: "1d6+4点寒冷伤害，目标减速（豁免终止）",
+    missText: "一半伤害，无额外效果",
     canUse: () => true
   },
   {
@@ -73,6 +75,8 @@ const testPowers = ref([
     maxUses: -1,
     currentUses: 0,
     prepared: true,
+    hitText: "1d8+4点伤害，目标后退1格，如果撞到障碍则倒地",
+    missText: null,
     canUse: () => true
   },
   {
@@ -93,6 +97,8 @@ const testPowers = ref([
     maxUses: 1,
     currentUses: 1,
     prepared: true,
+    hitText: "目标恢复1d4+4点生命值并可立即进行一次豁免",
+    missText: null,
     canUse: () => false
   }
 ])
