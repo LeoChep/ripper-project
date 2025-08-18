@@ -74,6 +74,12 @@
         <div class="effect-text">{{ power.missText }}</div>
       </div>
 
+      <!-- 效果 -->
+      <div class="power-effect-info" v-if="power.effectText">
+        <div class="effect-label">效果：</div>
+        <div class="effect-text">{{ power.effectText }}</div>
+      </div>
+
       <!-- 威能描述 -->
       <div class="power-description" v-if="power.description">
         <div class="description-label">描述：</div>
@@ -200,6 +206,13 @@ const calculateTooltipHeight = (power) => {
   // 失手效果
   if (power.missText) {
     const textLength = power.missText.length
+    const estimatedLines = Math.max(1, Math.ceil(textLength / 40))
+    height += estimatedLines * 16 + 25
+  }
+  
+  // 效果文本
+  if (power.effectText) {
+    const textLength = power.effectText.length
     const estimatedLines = Math.max(1, Math.ceil(textLength / 40))
     height += estimatedLines * 16 + 25
   }
@@ -377,9 +390,10 @@ const getPowerTypeText = (type) => {
   flex: 1;
 }
 
-/* 命中/失手效果 */
+/* 命中/失手/效果 */
 .power-hit-info,
-.power-miss-info {
+.power-miss-info,
+.power-effect-info {
   margin-bottom: 8px;
   padding: 6px;
   border-radius: 4px;
@@ -394,6 +408,10 @@ const getPowerTypeText = (type) => {
   border-left: 3px solid #e74c3c;
 }
 
+.power-effect-info {
+  border-left: 3px solid #3498db;
+}
+
 .effect-label {
   font-weight: bold;
   font-size: 11px;
@@ -406,6 +424,10 @@ const getPowerTypeText = (type) => {
 
 .power-miss-info .effect-label {
   color: #e74c3c;
+}
+
+.power-effect-info .effect-label {
+  color: #3498db;
 }
 
 .effect-text {

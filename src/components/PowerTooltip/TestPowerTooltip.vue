@@ -55,6 +55,7 @@ const testPowers = ref([
     prepared: true,
     hitText: "1d6+4点寒冷伤害，目标减速（豁免终止）",
     missText: "一半伤害，无额外效果",
+    effectText: "攻击前，你可以移动1格而不引发借机攻击",
     canUse: () => true
   },
   {
@@ -77,6 +78,7 @@ const testPowers = ref([
     prepared: true,
     hitText: "1d8+4点伤害，目标后退1格，如果撞到障碍则倒地",
     missText: null,
+    effectText: "此攻击的伤害骰获得+2加值",
     canUse: () => true
   },
   {
@@ -121,6 +123,7 @@ const testPowers = ref([
     prepared: true,
     hitText: "3d6+5点火焰伤害和2d4点雷鸣伤害，目标被击倒并着火（持续伤害5，豁免终止）。在目标区域创建一个火焰地带，持续到遭遇结束，任何进入或在地带内开始回合的敌人受到5点火焰伤害。",
     missText: "一半火焰伤害，无雷鸣伤害，目标不被击倒，但仍然着火（持续伤害3，豁免终止）。仍然创建火焰地带但持续时间减半。",
+    effectText: "施放此威能时，你获得抗火5直到遭遇结束，并且可以无视火焰地带的伤害",
     canUse: () => true
   }
 ])
