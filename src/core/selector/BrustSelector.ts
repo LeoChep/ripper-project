@@ -25,6 +25,7 @@ export class BrustSelector {
   public selecteNum: number = 0;
   public brustRange: number = 1;
   public brustGraphics: PIXI.Graphics | null = null;
+  public brustGridSet: Set<{ x: number; y: number; step: number }> = new Set();
   private static instance: BrustSelector | null = null;
   // 选择基本攻击
   public selectBasic(
@@ -189,7 +190,7 @@ export class BrustSelector {
 
     const { x, y } = targetXY;
 
-    const brustGrids = generateWays({
+    const brustGridsWay = generateWays({
       start: { x, y },
       range: range,
       checkFunction: (
@@ -206,7 +207,18 @@ export class BrustSelector {
         );
       },
     });
-    this.brustGraphics = this.drawGrids(brustGrids, color);
+    const brustGridSet = new Set<{ x: number; y: number; step: number }>();
+    Object.keys(brustGridsWay).forEach((grid) => {
+      const [x, y] = grid.split(",").map(Number);
+      const gridData = brustGridsWay[grid];
+      if (grid && gridData) {
+        brustGridSet.add({ x, y, step: gridData.step });
+      }
+    });
+    brustGridSet.add({ x: x, y: y, step: 0 });
+    this.brustGridSet.clear();
+    this.brustGridSet = brustGridSet;
+    this.brustGraphics = this.drawGrids(brustGridsWay, color);
     this.brustGraphics.eventMode = "none";
     if (!golbalSetting.rlayers.selectLayer || !golbalSetting.spriteContainer) {
       return;

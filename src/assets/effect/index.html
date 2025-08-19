@@ -10,18 +10,159 @@
 
 <div id="upload-section">
   <h3>上传视频文件</h3>
-  <input type="file" id="videoUpload" accept="video/*" />
+  <input type="file" id="videoUpload" accept="video/*,.mov,.MOV,.mp4,.MP4,.webm,.WEBM,.avi,.AVI,.mkv,.MKV" />
   <button id="uploadBtn">上传视频</button>
+  <div class="format-info">
+    <small>💡 支持格式：MP4、MOV、WEBM、AVI、MKV、OGG</small>
+    <br>
+    <small>🎬 MOV格式提示：支持透明通道提取，建议使用H.264编码</small>
+  </div>
 </div>
 
-<video id="vid" style="background: red;" crossorigin="anonymous" muted playsinline controls></video>
+<div id="test-video-section">
+  <h3>🎬 生成测试视频</h3>
+  <div class="test-video-controls">
+    <p>没有MOV文件？生成一个用于测试的视频：</p>
+    <div class="test-options">
+      <div class="option-group">
+        <label>背景色：</label>
+        <select id="testBgColor">
+          <option value="#00ff00">绿色 (标准绿幕)</option>
+          <option value="#0000ff">蓝色 (蓝幕)</option>
+          <option value="#ff00ff">品红色</option>
+          <option value="#ffffff">白色</option>
+          <option value="#000000">黑色</option>
+        </select>
+      </div>
+      
+      <div class="option-group">
+        <label>动画对象：</label>
+        <select id="testAnimation">
+          <option value="circle">移动的圆圈</option>
+          <option value="square">旋转的方块</option>
+          <option value="text">滚动文字</option>
+        </select>
+      </div>
+      
+      <div class="option-group">
+        <label>时长：</label>
+        <select id="testDuration">
+          <option value="3">3秒</option>
+          <option value="5">5秒</option>
+          <option value="10">10秒</option>
+        </select>
+      </div>
+      
+      <div class="option-group">
+        <label>输出格式：</label>
+        <select id="testFormat">
+          <option value="mp4">MP4 (推荐)</option>
+          <option value="webm">WebM</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="format-note">
+      <small>📝 关于MOV格式：</small><br>
+      <small>• 浏览器MediaRecorder不直接支持MOV格式输出</small><br>
+      <small>• 生成MP4格式，可用转换工具转为MOV：<code>ffmpeg -i input.mp4 output.mov</code></small><br>
+      <small>• 或使用在线转换服务将MP4转换为MOV格式</small>
+    </div>
+    
+    <button id="generateTestBtn">🎥 生成测试视频</button>
+    <span id="generateStatus"></span>
+  </div>
+</div>
+
+<div id="chroma-key-section" style="display: none;">
+  <h3>🎨 色键透明设置</h3>
+  <div class="chroma-controls">
+    <div class="control-group">
+      <label for="enableChromaKey">
+        <input type="checkbox" id="enableChromaKey"> 启用色键透明
+      </label>
+    </div>
+    
+    <div class="control-group" id="chromaKeyOptions" style="display: none;">
+      <div class="color-picker-group">
+        <label for="chromaKeyColor">背景色:</label>
+        <input type="color" id="chromaKeyColor" value="#00ff00">
+        <span class="color-preview" id="colorPreview"></span>
+        <button id="pickColorBtn" type="button">🎯 从视频选取</button>
+      </div>
+      
+      <div class="slider-group">
+        <label for="chromaKeyTolerance">容差 (0-100): <span id="toleranceValue">10</span></label>
+        <input type="range" id="chromaKeyTolerance" min="0" max="100" value="10">
+      </div>
+      
+      <div class="slider-group">
+        <label for="chromaKeySoftness">羽化 (0-50): <span id="softnessValue">2</span></label>
+        <input type="range" id="chromaKeySoftness" min="0" max="50" value="2">
+      </div>
+    </div>
+    
+    <div class="preset-colors">
+      <span>常用背景色:</span>
+      <button class="color-preset" data-color="#00ff00" style="background: #00ff00;" title="绿幕">绿</button>
+      <button class="color-preset" data-color="#0000ff" style="background: #0000ff;" title="蓝幕">蓝</button>
+      <button class="color-preset" data-color="#ff00ff" style="background: #ff00ff;" title="品红">品红</button>
+      <button class="color-preset" data-color="#ffffff" style="background: #ffffff;" title="白色">白</button>
+      <button class="color-preset" data-color="#000000" style="background: #000000;" title="黑色">黑</button>
+    </div>
+  </div>
+</div>
+
+<div id="video-container">
+  <video id="vid" style="background: red;" crossorigin="anonymous" muted playsinline controls></video>
+  <div id="crop-overlay"></div>
+</div>
 <canvas id="canvas"></canvas>
 
 <div id="controls">
   <button id="startBtn" disabled>开始提取帧</button>
   <button id="stopBtn" disabled>停止提取</button>
   <button id="downloadBtn" disabled>下载提取的帧</button>
+  <button id="cropBtn" disabled>✂️ 设置裁剪区域</button>
   <span id="status">请先上传视频文件</span>
+</div>
+
+<div id="crop-section" style="display: none;">
+  <h4>🎯 裁剪设置</h4>
+  <div class="crop-controls">
+    <label>裁剪模式：</label>
+    <select id="cropMode">
+      <option value="none">无裁剪（完整视频）</option>
+      <option value="manual">手动选择区域</option>
+      <option value="center">居中裁剪</option>
+    </select>
+  </div>
+  
+  <div id="manual-crop" style="display: none;">
+    <p><strong>🎯 按F键开始裁剪</strong>，然后使用方向键调整选择区域：</p>
+    <div class="crop-usage-tip">
+      <small>💡 使用说明：</small><br>
+      <small>• 按<kbd>F</kbd>键开始裁剪模式</small><br>
+      <small>• 使用<kbd>方向键</kbd>移动裁剪区域</small><br>
+      <small>• 按住<kbd>Shift</kbd> + 方向键调整大小</small><br>
+      <small>• 按<kbd>Enter</kbd>确认选择，<kbd>Esc</kbd>取消</small>
+    </div>
+    <div class="crop-info">
+      <span>选择区域：</span>
+      <span id="cropInfo">未设置</span>
+      <button id="resetCrop">重置选择</button>
+    </div>
+  </div>
+  
+  <div id="center-crop" style="display: none;">
+    <div class="crop-size-controls">
+      <label>裁剪尺寸：</label>
+      <input type="number" id="cropWidth" placeholder="宽度" min="50" step="10" value="400">
+      <span>×</span>
+      <input type="number" id="cropHeight" placeholder="高度" min="50" step="10" value="300">
+      <button id="applyCenterCrop">应用居中裁剪</button>
+    </div>
+  </div>
 </div>
 <div id="progress">
   <div id="frameInfo">帧数: 0 / 总时长: 0s</div>
@@ -46,6 +187,22 @@
   #upload-section h3 {
     margin-top: 0;
     color: #333;
+  }
+
+  .format-info {
+    margin-top: 10px;
+    color: #666;
+    font-style: italic;
+    line-height: 1.4;
+  }
+
+  .format-info small {
+    background: #e8f4fd;
+    padding: 5px 10px;
+    border-radius: 15px;
+    border: 1px solid #b3d9f2;
+    display: inline-block;
+    margin: 2px 0;
   }
 
   #videoUpload {
@@ -98,9 +255,333 @@
     max-width: 100%;
   }
 
+  #test-video-section {
+    margin: 20px 0;
+    padding: 15px;
+    background: #fff3cd;
+    border-radius: 5px;
+    border: 1px solid #ffeaa7;
+  }
+
+  .test-video-controls {
+    margin-top: 10px;
+  }
+
+  .test-options {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin: 10px 0;
+  }
+
+  .option-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .option-group label {
+    font-weight: bold;
+    color: #6c757d;
+  }
+
+  .option-group select {
+    padding: 5px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 3px;
+    background: white;
+  }
+
+  #generateTestBtn {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    margin: 10px 5px 0 0;
+    transition: all 0.3s;
+  }
+
+  #generateTestBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+  }
+
+  #generateTestBtn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  #generateStatus {
+    color: #28a745;
+    font-weight: bold;
+    margin-left: 10px;
+  }
+
+  .format-note {
+    background: #e7f3ff;
+    padding: 10px;
+    border-radius: 4px;
+    border-left: 4px solid #007cba;
+    margin: 10px 0;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .format-note code {
+    background: #f1f1f1;
+    padding: 2px 4px;
+    border-radius: 2px;
+    font-family: 'Courier New', monospace;
+  }
+
+  #crop-section {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f0f8ff;
+    border-radius: 5px;
+    border: 1px solid #b0d4f1;
+  }
+
+  .crop-controls {
+    margin: 10px 0;
+  }
+
+  .crop-controls label {
+    font-weight: bold;
+    margin-right: 10px;
+  }
+
+  .crop-controls select {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background: white;
+  }
+
+  .crop-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+    padding: 8px;
+    background: #fff;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+  }
+
+  .crop-usage-tip {
+    background: #fff9c4;
+    border: 1px solid #f7d794;
+    border-radius: 4px;
+    padding: 8px;
+    margin: 8px 0;
+    font-style: italic;
+    color: #8e6a00;
+  }
+
+  .crop-usage-tip kbd {
+    background: #f4f4f4;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-family: monospace;
+    font-weight: bold;
+    color: #333;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+
+  .crop-size-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+  }
+
+  .crop-size-controls input {
+    width: 80px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+  }
+
+  #cropBtn {
+    background: linear-gradient(45deg, #ff6b6b, #ffa500);
+  }
+
+  #cropBtn:hover:not(:disabled) {
+    background: linear-gradient(45deg, #ff5252, #ff9800);
+    transform: translateY(-1px);
+  }
+
+  #resetCrop {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+
+  #applyCenterCrop {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+
+  /* 裁剪选择框样式 */
+  #video-container {
+    position: relative;
+    display: inline-block;
+    border: 2px solid #007cba;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  #crop-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  #vid {
+    display: block;
+    position: relative;
+    z-index: 1;
+  }
+
+  .crop-selection {
+    position: absolute;
+    border: 2px dashed #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+    pointer-events: none;
+  }
+
+  .crop-handle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #ff6b6b;
+    border: 1px solid #fff;
+    cursor: nw-resize;
+  }
+
   video {
     max-width: 100%;
     margin: 10px 0;
+  }
+
+  /* 色键功能样式 */
+  #chroma-key-section {
+    background: #f0f8ff;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 2px solid #b3d9f2;
+  }
+
+  #chroma-key-section h3 {
+    margin-top: 0;
+    color: #0066cc;
+  }
+
+  .chroma-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .control-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .control-group label {
+    font-weight: bold;
+    min-width: 80px;
+  }
+
+  .color-picker-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .color-preview {
+    width: 30px;
+    height: 30px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    display: inline-block;
+    background: var(--preview-color, #00ff00);
+  }
+
+  .slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .slider-group label {
+    font-size: 14px;
+    color: #333;
+  }
+
+  .slider-group input[type="range"] {
+    width: 200px;
+  }
+
+  .preset-colors {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .color-preset {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #333;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 12px;
+    color: transparent;
+    transition: all 0.2s;
+  }
+
+  .color-preset:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  #pickColorBtn {
+    background: #ff6b35;
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+
+  #pickColorBtn:hover:not(:disabled) {
+    background: #ff4500;
+  }
+
+  #chromaKeyOptions {
+    background: rgba(255, 255, 255, 0.5);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
   }
 </style>
 
@@ -116,11 +597,47 @@
   const status = document.getElementById('status');
   const frameInfo = document.getElementById('frameInfo');
   
+  // 色键功能元素
+  const chromaKeySection = document.getElementById('chroma-key-section');
+  const enableChromaKey = document.getElementById('enableChromaKey');
+  const chromaKeyOptions = document.getElementById('chromaKeyOptions');
+  const chromaKeyColor = document.getElementById('chromaKeyColor');
+  const chromaKeyTolerance = document.getElementById('chromaKeyTolerance');
+  const chromaKeySoftness = document.getElementById('chromaKeySoftness');
+  const colorPreview = document.getElementById('colorPreview');
+  const toleranceValue = document.getElementById('toleranceValue');
+  const softnessValue = document.getElementById('softnessValue');
+  const pickColorBtn = document.getElementById('pickColorBtn');
+  const colorPresets = document.querySelectorAll('.color-preset');
+  
+  // 裁剪功能元素
+  const cropBtn = document.getElementById('cropBtn');
+  const cropSection = document.getElementById('crop-section');
+  const cropMode = document.getElementById('cropMode');
+  const manualCrop = document.getElementById('manual-crop');
+  const centerCrop = document.getElementById('center-crop');
+  const cropInfo = document.getElementById('cropInfo');
+  const resetCrop = document.getElementById('resetCrop');
+  const cropWidth = document.getElementById('cropWidth');
+  const cropHeight = document.getElementById('cropHeight');
+  const applyCenterCrop = document.getElementById('applyCenterCrop');
+  const videoContainer = document.getElementById('video-container');
+  const cropOverlay = document.getElementById('crop-overlay');
+  
   let nowFrame = 0;
   let frameCount = 0;
   let isExtracting = false;
   let fps = 18; // 默认FPS，会在视频加载后更新
   let extractedFrames = []; // 存储提取的帧数据
+  let isPickingColor = false; // 是否正在拾色模式
+
+  // 裁剪相关变量
+  let cropArea = null; // 裁剪区域 {x, y, width, height}
+  let isDragging = false;
+  let dragStart = {x: 0, y: 0};
+  let currentCropMode = 'none';
+  let cropSelection = null;
+  let isAltPressed = false; // 全局Alt键状态
 
   // 上传视频处理
   uploadBtn.onclick = () => {
@@ -130,8 +647,23 @@
       return;
     }
 
-    if (!file.type.startsWith('video/')) {
-      alert('请选择有效的视频文件');
+    // 支持的视频格式
+    const supportedFormats = [
+      'video/mp4', 'video/webm', 'video/ogg', 'video/avi',
+      'video/mov', 'video/quicktime', 'video/x-msvideo',
+      'video/mkv', 'video/x-matroska'
+    ];
+    
+    const fileName = file.name.toLowerCase();
+    const fileExtension = fileName.split('.').pop();
+    const supportedExtensions = ['mp4', 'webm', 'ogg', 'avi', 'mov', 'mkv'];
+    
+    // 检查文件类型或扩展名
+    const isValidType = file.type && supportedFormats.some(format => file.type.includes(format.split('/')[1]));
+    const isValidExtension = supportedExtensions.includes(fileExtension);
+    
+    if (!file.type.startsWith('video/') && !isValidType && !isValidExtension) {
+      alert('请选择有效的视频文件\n支持格式：MP4, MOV, WEBM, AVI, MKV, OGG');
       return;
     }
 
@@ -139,15 +671,274 @@
     video.src = url;
     video.load();
     
-    status.textContent = "正在加载视频...";
+    status.textContent = `正在加载${fileExtension.toUpperCase()}视频...`;
     extractedFrames = []; // 清空之前的帧数据
     downloadBtn.disabled = true;
+    
+    // 显示色键设置面板
+    chromaKeySection.style.display = 'block';
   };
 
   // 文件选择变化处理
   videoUpload.onchange = () => {
     uploadBtn.disabled = !videoUpload.files[0];
   };
+
+  // 全局键盘监听（用于F键裁剪功能）
+  let cropModeActive = false;
+  let currentCropRect = { x: 0, y: 0, width: 200, height: 150 }; // 默认裁剪区域
+  let isPressingF = false; // F键是否正在被按下
+  let cropStartPos = { x: 0, y: 0 }; // 开始拖拽的位置
+  
+  // 确保页面可以接收键盘事件
+  document.body.tabIndex = 0;
+  
+  // 全局鼠标位置跟踪变量
+  let lastMousePos = { x: 0, y: 0 };
+  
+  // 更新鼠标位置（轻量级跟踪）
+  document.addEventListener('mousemove', (e) => {
+    lastMousePos.x = e.clientX;
+    lastMousePos.y = e.clientY;
+  });
+
+  document.addEventListener('keydown', (e) => {
+    console.log('键盘事件:', e.key, 'target:', e.target.tagName);
+    
+    // 防止在输入框中触发
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+      console.log('在输入框中，跳过键盘处理');
+      return;
+    }
+    
+    console.log('检查裁剪条件:', {
+      currentCropMode: currentCropMode,
+      videoWidth: video.videoWidth,
+      videoHeight: video.videoHeight,
+      videoReadyState: video.readyState
+    });
+    
+    // 处理F键按下 - 选择裁剪点
+    if ((e.key === 'f' || e.key === 'F') && !isPressingF) {
+      console.log('F键按下');
+      if (video.videoWidth > 0) {
+        console.log('视频已加载，准备选择裁剪点');
+        // 如果当前不是手动模式，自动切换
+        if (currentCropMode !== 'manual') {
+          currentCropMode = 'manual';
+          cropMode.value = 'manual';
+          manualCrop.style.display = 'block';
+          centerCrop.style.display = 'none';
+          enableManualCrop();
+        }
+        
+        isPressingF = true;
+        
+        if (!cropModeActive) {
+          // 第一次按F - 设置起始点
+          startCropSelection();
+        } else {
+          // 第二次按F - 设置结束点并完成选择
+          endCropSelection();
+        }
+      } else {
+        console.log('视频还未加载完成');
+      }
+      e.preventDefault();
+      return;
+    }
+  });
+  
+  document.addEventListener('keyup', (e) => {
+    // 处理F键松开 - 重置按键状态
+    if ((e.key === 'f' || e.key === 'F') && isPressingF) {
+      console.log('F键松开');
+      isPressingF = false;
+      e.preventDefault();
+    }
+  });
+
+  // 色键功能事件处理
+  enableChromaKey.onchange = () => {
+    chromaKeyOptions.style.display = enableChromaKey.checked ? 'block' : 'none';
+    updateColorPreview();
+  };
+
+  // 键盘裁剪辅助函数
+  function startKeyboardCrop() {
+    console.log('startKeyboardCrop 被调用');
+    cropModeActive = true;
+    
+    // 初始化裁剪区域到视频中心
+    currentCropRect = {
+      x: Math.round((video.videoWidth - 200) / 2),
+      y: Math.round((video.videoHeight - 150) / 2),
+      width: 200,
+      height: 150
+    };
+    
+    console.log('初始化裁剪区域:', currentCropRect);
+    
+    // 确保不超出边界
+    currentCropRect.x = Math.max(0, Math.min(currentCropRect.x, video.videoWidth - currentCropRect.width));
+    currentCropRect.y = Math.max(0, Math.min(currentCropRect.y, video.videoHeight - currentCropRect.height));
+    
+    console.log('边界检查后:', currentCropRect);
+    
+    createCropSelection();
+    updateCropDisplay();
+    
+    // 显示操作提示
+    cropInfo.textContent = '键盘裁剪模式：使用方向键移动，Shift+方向键调整大小，Enter确认，Esc取消';
+    cropInfo.style.color = '#007cba';
+    cropInfo.style.fontWeight = 'bold';
+  }
+  
+  function updateCropDisplay() {
+    console.log('updateCropDisplay 被调用, cropSelection:', cropSelection);
+    if (!cropSelection) return;
+    
+    // 计算在显示区域的位置和大小
+    const videoRect = video.getBoundingClientRect();
+    const scaleX = videoRect.width / video.videoWidth;
+    const scaleY = videoRect.height / video.videoHeight;
+    
+    console.log('视频尺寸:', {videoWidth: video.videoWidth, videoHeight: video.videoHeight});
+    console.log('显示尺寸:', {width: videoRect.width, height: videoRect.height});
+    console.log('缩放比例:', {scaleX, scaleY});
+    console.log('裁剪区域:', currentCropRect);
+    
+    const displayLeft = currentCropRect.x * scaleX;
+    const displayTop = currentCropRect.y * scaleY;
+    const displayWidth = currentCropRect.width * scaleX;
+    const displayHeight = currentCropRect.height * scaleY;
+    
+    console.log('显示位置:', {displayLeft, displayTop, displayWidth, displayHeight});
+    
+    cropSelection.style.left = displayLeft + 'px';
+    cropSelection.style.top = displayTop + 'px';
+    cropSelection.style.width = displayWidth + 'px';
+    cropSelection.style.height = displayHeight + 'px';
+  }
+  
+  function createCropSelection() {
+    console.log('createCropSelection 被调用');
+    clearCropSelection();
+    cropSelection = document.createElement('div');
+    cropSelection.className = 'crop-selection';
+    cropSelection.style.border = '2px solid #007cba';
+    cropSelection.style.background = 'rgba(0, 124, 186, 0.1)';
+    cropSelection.style.position = 'absolute';
+    cropSelection.style.pointerEvents = 'none';
+    
+    console.log('cropOverlay:', cropOverlay);
+    if (cropOverlay) {
+      cropOverlay.appendChild(cropSelection);
+      console.log('cropSelection 已添加到 cropOverlay');
+    } else {
+      console.error('cropOverlay 不存在!');
+    }
+  }
+  
+  function confirmKeyboardCrop() {
+    cropArea = { ...currentCropRect };
+    cropModeActive = false;
+    
+    cropInfo.textContent = `${cropArea.width}x${cropArea.height} (起点: ${cropArea.x},${cropArea.y})`;
+    cropInfo.style.color = '#28a745';
+    cropInfo.style.fontWeight = 'normal';
+    
+    // 保持选择框但改为绿色表示确认
+    if (cropSelection) {
+      cropSelection.style.border = '2px solid #28a745';
+      cropSelection.style.background = 'rgba(40, 167, 69, 0.1)';
+    }
+  }
+  
+  function cancelKeyboardCrop() {
+    cropModeActive = false;
+    clearCropSelection();
+    
+    cropInfo.textContent = '未设置';
+    cropInfo.style.color = '';
+    cropInfo.style.fontWeight = 'normal';
+  }
+
+  chromaKeyColor.onchange = updateColorPreview;
+  
+  chromaKeyTolerance.oninput = () => {
+    toleranceValue.textContent = chromaKeyTolerance.value;
+  };
+  
+  chromaKeySoftness.oninput = () => {
+    softnessValue.textContent = chromaKeySoftness.value;
+  };
+
+  // 颜色预设按钮
+  colorPresets.forEach(btn => {
+    btn.onclick = () => {
+      chromaKeyColor.value = btn.dataset.color;
+      updateColorPreview();
+      enableChromaKey.checked = true;
+      chromaKeyOptions.style.display = 'block';
+    };
+  });
+
+  // 从视频拾色
+  pickColorBtn.onclick = () => {
+    if (video.videoWidth === 0) {
+      alert('请先加载视频！');
+      return;
+    }
+    isPickingColor = true;
+    pickColorBtn.textContent = '🎯 点击视频选择颜色';
+    pickColorBtn.style.background = '#ff4500';
+    status.textContent = '点击视频画面选择要透明的颜色';
+    video.style.cursor = 'crosshair';
+  };
+
+  // 视频点击拾色
+  video.onclick = (e) => {
+    if (!isPickingColor) return;
+    
+    // 创建临时canvas获取点击位置的颜色
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCanvas.width = video.videoWidth;
+    tempCanvas.height = video.videoHeight;
+    tempCtx.drawImage(video, 0, 0);
+    
+    const rect = video.getBoundingClientRect();
+    const scaleX = video.videoWidth / rect.width;
+    const scaleY = video.videoHeight / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+    
+    const pixel = tempCtx.getImageData(x, y, 1, 1).data;
+    const hexColor = `#${pixel[0].toString(16).padStart(2, '0')}${pixel[1].toString(16).padStart(2, '0')}${pixel[2].toString(16).padStart(2, '0')}`;
+    
+    chromaKeyColor.value = hexColor;
+    updateColorPreview();
+    enableChromaKey.checked = true;
+    chromaKeyOptions.style.display = 'block';
+    
+    // 退出拾色模式
+    isPickingColor = false;
+    pickColorBtn.textContent = '🎯 从视频选取';
+    pickColorBtn.style.background = '#ff6b35';
+    video.style.cursor = 'default';
+    status.textContent = `已选择颜色: ${hexColor}`;
+  };
+
+  // 更新颜色预览
+  function updateColorPreview() {
+    const color = chromaKeyColor.value;
+    colorPreview.style.setProperty('--preview-color', color);
+    colorPreview.style.background = color;
+  }
+
+  // 页面加载完成后初始化
+  updateColorPreview();
 
   video.onloadedmetadata = () => {
     canvas.width = video.videoWidth;
@@ -156,25 +947,136 @@
     // ✅ 确保Canvas支持透明
     ctx.globalCompositeOperation = 'source-over';
     
+    const fileName = videoUpload.files[0]?.name || '';
+    const fileExtension = fileName.split('.').pop()?.toLowerCase();
+    
     frameInfo.textContent = `视频尺寸: ${video.videoWidth}x${video.videoHeight}, 时长: ${video.duration.toFixed(2)}s`;
-    status.textContent = "视频已加载，点击开始提取";
+    
+    if (fileExtension === 'mov') {
+      status.textContent = "MOV视频已加载完成，支持透明通道提取！点击开始提取";
+    } else {
+      status.textContent = "视频已加载，点击开始提取";
+    }
+    
     startBtn.disabled = false; // 启用开始按钮
+    cropBtn.disabled = false; // 启用裁剪按钮
   };
+
+  // 添加视频加载错误处理
+  video.onerror = (e) => {
+    console.error('视频加载错误:', e);
+    const fileName = videoUpload.files[0]?.name || '';
+    const fileExtension = fileName.split('.').pop()?.toLowerCase();
+    
+    if (fileExtension === 'mov') {
+      status.textContent = "MOV文件加载失败，可能是编码问题。建议使用H.264编码的MOV文件";
+      alert('MOV文件加载失败！\n\n可能的解决方案：\n1. 确保MOV文件使用H.264编码\n2. 尝试将MOV转换为MP4格式\n3. 检查文件是否损坏');
+    } else {
+      status.textContent = "视频加载失败，请检查文件格式";
+      alert('视频文件加载失败，请检查文件是否完整或尝试其他格式');
+    }
+    
+    startBtn.disabled = true;
+  };
+
+  // 🎨 色键处理函数
+  function applyChromaKey(imageData) {
+    const targetColor = hexToRgb(chromaKeyColor.value);
+    const tolerance = parseInt(chromaKeyTolerance.value);
+    const softness = parseInt(chromaKeySoftness.value);
+    
+    const data = imageData.data;
+    
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      
+      // 计算颜色距离
+      const distance = Math.sqrt(
+        Math.pow(r - targetColor.r, 2) + 
+        Math.pow(g - targetColor.g, 2) + 
+        Math.pow(b - targetColor.b, 2)
+      );
+      
+      // 归一化距离 (0-441 -> 0-100)
+      const normalizedDistance = (distance / 441) * 100;
+      
+      if (normalizedDistance <= tolerance) {
+        // 在容差范围内，应用透明度
+        if (normalizedDistance <= tolerance - softness) {
+          // 完全透明
+          data[i + 3] = 0;
+        } else {
+          // 渐变透明（羽化效果）
+          const alpha = ((normalizedDistance - (tolerance - softness)) / softness);
+          data[i + 3] = Math.round(alpha * 255);
+        }
+        
+        // 透明像素的RGB设为0
+        if (data[i + 3] === 0) {
+          data[i] = 0;
+          data[i + 1] = 0;
+          data[i + 2] = 0;
+        }
+      }
+    }
+  }
+
+  // 辅助函数：十六进制转RGB
+  function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : null;
+  }
 
   // 提取单帧的alpha图
   function extractFrame(frameNumber) {
     return new Promise((resolve) => {
+      // 设置画布尺寸
+      let targetWidth = video.videoWidth;
+      let targetHeight = video.videoHeight;
+      
+      // 如果有裁剪区域，使用裁剪尺寸
+      if (cropArea) {
+        targetWidth = cropArea.width;
+        targetHeight = cropArea.height;
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+      } else {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+      }
+      
       // ✅ 清除为透明背景
       ctx.save();
       ctx.globalCompositeOperation = 'copy';
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.restore();
       
-      // 绘制视频帧
-      ctx.drawImage(video, 0, 0);
+      // 绘制视频帧（支持裁剪）
+      if (cropArea) {
+        // 裁剪模式：只绘制指定区域
+        ctx.drawImage(
+          video, 
+          cropArea.x, cropArea.y, cropArea.width, cropArea.height, // 源区域
+          0, 0, targetWidth, targetHeight // 目标区域
+        );
+      } else {
+        // 完整模式：绘制整个视频
+        ctx.drawImage(video, 0, 0);
+      }
       
       // 获取图像数据
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      
+      // 🎨 色键处理
+      if (enableChromaKey.checked) {
+        applyChromaKey(imageData);
+      }
       
       // 🔧 处理Alpha通道（确保透明度正确）
       let hasRealAlpha = false;
@@ -195,6 +1097,9 @@
       
       if (frameNumber === 25) {
           console.log(`帧 ${frameNumber}: 真实Alpha通道${hasRealAlpha ? '存在' : '不存在'}`);
+          if (enableChromaKey.checked) {
+              console.log(`帧 ${frameNumber}: 应用了色键处理`);
+          }
       }
       
       // 将处理后的数据写回Canvas
@@ -324,12 +1229,490 @@
     }
   };
 
-  // 错误处理
-  video.onerror = (e) => {
-    console.error("视频加载错误:", e);
-    status.textContent = "视频加载失败";
+  // 测试视频生成功能
+  const generateTestBtn = document.getElementById('generateTestBtn');
+  const generateStatus = document.getElementById('generateStatus');
+
+  generateTestBtn.onclick = async () => {
+    const bgColor = document.getElementById('testBgColor').value;
+    const animation = document.getElementById('testAnimation').value;
+    const duration = parseInt(document.getElementById('testDuration').value) * 1000; // 转换为毫秒
+    const format = document.getElementById('testFormat').value;
+
+    generateTestBtn.disabled = true;
+    generateStatus.textContent = `正在生成${format.toUpperCase()}测试视频...`;
+
+    try {
+      // 创建用于录制的Canvas
+      const recordCanvas = document.createElement('canvas');
+      const recordCtx = recordCanvas.getContext('2d');
+      recordCanvas.width = 800;
+      recordCanvas.height = 600;
+
+      // 设置录制参数 - 根据选择的格式
+      const stream = recordCanvas.captureStream(30); // 30 FPS
+      
+      let mimeType, fileExtension;
+      
+      if (format === 'mp4') {
+        // 尝试MP4格式
+        if (MediaRecorder.isTypeSupported('video/mp4; codecs=avc1.42E01E')) {
+          mimeType = 'video/mp4; codecs=avc1.42E01E';
+        } else if (MediaRecorder.isTypeSupported('video/mp4')) {
+          mimeType = 'video/mp4';
+        } else {
+          // 降级到WebM
+          mimeType = 'video/webm; codecs=vp9';
+          fileExtension = 'webm';
+          generateStatus.textContent = '浏览器不支持MP4，将生成WebM格式...';
+        }
+        fileExtension = fileExtension || 'mp4';
+      } else {
+        // WebM格式
+        mimeType = 'video/webm; codecs=vp9';
+        fileExtension = 'webm';
+      }
+      
+      const recorder = new MediaRecorder(stream, { mimeType });
+
+      const chunks = [];
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunks.push(event.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: mimeType });
+        
+        // 创建下载链接
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `test_video_${animation}_${Date.now()}.${fileExtension}`;
+        link.click();
+        
+        setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+        
+        generateStatus.textContent = `✓ ${fileExtension.toUpperCase()}测试视频生成完成！`;
+        generateTestBtn.disabled = false;
+      };
+
+      // 开始录制
+      recorder.start();
+
+      // 动画循环
+      let startTime = Date.now();
+      const animate = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = elapsed / duration;
+
+        // 清除画布并填充背景色
+        recordCtx.fillStyle = bgColor;
+        recordCtx.fillRect(0, 0, recordCanvas.width, recordCanvas.height);
+
+        // 绘制动画对象
+        switch (animation) {
+          case 'circle':
+            // 移动的圆圈
+            const x = 100 + (recordCanvas.width - 200) * Math.sin(progress * Math.PI * 4);
+            const y = recordCanvas.height / 2 + 100 * Math.sin(progress * Math.PI * 8);
+            recordCtx.fillStyle = '#ff0000';
+            recordCtx.beginPath();
+            recordCtx.arc(x, y, 50, 0, Math.PI * 2);
+            recordCtx.fill();
+            break;
+
+          case 'square':
+            // 旋转的方块
+            const centerX = recordCanvas.width / 2;
+            const centerY = recordCanvas.height / 2;
+            const rotation = progress * Math.PI * 4;
+            
+            recordCtx.save();
+            recordCtx.translate(centerX, centerY);
+            recordCtx.rotate(rotation);
+            recordCtx.fillStyle = '#0000ff';
+            recordCtx.fillRect(-50, -50, 100, 100);
+            recordCtx.restore();
+            break;
+
+          case 'text':
+            // 滚动文字
+            const textX = recordCanvas.width - (progress * (recordCanvas.width + 400));
+            recordCtx.fillStyle = '#800080';
+            recordCtx.font = 'bold 60px Arial';
+            recordCtx.fillText('测试视频 TEST VIDEO', textX, recordCanvas.height / 2);
+            break;
+        }
+
+        // 添加时间戳
+        recordCtx.fillStyle = '#000000';
+        recordCtx.font = '16px Arial';
+        recordCtx.fillText(`时间: ${(elapsed / 1000).toFixed(1)}s`, 10, 30);
+
+        if (elapsed < duration) {
+          requestAnimationFrame(animate);
+        } else {
+          // 录制完成
+          recorder.stop();
+        }
+      };
+
+      // 开始动画
+      animate();
+
+    } catch (error) {
+      console.error('生成测试视频失败:', error);
+      generateStatus.textContent = '❌ 生成失败，浏览器可能不支持视频录制';
+      generateTestBtn.disabled = false;
+    }
   };
+
+  // ========== 裁剪功能 ==========
+  
+  // 裁剪按钮点击事件
+  cropBtn.onclick = () => {
+    if (cropSection.style.display === 'none' || !cropSection.style.display) {
+      cropSection.style.display = 'block';
+      cropBtn.textContent = '✂️ 关闭裁剪设置';
+    } else {
+      cropSection.style.display = 'none';
+      cropBtn.textContent = '✂️ 设置裁剪区域';
+    }
+  };
+
+  // 裁剪模式切换
+  cropMode.onchange = () => {
+    currentCropMode = cropMode.value;
+    
+    // 清除之前的选择
+    clearCropSelection();
+    
+    // 显示/隐藏相应的设置面板
+    if (currentCropMode === 'manual') {
+      manualCrop.style.display = 'block';
+      centerCrop.style.display = 'none';
+      enableManualCrop();
+    } else if (currentCropMode === 'center') {
+      manualCrop.style.display = 'none';
+      centerCrop.style.display = 'block';
+      disableManualCrop(); // 清理手动裁剪事件
+      // 设置默认尺寸
+      cropWidth.value = Math.floor(video.videoWidth * 0.8);
+      cropHeight.value = Math.floor(video.videoHeight * 0.8);
+    } else {
+      manualCrop.style.display = 'none';
+      centerCrop.style.display = 'none';
+      disableManualCrop(); // 清理手动裁剪事件
+      cropArea = null;
+      updateCropInfo();
+    }
+  };
+
+  // 禁用手动裁剪功能
+  function disableManualCrop() {
+    video.style.cursor = 'default';
+    video.onmousedown = null;
+    video.onmousemove = null;
+    video.onmouseup = null;
+    
+    // 重置键盘裁剪状态
+    cropModeActive = false;
+    clearCropSelection();
+  }
+
+  // 启用手动裁剪功能（现在使用F键选择区域）
+  function enableManualCrop() {
+    // 设置视频默认样式
+    video.style.cursor = 'crosshair';
+    
+    // 清除之前的鼠标事件
+    video.onmousedown = null;
+    video.onmousemove = null;
+    video.onmouseup = null;
+    
+    // 重置裁剪状态
+    cropModeActive = false;
+    isPressingF = false;
+    clearCropSelection();
+    
+    // 显示操作提示
+    cropInfo.textContent = '按F键开始选择，再按F键结束选择';
+    cropInfo.style.color = '#666';
+    cropInfo.style.fontWeight = 'normal';
+  }
+
+
+  // 应用居中裁剪
+  applyCenterCrop.onclick = () => {
+    const width = parseInt(cropWidth.value);
+    const height = parseInt(cropHeight.value);
+    
+    if (!width || !height || width < 50 || height < 50) {
+      alert('请输入有效的裁剪尺寸（最小50x50）');
+      return;
+    }
+    
+    if (width > video.videoWidth || height > video.videoHeight) {
+      alert('裁剪尺寸不能超过视频原始尺寸');
+      return;
+    }
+    
+    cropArea = {
+      x: Math.floor((video.videoWidth - width) / 2),
+      y: Math.floor((video.videoHeight - height) / 2),
+      width: width,
+      height: height
+    };
+    
+    updateCropInfo();
+    showCenterCropPreview();
+  };
+
+  // 显示居中裁剪预览
+  function showCenterCropPreview() {
+    clearCropSelection();
+    
+    if (cropArea) {
+      const videoRect = video.getBoundingClientRect();
+      const scaleX = videoRect.width / video.videoWidth;
+      const scaleY = videoRect.height / video.videoHeight;
+      
+      cropSelection = document.createElement('div');
+      cropSelection.className = 'crop-selection';
+      cropSelection.style.left = (cropArea.x * scaleX) + 'px';
+      cropSelection.style.top = (cropArea.y * scaleY) + 'px';
+      cropSelection.style.width = (cropArea.width * scaleX) + 'px';
+      cropSelection.style.height = (cropArea.height * scaleY) + 'px';
+      cropOverlay.appendChild(cropSelection);
+    }
+  }
+
+  // 重置裁剪选择
+  resetCrop.onclick = () => {
+    cropModeActive = false;
+    clearCropSelection();
+    cropArea = null;
+    updateCropInfo();
+    
+    // 重置提示文字
+    cropInfo.textContent = '按F键开始裁剪，然后使用方向键调整';
+    cropInfo.style.color = '#666';
+    cropInfo.style.fontWeight = 'normal';
+  };
+
+  // 开始裁剪选择（第一次按F键）
+  function startCropSelection() {
+    console.log('开始裁剪选择');
+    cropModeActive = true;
+    
+    // 获取当前鼠标位置相对于视频的坐标
+    const videoRect = video.getBoundingClientRect();
+    const scaleX = video.videoWidth / videoRect.width;
+    const scaleY = video.videoHeight / videoRect.height;
+    
+    // 计算在视频坐标系中的位置
+    cropStartPos.x = (lastMousePos.x - videoRect.left) * scaleX;
+    cropStartPos.y = (lastMousePos.y - videoRect.top) * scaleY;
+    
+    // 确保起始位置在视频范围内
+    cropStartPos.x = Math.max(0, Math.min(cropStartPos.x, video.videoWidth));
+    cropStartPos.y = Math.max(0, Math.min(cropStartPos.y, video.videoHeight));
+    
+    console.log('裁剪起始点:', cropStartPos);
+    
+    // 显示起始点标记
+    clearCropSelection();
+    createStartMarker();
+    
+    cropInfo.textContent = `起始点: (${cropStartPos.x.toFixed(0)}, ${cropStartPos.y.toFixed(0)}) - 再按F键选择结束点`;
+    cropInfo.style.color = '#007bff';
+    cropInfo.style.fontWeight = 'bold';
+  }
+  
+  // 结束裁剪选择（第二次按F键）
+  function endCropSelection() {
+    console.log('结束裁剪选择');
+    
+    // 获取当前鼠标位置相对于视频的坐标
+    const videoRect = video.getBoundingClientRect();
+    const scaleX = video.videoWidth / videoRect.width;
+    const scaleY = video.videoHeight / videoRect.height;
+    
+    // 计算结束位置
+    const endX = (lastMousePos.x - videoRect.left) * scaleX;
+    const endY = (lastMousePos.y - videoRect.top) * scaleY;
+    
+    // 确保结束位置在视频范围内
+    const clampedEndX = Math.max(0, Math.min(endX, video.videoWidth));
+    const clampedEndY = Math.max(0, Math.min(endY, video.videoHeight));
+    
+    console.log('裁剪结束点:', { x: clampedEndX, y: clampedEndY });
+    
+    // 计算裁剪区域
+    const left = Math.min(cropStartPos.x, clampedEndX);
+    const top = Math.min(cropStartPos.y, clampedEndY);
+    const right = Math.max(cropStartPos.x, clampedEndX);
+    const bottom = Math.max(cropStartPos.y, clampedEndY);
+    
+    currentCropRect = {
+      x: left,
+      y: top,
+      width: right - left,
+      height: bottom - top
+    };
+    
+    // 检查选择区域是否有效
+    if (currentCropRect.width > 20 && currentCropRect.height > 20) {
+      confirmCropSelection();
+    } else {
+      cancelCropSelection();
+    }
+  }
+  
+  // 创建起始点标记
+  function createStartMarker() {
+    const marker = document.createElement('div');
+    marker.id = 'crop-start-marker';
+    marker.style.position = 'absolute';
+    marker.style.width = '10px';
+    marker.style.height = '10px';
+    marker.style.backgroundColor = '#007bff';
+    marker.style.border = '2px solid white';
+    marker.style.borderRadius = '50%';
+    marker.style.pointerEvents = 'none';
+    marker.style.zIndex = '1001';
+    marker.style.transform = 'translate(-50%, -50%)';
+    
+    // 计算显示位置
+    const videoRect = video.getBoundingClientRect();
+    const scaleX = videoRect.width / video.videoWidth;
+    const scaleY = videoRect.height / video.videoHeight;
+    
+    const displayX = cropStartPos.x * scaleX;
+    const displayY = cropStartPos.y * scaleY;
+    
+    marker.style.left = displayX + 'px';
+    marker.style.top = displayY + 'px';
+    
+    // 添加到视频容器
+    const videoContainer = video.parentElement;
+    if (!videoContainer.style.position || videoContainer.style.position === 'static') {
+      videoContainer.style.position = 'relative';
+    }
+    videoContainer.appendChild(marker);
+    
+    cropSelection = marker; // 重用cropSelection变量
+  }
+  
+  // 确认裁剪选择
+  function confirmCropSelection() {
+    cropArea = { ...currentCropRect };
+    cropModeActive = false;
+    
+    cropInfo.textContent = `裁剪区域: ${cropArea.width.toFixed(0)}x${cropArea.height.toFixed(0)} (起点: ${cropArea.x.toFixed(0)},${cropArea.y.toFixed(0)})`;
+    cropInfo.style.color = '#28a745';
+    cropInfo.style.fontWeight = 'bold';
+    
+    // 清除起始点标记，创建完整选择框
+    clearCropSelection();
+    createCropSelection();
+    
+    // 设置为绿色表示确认
+    if (cropSelection) {
+      cropSelection.style.border = '2px solid #28a745';
+      cropSelection.style.background = 'rgba(40, 167, 69, 0.1)';
+    }
+    
+    console.log('裁剪区域已确认:', cropArea);
+  }
+  
+  // 取消裁剪选择
+  function cancelCropSelection() {
+    cropModeActive = false;
+    clearCropSelection();
+    
+    cropInfo.textContent = '选择区域太小或无效，请重新选择（最小20x20像素）';
+    cropInfo.style.color = '#dc3545';
+    cropInfo.style.fontWeight = 'normal';
+    
+    console.log('裁剪选择取消');
+  }
+
+  
+  // 创建裁剪选择框
+  function createCropSelection() {
+    if (cropSelection) {
+      clearCropSelection();
+    }
+    
+    cropSelection = document.createElement('div');
+    cropSelection.id = 'crop-selection';
+    cropSelection.style.position = 'absolute';
+    cropSelection.style.border = '2px dashed #007bff';
+    cropSelection.style.background = 'rgba(0, 123, 255, 0.1)';
+    cropSelection.style.pointerEvents = 'none';
+    cropSelection.style.zIndex = '1000';
+    
+    // 计算显示坐标和尺寸
+    const videoRect = video.getBoundingClientRect();
+    const scaleX = videoRect.width / video.videoWidth;
+    const scaleY = videoRect.height / video.videoHeight;
+    
+    const displayLeft = currentCropRect.x * scaleX;
+    const displayTop = currentCropRect.y * scaleY;
+    const displayWidth = currentCropRect.width * scaleX;
+    const displayHeight = currentCropRect.height * scaleY;
+    
+    cropSelection.style.left = displayLeft + 'px';
+    cropSelection.style.top = displayTop + 'px';
+    cropSelection.style.width = displayWidth + 'px';
+    cropSelection.style.height = displayHeight + 'px';
+    
+    // 添加到视频容器
+    const videoContainer = video.parentElement;
+    if (!videoContainer.style.position || videoContainer.style.position === 'static') {
+      videoContainer.style.position = 'relative';
+    }
+    videoContainer.appendChild(cropSelection);
+  }
+
+  // 清除裁剪选择框
+  function clearCropSelection() {
+    if (cropSelection && cropSelection.parentNode) {
+      cropSelection.parentNode.removeChild(cropSelection);
+      cropSelection = null;
+    }
+    
+    // 清除可能存在的起始点标记
+    const existingMarker = document.getElementById('crop-start-marker');
+    if (existingMarker && existingMarker.parentNode) {
+      existingMarker.parentNode.removeChild(existingMarker);
+    }
+  }
+
+  // 更新裁剪信息显示
+  function updateCropInfo() {
+    if (cropArea) {
+      cropInfo.textContent = `${cropArea.width}x${cropArea.height} (起点: ${cropArea.x},${cropArea.y})`;
+    } else {
+      cropInfo.textContent = '未设置';
+    }
+  }
 </script>
+
+<div id="usage-tips" style="margin-top: 30px; padding: 15px; background: #f9f9f9; border-radius: 5px; border-left: 4px solid #007cba;">
+  <h4 style="margin-top: 0; color: #007cba;">📋 使用说明</h4>
+  <ul style="margin: 0; padding-left: 20px; color: #555;">
+    <li><strong>MOV格式支持：</strong>完全支持Apple ProRes 4444、Animation编码等带透明通道的MOV文件</li>
+    <li><strong>最佳实践：</strong>使用H.264或H.265编码的MOV文件可获得最佳兼容性</li>
+    <li><strong>透明通道：</strong>工具会自动检测和保留视频中的透明信息</li>
+    <li><strong>🎨 色键功能：</strong>可指定特定颜色（如绿幕、蓝幕）作为透明背景，支持容差和羽化调节</li>
+    <li><strong>颜色选取：</strong>支持手动选择颜色或直接从视频画面中拾取目标颜色</li>
+    <li><strong>输出格式：</strong>所有帧都会导出为PNG格式以保持透明度</li>
+    <li><strong>批量处理：</strong>提取完成后可一次性下载所有帧的ZIP压缩包</li>
+  </ul>
+</div>
 
 </body>
 </html>

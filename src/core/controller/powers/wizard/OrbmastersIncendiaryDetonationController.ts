@@ -1,5 +1,5 @@
 import { distance } from "../../../system/DoorSystem";
-import type { Unit } from "@/core/units/Unit";
+
 import { AbstractPwoerController } from "../AbstractPwoerController";
 import type { CreatureAttack } from "@/core/units/Creature";
 import {
@@ -20,6 +20,10 @@ import { createMissOrHitAnimation } from "@/core/anim/MissOrHitAnim";
 import { toward } from "@/core/anim/UnitAnimSprite";
 import { BrustSelector } from "@/core/selector/BrustSelector";
 import { AbilityValueSystem } from "@/core/system/AbilitiyValueSystem";
+import { BurnAreaEffect } from "@/core/power/wizard/OrbmastersIncendiaryDetonation/BurnAreaEffect";
+import type { Unit } from "@/core/units/Unit";
+import { Area } from "@/core/area/Area";
+import { OrbmastersIncendiaryDetonationEvent } from "@/core/power/wizard/OrbmastersIncendiaryDetonation/OrbmastersIncendiaryDetonationEvent";
 
 export class OrbmastersIncendiaryDetonationController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -91,7 +95,11 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
         selected.y,
         1
       );
-
+      const effect=await this.createAreaEffect(this.selectedCharacter as Unit,selector.brustGridSet);
+      const area= new Area();
+      area.effects.push(effect);
+      const event = new OrbmastersIncendiaryDetonationEvent(this.selectedCharacter as Unit, area,2);
+      event.hook();
       resolveCallback({});
     } else {
       console.log("result.cancel", result);
@@ -99,7 +107,11 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
     }
     return promise;
   };
-
+  async createAreaEffect(owner:Unit,gridSet: Set<{ x: number; y: number; step: number }>) {
+   const effect=new BurnAreaEffect(owner);
+   await effect.build(gridSet);
+   return effect;
+  }
   static async playAnim(
     unit: Unit,
     gridX: number,

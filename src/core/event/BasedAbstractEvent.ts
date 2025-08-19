@@ -12,17 +12,17 @@ export abstract class BasedAbstractEvent extends GameEvent {
   // 结束回合时移除增益效果事件
   static type = "attackEvent";
   static name = "UnitAttackEvent";
-
+  eventId: string;
+  eventData: any;
+  eventType = BasedAbstractEvent.type;
+  eventName = BasedAbstractEvent.name;
   constructor(uid?: string) {
     super();
 
     this.eventId = uid ? uid : UuidUtil.generate();
     this.eventData = {};
   }
-  eventId: string;
-  eventData: any;
-  eventType = BasedAbstractEvent.type;
-  eventName = BasedAbstractEvent.name;
+
   eventHandler = async (...args: any[]) => {
     return Promise.resolve({} as any);
   };
