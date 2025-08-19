@@ -1,8 +1,10 @@
-
 import { getAnimSpriteFromPNGpacks } from "@/core/anim/AnimSpriteFromPNGpacks";
 import { Effect } from "@/core/effect/Effect";
+import type { EffectSerializeData } from "@/core/effect/EffectSerializeData";
+import { EffectSerializer } from "@/core/effect/EffectSerializer";
 import { tileSize, zIndexSetting } from "@/core/envSetting";
 import { golbalSetting } from "@/core/golbalSetting";
+import { UnitSystem } from "@/core/system/UnitSystem";
 import type { Unit } from "@/core/units/Unit";
 import { Container } from "pixi.js";
 
@@ -11,19 +13,18 @@ export class BurnAreaEffect extends Effect {
   static readonly name = "BurnAreaEffect";
   owner: Unit | null = null; // 施法单位
   anim: Container | null = null;
+  grids: Set<{ x: number; y: number; step: number }> = new Set();
   constructor(owner: Unit, uid?: string) {
     super(uid);
     this.owner = owner;
   }
-  async build(
-    girds: Set<{ x: number; y: number; step: number }>
-  ): Promise<void> {
-    const container=golbalSetting.mapContainer;
-    if (!container)
-        return;
+  async build(): Promise<void> {
+    const container = golbalSetting.mapContainer;
+    if (!container) return;
     const effectContainer = new Container();
     container.addChild(effectContainer);
-    for (const grid of girds) {
+    const grids = this.grids;
+    for (const grid of grids) {
       const { x: gridx, y: gridy } = grid;
       // 每个格子2~3个火焰
       const flameCount = 2 + Math.floor(Math.random() * 2); // 2或3
@@ -46,7 +47,7 @@ export class BurnAreaEffect extends Effect {
         sprite.y = gridy * tileSize + tileSize / 2 + offsetY;
         sprite.anchor.set(0.5, 0.5);
         const basicLayer = golbalSetting.rlayers.basicLayer;
-        if ( basicLayer) {
+        if (basicLayer) {
           effectContainer.addChild(sprite);
           basicLayer.attach(sprite);
           sprite.animationSpeed = 0.5;
@@ -66,5 +67,31 @@ export class BurnAreaEffect extends Effect {
   }
   apply(target: Unit) {
     // 应用灼烧效果
+  }
+}
+
+export class BurnAreaEffectSerializer extends EffectSerializer {
+  static instance: BurnAreaEffectSerializer;
+  static getInstance(): BurnAreaEffectSerializer {
+    if (!this.instance) {
+      this.instance = new BurnAreaEffectSerializer();
+    }
+    return this.instance;
+  }
+  serialize(effect: BurnAreaEffect): EffectSerializeData {
+    const data = super.serialize(effect);
+    data.effectName = "BurnAreaEffect";
+    data.effectData.grids = Array.from(effect.grids);
+    return data;
+  }
+  deserialize(data: EffectSerializeData): BurnAreaEffect | null {
+    const { ownerId } = data.effectData;
+    if (!ownerId) return null;
+    const owner = UnitSystem.getInstance().getUnitById(ownerId);
+
+    if (!owner) return null;
+    const effect = new BurnAreaEffect(owner, data.effectId);
+    effect.grids = new Set(data.effectData.grids);
+    return effect;
   }
 }

@@ -10,7 +10,11 @@ export class Area{
         this.uid=uid?uid:UuidUtil.generate();
         this.effects=[];
     }
-
+    buildEffect(){
+        for (const effect of this.effects) {
+            effect.build();
+        }
+    }
    
     
 }

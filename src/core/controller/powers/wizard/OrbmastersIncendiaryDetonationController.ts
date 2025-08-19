@@ -29,7 +29,7 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
   public static isUse: boolean = false;
   public static instense: OrbmastersIncendiaryDetonationController | null =
     null;
-  powerName='OrbmastersIncendiaryDetonation'
+  powerName = "OrbmastersIncendiaryDetonation";
   constructor() {
     super();
   }
@@ -61,11 +61,7 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
       start: { x, y },
       range: attack.range,
       checkFunction: (gridX: any, gridY: any, preX: number, preY: number) => {
-        return checkPassiable(
-          unit,
-          gridX ,
-          gridY ,
-        );
+        return checkPassiable(unit, gridX, gridY);
       },
     });
     let resolveCallback = (value: any) => {};
@@ -95,10 +91,17 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
         selected.y,
         1
       );
-      const effect=await this.createAreaEffect(this.selectedCharacter as Unit,selector.brustGridSet);
-      const area= new Area();
+      const effect = await this.createAreaEffect(
+        this.selectedCharacter as Unit,
+        selector.brustGridSet
+      );
+      const area = new Area();
       area.effects.push(effect);
-      const event = new OrbmastersIncendiaryDetonationEvent(this.selectedCharacter as Unit, area,2);
+      const event = new OrbmastersIncendiaryDetonationEvent(
+        this.selectedCharacter as Unit,
+        area,
+        2
+      );
       event.hook();
       resolveCallback({});
     } else {
@@ -107,10 +110,14 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
     }
     return promise;
   };
-  async createAreaEffect(owner:Unit,gridSet: Set<{ x: number; y: number; step: number }>) {
-   const effect=new BurnAreaEffect(owner);
-   await effect.build(gridSet);
-   return effect;
+  async createAreaEffect(
+    owner: Unit,
+    gridSet: Set<{ x: number; y: number; step: number }>
+  ) {
+    const effect = new BurnAreaEffect(owner);
+    effect.grids = gridSet;
+    await effect.build();
+    return effect;
   }
   static async playAnim(
     unit: Unit,
