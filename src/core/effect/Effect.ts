@@ -1,13 +1,13 @@
 import { UuidUtil } from "../utils/UuidUtil";
-import type { EffectSerializer } from "./EffectSerializer";
+import { EffectSerializer } from "./EffectSerializer";
 
 export class Effect {
   uid: string;
   effectType: string = "";
   effectName: string = "";
-  effectData: any = {};
+  effectData: any={};
   static getSerializer(): EffectSerializer {
-    return Effect.getSerializer();
+    return EffectSerializer.getInstance();
   }
   getSerializer(): EffectSerializer {
     return Effect.getSerializer();

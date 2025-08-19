@@ -32,12 +32,12 @@ export abstract class AbstractPwoerController {
     unitPowers?.forEach((power) => {
       if (power.name === this.powerName) {
          console.log("power can use", power,canuse);
-        canuse = power.canUse();
+       // canuse = power.canUse();
         console.log("power can use", power,canuse);
       }
     });
 
-    return canuse;
+   // return canuse;
     return true;
   };
   use = () => {
@@ -51,7 +51,7 @@ export abstract class AbstractPwoerController {
       if (power.name === this.powerName) {
         power.use();
         const actionType=power.actionType;
-        useAction(unit, actionType);
+        //useAction(unit, actionType);
       }
     });
   };

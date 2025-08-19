@@ -24,6 +24,7 @@ import { BurnAreaEffect } from "@/core/power/wizard/OrbmastersIncendiaryDetonati
 import type { Unit } from "@/core/units/Unit";
 import { Area } from "@/core/area/Area";
 import { OrbmastersIncendiaryDetonationEvent } from "@/core/power/wizard/OrbmastersIncendiaryDetonation/OrbmastersIncendiaryDetonationEvent";
+import { AreaSystem } from "@/core/system/AreaSystem";
 
 export class OrbmastersIncendiaryDetonationController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -97,6 +98,7 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
       );
       const area = new Area();
       area.effects.push(effect);
+      AreaSystem.getInstance().addArea(area);
       const event = new OrbmastersIncendiaryDetonationEvent(
         this.selectedCharacter as Unit,
         area,

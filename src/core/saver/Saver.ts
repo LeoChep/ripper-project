@@ -19,6 +19,7 @@ import { EventDeserializerFactory } from "../event/EventDeserializerFactory";
 import type { EndTurnRemoveBuffEvent } from "../event/EndTurnRemoveBuffEvent";
 import type { BasedAbstractEvent } from "../event/BasedAbstractEvent";
 import type { GameEvent } from "../event/Event";
+import { AreaSystem } from "../system/AreaSystem";
 
 export class Saver {
   static gameState: any;
@@ -46,6 +47,7 @@ export class Saver {
     const dramaRecord = DramaSystem.getInstance().getRercords();
     const initRecord = InitiativeSystem.getInitRecord();
     const eventRecord = BattleEvenetSystem.getInstance().serializeEvents();
+    const areasRecord = AreaSystem.getInstance().getSaver();
     // 收集需要保存的游戏数据
     const gameState = {
       // 保存完整的地图数据
@@ -55,6 +57,7 @@ export class Saver {
       dramaRecord: dramaRecord,
       initiativeRecord: initRecord,
       eventRecord: eventRecord,
+      areasRecord: areasRecord,
       timestamp: Date.now(), // 保存时间戳
     };
     localStorage.setItem("gameState", JSON.stringify(gameState));
@@ -82,12 +85,16 @@ export class Saver {
       }
     });
     const findSprite = (id: string) => {
-      return map.sprites.find((sprite) => sprite.id === parseInt(id)) ;
+      return map.sprites.find((sprite) => sprite.id === parseInt(id));
     };
     for (let i = 0; i < map.sprites.length; i++) {
       const sprite = map.sprites[i];
       const buffs = sprite.creature.buffs || [];
-      const deserializedBuffs = await BuffSerializer.deserializeArray(buffs,undefined,findSprite);
+      const deserializedBuffs = await BuffSerializer.deserializeArray(
+        buffs,
+        undefined,
+        findSprite
+      );
       sprite.creature.buffs = deserializedBuffs;
       console.log("恢复的角色数据:", sprite.creature);
     }
@@ -115,8 +122,12 @@ export class Saver {
     DramaSystem.getInstance().records = vars;
     DramaSystem.getInstance().setDramaUse(gameState.dramaRecord.use);
   }
+  static loadArea() {
+    const gameState = Saver.gameState;
+    const vars = gameState.areasRecord || [];
+    AreaSystem.getInstance().loadRecords(vars);
+  }
   static async loadGameState(gameState: any): Promise<any> {
-
     // 清空当前角色数据
     // 恢复角色数据
     const map = {} as TiledMap;
@@ -125,24 +136,26 @@ export class Saver {
     Saver.loadWallAndDoor();
     await Saver.loadUnit();
     Saver.loadDrama();
+    Saver.loadArea();
     if (gameState.initiativeRecord) {
       InitiativeSystem.loadInitRecord(gameState.initiativeRecord);
     }
     //加载战斗事件
     const eventSerializeDatas = gameState.eventRecord || [];
-    const events: (GameEvent)[]=[];
-    eventSerializeDatas.forEach((eventSerializeData:EventSerializeData) => {
+    const events: GameEvent[] = [];
+    eventSerializeDatas.forEach((eventSerializeData: EventSerializeData) => {
       console.log("反序列化事件:", eventSerializeData);
-        const deserializer = EventDeserializerFactory.getDeserializer(eventSerializeData.eventName);
-        if (deserializer) {
-            const event = deserializer.deserialize(eventSerializeData);
-            if (event) {
-                events.push(event);
-                event.hook();
-            }
+      const deserializer = EventDeserializerFactory.getDeserializer(
+        eventSerializeData.eventName
+      );
+      if (deserializer) {
+        const event = deserializer.deserialize(eventSerializeData);
+        if (event) {
+          events.push(event);
+          event.hook();
         }
-    })
+      }
+    });
     console.log("加载的战斗事件:", events);
-
   }
 }

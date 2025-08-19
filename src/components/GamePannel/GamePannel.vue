@@ -49,6 +49,7 @@ import { DoorSerializer } from '@/core/units/DoorSerializer'
 import * as InitiativeSystem from '@/core/system/InitiativeSystem'
 import { CharacterCombatController } from '@/core/controller/CharacterCombatController'
 import { Saver } from '@/core/saver/Saver'
+import { AreaSystem } from '@/core/system/AreaSystem'
 const appSetting = envSetting.appSetting;
 onMounted(async () => {
     const app = new PIXI.Application();
@@ -152,6 +153,7 @@ const initByMap = async (mapPassiable) => {
         await Promise.all(createEndPromise);
     mapPassiable.sprites = units;
     const characterStore = useCharacterStore();
+
     units.forEach((unit) => {
         if (unit.party === 'player') {
             characterStore.addCharacter(unit);
@@ -225,6 +227,7 @@ const loadGameState = async () => {
         map.textures = mapTexture;
         await initByMap(map);
         DramaSystem.getInstance().play();
+        AreaSystem.getInstance().rebuildAreas()
         if (InitiativeSystem.isInBattle()) {
             CharacterCombatController.getInstance().inUse = true;
         } else {
@@ -390,7 +393,7 @@ const createAnimSpriteUnits = async (unitTypeName, unit) => {
 
     animSpriteUnit.setFrameSize({ width: animMetaJson.frameSize, height: animMetaJson.frameSize });
     if (unit.creature) {
-        console.log("单位的视觉大小:", animSpriteUnit.visisualSizeValue,unit.creature.size);
+        console.log("单位的视觉大小:", animSpriteUnit.visisualSizeValue, unit.creature.size);
         if (unit.creature.size == 'big')
             animSpriteUnit.visisualSizeValue = { width: 128, height: 128 };
     } else {

@@ -14,6 +14,12 @@ export class BurnAreaEffect extends Effect {
   owner: Unit | null = null; // 施法单位
   anim: Container | null = null;
   grids: Set<{ x: number; y: number; step: number }> = new Set();
+  static getSerializer(): EffectSerializer {
+    return BurnAreaEffectSerializer.getInstance();
+  }
+  getSerializer(): EffectSerializer {
+    return BurnAreaEffect.getSerializer();
+  }
   constructor(owner: Unit, uid?: string) {
     super(uid);
     this.owner = owner;
@@ -81,7 +87,12 @@ export class BurnAreaEffectSerializer extends EffectSerializer {
   serialize(effect: BurnAreaEffect): EffectSerializeData {
     const data = super.serialize(effect);
     data.effectName = "BurnAreaEffect";
-    data.effectData.grids = Array.from(effect.grids);
+    console.log('BurnAreaEffect serialize', data.effectData)
+    data.effectData.grids =[]
+    effect.grids.forEach(grid => {
+      data.effectData.grids.push({ x: grid.x, y: grid.y, step: grid.step });
+    });
+    data.effectData.ownerId = effect.owner?.id || "";
     return data;
   }
   deserialize(data: EffectSerializeData): BurnAreaEffect | null {
@@ -90,6 +101,7 @@ export class BurnAreaEffectSerializer extends EffectSerializer {
     const owner = UnitSystem.getInstance().getUnitById(ownerId);
 
     if (!owner) return null;
+
     const effect = new BurnAreaEffect(owner, data.effectId);
     effect.grids = new Set(data.effectData.grids);
     return effect;

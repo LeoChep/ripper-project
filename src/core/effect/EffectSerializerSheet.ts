@@ -1,3 +1,4 @@
+import { BurnAreaEffect } from "../power/wizard/OrbmastersIncendiaryDetonation/BurnAreaEffect";
 import type { EffectSerializer } from "./EffectSerializer";
 
 
@@ -34,6 +35,6 @@ function registerEffectSerializer(effectClass: EffectClassWithSerializer) {
   );
 }
 function initEffectSerializer(): void {
-
+  registerEffectSerializer(BurnAreaEffect)
 
 }
