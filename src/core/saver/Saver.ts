@@ -1,5 +1,6 @@
+import { BattleEvenetSystem } from './../system/BattleEventSystem';
 import { golbalSetting } from "../golbalSetting";
-import { BattleEvenetSystem } from "../system/BattleEventSystem";
+
 import { DramaSystem } from "../system/DramaSystem";
 import { CreatureSerializer } from "../units/CreatureSerializer";
 import { DoorSerializer } from "../units/DoorSerializer";
@@ -140,7 +141,8 @@ export class Saver {
     if (gameState.initiativeRecord) {
       InitiativeSystem.loadInitRecord(gameState.initiativeRecord);
     }
-    //加载战斗事件
+    //加载战斗事
+    BattleEvenetSystem.getInstance().clearEvents();
     const eventSerializeDatas = gameState.eventRecord || [];
     const events: GameEvent[] = [];
     eventSerializeDatas.forEach((eventSerializeData: EventSerializeData) => {

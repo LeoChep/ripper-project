@@ -20,7 +20,7 @@ export class BuffSystem {
     }
     return BuffSystem.instance;
   }
-   findBuffInUnit(unit:Unit,buffId:string){
+  findBuffInUnit(unit: Unit, buffId: string) {
     return unit.creature?.buffs?.find((buff) => buff.uid === buffId);
   }
   async addTo(buff: BuffInterface, unit: Unit) {
@@ -67,7 +67,10 @@ export class BuffSystem {
       console.warn(`Buff ${buff.name} not found in unit: ${unit.name}`);
       return;
     }
+    console.log("移除增益效果:", buff.name, "从单位:", unit.name, buffs);
+    // alert('')
     buffs.splice(index, 1);
+
     updataModifierByBuff(buff);
     removeIcon(buff);
     // drawBuffs(unit);
@@ -98,10 +101,24 @@ async function removeIcon(buff: BuffInterface) {
     return;
   }
   const statusIcons = animUnit.statusIcons;
+  console.log("removeIcon", statusIcons[buff.name], statusIcons);
+
   if (statusIcons[buff.name]) {
+    // alert("");
+    const effects = animUnit.getChildrenByLabel("effect");
+    effects.forEach((effect) => {
+      if (statusIcons[buff.name] === effect) {
+        animUnit.removeChild(effect);
+        effect.destroy();
+      }
+      console.log("移除效果:", effect);
+    });
+
     animUnit.removeChild(statusIcons[buff.name]);
+    statusIcons[buff.name].removeChildren();
     statusIcons[buff.name].destroy();
-    delete statusIcons[buff.name];
+    // animUnit.removeChildren();
+    console.log("Buff icon removed:", buff.name);
+    // delete statusIcons[buff.name];
   }
- 
 }

@@ -56,11 +56,16 @@ export class ShieldEdgeBlockEvent extends BasedAbstractEvent {
         attacker.party !== this.owner?.party &&
         checkRectionUseful(this.owner)
       ) {
-        const grids=UnitSystem.getInstance().getUnitGrids(attacker);
+        const grids=UnitSystem.getInstance().getGridsArround(this.owner);
+        console.log('单位格子:', this.owner, grids);
         let canCounter=false;
         for (let {x,y} of grids){
+          const isAttackerInGrid= UnitSystem.getInstance().checkUnitInGrid(attacker,x,y);
+          if (!isAttackerInGrid) continue;
+          console.log(isAttackerInGrid,'检查单位在格子内')
           let canCounterThePoint= checkPassiable(this.owner,x,y);
-          if (canCounterThePoint) canCounter=true
+          
+          if (canCounterThePoint ) canCounter=true
           break;
         }
         if (canCounter) {

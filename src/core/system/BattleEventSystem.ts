@@ -28,7 +28,7 @@ export class BattleEvenetSystem {
     events.push(gameEvent);
   }
   clearEvents() {
-    //his.events = [];
+     this.eventMap.clear()
   }
   // 添加事件处理方法
   async handleEvent(eventType: string, ...args: any[]) {

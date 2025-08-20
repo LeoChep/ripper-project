@@ -27,12 +27,6 @@ export class EndTurnRemoveBuffEvent extends GameEvent {
     this.turnCount = turnCount; // 记录回合数
     this.eventId = uid ? uid : UuidUtil.generate();
 
-    this.eventData = {
-      endTurnUnitId: this.endTurnUnit.id.toString(),
-      buffId: this.buff.uid,
-      turnCount: this.turnCount,
-      buffOwnerId: this?.buff?.owner?.id.toString(),
-    };
   }
   eventId: string;
   eventData: any;
@@ -87,6 +81,12 @@ export class EndTurnRemoveBuffEventSerializer extends EventSerializer {
   serialize(event: EndTurnRemoveBuffEvent): EventSerializeData {
     const data = super.serialize(event);
     data.eventName = "EndTurnRemoveBuffEvent";
+    data.eventData = {
+      endTurnUnitId: event.endTurnUnit.id.toString(),
+      buffOwnerId: event.buff.owner?.id.toString(),
+      buffId: event.buff.uid,
+      turnCount: event.turnCount,
+    };
     return data;
   }
 
