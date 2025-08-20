@@ -220,7 +220,10 @@ export class BuffSerializer {
    * 批量序列化 BuffInterface 数组
    */
   static serializeArray(buffs: BuffInterface[]): any[] {
-    return buffs.map((buff) => this.serialize(buff));
+    const buffSerialize= buffs.map((buff) => this.serialize(buff));
+    console.log("Serializing buffs:", buffSerialize);
+    return buffSerialize
+   
   }
 
   /**
@@ -233,7 +236,7 @@ export class BuffSerializer {
   ): Promise<T[]> {
     const buffs: T[] = [];
     const buffDeserializePromises: any[] = [];
-    console.log("Deserializing buffs:", serializedBuffs.length);
+    console.log("Deserializing buffs:", serializedBuffs);
     for (const serialized of serializedBuffs) {
       const buffDeserializePromise = new Promise<void>(async (resolve) => {
                 console.log("Deserializing buff:", serialized);

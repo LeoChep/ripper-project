@@ -18,7 +18,7 @@ export abstract class BasedAbstractEvent extends GameEvent {
   eventName = BasedAbstractEvent.name;
   constructor(uid?: string) {
     super();
-
+   
     this.eventId = uid ? uid : UuidUtil.generate();
     this.eventData = {};
   }

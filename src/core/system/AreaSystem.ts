@@ -26,6 +26,9 @@ export class AreaSystem {
     return this.areas;
   }
 
+  getArea(uid:string):Area|null{
+    return this.areas.find(area => area.uid === uid) || null;
+  }
   clearAreas(): void {
     this.areas = [];
   }
@@ -37,6 +40,7 @@ export class AreaSystem {
     return areaSerializerDatas;
   }
   loadRecords(data: AreaSerializeData[]): void {
+    this.clearAreas();
     data.forEach((item) => {
       const area = Area.getSerializer().deserialize(item);
       if (area) {

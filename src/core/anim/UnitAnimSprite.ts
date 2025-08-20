@@ -4,7 +4,7 @@ import type { Unit } from "../units/Unit";
 import { tileSize, zIndexSetting } from "../envSetting";
 import type { BuffInterface } from "../buff/BuffInterface";
 import { getStatusEffectsIconUrl } from "@/utils/utils";
-  const lineIconLimit = 4;
+const lineIconLimit = 4;
 export class UnitAnimSpirite extends Container {
   // 单位的朝向，单位为弧度，0 表示向右
   private _direction: number = -1;
@@ -13,8 +13,14 @@ export class UnitAnimSpirite extends Container {
   private _state: string = "walk"; // 例如 'walking', 'attacking', 'idle' 等
 
   private owner: Unit | undefined;
-  private frameSize: { width: number; height: number } = { width: 64, height:64 };
-  private visisualSize: { width: number; height: number } = { width: 64, height:64 };
+  private frameSize: { width: number; height: number } = {
+    width: 64,
+    height: 64,
+  };
+  private visisualSize: { width: number; height: number } = {
+    width: 64,
+    height: 64,
+  };
 
   public getFrameSize(): { width: number; height: number } {
     return this.frameSize;
@@ -122,9 +128,12 @@ export class UnitAnimSpirite extends Container {
       ) {
         //调整位置
         this.anims[this._state].x =
-          0 - (this.anims[this._state].width - (this.visisualSize.width ?? 0)) / 2;
+          0 -
+          (this.anims[this._state].width - (this.visisualSize.width ?? 0)) / 2;
         this.anims[this._state].y =
-          0 - (this.anims[this._state].height - (this.visisualSize.height ?? 0)) / 2;
+          0 -
+          (this.anims[this._state].height - (this.visisualSize.height ?? 0)) /
+            2;
         if (this.owner?.direction != null) {
           this.direction = this.owner.direction;
           this.anims[this._state].textures =
@@ -161,7 +170,7 @@ export class UnitAnimSpirite extends Container {
       this.callback(this);
       this.callback = undefined; // 清除回调函数
     }
-    this.drawBuffs()
+    this.drawBuffs();
   }
 
   public getWASDDirection(): string {
@@ -206,102 +215,120 @@ export class UnitAnimSpirite extends Container {
     animSprite.anchor.set(0, 0); // 设置锚点为左上角，避免偏移
     this.addAnimation(name, animSprite);
   }
-  public  async addIcon(buff: BuffInterface) {
-  const unit = this.owner
-  // console.log("Adding icon for buff:", buff.name, "to unit:", unit?.name);
-  if (!unit) {
-    console.error("Buff owner is not defined.");
-    return;
-  }
-  const animUnit = unit.animUnit;
-  if (!animUnit) {
-    console.error("Unit does not have an animation sprite.");
-    return;
-  }
-  const statusIcons = animUnit.statusIcons;
-  console.log("statusIcons", statusIcons);
-  if (statusIcons[buff.name]) {
-    console.log("Icon already exists for buff:", buff.name);
-  
-  }
-  if (!statusIcons[buff.name]) {
-    console.log("Adding icon for buff:", buff.name,buff.icon, "to unit:", unit.name);
-    const iconUrl = getStatusEffectsIconUrl(buff.icon);
-    await PIXI.Assets.load(iconUrl);
-    const iconContainer = new PIXI.Container();
-    const iconGraphic = new PIXI.Graphics();
-    iconGraphic.setStrokeStyle({ width: 2, color: "white", alpha: 1 });
-    iconGraphic.lineTo(0, tileSize / lineIconLimit);
-    iconGraphic.lineTo(tileSize / lineIconLimit, tileSize / lineIconLimit);
-    iconGraphic.lineTo(tileSize / lineIconLimit, 0);
-    iconGraphic.lineTo(0, 0);
-    iconGraphic.stroke();
-    iconGraphic.rect(0, 0, tileSize / lineIconLimit, tileSize / lineIconLimit);
-    iconGraphic.fill(0x000000);
-    iconContainer.addChild(iconGraphic);
-    const iconSprite = new PIXI.Sprite(PIXI.Texture.from(iconUrl));
-    iconSprite.renderable = true;
-    iconSprite.scale.x = tileSize / lineIconLimit / iconSprite.width;
-    iconSprite.scale.y = tileSize / lineIconLimit / iconSprite.height;
-    iconContainer.addChild(iconSprite);
-    iconContainer.label = "effect";
-    statusIcons[buff.name] = iconContainer;
-    animUnit.addChild(iconContainer);
-    // golbalSetting.rlayers.spriteLayer?.attach(iconSprite);
-    iconContainer.zIndex = zIndexSetting.spriteZIndex + 1;
-  }
-
-  console.log(buff.giver, "给", unit.name, "添加了", buff.name, "效果");
-}
-
-
-  public drawBuffs():void {
-  const animUnit = this
-  const unit= this.owner;
-  if (!animUnit|| !unit) {
-    console.error("Unit does not have an animation sprite.");
-    return;
-  }
-  const buff = unit.creature?.buffs;
-  if (!buff || buff.length === 0) {
-   // console.warn(`No buffs found for unit: ${unit.name} ${unit.id}`);
-    return;
-  }
-  const statusIcons = animUnit.statusIcons;
-  if (!statusIcons) {
-    console.warn(`No status icons found for unit: ${unit.name}`);
-    return;
-  }
-  buff.forEach((buff) => {
-    if (!statusIcons[buff.name]) {
-      //如果图标不存在，添加
-      this.addIcon(buff);
+  public async addIcon(buff: BuffInterface) {
+    const unit = this.owner;
+    // console.log("Adding icon for buff:", buff.name, "to unit:", unit?.name);
+    if (!unit) {
+      console.error("Buff owner is not defined.");
+      return;
     }
-  });
-  const iconKeys = Object.keys(statusIcons);
-  // console.log("statusIcons", statusIcons);
-  if (iconKeys.length === 0) {
-    return;
-  }
-  let drawIndex = 0;
-  iconKeys.forEach((key) => {
-    const icon = statusIcons[key];
-    // console.log("statusIcons", icon);
-    if (icon.renderable) {
-      // icon.renderable=false
-      drawIndex++;
-      const row = Math.floor(drawIndex / lineIconLimit);
-      const col =
-        drawIndex % lineIconLimit == 0 ? 0 : (drawIndex % lineIconLimit) - 1;
-      icon.x = col * (tileSize / lineIconLimit); // 设置图标位置
-      icon.y = row * (tileSize / lineIconLimit); // 设置图标位置
+    const animUnit = unit.animUnit;
+    if (!animUnit) {
+      console.error("Unit does not have an animation sprite.");
+      return;
     }
-  });
-}
+    const statusIcons = animUnit.statusIcons;
+    console.log("statusIcons", statusIcons);
+    if (statusIcons[buff.uid]) {
+      console.log("Icon already exists for buff:", buff.uid);
+    }
+    if (!statusIcons[buff.uid]) {
+      console.log(
+        "Adding icon for buff:",
+        buff.name,
+        buff.uid,
+        buff.icon,
+        "to unit:",
+        unit.name
+      );
+      const iconContainer = new PIXI.Container();
+      iconContainer.label = "effect";
+      statusIcons[buff.uid] = iconContainer;
+      const iconUrl = getStatusEffectsIconUrl(buff.icon);
+      await PIXI.Assets.load(iconUrl);
+
+      const iconGraphic = new PIXI.Graphics();
+      iconGraphic.setStrokeStyle({ width: 2, color: "white", alpha: 1 });
+      iconGraphic.lineTo(0, tileSize / lineIconLimit);
+      iconGraphic.lineTo(tileSize / lineIconLimit, tileSize / lineIconLimit);
+      iconGraphic.lineTo(tileSize / lineIconLimit, 0);
+      iconGraphic.lineTo(0, 0);
+      iconGraphic.stroke();
+      iconGraphic.rect(
+        0,
+        0,
+        tileSize / lineIconLimit,
+        tileSize / lineIconLimit
+      );
+      iconGraphic.fill(0x000000);
+      iconContainer.addChild(iconGraphic);
+      const iconSprite = new PIXI.Sprite(PIXI.Texture.from(iconUrl));
+      iconSprite.renderable = true;
+      iconSprite.scale.x = tileSize / lineIconLimit / iconSprite.width;
+      iconSprite.scale.y = tileSize / lineIconLimit / iconSprite.height;
+      iconContainer.addChild(iconSprite);
 
 
+      animUnit.addChild(iconContainer);
+      // golbalSetting.rlayers.spriteLayer?.attach(iconSprite);
+      iconContainer.zIndex = zIndexSetting.spriteZIndex + 1;
+    }
+
+    console.log(buff.giver, "给", unit.name, "添加了", buff.name, "效果");
+  }
+
+  public drawBuffs(): void {
+    const animUnit = this;
+    const unit = this.owner;
+    if (!animUnit || !unit) {
+      console.error("Unit does not have an animation sprite.");
+      return;
+    }
+    const buffs = unit.creature?.buffs;
+    //console.log("drawBuffs", buffs, unit.name);
+    if (!buffs || buffs.length === 0) {
+      // console.warn(`No buffs found for unit: ${unit.name} ${unit.id}`);
+      return;
+    }
+    const statusIcons = animUnit.statusIcons;
+    if (!statusIcons) {
+      console.warn(`No status icons found for unit: ${unit.name}`);
+      return;
+    }
+    buffs.forEach((buff) => {
+      if (!statusIcons[buff.uid]) {
+        //如果图标不存在，添加
+        this.addIcon(buff);
+      }
+    });
+    const iconKeys = Object.keys(statusIcons);
+    // console.log("statusIcons", statusIcons);
+    if (iconKeys.length === 0) {
+      return;
+    }
+    let drawIndex = 0;
+    iconKeys.forEach((key) => {
+      const icon = statusIcons[key];
+      if (!icon)
+        return;
+      // console.log("statusIcons", icon);
+      if (icon.renderable) {
+        // icon.renderable=false
+        drawIndex++;
+        const row = Math.floor(drawIndex / lineIconLimit);
+        const col =
+          drawIndex % lineIconLimit == 0 ? 0 : (drawIndex % lineIconLimit) - 1;
+        icon.x = col * (tileSize / lineIconLimit); // 设置图标位置
+        icon.y = row * (tileSize / lineIconLimit); // 设置图标位置
+      }
+    });
+  }
 }
-export const toward = (unit: { direction: any; x: number; y: number; name: any; },targetX: number,targetY: number) => {
+export const toward = (
+  unit: { direction: any; x: number; y: number; name: any },
+  targetX: number,
+  targetY: number
+) => {
   let direction = unit.direction;
   const spriteUnitX = Math.floor(unit.x / 64); // 假设动画
   const spriteUnitY = Math.floor(unit.y / 64); // 假设动画

@@ -101,22 +101,23 @@ async function removeIcon(buff: BuffInterface) {
     return;
   }
   const statusIcons = animUnit.statusIcons;
-  console.log("removeIcon", statusIcons[buff.name], statusIcons);
+  console.log("removeIcon", statusIcons[buff.uid], statusIcons);
 
-  if (statusIcons[buff.name]) {
-    // alert("");
+  if (statusIcons[buff.uid]) {
+
     const effects = animUnit.getChildrenByLabel("effect");
     effects.forEach((effect) => {
-      if (statusIcons[buff.name] === effect) {
+       console.log("需要移除效果:", statusIcons[buff.uid],'实际效果',effect,'判断:',statusIcons[buff.uid] === effect);
+      if (statusIcons[buff.uid] === effect) {
+        console.log("移除效果:", effect);
         animUnit.removeChild(effect);
         effect.destroy();
       }
-      console.log("移除效果:", effect);
     });
 
-    animUnit.removeChild(statusIcons[buff.name]);
-    statusIcons[buff.name].removeChildren();
-    statusIcons[buff.name].destroy();
+    // animUnit.removeChild(statusIcons[buff.name]);
+    // statusIcons[buff.name].removeChildren();
+    // statusIcons[buff.name].destroy();
     // animUnit.removeChildren();
     console.log("Buff icon removed:", buff.name);
     // delete statusIcons[buff.name];

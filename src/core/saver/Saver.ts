@@ -150,8 +150,10 @@ export class Saver {
       const deserializer = EventDeserializerFactory.getDeserializer(
         eventSerializeData.eventName
       );
+          console.log('获取反序列化器:', deserializer);
       if (deserializer) {
         const event = deserializer.deserialize(eventSerializeData);
+        console.log("加载的战斗事件 one:", deserializer,event);
         if (event) {
           events.push(event);
           event.hook();
