@@ -183,9 +183,9 @@ export function useReaction(unit: Unit) {
   if (!unit.initiative) {
     return false;
   }
-  if (initiativeCursor.pointAt?.owner === unit) {
-    return false; // 如果当前回合单位是自己，则不能使用反应
-  }
+  // if (initiativeCursor.pointAt?.owner === unit) {
+  //   return false; // 如果当前回合单位是自己，则不能使用反应
+  // }
   if (unit.initiative.reactionNumber >= 1) {
     unit.initiative.reactionNumber--;
     return true;

@@ -8,7 +8,7 @@ export class MagicMissile extends Power {
   description = "";
   icon = "shield-edge-block";
   type = "fighter";
-  actionType = "standard";
+  actionType = "reaction";
   useType: string = "atwill";
   cost = 1;
   cooldown = 0;

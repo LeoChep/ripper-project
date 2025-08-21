@@ -51,7 +51,7 @@ export abstract class AbstractPwoerController {
       if (power.name === this.powerName) {
         power.use();
         const actionType=power.actionType;
-        //useAction(unit, actionType);
+        useAction(unit, actionType);
       }
     });
   };
