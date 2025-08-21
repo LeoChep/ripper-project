@@ -1,4 +1,5 @@
 import { OpportunitySystem } from "../system/OpportunitySystem";
+import { UnitSystem } from "../system/UnitSystem";
 import type { Unit } from "../units/Unit";
 import { StateMachine } from "./StateMachine";
 const tileSize = 64; // 假设每个格子的大小为64像素
@@ -9,6 +10,8 @@ export class WalkStateMachine extends StateMachine {
     x: number;
     y: number;
   }[] = [];
+  private currentGrids: { x: number; y: number }[] = [];
+  private oldGrids: { x: number; y: number }[] = [];
   public onDivideWalk: boolean = false; // 是否分割行走
   public leastDivideSpeed: number = 0; //剩余
   private targetX: number = 0;
@@ -49,21 +52,25 @@ export class WalkStateMachine extends StateMachine {
     const nextX = nextPathPoint.x * tileSize;
     const nextY = nextPathPoint.y * tileSize;
     //借机判断
-    const unitX = Math.floor((this.owner.x + tileSize / 2) / tileSize);
-    const unitY = Math.floor((this.owner.y + tileSize / 2) / tileSize);
-    //判断是否需要移动到新的格子
-    let haveMoveToNewTile = true;
-    if (unitX === nextPathPoint.x && unitY === nextPathPoint.y) {
-      haveMoveToNewTile = false; //
+    const unitX = Math.floor(this.owner.x / tileSize);
+    const unitY = Math.floor(this.owner.y / tileSize);
+    let haveMoveToNewTile = false;
+    if (
+      unitX !== this.currentGrids[0]?.x ||
+      unitY !== this.currentGrids[0]?.y
+    ) {
+      haveMoveToNewTile = true;
+      this.oldGrids = this.currentGrids;
+      this.currentGrids = UnitSystem.getInstance().getUnitGrids(this.owner);
     }
+    //判断是否需要移动到新的格子
+
     if (haveMoveToNewTile) {
       console.log(
         `单位 (${unitX}, ${unitY}) 移动到目标格子 (${nextPathPoint.x}, ${nextPathPoint.y})`
       );
       // 检查是否有单位可以触
-      if (this.walkType!='step')
-      this.checkOpportunity(unitX, unitY);
-
+      if (this.walkType != "step") this.checkOpportunity(this.oldGrids);
     }
     //
     console.log("nextpoint", nextPathPoint);
@@ -174,10 +181,9 @@ export class WalkStateMachine extends StateMachine {
       }
     }
   }
-  checkOpportunity = (unitX: number, unitY: number) => {
+  checkOpportunity = (startMoveGrids: { x: number; y: number }[]) => {
     const mayOpportunityUnit = OpportunitySystem.getOpportunityUnit(
-      unitX,
-      unitY,
+      startMoveGrids,
       this.owner
     );
     const opportunityUnit: Unit[] = [];

@@ -13,8 +13,7 @@ export class OpportunitySystem {
     // 初始化逻辑
   }
   static getOpportunityUnit(
-    targetX: number,
-    targetY: number,
+    startMoveGrids: { x: number; y: number }[],
     targetUnit: Unit
   ): Unit[] {
     const opportunityUnits = [] as Unit[];
@@ -30,9 +29,7 @@ export class OpportunitySystem {
         return; // 如果是同一方的单位，则跳过
       }
       // 检查单位是否可以触发借机
-      const checkUnitX = Math.floor(checkUnit.x / tileSize);
-      const checkUnitY = Math.floor(checkUnit.y / tileSize);
-      //用一个数组矩阵来存储checkUnit的周围八个格子
+      //用一个数组矩阵来存储checkUnit的周围格子
       const arroundGrids = UnitSystem.getInstance().getGridsArround(checkUnit);
       // const surroundingTiles = [
       //   [checkUnitX - 1, checkUnitY - 1], // 左上
@@ -47,10 +44,14 @@ export class OpportunitySystem {
       // 检查目标位置是否在周围八个格子内
       let isInRangeFaze = false;
       for (const { x, y } of arroundGrids) {
-        if (UnitSystem.getInstance().checkUnitInGrid(targetUnit, x, y)) {
-          isInRangeFaze = true; // 如果目标位置在周围八个格子内，返回 true
-          //  console.log("目标位置在单位周围格子内", x, y);
-          break;
+        for (let startMoveGrid of startMoveGrids) {
+          const moveStartGridx = startMoveGrid.x;
+          const moveStartGridy = startMoveGrid.y;
+          if (moveStartGridx === x && moveStartGridy === y) {
+            isInRangeFaze = true; // 如果目标位置在周围八个格子内，返回 true
+            //  console.log("目标位置在单位周围格子内", x, y);
+            break;
+          }
         }
       }
       let isInrange = false;
@@ -58,7 +59,7 @@ export class OpportunitySystem {
         `检查单位 ${checkUnit.name} 是否可以触发借机: `,
         isInRangeFaze
       );
-      const grids = UnitSystem.getInstance().getUnitGrids(targetUnit);
+      const grids = startMoveGrids;
       if (isInRangeFaze) {
         for (let { x, y } of grids) {
           let isthePointInRangeCheck = checkPassiable(checkUnit, x, y);
