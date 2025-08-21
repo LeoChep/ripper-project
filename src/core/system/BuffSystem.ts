@@ -112,6 +112,7 @@ async function removeIcon(buff: BuffInterface) {
         console.log("移除效果:", effect);
         animUnit.removeChild(effect);
         effect.destroy();
+        delete statusIcons[buff.uid];
       }
     });
 

@@ -37,6 +37,7 @@
             'action-indicator',
             'standard',
             { disabled: remainingStandardActions === 0 },
+            { 'about-to-use': pendingAction === 'standard' },
           ]"
         >
           <div class="action-icon">⚔️</div>
@@ -48,7 +49,12 @@
 
         <!-- 移动动作 -->
         <div
-          :class="['action-indicator', 'move', { disabled: remainingMoveActions <= 0 }]"
+          :class="[
+            'action-indicator',
+            'move',
+            { disabled: remainingMoveActions <= 0 },
+            { 'about-to-use': pendingAction === 'move' },
+          ]"
         >
           <!-- {{ currentMoveActions }} -->
           <div class="action-icon">🏃</div>
@@ -64,6 +70,7 @@
             'action-indicator',
             'minor',
             { disabled: remainingMinorActions === 0 },
+            { 'about-to-use': pendingAction === 'minor' },
           ]"
         >
           <div class="action-icon">🛡️</div>
@@ -79,6 +86,7 @@
             'action-indicator',
             'reaction',
             { disabled: remainingReactionActions === 0 },
+            { 'about-to-use': pendingAction === 'reaction' },
           ]"
         >
           <div class="action-icon">⚡</div>
@@ -97,6 +105,13 @@ const props = defineProps({
   character: {
     type: Object,
     default: null,
+  },
+  pendingAction: {
+    type: String,
+    default: null,
+    validator: (value) => {
+      return !value || ["standard", "move", "minor", "reaction"].includes(value);
+    },
   },
 });
 
@@ -160,17 +175,17 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
   z-index: 10;
 }
 
-/* 奇幻风格条状外框 */
+/* 奇幻风格条状外框 - 中等温暖色调 */
 .fantasy-bar {
   position: relative;
   height: 50px;
   background: linear-gradient(
     90deg,
-    rgba(139, 69, 19, 0.95) 0%,
-    rgba(101, 67, 33, 0.95) 25%,
-    rgba(139, 69, 19, 0.95) 50%,
-    rgba(101, 67, 33, 0.95) 75%,
-    rgba(139, 69, 19, 0.95) 100%
+    rgba(160, 100, 50, 0.95) 0%,
+    /* 中等褐色 */ rgba(180, 120, 80, 0.95) 25%,
+    /* 温暖中褐色 */ rgba(170, 110, 60, 0.95) 50%,
+    /* 平衡褐色 */ rgba(180, 120, 80, 0.95) 75%,
+    /* 温暖中褐色 */ rgba(160, 100, 50, 0.95) 100% /* 中等褐色 */
   );
   border: 2px solid #d4af37;
   border-radius: 25px;
@@ -227,7 +242,7 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
 /* 标准动作背景 */
 .bg-segment.standard-bg {
   /* 您可以在这里设置left和width或right */
-  width: calc(40% + 11px);
+  width: calc(40%);
 
   /* margin-left: -10px; */
 }
@@ -235,49 +250,49 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
 /* 移动动作背景 */
 .bg-segment.move-bg {
   /* 您可以在这里设置left和width或right */
-  width: calc(30% + 21px);
-  left: calc(40% + 11px);
+  width: calc(30% + 14px);
+  left: calc(40%);
 }
 
 /* 次要动作背景 */
 .bg-segment.minor-bg {
   /* 您可以在这里设置left和width或right */
-  width: calc(10% + 21px);
-  left: calc(70% + 32px);
+  width: calc(10% + 27px);
+  left: calc(70% + 14px);
 }
 
 /* 反应动作背景 */
 .bg-segment.reaction-bg {
   /* 您可以在这里设置left和width或right */
   width: calc(10% + 30px);
-  left: calc(80% + 52px);
+  left: calc(80% + 42px);
 }
 
 .bg-segment.disabled {
   background: linear-gradient(
     180deg,
-    rgba(0, 0, 0, 0.9) 0%,
-    rgba(40, 40, 40, 0.95) 20%,
-    rgba(20, 20, 20, 0.95) 50%,
-    rgba(40, 40, 40, 0.95) 80%,
-    rgba(0, 0, 0, 0.9) 100%
+    rgba(60, 20, 20, 0.95) 0%,
+    /* 暗深红 */ rgba(80, 30, 30, 0.95) 20%,
+    /* 稍亮深红 */ rgba(40, 15, 15, 0.95) 50%,
+    /* 非常暗的深红 */ rgba(80, 30, 30, 0.95) 80%,
+    /* 稍亮深红 */ rgba(60, 20, 20, 0.95) 100% /* 暗深红 */
   );
-  /* 添加破损纹理 */
+  /* 添加更明显的破损纹理 */
   background-image: repeating-linear-gradient(
       45deg,
       transparent 0px,
-      rgba(255, 0, 0, 0.1) 1px,
-      rgba(255, 0, 0, 0.1) 2px,
+      rgba(139, 0, 0, 0.3) 1px,
+      /* 更明显的深红色 */ rgba(139, 0, 0, 0.3) 2px,
       transparent 3px
     ),
     repeating-linear-gradient(
       -45deg,
       transparent 0px,
-      rgba(255, 0, 0, 0.05) 2px,
-      rgba(255, 0, 0, 0.05) 4px,
+      rgba(160, 20, 20, 0.2) 2px,
+      /* 更明显的红色 */ rgba(160, 20, 20, 0.2) 4px,
       transparent 6px
     );
-  border: 1px solid #444;
+  border: 1px solid #5a0000; /* 更深的红色边框 */
   border-style: dashed;
   animation: fadeInOut 3s infinite;
 }
@@ -314,6 +329,10 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
   transition: all 0.3s ease;
   cursor: pointer;
   min-width: 60px;
+  /* 为所有状态预设透明边框，避免禁用时尺寸变化 */
+  border: 2px solid transparent;
+  /* 为伪元素预留空间 */
+  margin: 5px;
 }
 
 /* 标准动作占40% */
@@ -322,11 +341,7 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
   justify-content: center;
   padding-left: 0;
 }
-.action-indicator.reaction {
-  flex: 4;
-  justify-content: center;
-  padding-right: 0;
-}
+
 /* 移动动作占30% */
 .action-indicator.move {
   flex: 3;
@@ -340,43 +355,136 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
 /* 反应动作占10% */
 .action-indicator.reaction {
   flex: 1;
+  justify-content: center;
+  padding-right: 0;
 }
 
-/* 禁用状态 - 破损不可用的视觉效果 */
+/* 将要被使用的状态 - 高亮提示效果 */
+.action-indicator.about-to-use {
+  background: linear-gradient(
+    145deg,
+    #ffd700 0%,
+    /* 金黄色 */ #ffa500 20%,
+    /* 橙色 */ #ffd700 40%,
+    /* 金黄色 */ #ff8c00 60%,
+    /* 深橙色 */ #ffd700 80%,
+    /* 金黄色 */ #ffa500 100% /* 橙色 */
+  );
+  /* 使用相同尺寸的边框，只改变颜色和样式 */
+  border-color: #ffd700;
+  border-style: solid;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3),
+    0 0 30px rgba(255, 215, 0, 0.6);
+  transform: scale(1.1);
+  z-index: 5;
+  animation: aboutToUseGlow 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes aboutToUseGlow {
+  0% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3),
+      0 0 30px rgba(255, 215, 0, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 30px rgba(255, 215, 0, 1), inset 0 0 15px rgba(255, 255, 255, 0.5),
+      0 0 40px rgba(255, 215, 0, 0.8);
+  }
+}
+
+/* 将要被使用状态的图标效果 */
+.action-indicator.about-to-use .action-icon {
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 1))
+    drop-shadow(0 0 15px rgba(255, 140, 0, 0.8));
+  transform: scale(1.2);
+  animation: iconPulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes iconPulse {
+  0% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1.3);
+  }
+}
+
+/* 将要被使用状态的标签效果 */
+.action-indicator.about-to-use .action-label {
+  color: #8b4513;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.8), 0 0 12px rgba(255, 140, 0, 0.6);
+  font-weight: 900;
+  animation: textGlow 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes textGlow {
+  0% {
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.8), 0 0 12px rgba(255, 140, 0, 0.6);
+  }
+  100% {
+    text-shadow: 0 0 12px rgba(255, 215, 0, 1), 0 0 18px rgba(255, 140, 0, 0.8),
+      0 0 24px rgba(255, 215, 0, 0.6);
+  }
+}
+
+/* 将要被使用状态的提示箭头 */
+.action-indicator.about-to-use::after {
+  content: "⬇️";
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  color: #ffd700;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+  animation: arrowBounce 1s ease-in-out infinite;
+  z-index: 6;
+}
+
+@keyframes arrowBounce {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-5px);
+  }
+}
+
+/* 禁用状态 - 暗淡深红的视觉效果 */
 .action-indicator.disabled {
-  opacity: 0.4;
-  filter: grayscale(90%) brightness(0.3) contrast(0.7);
+  opacity: 0.3;
+  filter: brightness(0.2) contrast(0.8);
   cursor: not-allowed;
   position: relative;
 
-  /* 破损木块效果 */
+  /* 深红破损木块效果 */
   background: linear-gradient(
     145deg,
-    #3c3c3c 0%,
-    /* 深灰色 */ #2f2f2f 20%,
-    /* 更深灰色 */ #404040 40%,
-    /* 中灰色 */ #555555 60%,
-    /* 浅灰色 */ #2f2f2f 80%,
-    /* 更深灰色 */ #3c3c3c 100% /* 深灰色 */
+    #4a1a1a 0%,
+    /* 深红色 */ #3d1010 20%,
+    /* 更深红色 */ #5a2020 40%,
+    /* 中红色 */ #6a2a2a 60%,
+    /* 稍亮红色 */ #3d1010 80%,
+    /* 更深红色 */ #4a1a1a 100% /* 深红色 */
   );
-  border: 2px solid #1c1c1c;
+  /* 使用相同尺寸的边框，深红色调 */
+  border-color: #2a0808;
   border-style: dashed; /* 虚线边框暗示破损 */
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8), 0 1px 1px rgba(255, 255, 255, 0.1);
-  transform: none;
+  box-shadow: inset 0 0 10px rgba(80, 0, 0, 0.8), 0 1px 1px rgba(139, 69, 19, 0.1);
 
-  /* 添加裂痕效果 */
+  /* 添加深红裂痕效果 */
   background-image: linear-gradient(
       45deg,
       transparent 40%,
-      rgba(0, 0, 0, 0.3) 41%,
-      rgba(0, 0, 0, 0.3) 43%,
+      rgba(80, 20, 20, 0.5) 41%,
+      rgba(80, 20, 20, 0.5) 43%,
       transparent 44%
     ),
     linear-gradient(
       135deg,
       transparent 60%,
-      rgba(0, 0, 0, 0.2) 61%,
-      rgba(0, 0, 0, 0.2) 62%,
+      rgba(100, 30, 30, 0.4) 61%,
+      rgba(100, 30, 30, 0.4) 62%,
       transparent 63%
     );
 }
@@ -437,16 +545,21 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
   text-decoration-thickness: 2px;
 }
 
-/* 悬停效果 - 只对可用状态生效 */
-.action-indicator:not(.disabled):hover {
+/* 默认状态也应用轻微放大效果 */
+.action-indicator:not(.disabled):not(.about-to-use) {
   transform: scale(1.05);
 }
 
-.action-indicator:not(.disabled):hover .action-icon {
-  filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.8));
+/* 悬停效果 - 在默认效果基础上适度增强 */
+.action-indicator:not(.disabled):not(.about-to-use):hover {
+  transform: scale(1.1);
 }
 
-.action-indicator:not(.disabled):hover .action-label {
+.action-indicator:not(.disabled):not(.about-to-use):hover .action-icon {
+  filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.6));
+}
+
+.action-indicator:not(.disabled):not(.about-to-use):hover .action-label {
   color: #fff;
   text-shadow: 1px 1px 3px rgba(212, 175, 55, 0.5);
 }
@@ -470,21 +583,21 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
   z-index: 2;
 }
 
-/* 动作图标 */
+/* 动作图标 - 柔和的发光效果 */
 .action-icon {
   font-size: 16px;
-  filter: drop-shadow(0 0 3px rgba(212, 175, 55, 0.5));
+  filter: drop-shadow(0 0 3px rgba(212, 175, 55, 0.4));
   margin-right: 4px;
   transition: all 0.3s ease;
 }
 
-/* 动作标签 */
+/* 动作标签 - 柔和的文字效果 */
 .action-label {
-  color: #f4e4bc;
+  color: #d6d4d4;
   font-size: 11px;
-  font-weight: bold;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-  text-transform: uppercase;
+  font-weight: bolder;
+  /* text-shadow: 1px 1px 2px rgba(212, 175, 55, 0.3); */
+  /* text-transform: uppercase; */
   letter-spacing: 0.5px;
   min-width: 28px;
   transition: all 0.3s ease;
