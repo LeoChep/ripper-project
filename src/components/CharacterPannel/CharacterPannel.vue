@@ -9,22 +9,30 @@
                 <div class="list-name">{{ character.name }}</div>
             </div>
         </div>
-
+        <ActionBar :character="selectedCharacter" />
         <!-- 原位置显示选中角色详情 -->
         <div v-if="selectedCharacter" class="character-detail-panel">
-            <div class="character-detail">
-                <!-- 名字显示 -->
-                <div class="name">{{ selectedCharacter.name }}</div>
-                <img :src="getAvatar(selectedCharacter.unitTypeName)" :alt="selectedCharacter.name" class="avatar" />
-                <!-- HP 显示 -->
-                <div class="hp-display">
-                    <div class="hp-text">HP:{{ hp || 0 }}/{{
-                        maxHp || 0 }}</div>
-                </div>
-            </div>
+            <!-- 动作条 - 独立组件 -->
 
-            <!-- 动作选择面板 -->
-            <ActionPannel :character="selectedCharacter" @actionSelected="handleActionSelected" ref="actionPanelRef" />
+
+            <!-- 底部区域：角色详情 + 动作面板 -->
+            <div class="bottom-section">
+                <div class="character-detail">
+                    <!-- 名字显示 -->
+                    <div class="name">{{ selectedCharacter.name }}</div>
+                    <img :src="getAvatar(selectedCharacter.unitTypeName)" :alt="selectedCharacter.name"
+                        class="avatar" />
+                    <!-- HP 显示 -->
+                    <div class="hp-display">
+                        <div class="hp-text">HP:{{ hp || 0 }}/{{
+                            maxHp || 0 }}</div>
+                    </div>
+                </div>
+
+                <!-- 动作选择面板 -->
+                <ActionPannel :character="selectedCharacter" @actionSelected="handleActionSelected"
+                    ref="actionPanelRef" />
+            </div>
         </div>
     </div>
 </template>
@@ -34,6 +42,7 @@ import { computed, onMounted, ref, toRefs } from 'vue'
 import { useCharacterStore } from '@/stores/characterStore'
 import { getUnitAvatar } from '@/utils/utils'
 import ActionPannel from '../ActionPannel/ActionPannel.vue'
+import ActionBar from '../ActionBar/ActionBar.vue'
 import { CharacterController } from '@/core/controller/CharacterController'
 import { lockOn } from '@/core/anim/LockOnAnim'
 import { useTalkStateStore } from '@/stores/talkStateStore'
@@ -174,27 +183,51 @@ function selectCharacter(character, index) {
 .character-detail-panel {
     position: absolute;
     display: flex;
+    flex-direction: column;
     justify-content: flex-start;
-    align-items: flex-end;
+    align-items: flex-start;
     background-image: url('@/assets/ui/test3.png');
     background-size: 800px 100%;
     background-repeat: no-repeat;
-    background-position: center top -10px;
-    padding: 20px 0px 25px 20px;
+    background-position: center bottom;
+    padding: 15px 40px 15px 20px;
+    /* 减少右侧内边距，增加可用空间 */
     z-index: 10;
     left: 400px;
-    top: 745px;
+    top: 730px;
+    /* 底部贴着游戏边界(900px - 170px = 730px) */
     width: 800px;
+    /* 参考TalkPannel的宽度 */
     height: 170px;
+    /* 参考TalkPannel的高度 */
+    gap: 5px;
+}
+
+.character-detail-panel>.character-detail {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
     gap: 20px;
+    margin-top: 10px;
+}
+
+/* 底部区域样式 */
+.bottom-section {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    gap: 15px;
+    flex: 1;
+    margin-top: 5px;
+    width: 100%;
 }
 
 .character-detail {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 120px;
-    height: 125px;
+    width: 110px;
+    height: 120px;
     position: relative;
     flex-shrink: 0;
 }
@@ -204,13 +237,17 @@ function selectCharacter(character, index) {
     flex: 1;
     display: flex;
     flex-direction: column;
-    height: 125px;
+    height: 120px;
     background: rgba(0, 0, 0, 0.6);
     border-radius: 8px;
-    padding: 10px;
+    padding: 8px;
     border: 2px solid #444;
     position: relative;
     left: -10px;
+    width: calc(100% - 125px);
+    /* 减去角色详情区域的宽度和间距 */
+    max-width: 640px;
+    /* 设置最大宽度，避免过宽 */
 }
 
 /* 标签栏容器 */
@@ -335,11 +372,11 @@ function selectCharacter(character, index) {
 
 .name {
     color: #fff;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: bold;
     text-shadow: 1px 1px 1px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000;
     position: absolute;
-    top: 4px;
+    top: 3px;
     left: 50%;
     transform: translateX(-50%);
     padding: 2px 6px;
@@ -358,7 +395,7 @@ function selectCharacter(character, index) {
 
 .hp-text {
     color: #fff;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: bold;
     text-shadow: 2px 2px 4px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000;
     margin-bottom: 2px;

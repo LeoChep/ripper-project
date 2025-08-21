@@ -42,26 +42,29 @@ onMounted(()=>{
 <style scoped>
 #talk-window {
     position: absolute;
-
     font-size: 18px;
     background-image: url('@/assets/ui/test3.png');
     background-size: 800px 100%;
     background-repeat: no-repeat;
-    background-position: center top -10px;
-    padding: 30px 0px ;
-    gap: 32px;
-    z-index:10;
+    background-position: center bottom;
+    padding: 15px 15px 15px 20px;
+    /* 与character-detail-panel保持一致的内边距 */
+    z-index: 10;
     left: 400px;
-    top: 745px;
+    top: 730px;
+    /* 与character-detail-panel相同的位置 */
     width: 800px;
     height: 170px;
-    gap: 20px;
-
+    gap: 5px;
+    /* 与character-detail-panel保持一致的间距 */
 }
 
 .talk-content {
-    width: 96%;
-    margin: 0px 0px 25px 20px;
+    width: calc(100% );
+    /* 考虑左右内边距的影响 */
+    margin: 35px 0px 15px 0px;
+    /* 调整边距适应新的内边距 */
+    padding: 0px;
 }
 
 p {

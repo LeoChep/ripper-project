@@ -508,8 +508,8 @@ const drawGrid = (app, rlayers) => {
     position: fixed;
     top: 0;
     left: 0;
-    width: 800px;
-    height: 600px;
+    width: 1600px;
+    height: 900px;
     background: white
 }
 

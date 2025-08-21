@@ -67,11 +67,6 @@
         </span>
         <span v-else>当前选择：无</span>
       </div>
-      <div class="action-points">
-        剩余行动点：
-        <span v-for="n in 3" :key="n" :class="['action-point', { filled: n <= remainingActionPoints }]">
-          {{ n <= remainingActionPoints ? '●' : '○' }} </span>
-      </div>
     </div>
   </div>
 </template>
@@ -95,7 +90,6 @@ const emit = defineEmits(['actionSelected'])
 const activeActionTab = ref('standard')
 const activePowerTab = ref('atwill')
 const selectedAction = ref(null)
-const remainingActionPoints = ref(3)
 
 // 悬浮窗相关数据
 const tooltipVisible = ref(false)
@@ -259,9 +253,6 @@ const updateTooltipPosition = (event) => {
 defineExpose({
   resetSelection() {
     selectedAction.value = null
-  },
-  setActionPoints(points) {
-    remainingActionPoints.value = points
   }
 })
 </script>
@@ -372,22 +363,5 @@ defineExpose({
   color: #fff;
   font-size: 10px;
   font-weight: bold;
-}
-
-.action-points {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: #fff;
-  font-size: 10px;
-}
-
-.action-point {
-  font-size: 14px;
-  color: #666;
-}
-
-.action-point.filled {
-  color: #4a90e2;
 }
 </style>
