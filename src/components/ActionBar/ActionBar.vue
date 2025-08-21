@@ -85,7 +85,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 
 // Props
 const props = defineProps({
@@ -95,32 +95,54 @@ const props = defineProps({
   }
 })
 
+// 响应式数据，用于存储实时查询的动作数量
+const currentStandardActions = ref(0)
+const currentMoveActions = ref(0)
+const currentMinorActions = ref(0)
+const currentReactionActions = ref(0)
+
+// 轮询定时器
+let pollingTimer = null
+
+// 轮询函数，实时更新动作数量
+const pollActionNumbers = () => {
+  if (!props.character || !props.character.initiative) return
+  
+  // 直接使用 initiative 中的已使用动作数量作为剩余动作数量
+  currentStandardActions.value = props.character.initiative.standerActionNumber || 0
+  currentMoveActions.value = props.character.initiative.moveActionNumber || 0
+  currentMinorActions.value = props.character.initiative.minorActionNumber || 0
+  currentReactionActions.value = props.character.initiative.reactionNumber || 0
+}
+
+// 组件挂载时启动轮询
+onMounted(() => {
+  // 立即执行一次
+  pollActionNumbers()
+  
+  // 每100ms轮询一次
+  pollingTimer = setInterval(pollActionNumbers, 100)
+})
+
+// 组件卸载时清理定时器
+onUnmounted(() => {
+  if (pollingTimer) {
+    clearInterval(pollingTimer)
+    pollingTimer = null
+  }
+})
+
 // 动作相关计算属性
 const maxStandardActions = computed(() => 1)
 const maxMoveActions = computed(() => 1)
 const maxMinorActions = computed(() => 1)
 const maxReactionActions = computed(() => 1)
 
-// 剩余动作数量计算
-const remainingStandardActions = computed(() => {
-  if (!props.character || !props.character.initiative) return 0
-  return Math.max(0, maxStandardActions.value - (props.character.initiative.standerActionNumber || 0))
-})
-
-const remainingMoveActions = computed(() => {
-  if (!props.character || !props.character.initiative) return 0
-  return Math.max(0, maxMoveActions.value - (props.character.initiative.moveActionNumber || 0))
-})
-
-const remainingMinorActions = computed(() => {
-  if (!props.character || !props.character.initiative) return 0
-  return Math.max(0, maxMinorActions.value - (props.character.initiative.minorActionNumber || 0))
-})
-
-const remainingReactionActions = computed(() => {
-  if (!props.character || !props.character.initiative) return 0
-  return Math.max(0, maxReactionActions.value - (props.character.initiative.reactionNumber || 0))
-})
+// 剩余动作数量直接使用轮询获取的数值
+const remainingStandardActions = computed(() => currentStandardActions.value)
+const remainingMoveActions = computed(() => currentMoveActions.value)
+const remainingMinorActions = computed(() => currentMinorActions.value)
+const remainingReactionActions = computed(() => currentReactionActions.value)
 </script>
 
 <style scoped>
