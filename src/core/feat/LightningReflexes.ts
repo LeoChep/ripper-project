@@ -5,7 +5,7 @@ import type { Unit } from "../units/Unit";
 export class LightningReflexes extends Trait {
   name = "LightningReflexes";
   displayName = "闪电反射";
-  description = "增加反射";
+  description = "你在反射上获得+2专长加值。此加值11级时为+3，21级时为+4。";
   icon = "lightning_reflexes";
   type = "trait";
 

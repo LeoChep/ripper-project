@@ -5,7 +5,7 @@ import type { Unit } from "../units/Unit";
 export class SuperiorWill extends Trait {
   name = "SuperiorWill";
   displayName = "卓越意志";
-  description = "增加意志值";
+  description = "你在意志上获得+2专长加值。此加值11级时为+3，21级时为+4。";
   icon = "superior_will";
   type = "trait";
 

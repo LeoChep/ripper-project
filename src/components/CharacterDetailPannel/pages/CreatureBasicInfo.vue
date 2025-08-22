@@ -21,7 +21,7 @@
     <!-- 生命值和防御卡片 -->
     <div class="info-card combat-stats">
       <div class="card-title">战斗数据</div>
-      <div class="hp-display">
+      <!-- <div class="hp-display">
         <div class="hp-bar">
           <div
             class="hp-fill"
@@ -35,7 +35,7 @@
             HP: {{ creature.hp }} (重伤: {{ creature.bloodied }})
           </div>
         </div>
-      </div>
+      </div> -->
       <div class="defense-grid">
         <div class="defense-item ac">
           <div class="defense-label">护甲等级</div>
@@ -66,9 +66,7 @@
         <div class="resistance-type immunity">
           <span class="resistance-icon">🛡️</span>
           <span class="resistance-label">免疫:</span>
-          <span class="resistance-values">{{
-            creature.immunities.join(", ")
-          }}</span>
+          <span class="resistance-values">{{ creature.immunities.join(", ") }}</span>
         </div>
       </div>
       <div v-if="creature.resistances.length" class="resistance-group">
@@ -76,11 +74,7 @@
           <span class="resistance-icon">🔰</span>
           <span class="resistance-label">抗性:</span>
           <span class="resistance-values">
-            <span
-              v-for="r in creature.resistances"
-              :key="r.type"
-              class="resist-item"
-            >
+            <span v-for="r in creature.resistances" :key="r.type" class="resist-item">
               {{ r.type }} {{ r.value }}
             </span>
           </span>
