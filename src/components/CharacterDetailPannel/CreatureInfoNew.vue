@@ -32,33 +32,29 @@
               <h2 class="creature-name">{{ creature.name }}</h2>
               <div class="creature-subtitle">{{ creatureTypeText }}</div>
             </div>
+            <div class="creature-level">{{ creature.level }} 级</div>
 
-            <!-- 等级和机动性信息同行，底部对齐 -->
-            <div class="level-and-mobility">
-              <div class="creature-level">{{ creature.level }} 级</div>
-
-              <!-- 机动性信息内联 -->
-              <div class="mobility-info-inline">
-                <!-- AC -->
-                <div class="info-item-inline">
-                  <span class="label">AC</span>
-                  <span class="value">{{ creature.ac }}</span>
-                </div>
-                <!-- HP -->
-                <!-- <div class="info-item-inline">
-                  <span class="label">生命值</span>
-                  <span class="value">{{ creature.hp }}</span>
-                </div> -->
-                <!-- 速度 -->
-                <div class="info-item-inline">
-                  <span class="label">速度</span>
-                  <span class="value">{{ creature.speed }}</span>
-                </div>
-                <!-- 倡议 -->
-                <div class="info-item-inline">
-                  <span class="label">先攻</span>
-                  <span class="value">{{ creature.initiative }}</span>
-                </div>
+            <!-- 机动性信息内联 -->
+            <div class="mobility-info-inline">
+              <!-- AC -->
+              <div class="info-item-inline">
+                <span class="label">AC</span>
+                <span class="value">{{ creature.ac }}</span>
+              </div>
+              <!-- HP -->
+              <div class="info-item-inline">
+                <span class="label">生命值</span>
+                <span class="value">{{ creature.hp }}</span>
+              </div>
+              <!-- 速度 -->
+              <div class="info-item-inline">
+                <span class="label">速度</span>
+                <span class="value">{{ creature.speed }}</span>
+              </div>
+              <!-- 倡议 -->
+              <div class="info-item-inline">
+                <span class="label">倡议</span>
+                <span class="value">{{ creature.initiative }}</span>
               </div>
             </div>
           </div>
@@ -129,7 +125,7 @@ const reflex = ref("");
 const tabs = ref([
   { id: "basic", label: "基础" },
   { id: "powers", label: "能力" },
-  { id: "traits", label: "特性" },
+  { id: "traits", label: "特征" },
   { id: "equipment", label: "装备" },
   { id: "feats", label: "专长" },
   { id: "other", label: "其他" },
@@ -203,7 +199,6 @@ onMounted(() => {
   from {
     opacity: 0;
   }
-
   to {
     opacity: 1;
   }
@@ -224,8 +219,9 @@ onMounted(() => {
   border-radius: 12px;
   box-shadow: 0 0 30px rgba(139, 69, 19, 0.6), inset 0 2px 4px rgba(255, 215, 0, 0.1),
     inset 0 -2px 4px rgba(0, 0, 0, 0.3);
-  width: 800px;
-  height: 85vh;
+  width: 90vw;
+  max-width: 800px;
+  max-height: 85vh;
   overflow: hidden;
   animation: panelSlideIn 0.4s ease-out;
 }
@@ -235,7 +231,6 @@ onMounted(() => {
     transform: translateY(-50px) scale(0.9);
     opacity: 0;
   }
-
   to {
     transform: translateY(0) scale(1);
     opacity: 1;
@@ -257,17 +252,14 @@ onMounted(() => {
   top: -15px;
   left: -15px;
 }
-
 .panel-ornament.top-right {
   top: -15px;
   right: -15px;
 }
-
 .panel-ornament.bottom-left {
   bottom: -15px;
   left: -15px;
 }
-
 .panel-ornament.bottom-right {
   bottom: -15px;
   right: -15px;
@@ -306,7 +298,7 @@ onMounted(() => {
   position: relative;
   background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.1));
   border-bottom: 2px solid #8b4513;
-  padding: 20px 20px 30px 20px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -362,14 +354,6 @@ onMounted(() => {
   gap: 4px;
 }
 
-/* 等级和机动性信息的容器 */
-.level-and-mobility {
-  display: flex;
-  align-items: flex-end;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-
 .creature-name {
   font-size: 28px;
   font-weight: bold;
@@ -390,8 +374,7 @@ onMounted(() => {
   color: #ffd700;
   font-weight: bold;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-  align-self: flex-end;
-  /* 底部对齐 */
+  align-self: flex-start;
 }
 
 /* 机动性信息 */
@@ -399,8 +382,7 @@ onMounted(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
-  align-items: flex-end;
-  /* 改为底部对齐 */
+  align-items: center;
 }
 
 .info-item-inline {
@@ -408,8 +390,6 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   min-width: 80px;
-  justify-content: flex-end;
-  /* 确保内容底部对齐 */
 }
 
 .info-item-inline .label {
@@ -436,9 +416,6 @@ onMounted(() => {
   gap: 0;
   margin-top: 10px;
   flex-wrap: wrap;
-  position: absolute;
-  bottom: 0px;
-  right: 40px;
 }
 
 .bookmark-tab {
@@ -449,6 +426,7 @@ onMounted(() => {
   color: #daa520;
   font-weight: bold;
   font-size: 12px;
+  padding: 12px 20px 16px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 215, 0, 0.1);
@@ -468,14 +446,14 @@ onMounted(() => {
   bottom: 0;
   background: inherit;
   border-radius: inherit;
-  /* transform: perspective(20px) rotateX(-2deg); */
+  transform: perspective(20px) rotateX(-2deg);
   z-index: -1;
 }
 
 .bookmark-tab:hover {
   background: linear-gradient(135deg, rgba(139, 69, 19, 0.9), rgba(218, 165, 32, 0.8));
   color: #ffd700;
-  /* transform: translateY(-3px); */
+  transform: translateY(-3px);
   z-index: 2;
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 215, 0, 0.2),
     0 0 10px rgba(218, 165, 32, 0.3);
@@ -485,7 +463,7 @@ onMounted(() => {
   background: linear-gradient(135deg, #daa520, #ffd700, #daa520);
   color: #2c1810;
   border-color: #ffd700;
-  /* transform: translateY(-6px); */
+  transform: translateY(-6px);
   z-index: 3;
   box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.5), inset 0 1px 4px rgba(255, 215, 0, 0.4),
     0 0 20px rgba(255, 215, 0, 0.6);
@@ -497,7 +475,7 @@ onMounted(() => {
 
 /* 内容区域 */
 .content-area {
-  height: calc(85vh - 200px);
+  max-height: calc(85vh - 200px);
   overflow-y: auto;
   padding: 20px 30px;
   scrollbar-width: thin;
@@ -522,11 +500,11 @@ onMounted(() => {
 @media (max-width: 768px) {
   .creature-info-panel {
     width: 95vw;
-    height: 90vh;
+    max-height: 90vh;
   }
 
   .creature-header {
-    padding: 15px 0px 0px 15px;
+    padding: 15px;
     flex-direction: column;
     align-items: center;
     gap: 15px;
@@ -558,12 +536,12 @@ onMounted(() => {
   .bookmark-tab {
     min-width: 70px;
     font-size: 11px;
-    /* padding: 10px 16px 14px; */
+    padding: 10px 16px 14px;
   }
 
   .content-area {
     padding: 15px 20px;
-    height: calc(90vh - 180px);
+    max-height: calc(90vh - 180px);
   }
 }
 </style>
