@@ -6,221 +6,429 @@
       <div class="panel-ornament top-right"></div>
       <div class="panel-ornament bottom-left"></div>
       <div class="panel-ornament bottom-right"></div>
-      
+
       <!-- 关闭按钮 -->
       <div class="close-btn" @click="$emit('close')">✕</div>
-      
+
       <!-- 标题栏 -->
       <div class="creature-header">
         <div class="creature-title">{{ creature.name }}</div>
         <div class="creature-subtitle">等级 {{ creature.level }} {{ creature.role }}</div>
       </div>
-      
+
       <!-- 内容滚动区域 -->
       <div class="content-scroll">
-        <!-- 基础信息卡片 -->
-        <div class="info-card basic-info">
-          <div class="card-title">基础信息</div>
-          <div class="info-grid">
-            <div class="info-item">
-              <span class="label">XP</span>
-              <span class="value">{{ creature.xp }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">体型</span>
-              <span class="value">{{ creature.size }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">类型</span>
-              <span class="value">{{ creature.type }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">阵营</span>
-              <span class="value">{{ creature.alignment }}</span>
-            </div>
-          </div>
+        <!-- 分页导航 -->
+        <div class="page-navigation">
+          <button
+            v-for="(page, index) in pages"
+            :key="index"
+            :class="['page-btn', { active: currentPage === index }]"
+            @click="currentPage = index"
+          >
+            {{ page.title }}
+          </button>
         </div>
 
-        <!-- 生命值和防御卡片 -->
-        <div class="info-card combat-stats">
-          <div class="card-title">战斗数据</div>
-          <div class="hp-display">
-            <div class="hp-bar">
-              <div class="hp-fill" :style="{ width: (creature.hp / (creature.hp + (creature.bloodied || 0))) * 100 + '%' }"></div>
-              <div class="hp-text">HP: {{ creature.hp }} (血量线: {{ creature.bloodied }})</div>
+        <!-- 第1页: 基础信息 -->
+        <div v-if="currentPage === 0" class="page-content">
+          <!-- 基础信息卡片 -->
+          <div class="info-card basic-info">
+            <div class="card-title">基础信息</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="label">XP</span>
+                <span class="value">{{ creature.xp }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">体型</span>
+                <span class="value">{{ creature.size }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">类型</span>
+                <span class="value">{{ creature.type }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">阵营</span>
+                <span class="value">{{ creature.alignment }}</span>
+              </div>
             </div>
           </div>
-          <div class="defense-grid">
-            <div class="defense-item ac">
-              <div class="defense-label">护甲等级</div>
-              <div class="defense-value">{{ creature.ac }}</div>
-            </div>
-            <div class="defense-item fort">
-              <div class="defense-label">强韧</div>
-              <div class="defense-value">{{ creature.fortitude }}</div>
-            </div>
-            <div class="defense-item reflex-def">
-              <div class="defense-label">反射</div>
-              <div class="defense-value">{{ reflex }}</div>
-            </div>
-            <div class="defense-item will-def">
-              <div class="defense-label">意志</div>
-              <div class="defense-value">{{ will }}</div>
-            </div>
-          </div>
-        </div>
 
-        <!-- 移动和感官卡片 -->
-        <div class="info-card mobility">
-          <div class="card-title">机动性</div>
-          <div class="mobility-info">
-            <div class="speed-item">
-              <span class="speed-icon">🏃</span>
-              <span>速度: {{ creature.speed }}</span>
+          <!-- 生命值和防御卡片 -->
+          <div class="info-card combat-stats">
+            <div class="card-title">战斗数据</div>
+            <div class="hp-display">
+              <div class="hp-bar">
+                <div
+                  class="hp-fill"
+                  :style="{
+                    width:
+                      (creature.hp / (creature.hp + (creature.bloodied || 0))) * 100 +
+                      '%',
+                  }"
+                ></div>
+                <div class="hp-text">
+                  HP: {{ creature.hp }} (血量线: {{ creature.bloodied }})
+                </div>
+              </div>
             </div>
-            <div v-if="creature.fly" class="speed-item">
-              <span class="speed-icon">🦅</span>
-              <span>飞行: {{ creature.fly }}</span>
-            </div>
-            <div class="speed-item">
-              <span class="speed-icon">👁️</span>
-              <span>感官: {{ creature.senses }}</span>
-            </div>
-            <div class="speed-item">
-              <span class="speed-icon">⚡</span>
-              <span>先攻: {{ creature.initiative }}</span>
+            <div class="defense-grid">
+              <div class="defense-item ac">
+                <div class="defense-label">护甲等级</div>
+                <div class="defense-value">{{ creature.ac }}</div>
+              </div>
+              <div class="defense-item fort">
+                <div class="defense-label">强韧</div>
+                <div class="defense-value">{{ creature.fortitude }}</div>
+              </div>
+              <div class="defense-item reflex-def">
+                <div class="defense-label">反射</div>
+                <div class="defense-value">{{ reflex }}</div>
+              </div>
+              <div class="defense-item will-def">
+                <div class="defense-label">意志</div>
+                <div class="defense-value">{{ will }}</div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- 能力值卡片 -->
-        <div v-if="creature.abilities" class="info-card abilities">
-          <div class="card-title">能力值</div>
-          <div class="abilities-grid">
-            <div v-for="(ability, name) in creature.abilities" :key="name" class="ability-item">
-              <div class="ability-name">{{ name }}</div>
-              <div class="ability-score">{{ ability.value }}</div>
-              <div class="ability-modifier">({{ ability.modifier >= 0 ? '+' : '' }}{{ ability.modifier }})</div>
+          <!-- 移动和感官卡片 -->
+          <div class="info-card mobility">
+            <div class="card-title">机动性</div>
+            <div class="mobility-info">
+              <div class="speed-item">
+                <span class="speed-icon">🏃</span>
+                <span>速度: {{ creature.speed }}</span>
+              </div>
+              <div v-if="creature.fly" class="speed-item">
+                <span class="speed-icon">🦅</span>
+                <span>飞行: {{ creature.fly }}</span>
+              </div>
+              <div class="speed-item">
+                <span class="speed-icon">👁️</span>
+                <span>感官: {{ creature.senses }}</span>
+              </div>
+              <div class="speed-item">
+                <span class="speed-icon">⚡</span>
+                <span>先攻: {{ creature.initiative }}</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- 抗性和免疫卡片 -->
-        <div v-if="creature.immunities.length || creature.resistances.length" class="info-card resistances">
-          <div class="card-title">抗性与免疫</div>
-          <div v-if="creature.immunities.length" class="resistance-group">
-            <div class="resistance-type immunity">
-              <span class="resistance-icon">🛡️</span>
-              <span class="resistance-label">免疫:</span>
-              <span class="resistance-values">{{ creature.immunities.join(', ') }}</span>
+          <!-- 能力值卡片 -->
+          <div v-if="creature.abilities" class="info-card abilities">
+            <div class="card-title">能力值</div>
+            <div class="abilities-grid">
+              <div
+                v-for="(ability, name) in creature.abilities"
+                :key="name"
+                class="ability-item"
+              >
+                <div class="ability-name">{{ name }}</div>
+                <div class="ability-score">{{ ability.value }}</div>
+                <div class="ability-modifier">
+                  ({{ ability.modifier >= 0 ? "+" : "" }}{{ ability.modifier }})
+                </div>
+              </div>
             </div>
           </div>
-          <div v-if="creature.resistances.length" class="resistance-group">
-            <div class="resistance-type resistance">
-              <span class="resistance-icon">🔰</span>
-              <span class="resistance-label">抗性:</span>
-              <span class="resistance-values">
-                <span v-for="r in creature.resistances" :key="r.type" class="resist-item">
-                  {{ r.type }} {{ r.value }}
+
+          <!-- 抗性和免疫卡片 -->
+          <div
+            v-if="creature.immunities.length || creature.resistances.length"
+            class="info-card resistances"
+          >
+            <div class="card-title">抗性与免疫</div>
+            <div v-if="creature.immunities.length" class="resistance-group">
+              <div class="resistance-type immunity">
+                <span class="resistance-icon">🛡️</span>
+                <span class="resistance-label">免疫:</span>
+                <span class="resistance-values">{{
+                  creature.immunities.join(", ")
+                }}</span>
+              </div>
+            </div>
+            <div v-if="creature.resistances.length" class="resistance-group">
+              <div class="resistance-type resistance">
+                <span class="resistance-icon">🔰</span>
+                <span class="resistance-label">抗性:</span>
+                <span class="resistance-values">
+                  <span
+                    v-for="r in creature.resistances"
+                    :key="r.type"
+                    class="resist-item"
+                  >
+                    {{ r.type }} {{ r.value }}
+                  </span>
                 </span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 技能卡片 -->
-        <div v-if="creature.skills.length" class="info-card skills">
-          <div class="card-title">技能</div>
-          <div class="skills-grid">
-            <div v-for="s in creature.skills" :key="s.name" class="skill-item">
-              <span class="skill-name">{{ s.name }}</span>
-              <span class="skill-bonus">+{{ s.bonus }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 攻击方式卡片 -->
-        <div v-if="creature.attacks.length" class="info-card attacks">
-          <div class="card-title">⚔️ 攻击方式</div>
-          <div class="attacks-list">
-            <div v-for="atk in creature.attacks" :key="atk.name" class="attack-item">
-              <div class="attack-header">
-                <span class="attack-name">{{ atk.name }}</span>
-                <span class="attack-type">{{ atk.type }} · {{ atk.action }}</span>
               </div>
-              <div class="attack-details">
-                <div v-if="atk.range" class="attack-stat">
-                  <span class="stat-label">范围:</span>
-                  <span class="stat-value">{{ atk.range }}</span>
+            </div>
+          </div>
+
+          <!-- 技能卡片 -->
+          <div v-if="creature.skills.length" class="info-card skills">
+            <div class="card-title">技能</div>
+            <div class="skills-grid">
+              <div v-for="s in creature.skills" :key="s.name" class="skill-item">
+                <span class="skill-name">{{ s.name }}</span>
+                <span class="skill-bonus">+{{ s.bonus }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 第2页: 威能 -->
+        <div v-if="currentPage === 1" class="page-content">
+          <!-- 威能卡片 -->
+          <div v-if="creature.powers.length" class="info-card powers">
+            <div class="card-title">⚡ 威能</div>
+            <div class="powers-list">
+              <div
+                v-for="power in creature.powers"
+                :key="power.name"
+                class="power-item enhanced"
+              >
+                <div class="power-header">
+                  <div class="power-name">{{ power.displayName }}</div>
+                  <div v-if="power.subName" class="power-subname">
+                    ({{ power.subName }})
+                  </div>
                 </div>
-                <div class="attack-stat">
-                  <span class="stat-label">攻击:</span>
-                  <span class="stat-value">+{{ atk.attackBonus }} vs {{ atk.target }}</span>
+                <div class="power-meta">
+                  <div class="power-stat">
+                    <span class="stat-label">等级:</span>
+                    <span class="stat-value">{{ power.level }}</span>
+                  </div>
+                  <div class="power-stat">
+                    <span class="stat-label">类型:</span>
+                    <span class="stat-value">{{ getPowerTypeText(power.useType) }}</span>
+                  </div>
+                  <div class="power-stat">
+                    <span class="stat-label">动作:</span>
+                    <span class="stat-value">{{
+                      getActionTypeText(power.actionType)
+                    }}</span>
+                  </div>
+                  <div v-if="power.powersource" class="power-stat">
+                    <span class="stat-label">能量源:</span>
+                    <span class="stat-value">{{ power.powersource }}</span>
+                  </div>
                 </div>
-                <div class="attack-stat">
-                  <span class="stat-label">伤害:</span>
-                  <span class="stat-value">{{ atk.damage }}</span>
+                <div class="power-details">
+                  <div v-if="power.rangeText" class="power-detail">
+                    <span class="detail-label">范围:</span>
+                    <span class="detail-value">{{ power.rangeText }}</span>
+                  </div>
+                  <div v-if="power.target" class="power-detail">
+                    <span class="detail-label">目标:</span>
+                    <span class="detail-value">{{ power.target }}</span>
+                  </div>
+                  <div v-if="power.area" class="power-detail">
+                    <span class="detail-label">区域:</span>
+                    <span class="detail-value">{{ power.area }}</span>
+                  </div>
+                </div>
+                <div v-if="power.description" class="power-description">
+                  {{ power.description }}
+                </div>
+                <div
+                  v-if="power.keyWords && power.keyWords.length && power.keyWords[0]"
+                  class="power-keywords"
+                >
+                  <span class="keywords-label">关键词:</span>
+                  <span class="keywords-list">{{ power.keyWords.join(", ") }}</span>
                 </div>
               </div>
-              <div v-if="atk.effect" class="attack-effect hit-effect">
-                <span class="effect-label">命中效果:</span>
-                <span class="effect-text">{{ atk.effect }}</span>
+            </div>
+          </div>
+          <div v-else class="info-card empty-state">
+            <div class="empty-message">该生物没有威能</div>
+          </div>
+        </div>
+
+        <!-- 第3页: 特性 -->
+        <div v-if="currentPage === 2" class="page-content">
+          <!-- 特性卡片 -->
+          <div v-if="creature.traits.length" class="info-card traits">
+            <div class="card-title">✨ 特性</div>
+            <div class="traits-list">
+              <div v-for="t in creature.traits" :key="t.name" class="trait-item enhanced">
+                <div class="trait-name">{{ t.displayName || t.name }}</div>
+                <div v-if="t.description" class="trait-description">
+                  {{ t.description }}
+                </div>
               </div>
-              <div v-if="atk.missEffect" class="attack-effect miss-effect">
-                <span class="effect-label">失手效果:</span>
-                <span class="effect-text">{{ atk.missEffect }}</span>
+            </div>
+          </div>
+
+          <!-- 攻击方式卡片 -->
+          <div v-if="creature.attacks.length" class="info-card attacks">
+            <div class="card-title">⚔️ 攻击方式</div>
+            <div class="attacks-list">
+              <div v-for="atk in creature.attacks" :key="atk.name" class="attack-item">
+                <div class="attack-header">
+                  <span class="attack-name">{{ atk.name }}</span>
+                  <span class="attack-type">{{ atk.type }} · {{ atk.action }}</span>
+                </div>
+                <div class="attack-details">
+                  <div v-if="atk.range" class="attack-stat">
+                    <span class="stat-label">范围:</span>
+                    <span class="stat-value">{{ atk.range }}</span>
+                  </div>
+                  <div class="attack-stat">
+                    <span class="stat-label">攻击:</span>
+                    <span class="stat-value"
+                      >+{{ atk.attackBonus }} vs {{ atk.target }}</span
+                    >
+                  </div>
+                  <div class="attack-stat">
+                    <span class="stat-label">伤害:</span>
+                    <span class="stat-value">{{ atk.damage }}</span>
+                  </div>
+                </div>
+                <div v-if="atk.effect" class="attack-effect hit-effect">
+                  <span class="effect-label">命中效果:</span>
+                  <span class="effect-text">{{ atk.effect }}</span>
+                </div>
+                <div v-if="atk.missEffect" class="attack-effect miss-effect">
+                  <span class="effect-label">失手效果:</span>
+                  <span class="effect-text">{{ atk.missEffect }}</span>
+                </div>
               </div>
             </div>
           </div>
+
+          <div
+            v-if="!creature.traits.length && !creature.attacks.length"
+            class="info-card empty-state"
+          >
+            <div class="empty-message">该生物没有特性和攻击方式</div>
+          </div>
         </div>
 
-        <!-- 特性卡片 -->
-        <div v-if="creature.traits.length" class="info-card traits">
-          <div class="card-title">✨ 特性</div>
-          <div class="traits-list">
-            <div v-for="t in creature.traits" :key="t.name" class="trait-item">
-              <div class="trait-name">{{ t.displayName || t.name }}</div>
-              <div v-if="t.description" class="trait-description">{{ t.description }}</div>
+        <!-- 第4页: 装备 -->
+        <div v-if="currentPage === 3" class="page-content">
+          <!-- 装备卡片 -->
+          <div v-if="creature.equipment.length" class="info-card equipment">
+            <div class="card-title">🎒 装备</div>
+            <div class="equipment-list enhanced">
+              <div
+                v-for="(item, index) in creature.equipment"
+                :key="index"
+                class="equipment-item"
+              >
+                {{ item }}
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- 威能卡片 -->
-        <div v-if="creature.powers.length" class="info-card powers">
-          <div class="card-title">⚡ 威能</div>
-          <div class="powers-list">
-            <div v-for="power in creature.powers" :key="power.name" class="power-item">
-              <div class="power-name">{{ power.displayName }}</div>
+          <!-- 武器卡片 -->
+          <div
+            v-if="creature.weapons && creature.weapons.length"
+            class="info-card weapons"
+          >
+            <div class="card-title">⚔️ 武器</div>
+            <div class="weapons-list">
+              <div
+                v-for="weapon in creature.weapons"
+                :key="weapon.name"
+                class="weapon-item"
+              >
+                <div class="weapon-header">
+                  <span class="weapon-name">{{ weapon.name }}</span>
+                  <span class="weapon-type">{{ weapon.type }}</span>
+                </div>
+                <div class="weapon-stats">
+                  <div class="weapon-stat">
+                    <span class="stat-label">伤害:</span>
+                    <span class="stat-value">{{ weapon.damage }}</span>
+                  </div>
+                  <div class="weapon-stat">
+                    <span class="stat-label">攻击加值:</span>
+                    <span class="stat-value">+{{ weapon.bonus }}</span>
+                  </div>
+                  <div v-if="weapon.range" class="weapon-stat">
+                    <span class="stat-label">射程:</span>
+                    <span class="stat-value">{{ weapon.range }}</span>
+                  </div>
+                  <div v-if="weapon.weight" class="weapon-stat">
+                    <span class="stat-label">重量:</span>
+                    <span class="stat-value">{{ weapon.weight }}</span>
+                  </div>
+                  <div v-if="weapon.cost" class="weapon-stat">
+                    <span class="stat-label">价格:</span>
+                    <span class="stat-value">{{ weapon.cost }}</span>
+                  </div>
+                </div>
+                <div
+                  v-if="weapon.properties && weapon.properties.length"
+                  class="weapon-properties"
+                >
+                  <span class="props-label">属性:</span>
+                  <span class="props-list">{{ weapon.properties.join(", ") }}</span>
+                </div>
+                <div v-if="weapon.description" class="weapon-description">
+                  {{ weapon.description }}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- 装备卡片 -->
-        <div v-if="creature.equipment.length" class="info-card equipment">
-          <div class="card-title">🎒 装备</div>
-          <div class="equipment-list">
-            <span v-for="(item, index) in creature.equipment" :key="index" class="equipment-item">
-              {{ item }}
-            </span>
+          <div
+            v-if="!creature.equipment?.length && !creature.weapons?.length"
+            class="info-card empty-state"
+          >
+            <div class="empty-message">该生物没有装备和武器</div>
           </div>
         </div>
 
-        <!-- 其他信息卡片 -->
-        <div v-if="creature.languages.length || creature.notes.length" class="info-card misc">
-          <div class="card-title">其他信息</div>
-          <div v-if="creature.languages.length" class="misc-section">
-            <span class="misc-label">语言:</span>
-            <span class="misc-value">{{ creature.languages.join(', ') }}</span>
-          </div>
-          <div v-if="creature.notes.length" class="misc-section notes">
-            <div class="misc-label">备注:</div>
-            <div class="notes-list">
-              <div v-for="n in creature.notes" :key="n" class="note-item">{{ n }}</div>
+        <!-- 第5页: 专长 -->
+        <div v-if="currentPage === 4" class="page-content">
+          <!-- 专长卡片 -->
+          <div v-if="creature.feats && creature.feats.length" class="info-card feats">
+            <div class="card-title">🎯 专长</div>
+            <div class="feats-list">
+              <div v-for="feat in creature.feats" :key="feat.name" class="feat-item">
+                <div class="feat-name">{{ feat.displayName || feat.name }}</div>
+                <div v-if="feat.description" class="feat-description">
+                  {{ feat.description }}
+                </div>
+              </div>
             </div>
+          </div>
+
+          <!-- 其他信息卡片 -->
+          <div
+            v-if="creature.languages.length || creature.notes.length"
+            class="info-card misc"
+          >
+            <div class="card-title">其他信息</div>
+            <div v-if="creature.languages.length" class="misc-section">
+              <span class="misc-label">语言:</span>
+              <span class="misc-value">{{ creature.languages.join(", ") }}</span>
+            </div>
+            <div v-if="creature.notes.length" class="misc-section notes">
+              <div class="misc-label">备注:</div>
+              <div class="notes-list">
+                <div v-for="n in creature.notes" :key="n" class="note-item">{{ n }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            v-if="
+              !creature.feats?.length &&
+              !creature.languages?.length &&
+              !creature.notes?.length
+            "
+            class="info-card empty-state"
+          >
+            <div class="empty-message">该生物没有专长和其他信息</div>
           </div>
         </div>
       </div>
-      
+
       <!-- 底部按钮 -->
       <div class="panel-footer">
         <button class="fantasy-btn export-btn" @click="exportCreature">
@@ -233,77 +441,86 @@
 </template>
 
 <script setup lang="ts">
-import { ModifierSystem } from '@/core/system/ModifierSystem'
-import type { Creature } from '@/core/units/Creature'
-import type { Unit } from '@/core/units/Unit'
-import { onMounted, ref } from 'vue'
+import { ModifierSystem } from "@/core/system/ModifierSystem";
+import type { Creature } from "@/core/units/Creature";
+import type { Unit } from "@/core/units/Unit";
+import { onMounted, ref } from "vue";
 
-defineEmits(['close'])
-const will = ref('')
-const reflex = ref('')
+defineEmits(["close"]);
+const will = ref("");
+const reflex = ref("");
+const currentPage = ref(0);
+
+// 定义分页配置
+const pages = [
+  { title: "基础信息" },
+  { title: "威能" },
+  { title: "特性" },
+  { title: "装备" },
+  { title: "专长" },
+];
 
 onMounted(() => {
   // 这里可以添加一些初始化逻辑
   const getValue = (valuePath: string) => {
-    if (!props.unit) return ''
+    if (!props.unit) return "";
     let valueStack = ModifierSystem.getInstance().getValueStack(props.unit, valuePath);
     let result;
     result = valueStack.finalValue.toString();
     if (valueStack.modifiers.length > 0) {
-      result += ` (${valueStack.modifiers.map(m => (m.value + ' ' + m.type)).join(', ')})`;
+      result += ` (${valueStack.modifiers
+        .map((m) => m.value + " " + m.type)
+        .join(", ")})`;
     }
     return result;
-  }
+  };
   setInterval(() => {
     if (props.unit) {
-      will.value = getValue('will');
-      reflex.value = getValue('reflex');
+      will.value = getValue("will");
+      reflex.value = getValue("reflex");
     }
-
   }, 100);
-
-
-})
+});
 // 获取威能类型文本
 const getPowerTypeText = (type: string) => {
   const typeMap: Record<string, string> = {
-    'atwill': '随意',
-    'encounter': '遭遇',
-    'daily': '每日',
-    'utility': '辅助'
-  }
-  return typeMap[type] || type
-}
+    atwill: "随意",
+    encounter: "遭遇",
+    daily: "每日",
+    utility: "辅助",
+  };
+  return typeMap[type] || type;
+};
 
 // 获取动作类型文本
 const getActionTypeText = (type: string) => {
   const typeMap: Record<string, string> = {
-    'standard': '标准动作',
-    'move': '移动动作',
-    'minor': '次要动作',
-    'free': '自由动作',
-    'immediate': '立即动作'
-  }
-  return typeMap[type] || type
-}
+    standard: "标准动作",
+    move: "移动动作",
+    minor: "次要动作",
+    free: "自由动作",
+    immediate: "立即动作",
+  };
+  return typeMap[type] || type;
+};
 
-const props = defineProps<{ creature: Creature | null, unit: Unit | null }>()
+const props = defineProps<{ creature: Creature | null; unit: Unit | null }>();
 
 const exportCreature = () => {
-  if (!props.creature) return
+  if (!props.creature) return;
 
-  const dataStr = JSON.stringify(props.creature, null, 2)
-  const dataBlob = new Blob([dataStr], { type: 'application/json' })
-  const url = URL.createObjectURL(dataBlob)
+  const dataStr = JSON.stringify(props.creature, null, 2);
+  const dataBlob = new Blob([dataStr], { type: "application/json" });
+  const url = URL.createObjectURL(dataBlob);
 
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `${props.creature.name || 'creature'}.json`
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
-}
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${props.creature.name || "creature"}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
 </script>
 
 <style scoped>
@@ -324,24 +541,28 @@ const exportCreature = () => {
 }
 
 @keyframes overlayFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* 奇幻面板主容器 */
 .creature-info-panel {
   position: relative;
-  background: linear-gradient(135deg, 
-    #2c1810 0%, 
-    #3d2415 25%, 
-    #4a2c1a 50%, 
-    #3d2415 75%, 
-    #2c1810 100%);
+  background: linear-gradient(
+    135deg,
+    #2c1810 0%,
+    #3d2415 25%,
+    #4a2c1a 50%,
+    #3d2415 75%,
+    #2c1810 100%
+  );
   border: 3px solid #8b4513;
   border-radius: 12px;
-  box-shadow: 
-    0 0 30px rgba(139, 69, 19, 0.6),
-    inset 0 2px 4px rgba(255, 215, 0, 0.1),
+  box-shadow: 0 0 30px rgba(139, 69, 19, 0.6), inset 0 2px 4px rgba(255, 215, 0, 0.1),
     inset 0 -2px 4px rgba(0, 0, 0, 0.3);
   width: 90vw;
   max-width: 800px;
@@ -424,18 +645,14 @@ const exportCreature = () => {
 .creature-header {
   padding: 20px 30px 15px;
   border-bottom: 2px solid #8b4513;
-  background: linear-gradient(135deg, 
-    rgba(255, 215, 0, 0.1),
-    rgba(255, 140, 0, 0.1));
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.1));
 }
 
 .creature-title {
   font-size: 28px;
   font-weight: bold;
   color: #ffd700;
-  text-shadow: 
-    2px 2px 4px rgba(0, 0, 0, 0.8),
-    0 0 10px rgba(255, 215, 0, 0.5);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 10px rgba(255, 215, 0, 0.5);
   margin-bottom: 5px;
 }
 
@@ -452,6 +669,68 @@ const exportCreature = () => {
   padding: 20px 30px;
   scrollbar-width: thin;
   scrollbar-color: #8b4513 #2c1810;
+}
+
+/* 分页导航 */
+.page-navigation {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(139, 69, 19, 0.3), rgba(218, 165, 32, 0.2));
+  border: 2px solid rgba(139, 69, 19, 0.5);
+  border-radius: 12px;
+}
+
+.page-btn {
+  background: linear-gradient(135deg, rgba(61, 36, 21, 0.8), rgba(44, 24, 16, 0.8));
+  border: 2px solid rgba(139, 69, 19, 0.6);
+  border-radius: 8px;
+  color: #daa520;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 215, 0, 0.1);
+  min-width: 100px;
+}
+
+.page-btn:hover {
+  background: linear-gradient(135deg, #8b4513, #daa520);
+  color: #ffd700;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 215, 0, 0.2),
+    0 0 10px rgba(218, 165, 32, 0.3);
+}
+
+.page-btn.active {
+  background: linear-gradient(135deg, #daa520, #ffd700, #daa520);
+  color: #2c1810;
+  border-color: #ffd700;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 215, 0, 0.3),
+    0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+.page-btn.active:hover {
+  transform: translateY(-1px);
+}
+
+/* 页面内容容器 */
+.page-content {
+  animation: pageSlideIn 0.3s ease-out;
+}
+
+@keyframes pageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .content-scroll::-webkit-scrollbar {
@@ -474,16 +753,12 @@ const exportCreature = () => {
 
 /* 信息卡片通用样式 */
 .info-card {
-  background: linear-gradient(135deg, 
-    rgba(61, 36, 21, 0.8), 
-    rgba(44, 24, 16, 0.8));
+  background: linear-gradient(135deg, rgba(61, 36, 21, 0.8), rgba(44, 24, 16, 0.8));
   border: 2px solid rgba(139, 69, 19, 0.8);
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
-  box-shadow: 
-    0 4px 8px rgba(0, 0, 0, 0.3),
-    inset 0 1px 2px rgba(255, 215, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 215, 0, 0.1);
 }
 
 .card-title {
@@ -780,61 +1055,295 @@ const exportCreature = () => {
 .traits-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .trait-item {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(139, 69, 19, 0.5);
-  border-radius: 4px;
-  padding: 10px;
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.trait-item.enhanced {
+  background: linear-gradient(135deg, rgba(61, 36, 21, 0.6), rgba(44, 24, 16, 0.6));
+  border: 2px solid rgba(139, 69, 19, 0.7);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .trait-name {
   font-weight: bold;
   color: #ffd700;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+  font-size: 16px;
 }
 
 .trait-description {
   color: #e6d3b7;
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 1.5;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  border-left: 4px solid #8b4513;
 }
 
 /* 威能列表 */
 .powers-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
 }
 
 .power-item {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(139, 69, 19, 0.5);
-  border-radius: 4px;
-  padding: 8px 12px;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.power-item.enhanced {
+  background: linear-gradient(135deg, rgba(61, 36, 21, 0.6), rgba(44, 24, 16, 0.6));
+  border: 2px solid rgba(139, 69, 19, 0.7);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.power-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .power-name {
   color: #ffd700;
   font-weight: bold;
+  font-size: 16px;
 }
 
-/* 装备列表 */
-.equipment-list {
+.power-subname {
+  color: #daa520;
+  font-style: italic;
+  font-size: 14px;
+}
+
+.power-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  border: 1px solid rgba(139, 69, 19, 0.3);
+}
+
+.power-stat {
   display: flex;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.power-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.power-detail {
+  display: flex;
   gap: 8px;
 }
 
-.equipment-item {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(139, 69, 19, 0.5);
-  border-radius: 4px;
-  padding: 4px 8px;
+.detail-label {
+  color: #daa520;
+  font-weight: bold;
+  min-width: 60px;
+}
+
+.detail-value {
   color: #e6d3b7;
+}
+
+.power-description {
+  color: #e6d3b7;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  border-left: 4px solid #8b4513;
+  margin-bottom: 8px;
+}
+
+.power-keywords {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.keywords-label {
+  color: #daa520;
+  font-weight: bold;
   font-size: 13px;
+}
+
+.keywords-list {
+  color: #ffd700;
+  font-size: 13px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(139, 69, 19, 0.5);
+}
+
+/* 专长列表 */
+.feats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.feat-item {
+  background: linear-gradient(135deg, rgba(61, 36, 21, 0.6), rgba(44, 24, 16, 0.6));
+  border: 2px solid rgba(139, 69, 19, 0.7);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.feat-name {
+  font-weight: bold;
+  color: #ffd700;
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.feat-description {
+  color: #e6d3b7;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  border-left: 4px solid #8b4513;
+}
+
+/* 武器列表 */
+.weapons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.weapon-item {
+  background: linear-gradient(135deg, rgba(61, 36, 21, 0.6), rgba(44, 24, 16, 0.6));
+  border: 2px solid rgba(139, 69, 19, 0.7);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.weapon-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.weapon-name {
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffd700;
+}
+
+.weapon-type {
+  font-size: 12px;
+  color: #daa520;
+  font-style: italic;
+}
+
+.weapon-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.weapon-stat {
+  display: flex;
+  justify-content: space-between;
+}
+
+.weapon-properties {
+  margin-top: 8px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  border-left: 3px solid #8b4513;
+}
+
+.props-label {
+  font-weight: bold;
+  color: #daa520;
+  margin-right: 8px;
+}
+
+.props-list {
+  color: #e6d3b7;
+}
+
+.weapon-description {
+  margin-top: 8px;
+  color: #e6d3b7;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  border-left: 3px solid #8b4513;
+}
+
+/* 装备列表增强 */
+.equipment-list.enhanced {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.equipment-list.enhanced .equipment-item {
+  background: linear-gradient(135deg, rgba(61, 36, 21, 0.4), rgba(44, 24, 16, 0.4));
+  border: 1px solid rgba(139, 69, 19, 0.6);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #e6d3b7;
+  font-size: 14px;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.equipment-list.enhanced .equipment-item:hover {
+  background: linear-gradient(135deg, rgba(139, 69, 19, 0.3), rgba(218, 165, 32, 0.2));
+  color: #ffd700;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* 空状态样式 */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.empty-message {
+  color: #daa520;
+  font-size: 16px;
+  font-style: italic;
 }
 
 /* 其他信息 */
@@ -872,9 +1381,7 @@ const exportCreature = () => {
 .panel-footer {
   padding: 20px 30px;
   border-top: 2px solid #8b4513;
-  background: linear-gradient(135deg, 
-    rgba(255, 215, 0, 0.05),
-    rgba(255, 140, 0, 0.05));
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(255, 140, 0, 0.05));
   text-align: center;
 }
 
@@ -889,9 +1396,7 @@ const exportCreature = () => {
   padding: 10px 20px;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 
-    0 4px 8px rgba(0, 0, 0, 0.3),
-    inset 0 1px 2px rgba(255, 215, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 215, 0, 0.2);
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -901,17 +1406,13 @@ const exportCreature = () => {
   background: linear-gradient(135deg, #daa520, #ffd700, #daa520);
   color: #2c1810;
   transform: translateY(-2px);
-  box-shadow: 
-    0 6px 12px rgba(0, 0, 0, 0.4),
-    inset 0 1px 2px rgba(255, 215, 0, 0.3),
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 215, 0, 0.3),
     0 0 15px rgba(255, 215, 0, 0.3);
 }
 
 .fantasy-btn:active {
   transform: translateY(0);
-  box-shadow: 
-    0 2px 4px rgba(0, 0, 0, 0.3),
-    inset 0 1px 2px rgba(255, 215, 0, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 215, 0, 0.2);
 }
 
 .btn-icon {
@@ -924,28 +1425,39 @@ const exportCreature = () => {
     width: 95vw;
     max-height: 90vh;
   }
-  
+
   .content-scroll {
     padding: 15px 20px;
     max-height: calc(90vh - 180px);
   }
-  
+
   .creature-header {
     padding: 15px 20px 12px;
   }
-  
+
   .creature-title {
     font-size: 24px;
   }
-  
+
+  .page-navigation {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .page-btn {
+    min-width: 80px;
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
   .defense-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .abilities-grid {
     grid-template-columns: repeat(3, 1fr);
   }
-  
+
   .attack-details {
     grid-template-columns: 1fr;
   }
@@ -955,9 +1467,19 @@ const exportCreature = () => {
   .abilities-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .info-grid {
     grid-template-columns: 1fr;
+  }
+
+  .page-navigation {
+    gap: 6px;
+  }
+
+  .page-btn {
+    min-width: 70px;
+    padding: 6px 12px;
+    font-size: 12px;
   }
 }
 </style>
