@@ -12,49 +12,73 @@
 
       <!-- 标题栏 -->
       <div class="creature-header">
-        <div class="creature-title">{{ creature.name }}</div>
-        <div class="creature-subtitle">等级 {{ creature.level }} {{ creature.role }}</div>
+        <div class="header-main">
+          <!-- 头像区域 -->
+          <div class="creature-avatar">
+            <div class="avatar-frame">
+              <img
+                v-if="avatarUrl"
+                :src="avatarUrl"
+                :alt="creature.name"
+                class="avatar-image"
+                @error="handleImageError"
+              />
+              <!-- <div v-else class="avatar-placeholder">
+                <span class="avatar-icon">👤</span>
+              </div> -->
+            </div>
+          </div>
+
+          <!-- 标题信息 -->
+          <div class="creature-info-main">
+            <div class="creature-title">{{ creature.name }}</div>
+
+            <!-- 等级和基础信息同行 -->
+            <div class="subtitle-with-info">
+              <div class="creature-subtitle">
+                等级 {{ creature.level }} {{ creature.role }}
+              </div>
+
+              <!-- 基础信息 -->
+              <div class="basic-info-inline">
+                <div class="info-item-inline">
+                  <span class="label">XP</span>
+                  <span class="value">{{ creature.xp }}</span>
+                </div>
+                <div class="info-item-inline">
+                  <span class="label">体型</span>
+                  <span class="value">{{ creature.size }}</span>
+                </div>
+                <div class="info-item-inline">
+                  <span class="label">类型</span>
+                  <span class="value">{{ creature.type }}</span>
+                </div>
+                <div class="info-item-inline">
+                  <span class="label">阵营</span>
+                  <span class="value">{{ creature.alignment }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 分页导航 -->
+            <div class="page-navigation">
+              <button
+                v-for="(page, index) in pages"
+                :key="index"
+                :class="['page-btn', { active: currentPage === index }]"
+                @click="currentPage = index"
+              >
+                {{ page.title }}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- 内容滚动区域 -->
       <div class="content-scroll">
-        <!-- 分页导航 -->
-        <div class="page-navigation">
-          <button
-            v-for="(page, index) in pages"
-            :key="index"
-            :class="['page-btn', { active: currentPage === index }]"
-            @click="currentPage = index"
-          >
-            {{ page.title }}
-          </button>
-        </div>
-
         <!-- 第1页: 基础信息 -->
         <div v-if="currentPage === 0" class="page-content">
-          <!-- 基础信息卡片 -->
-          <div class="info-card basic-info">
-            <div class="card-title">基础信息</div>
-            <div class="info-grid">
-              <div class="info-item">
-                <span class="label">XP</span>
-                <span class="value">{{ creature.xp }}</span>
-              </div>
-              <div class="info-item">
-                <span class="label">体型</span>
-                <span class="value">{{ creature.size }}</span>
-              </div>
-              <div class="info-item">
-                <span class="label">类型</span>
-                <span class="value">{{ creature.type }}</span>
-              </div>
-              <div class="info-item">
-                <span class="label">阵营</span>
-                <span class="value">{{ creature.alignment }}</span>
-              </div>
-            </div>
-          </div>
-
           <!-- 生命值和防御卡片 -->
           <div class="info-card combat-stats">
             <div class="card-title">战斗数据</div>
@@ -69,7 +93,7 @@
                   }"
                 ></div>
                 <div class="hp-text">
-                  HP: {{ creature.hp }} (血量线: {{ creature.bloodied }})
+                  HP: {{ creature.hp }} (重伤: {{ creature.bloodied }})
                 </div>
               </div>
             </div>
@@ -398,33 +422,46 @@
             </div>
           </div>
 
-          <!-- 其他信息卡片 -->
-          <div
-            v-if="creature.languages.length || creature.notes.length"
-            class="info-card misc"
-          >
-            <div class="card-title">其他信息</div>
-            <div v-if="creature.languages.length" class="misc-section">
-              <span class="misc-label">语言:</span>
-              <span class="misc-value">{{ creature.languages.join(", ") }}</span>
+          <div v-if="!creature.feats?.length" class="info-card empty-state">
+            <div class="empty-message">该生物没有专长</div>
+          </div>
+        </div>
+
+        <!-- 第6页: 其他信息 -->
+        <div v-if="currentPage === 5" class="page-content">
+          <!-- 语言信息卡片 -->
+          <div v-if="creature.languages.length" class="info-card languages">
+            <div class="card-title">🗣️ 语言</div>
+            <div class="languages-display">
+              <div
+                v-for="(language, index) in creature.languages"
+                :key="index"
+                class="language-item"
+              >
+                {{ language }}
+              </div>
             </div>
-            <div v-if="creature.notes.length" class="misc-section notes">
-              <div class="misc-label">备注:</div>
-              <div class="notes-list">
-                <div v-for="n in creature.notes" :key="n" class="note-item">{{ n }}</div>
+          </div>
+
+          <!-- 备注信息卡片 -->
+          <div v-if="creature.notes.length" class="info-card notes-card">
+            <div class="card-title">📝 备注</div>
+            <div class="notes-list enhanced">
+              <div
+                v-for="(note, index) in creature.notes"
+                :key="index"
+                class="note-item enhanced"
+              >
+                <div class="note-content">{{ note }}</div>
               </div>
             </div>
           </div>
 
           <div
-            v-if="
-              !creature.feats?.length &&
-              !creature.languages?.length &&
-              !creature.notes?.length
-            "
+            v-if="!creature.languages?.length && !creature.notes?.length"
             class="info-card empty-state"
           >
-            <div class="empty-message">该生物没有专长和其他信息</div>
+            <div class="empty-message">该生物没有其他信息</div>
           </div>
         </div>
       </div>
@@ -444,7 +481,8 @@
 import { ModifierSystem } from "@/core/system/ModifierSystem";
 import type { Creature } from "@/core/units/Creature";
 import type { Unit } from "@/core/units/Unit";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
+import { getUnitAvatar } from "@/utils/utils";
 
 defineEmits(["close"]);
 const will = ref("");
@@ -458,6 +496,7 @@ const pages = [
   { title: "特性" },
   { title: "装备" },
   { title: "专长" },
+  { title: "其他信息" },
 ];
 
 onMounted(() => {
@@ -505,6 +544,21 @@ const getActionTypeText = (type: string) => {
 };
 
 const props = defineProps<{ creature: Creature | null; unit: Unit | null }>();
+
+// 获取头像的计算属性
+const avatarUrl = computed(() => {
+  if (props.unit?.unitTypeName) {
+    return getUnitAvatar(props.unit.unitTypeName);
+  }
+  return null;
+});
+
+const handleImageError = (event: Event) => {
+  const target = event.target as HTMLImageElement;
+  if (target) {
+    target.style.display = "none";
+  }
+};
 
 const exportCreature = () => {
   if (!props.creature) return;
@@ -648,6 +702,86 @@ const exportCreature = () => {
   background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.1));
 }
 
+.header-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+/* 头像区域 */
+.creature-avatar {
+  flex-shrink: 0;
+}
+
+.avatar-frame {
+  width: 160px;
+  height: 160px;
+  border: 3px solid #8b4513;
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(139, 69, 19, 0.3),
+    rgba(61, 36, 21, 0.5),
+    rgba(139, 69, 19, 0.3)
+  );
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 215, 0, 0.1),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  position: relative;
+}
+
+.avatar-frame::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #ffd700, #ff8c00, #daa520, #ffd700);
+  border-radius: 12px;
+  z-index: -1;
+  animation: avatarGlow 3s ease-in-out infinite;
+}
+
+@keyframes avatarGlow {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(44, 24, 16, 0.8), rgba(61, 36, 21, 0.6));
+  border-radius: 8px;
+}
+
+.avatar-icon {
+  font-size: 36px;
+  color: #daa520;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* 标题信息区域 */
+.creature-info-main {
+  flex: 1;
+  min-width: 0;
+}
+
 .creature-title {
   font-size: 28px;
   font-weight: bold;
@@ -660,6 +794,55 @@ const exportCreature = () => {
   font-size: 16px;
   color: #daa520;
   font-style: italic;
+  margin-bottom: 0;
+  line-height: 1;
+}
+
+/* 等级和基础信息同行布局 */
+.subtitle-with-info {
+  display: flex;
+  align-items: flex-end;
+  gap: 30px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+/* 标题内基础信息 */
+.basic-info-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 0;
+  padding: 0;
+  border-top: none;
+  flex: 1;
+  min-width: 300px;
+  align-items: flex-end;
+}
+
+.info-item-inline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+  justify-content: flex-end;
+}
+
+.info-item-inline .label {
+  font-size: 11px;
+  color: #daa520;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+.info-item-inline .value {
+  font-size: 16px;
+  color: #ffd700;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+  line-height: 1;
 }
 
 /* 滚动内容区域 */
@@ -675,26 +858,28 @@ const exportCreature = () => {
 .page-navigation {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  padding: 16px;
-  background: linear-gradient(135deg, rgba(139, 69, 19, 0.3), rgba(218, 165, 32, 0.2));
-  border: 2px solid rgba(139, 69, 19, 0.5);
-  border-radius: 12px;
+  gap: 8px;
+  margin-top: 15px;
+  margin-bottom: 0;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(139, 69, 19, 0.2), rgba(218, 165, 32, 0.1));
+  border: 1px solid rgba(139, 69, 19, 0.4);
+  border-radius: 8px;
+  flex-wrap: wrap;
 }
 
 .page-btn {
   background: linear-gradient(135deg, rgba(61, 36, 21, 0.8), rgba(44, 24, 16, 0.8));
-  border: 2px solid rgba(139, 69, 19, 0.6);
-  border-radius: 8px;
+  border: 1px solid rgba(139, 69, 19, 0.6);
+  border-radius: 6px;
   color: #daa520;
   font-weight: bold;
-  font-size: 14px;
-  padding: 10px 20px;
+  font-size: 12px;
+  padding: 8px 16px;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 215, 0, 0.1);
-  min-width: 100px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 215, 0, 0.1);
+  min-width: 80px;
 }
 
 .page-btn:hover {
@@ -857,8 +1042,9 @@ const exportCreature = () => {
 /* 机动性信息 */
 .mobility-info {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
 }
 
 .speed-item {
@@ -866,6 +1052,11 @@ const exportCreature = () => {
   align-items: center;
   color: #e6d3b7;
   font-size: 14px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(139, 69, 19, 0.3);
+  flex-shrink: 0;
 }
 
 .speed-icon {
@@ -1346,6 +1537,62 @@ const exportCreature = () => {
   font-style: italic;
 }
 
+/* 语言显示 */
+.languages-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.language-item {
+  background: linear-gradient(135deg, rgba(61, 36, 21, 0.6), rgba(44, 24, 16, 0.6));
+  border: 2px solid rgba(139, 69, 19, 0.7);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: #ffd700;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+}
+
+.language-item:hover {
+  background: linear-gradient(135deg, rgba(139, 69, 19, 0.4), rgba(218, 165, 32, 0.3));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* 备注卡片增强 */
+.notes-list.enhanced {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.note-item.enhanced {
+  background: linear-gradient(135deg, rgba(61, 36, 21, 0.6), rgba(44, 24, 16, 0.6));
+  border: 2px solid rgba(139, 69, 19, 0.7);
+  border-left: 6px solid #8b4513;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+}
+
+.note-item.enhanced:hover {
+  background: linear-gradient(135deg, rgba(139, 69, 19, 0.4), rgba(218, 165, 32, 0.2));
+  transform: translateX(4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.note-content {
+  color: #e6d3b7;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: justify;
+}
+
 /* 其他信息 */
 .misc-section {
   margin-bottom: 12px;
@@ -1435,8 +1682,43 @@ const exportCreature = () => {
     padding: 15px 20px 12px;
   }
 
+  .header-main {
+    gap: 15px;
+  }
+
+  .avatar-frame {
+    width: 70px;
+    height: 70px;
+  }
+
+  .avatar-icon {
+    font-size: 32px;
+  }
+
   .creature-title {
     font-size: 24px;
+  }
+
+  .subtitle-with-info {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .creature-subtitle {
+    text-align: center;
+    margin-bottom: 0;
+  }
+
+  .basic-info-inline {
+    gap: 15px;
+    justify-content: center;
+    min-width: auto;
+    align-items: flex-end;
+  }
+
+  .info-item-inline {
+    min-width: 70px;
   }
 
   .page-navigation {
@@ -1448,6 +1730,15 @@ const exportCreature = () => {
     min-width: 80px;
     padding: 8px 16px;
     font-size: 13px;
+  }
+
+  .mobility-info {
+    gap: 12px;
+  }
+
+  .speed-item {
+    font-size: 13px;
+    padding: 5px 10px;
   }
 
   .defense-grid {
@@ -1472,14 +1763,91 @@ const exportCreature = () => {
     grid-template-columns: 1fr;
   }
 
+  .header-main {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .creature-avatar {
+    align-self: center;
+  }
+
+  .avatar-frame {
+    width: 60px;
+    height: 60px;
+  }
+
+  .avatar-icon {
+    font-size: 28px;
+  }
+
+  .creature-info-main {
+    text-align: center;
+  }
+
+  .subtitle-with-info {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .basic-info-inline {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    min-width: auto;
+  }
+
+  .info-item-inline {
+    flex-direction: row;
+    gap: 8px;
+    min-width: auto;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .info-item-inline .label {
+    margin-bottom: 0;
+    min-width: 40px;
+  }
+
+  .info-item-inline .value {
+    line-height: normal;
+  }
+
   .page-navigation {
+    flex-wrap: wrap;
     gap: 6px;
+    justify-content: center;
   }
 
   .page-btn {
     min-width: 70px;
-    padding: 6px 12px;
+    padding: 8px 12px;
     font-size: 12px;
+    flex: 1;
+    max-width: calc(50% - 3px);
+  }
+
+  .mobility-info {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .speed-item {
+    justify-content: center;
+  }
+
+  .languages-display {
+    justify-content: center;
+  }
+
+  .language-item {
+    flex: 1;
+    min-width: 100px;
+    max-width: calc(50% - 6px);
   }
 }
 </style>
