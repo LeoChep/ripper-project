@@ -20,9 +20,12 @@
           <span class="label">能量源：</span>
           <span class="value">{{ power.powersource }}</span>
         </div> -->
-        <div class="info-row" v-if="power.keyWords && power.keyWords.length > 0 && power.keyWords[0]">
+        <div
+          class="info-row"
+          v-if="power.keyWords && power.keyWords.length > 0 && power.keyWords[0]"
+        >
           <span class="label">关键词：</span>
-          <span class="value">{{ power.keyWords.join(', ') }}</span>
+          <span class="value">{{ power.keyWords.join(", ") }}</span>
         </div>
       </div>
 
@@ -35,6 +38,14 @@
         <div class="info-row" v-if="power.target">
           <span class="label">目标：</span>
           <span class="value">{{ power.target }}</span>
+        </div>
+        <div class="info-row" v-if="power.attackText">
+          <span class="label">攻击：</span>
+          <span class="value">{{ power.attackText }}</span>
+        </div>
+        <div class="info-row" v-if="power.trigger">
+          <span class="label">触发：</span>
+          <span class="value">{{ power.trigger }}</span>
         </div>
         <div class="info-row" v-if="power.area && power.area > 0">
           <span class="label">区域：</span>
@@ -88,10 +99,13 @@
 
       <!-- 威能状态 -->
       <div class="power-status">
-        <div class="status-indicator" :class="{ 
-          'available': canUsePower, 
-          'unavailable': !canUsePower 
-        }">
+        <div
+          class="status-indicator"
+          :class="{
+            available: canUsePower,
+            unavailable: !canUsePower,
+          }"
+        >
           <span v-if="canUsePower">✓ 可使用</span>
           <span v-else>✗ 不可用</span>
         </div>
@@ -101,213 +115,217 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch } from "vue";
 
 // Props
 const props = defineProps({
   power: {
     type: Object,
-    default: null
+    default: null,
   },
   visible: {
     type: Boolean,
-    default: false
+    default: false,
   },
   mouseX: {
     type: Number,
-    default: 0
+    default: 0,
   },
   mouseY: {
     type: Number,
-    default: 0
+    default: 0,
   },
   showCooldownInfo: {
     type: Boolean,
-    default: true
-  }
-})
+    default: true,
+  },
+});
 
 // 计算威能是否可用
 const canUsePower = computed(() => {
-  if (!props.power) return false
-  
+  if (!props.power) return false;
+
   // 如果威能有 canUse 方法，直接调用
-  if (typeof props.power.canUse === 'function') {
-    return props.power.canUse()
+  if (typeof props.power.canUse === "function") {
+    return props.power.canUse();
   }
-  
+
   // 否则进行基本检查
-  const power = props.power
-  
+  const power = props.power;
+
   // 检查冷却时间
   if (power.currentCooldown && power.currentCooldown > 0) {
-    return false
+    return false;
   }
-  
+
   // 检查使用次数限制
-  if (power.maxUses && power.maxUses > 0 && 
-      power.currentUses && power.currentUses >= power.maxUses) {
-    return false
+  if (
+    power.maxUses &&
+    power.maxUses > 0 &&
+    power.currentUses &&
+    power.currentUses >= power.maxUses
+  ) {
+    return false;
   }
-  
+
   // 检查是否已准备
   if (power.prepared === false) {
-    return false
+    return false;
   }
-  
-  return true
-})
+
+  return true;
+});
 
 // 计算威能详情的预估高度
 const calculateTooltipHeight = (power) => {
-  if (!power) return 100
-  
-  let height = 0
-  
+  if (!power) return 100;
+
+  let height = 0;
+
   // 威能标题区域 (标题 + 类型标签)
-  height += 50
-  
+  height += 50;
+
   // 基本信息区域
-  let basicInfoRows = 0
-  if (power.level) basicInfoRows++
-  if (power.keyWords && power.keyWords.length > 0 && power.keyWords[0]) basicInfoRows++
+  let basicInfoRows = 0;
+  if (power.level) basicInfoRows++;
+  if (power.keyWords && power.keyWords.length > 0 && power.keyWords[0]) basicInfoRows++;
   if (basicInfoRows > 0) {
-    height += basicInfoRows * 18 + 15 // 每行18px + 区域边距
+    height += basicInfoRows * 18 + 15; // 每行18px + 区域边距
   }
-  
+
   // 使用信息区域
-  let usageInfoRows = 0
-  if (power.rangeText || power.rangeType) usageInfoRows++
-  if (power.target) usageInfoRows++
-  if (power.area && power.area > 0) usageInfoRows++
-  if (power.requirements) usageInfoRows++
+  let usageInfoRows = 0;
+  if (power.rangeText || power.rangeType) usageInfoRows++;
+  if (power.target) usageInfoRows++;
+  if (power.area && power.area > 0) usageInfoRows++;
+  if (power.requirements) usageInfoRows++;
   if (usageInfoRows > 0) {
-    height += usageInfoRows * 18 + 15
+    height += usageInfoRows * 18 + 15;
   }
-  
+
   // 冷却信息区域
   if (props.showCooldownInfo) {
-    let cooldownRows = 0
-    if (power.cooldown && power.cooldown > 0) cooldownRows++
-    if (power.maxUses && power.maxUses > 0) cooldownRows++
-    if (power.currentCooldown && power.currentCooldown > 0) cooldownRows++
+    let cooldownRows = 0;
+    if (power.cooldown && power.cooldown > 0) cooldownRows++;
+    if (power.maxUses && power.maxUses > 0) cooldownRows++;
+    if (power.currentCooldown && power.currentCooldown > 0) cooldownRows++;
     if (cooldownRows > 0) {
-      height += cooldownRows * 18 + 15
+      height += cooldownRows * 18 + 15;
     }
   }
-  
+
   // 命中效果
   if (power.hitText) {
-    const textLength = power.hitText.length
-    const estimatedLines = Math.max(1, Math.ceil(textLength / 40)) // 每行约40个字符
-    height += estimatedLines * 16 + 25 // 16px行高 + 标签和边距
+    const textLength = power.hitText.length;
+    const estimatedLines = Math.max(1, Math.ceil(textLength / 40)); // 每行约40个字符
+    height += estimatedLines * 16 + 25; // 16px行高 + 标签和边距
   }
-  
+
   // 失手效果
   if (power.missText) {
-    const textLength = power.missText.length
-    const estimatedLines = Math.max(1, Math.ceil(textLength / 40))
-    height += estimatedLines * 16 + 25
+    const textLength = power.missText.length;
+    const estimatedLines = Math.max(1, Math.ceil(textLength / 40));
+    height += estimatedLines * 16 + 25;
   }
-  
+
   // 效果文本
   if (power.effectText) {
-    const textLength = power.effectText.length
-    const estimatedLines = Math.max(1, Math.ceil(textLength / 40))
-    height += estimatedLines * 16 + 25
+    const textLength = power.effectText.length;
+    const estimatedLines = Math.max(1, Math.ceil(textLength / 40));
+    height += estimatedLines * 16 + 25;
   }
-  
+
   // 描述文本
   if (power.description) {
-    const textLength = power.description.length
-    const estimatedLines = Math.max(1, Math.ceil(textLength / 40))
-    height += estimatedLines * 18 + 30 // 稍大的行高和边距
+    const textLength = power.description.length;
+    const estimatedLines = Math.max(1, Math.ceil(textLength / 40));
+    height += estimatedLines * 18 + 30; // 稍大的行高和边距
   }
-  
+
   // 状态指示器
-  height += 40
-  
+  height += 40;
+
   // 容器内边距
-  height += 30
-  
+  height += 30;
+
   // 确保最小高度，但不设置最大高度限制
-  return Math.max(height, 120)
-}
+  return Math.max(height, 120);
+};
 
 // 计算提示框位置
 const tooltipStyle = computed(() => {
-  if (!props.visible) return { display: 'none' }
-  
-  const offset = 15
-  const tooltipWidth = 320
-  const tooltipHeight = calculateTooltipHeight(props.power)
-  const screenWidth = window.innerWidth
-  const screenHeight = window.innerHeight
-  
-  let left = props.mouseX + offset
-  let top = props.mouseY + offset
-  
+  if (!props.visible) return { display: "none" };
+
+  const offset = 15;
+  const tooltipWidth = 320;
+  const tooltipHeight = calculateTooltipHeight(props.power);
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+
+  let left = props.mouseX + offset;
+  let top = props.mouseY + offset;
+
   // 水平位置调整
   if (left + tooltipWidth > screenWidth) {
-    left = props.mouseX - tooltipWidth - offset
+    left = props.mouseX - tooltipWidth - offset;
     if (left < 0) {
-      left = screenWidth - tooltipWidth - 10
+      left = screenWidth - tooltipWidth - 10;
     }
   }
-  
+
   // 垂直位置调整 - 根据实际计算的高度
-  const bottomSpace = screenHeight - props.mouseY
-  const topSpace = props.mouseY
-  
+  const bottomSpace = screenHeight - props.mouseY;
+  const topSpace = props.mouseY;
+
   if (bottomSpace < tooltipHeight + offset && topSpace > tooltipHeight + offset) {
     // 底部空间不足且顶部有足够空间，显示在鼠标上方
-    top = props.mouseY - tooltipHeight - offset
+    top = props.mouseY - tooltipHeight - offset;
   } else if (top + tooltipHeight > screenHeight) {
     // 如果底部超出，尝试贴底显示
-    top = screenHeight - tooltipHeight - 10
-    
+    top = screenHeight - tooltipHeight - 10;
+
     // 如果贴底后顶部也超出，则居中显示在可见区域
     if (top < 10) {
-      top = Math.max(10, (screenHeight - tooltipHeight) / 2)
+      top = Math.max(10, (screenHeight - tooltipHeight) / 2);
     }
   }
-  
+
   // 确保最小边距
-  left = Math.max(10, Math.min(left, screenWidth - tooltipWidth - 10))
-  top = Math.max(10, Math.min(top, screenHeight - tooltipHeight - 10))
-  
+  left = Math.max(10, Math.min(left, screenWidth - tooltipWidth - 10));
+  top = Math.max(10, Math.min(top, screenHeight - tooltipHeight - 10));
+
   return {
-    position: 'fixed',
+    position: "fixed",
     left: `${left}px`,
     top: `${top}px`,
     zIndex: 9999,
-    width: `${tooltipWidth}px`
-  }
-})
+    width: `${tooltipWidth}px`,
+  };
+});
 
 // 获取动作类型文本
 const getActionTypeText = (type) => {
   const typeMap = {
-    'standard': '标准动作',
-    'move': '移动动作',
-    'minor': '次要动作',
-    'reaction': '反应',
-    'free': '自由动作'
-  }
-  return typeMap[type] || type
-}
+    standard: "标准动作",
+    move: "移动动作",
+    minor: "次要动作",
+    reaction: "反应",
+    free: "自由动作",
+  };
+  return typeMap[type] || type;
+};
 
 // 获取威能类型文本
 const getPowerTypeText = (type) => {
   const typeMap = {
-    'atwill': '随意威能',
-    'encounter': '遭遇威能',
-    'utility': '辅助威能',
-    'daily': '每日威能',
-    'item': '道具'
-  }
-  return typeMap[type] || type
-}
+    atwill: "随意威能",
+    encounter: "遭遇威能",
+    utility: "辅助威能",
+    daily: "每日威能",
+    item: "道具",
+  };
+  return typeMap[type] || type;
+};
 </script>
 
 <style scoped>

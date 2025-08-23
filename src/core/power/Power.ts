@@ -22,6 +22,7 @@ export class Power {
   area: number = 0;
   rechargeRoll: string = "";
   rechargeCondition: string = "";
+  attackText:string=""
   hitText: string = "";
   missText: string = "";
   effectText: string = "";

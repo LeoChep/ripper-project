@@ -14,8 +14,9 @@ export class IceRays extends Power {
   
   target = "一个或两个";
   rangeText: string = "远程10";
-  hitText: string = `命中：	1d10 + 智力调整值的寒冰伤害，且目标定身直到你下回合结束。`;
-  missText: string = `失手：	目标迟缓直到你下一回合结束。`;
+  attackText: string=`智力 vs. 反射`;
+  hitText: string = `1d10 + 智力调整值的寒冰伤害，且目标定身直到你下回合结束。`;
+  missText: string = `目标迟缓直到你下一回合结束。`;
   owner = null as any; // 反应的拥有者
   constructor() {
     super({});

@@ -32,13 +32,13 @@ export abstract class AbstractPwoerController {
     unitPowers?.forEach((power) => {
       if (power.name === this.powerName) {
          console.log("power can use", power,canuse);
-       // canuse = power.canUse();
+       canuse = power.canUse();
         console.log("power can use", power,canuse);
       }
     });
 
-   // return canuse;
-    return true;
+   return canuse;
+    // return true;
   };
   use = () => {
     const unit = this.selectedCharacter;
