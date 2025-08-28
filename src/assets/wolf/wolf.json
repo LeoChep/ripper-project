@@ -73,6 +73,19 @@
       "missEffect": null
     }
   ],
+  "implements": [
+    {
+      "name": "法杖",
+      "type": "implement",
+      "action": "法术",
+      "range": 5,
+      "bonus": 1,
+      "target": "will",
+      "damage": "1d6+3",
+      "effect": "",
+      "missEffect": null
+    }
+  ],
   "powers": [
     {
       "name": "IceRays",

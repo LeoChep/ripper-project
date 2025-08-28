@@ -71,6 +71,7 @@ export interface CreatureOptions {
     notes?: string[];
     powers?: Power[];
     weapons?: Weapon[];
+    implements?: Weapon[];
     buffs?: BuffInterface[];
 }
 
@@ -105,6 +106,7 @@ export class Creature {
     attacks: CreatureAttack[];
     powers: Power[];
     weapons?: Weapon[];
+    implements: Weapon[];
     modifier: Modifier[] = [];
     buffs:BuffInterface[] = [];
     constructor(options: CreatureOptions) {
@@ -145,9 +147,12 @@ export class Creature {
         this.notes = options.notes || [];
         this.powers = options.powers || [];
         this.weapons = options.weapons||[];
+        this.implements = options.implements || [];
         this.buffs = options.buffs || [];
     }
+
 }
+   
 
 /**
  * 将 angle.txt 的内容解析为 Creature 实例

@@ -83,6 +83,7 @@
         <!-- 使用子组件 -->
         <CreatureBasicInfo
           v-if="currentPage === 'basic'"
+          :unit="unit"
           :creature="creature"
           :reflex="reflex"
           :will="will"
@@ -101,7 +102,7 @@
 import { ModifierSystem } from "@/core/system/ModifierSystem";
 import type { Creature } from "@/core/units/Creature";
 import type { Unit } from "@/core/units/Unit";
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, provide } from "vue";
 import { getUnitAvatar } from "@/utils/utils";
 // 导入子组件
 import CreatureBasicInfo from "./pages/CreatureBasicInfo.vue";
@@ -173,6 +174,10 @@ onMounted(() => {
     }
     return result;
   };
+  const getUnit = () => {
+    return props.unit;
+  };
+
   setInterval(() => {
     if (props.unit) {
       will.value = getValue("will");

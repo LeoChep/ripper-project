@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "datastructures-algorithms-ts": "^0.0.9",
+    "math": "^0.0.3",
+    "maths.ts": "^0.0.8",
     "pinia": "^3.0.1",
     "pixi.js": "^8.9.2",
     "vue": "^3.5.13",

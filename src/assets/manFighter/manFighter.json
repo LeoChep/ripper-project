@@ -55,7 +55,7 @@
       "name": "长剑",
       "type": "Melee",
       "action": "武器",
-      "range": 2,
+      "range": 1,
       "proficiency": 3,
       "bonus": 1,
       "target": "ac",
@@ -71,6 +71,7 @@
       "range": 1,
       "attackBonus": 12,
       "bonus": 1,
+      "proficiency": 2,
       "target": "ac",
       "weapon": "1d6",
       "damage": "1d6",
@@ -143,6 +144,9 @@
     },
     {
       "name": "LightningReflexes"
+    },
+    {
+      "name": "WeaponExpertise"
     }
   ],
   "notes": [

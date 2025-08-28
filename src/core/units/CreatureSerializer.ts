@@ -53,6 +53,9 @@ export class CreatureSerializer {
       weapons: creature.weapons
         ? this.serializeWeapons(creature.weapons)
         : undefined,
+      implements: creature.implements
+        ? this.serializeWeapons(creature.implements)
+        : undefined,
       buffs: creature.buffs ? BuffSerializer.serializeArray(creature.buffs) : [],
     };
   }

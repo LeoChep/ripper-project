@@ -4,7 +4,7 @@
   <CreatureInfo
     :creature="selectedCreature"
     :unit="selectedUnit"
-    v-if="selectedCreature"
+    v-if="selectedUnit"
     @close="selectedCreature = null"
   />
   <TalkPannel />

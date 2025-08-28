@@ -1,5 +1,5 @@
 <template>
-  <div class="page-content">
+  <div class="page-content" v-if="creature">
     <!-- 能力值卡片 -->
     <div v-if="creature.abilities" class="info-card abilities">
       <div class="card-title">属性</div>
@@ -92,17 +92,83 @@
         </div>
       </div>
     </div>
+
+    <!-- 武器卡片 -->
+    <div v-if="creature.weapons && creature.weapons.length" class="info-card weapons">
+      <div class="card-title">武器</div>
+      <div class="weapons-grid">
+        <div v-for="w in weaponAttack" :key="w.name" class="weapon-item">
+          <div class="weapon-name">{{ w.name }}</div>
+          <div class="weapon-type">类型: {{ w.type }}</div>
+          <div class="weapon-attack">攻击: {{ w.attackBonus }}</div>
+          <div class="weapon-damage">伤害: {{ w.damage }}</div>
+          <div v-if="w.range" class="weapon-range">射程: {{ w.range }}</div>
+          <!-- <div v-if="w.properties && w.properties.length" class="weapon-properties">
+            <span class="weapon-prop-label">特性:</span>
+            <span class="weapon-prop-list">{{ w.properties.join(", ") }}</span>
+          </div> -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 法器卡片 -->
+    <div
+      v-if="creature.implements && creature.implements.length"
+      class="info-card weapons"
+    >
+      <div class="card-title">法器</div>
+      <div class="weapons-grid">
+        <div v-for="w in creature.implements" :key="w.name" class="weapon-item">
+          <div class="weapon-name">{{ w.name }}</div>
+          <div class="weapon-type">类型: {{ w.type }}</div>
+          <div class="weapon-attack">攻击: {{ w.bonus }}</div>
+          <div class="weapon-damage">伤害: {{ w.damage }}</div>
+          <div v-if="w.range" class="weapon-range">射程: {{ w.range }}</div>
+          <!-- <div v-if="w.properties && w.properties.length" class="weapon-properties">
+            <span class="weapon-prop-label">特性:</span>
+            <span class="weapon-prop-list">{{ w.properties.join(", ") }}</span>
+          </div> -->
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { Creature } from "@/core/units/Creature";
+import { createAttack } from "@/core/system/AttackSystem";
+import type { Creature, CreatureAttack } from "@/core/units/Creature";
+import type { Unit } from "@/core/units/Unit";
+import type { Weapon } from "@/core/units/Weapon";
+import { inject, onMounted, ref, type Ref, watch } from "vue";
 
-defineProps<{
-  creature: Creature;
+const props = defineProps<{
+  creature: Creature | null;
+  unit: Unit | null;
   reflex: string;
   will: string;
 }>();
+
+const weaponAttack: Ref<CreatureAttack[]> = ref([]);
+onMounted(() => {
+  if (props.unit && props.unit.creature && props.unit.creature.weapons) {
+    weaponAttack.value = props.unit.creature.weapons.map((w) => getAttack(w)).filter((a): a is CreatureAttack => a !== null);
+  }
+});
+
+const getAttack = (weapon: Weapon) => {
+  const unit = props.unit;
+
+  if (unit) {
+    const attackParam = {
+      attackFormula: "[STR]",
+      damageFormula: "[W]+[STR]",
+      keyWords: [],
+      unit: unit,
+      weapon: weapon
+    }
+    return createAttack(attackParam);
+  }
+};
 </script>
 
 <style scoped>
@@ -116,6 +182,7 @@ defineProps<{
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -294,6 +361,52 @@ defineProps<{
 .skill-bonus {
   color: #ffd700;
   font-weight: bold;
+}
+
+/* 武器网格 */
+.weapons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.weapon-item {
+  text-align: left;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  border: 1px solid rgba(139, 69, 19, 0.5);
+  margin-bottom: 4px;
+}
+
+.weapon-name {
+  font-size: 15px;
+  color: #ffd700;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.weapon-type,
+.weapon-attack,
+.weapon-damage,
+.weapon-range {
+  font-size: 13px;
+  color: #e6d3b7;
+  margin-bottom: 2px;
+}
+
+.weapon-properties {
+  font-size: 12px;
+  color: #daa520;
+  margin-top: 4px;
+}
+
+.weapon-prop-label {
+  font-weight: bold;
+}
+
+.weapon-prop-list {
+  color: #ffd700;
 }
 
 /* 响应式设计 */

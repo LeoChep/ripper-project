@@ -1,4 +1,5 @@
-import type { CreatureAttack } from "@/core/units/Creature";
+import { Weapon } from "./../units/Weapon";
+import type { Creature, CreatureAttack } from "@/core/units/Creature";
 import { segmentsIntersect } from "../utils/MathUtil";
 import type { TiledMap } from "../MapClass";
 import type { RLayers } from "../type/RLayersInterface";
@@ -9,7 +10,19 @@ import { generateWays } from "../utils/PathfinderUtil";
 import { diceRoll } from "../DiceTryer";
 import { tileSize } from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
+import { AbilityValueSystem } from "./AbilitiyValueSystem";
+import { evaluate } from "maths.ts";
+import { ModifierSystem } from "./ModifierSystem";
 
+// 创建攻击的参数接口
+export interface CreateAttackParams {
+  attackFormula: string;
+  damageFormula: string;
+  keyWords: string[];
+  unit: Unit;
+  weapon?: Weapon;
+  implement?: any; // 添加法器支持
+}
 export const checkPassiable = (unit: Unit, x: number, y: number) => {
   const size = unit?.creature ? unit.creature.size : "middle";
   const unitx = Math.floor(unit.x / tileSize);
@@ -76,7 +89,7 @@ export const checkPassiableBySize = (
   const mapPassiable = golbalSetting.map;
   if (mapPassiable) {
     const edges = mapPassiable.edges;
-    const rangeArrA: { x:number;y: number; }[] = [];
+    const rangeArrA: { x: number; y: number }[] = [];
     let range = 1; // 默认范围为0，可根据需要调整
     if (size === "big") {
       range = 2;
@@ -90,7 +103,7 @@ export const checkPassiableBySize = (
         });
       }
     }
-      // console.log("rangeArrA", rangeArrA.length);
+    // console.log("rangeArrA", rangeArrA.length);
     // 检查是否穿过边
     if (edges) {
       // console.log(edges)
@@ -123,7 +136,7 @@ export const checkPassiableBySize = (
             intersectCount++;
           }
         }
-      
+
         if (intersectCount >= rangeArrA.length) {
           passiable = false;
           return;
@@ -133,4 +146,112 @@ export const checkPassiableBySize = (
   }
 
   return passiable;
+};
+
+export const createAttack = (params: CreateAttackParams) => {
+  const { attackFormula, damageFormula, keyWords, unit, weapon, implement } = params;
+
+  // 解析攻击公式
+  const abValue = getAttackBonus(attackFormula, keyWords, unit, weapon, implement);
+  const damageText = getDamageFormula(damageFormula, keyWords, unit, weapon, implement);
+  const attack = {} as CreatureAttack;
+  
+  // 设置攻击属性，优先使用武器，其次使用法器
+  if (weapon) {
+    attack.range = weapon.range;
+    attack.name = weapon.name;
+    attack.type = weapon.type;
+  } else if (implement) {
+    attack.range = 0; // 法器通常没有射程，或根据法术设定
+    attack.name = implement.name;
+    attack.type = implement.type;
+  } else {
+    attack.range = 0;
+    attack.name = "未知攻击";
+    attack.type = "未知";
+  }
+  
+  attack.attackBonus = abValue;
+  attack.damage = damageText;
+  return attack;
+};
+const getDamageFormula = (
+damageFormula: string, keyWords: string[], unit: Unit, weapon: Weapon | undefined, implement: any) => {
+  // 解析伤害公式
+  if (weapon) {
+    damageFormula = damageFormula.replace(
+      new RegExp(`\\[W\\]`, "g"),
+      weapon.damage
+    );
+    if (weapon.bonus) {
+      damageFormula += "+" + weapon.bonus;
+    }
+    const weaponDamageBonus = ModifierSystem.getInstance().getValueStack(
+      unit,
+      "weaponDamageBonus"
+    ).finalValue;
+    if (weaponDamageBonus) {
+      damageFormula += "+" + weaponDamageBonus;
+    }
+  }
+
+  const attributes = getAttributes(damageFormula);
+  //提取出公式中的属性，通过AbilityValueSystem等系统获取属性值
+  attributes.forEach((key) => {
+    const attributeModifer =
+      AbilityValueSystem.getInstance().getAbilityModifier(unit, key);
+    //将原公式内所有对应属性值替换
+    damageFormula = damageFormula.replace(
+      new RegExp(`\\[${key}\\]`, "g"),
+      attributeModifer.toString()
+    );
+  });
+
+  return damageFormula;
+};
+const getAttackBonus = (
+attackFormula: string, keyWords: string[], unit: Unit, weapon?: Weapon, implement?: any) => {
+  const attackAttributes = getAttributes(attackFormula);
+  //提取出公式中的属性，通过AbilityValueSystem等系统获取属性值
+  attackAttributes.forEach((key) => {
+    const attributeModifer =
+      AbilityValueSystem.getInstance().getAbilityModifier(unit, key);
+    //将原公式内所有对应属性值替换
+    attackFormula = attackFormula.replace(
+      new RegExp(`\\[${key}\\]`, "g"),
+      attributeModifer.toString()
+    );
+  });
+  const levelModifier = AbilityValueSystem.getInstance().getLevelModifier(unit);
+  attackFormula += "+" + levelModifier;
+  if (weapon) {
+    if (weapon.bonus) {
+      attackFormula += "+" + weapon.bonus;
+    }
+    if (weapon.proficiency) {
+      attackFormula += "+" + weapon.proficiency;
+    }
+
+    const weaponAttackBonus = ModifierSystem.getInstance().getValueStack(
+      unit,
+      "weaponAttackBonus"
+    ).finalValue;
+    if (weaponAttackBonus) {
+      attackFormula += "+" + weaponAttackBonus;
+    }
+  }
+
+  const value = evaluate(attackFormula);
+  return value.numberValue;
+};
+
+//编写一个解析器，提取公式中[INT]等属性
+const getAttributes = (formula: string) => {
+  const regex = /\[(\w+)\]/g;
+  const attributes: string[] = [];
+  let match;
+  while ((match = regex.exec(formula)) !== null) {
+    attributes.push(match[1]);
+  }
+  return attributes;
 };
