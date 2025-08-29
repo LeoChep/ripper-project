@@ -1,7 +1,7 @@
 import { distance } from "./../../../system/DoorSystem";
 import type { Unit } from "@/core/units/Unit";
 import { AbstractPwoerController } from "../AbstractPwoerController";
-import type { CreatureAttack } from "@/core/units/Creature";
+import * as AttackSystem from "@/core/system/AttackSystem";
 import {
   checkHit,
   checkPassiable,
@@ -38,27 +38,15 @@ export class IceRaysController extends AbstractPwoerController {
     if (!this.preFix()) return Promise.resolve();
     const { x, y } = this.getXY();
     const unit = this.selectedCharacter as Unit;
-    const weapon = unit.creature?.weapons?.[0];
-    const iceRayAttack = {} as CreatureAttack;
-    iceRayAttack.name = "Ice Ray";
-    iceRayAttack.type = "ranged";
-    iceRayAttack.action = "attack";
-    iceRayAttack.range = 10; // Example range
-    iceRayAttack.attackBonus =
-      AbilityValueSystem.getInstance().getLevelModifier(unit); // Example attack bonus
-    iceRayAttack.target = "enemy";
-    iceRayAttack.damage = "1d10"; // Example damage
-    const modifer = AbilityValueSystem.getInstance().getAbilityModifier(
-      unit,
-      "INT"
-    );
-    iceRayAttack.attackBonus += modifer;
-    iceRayAttack.attackBonus += weapon?.bonus ?? 0; // 添加武器加值
-    iceRayAttack.attackBonus += ModifierSystem.getInstance().getValueStack(
-      unit,
-      "spellAttack"
-    ).finalValue; // 精准法器
-    // iceRayAttack.damage += `+${  weapon?.bonus ?? 0}+(${modifer})`; // 添加攻击加值到伤害
+    const implement = unit.creature?.implements?.[0] || undefined;
+    const iceRayAttack = AttackSystem.createAttack({
+      attackFormula: "[INT]",
+      damageFormula: "1d10+[INT]",
+      keyWords: [],
+      implement: implement,
+      unit: unit,
+    });
+    iceRayAttack.range=10;
     console.log("icerays attack", iceRayAttack);
     const grids = generateWays({
       start: { x, y },

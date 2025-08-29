@@ -2,20 +2,16 @@ import { MessageTipSystem } from "./../system/MessageTipSystem";
 import * as PIXI from "pixi.js";
 import { Unit } from "../units/Unit";
 
-import { useInitiativeStore } from "@/stores/initiativeStore";
-
 import { golbalSetting } from "../golbalSetting";
 
 import { playerSelectAttackMovement } from "../action/UnitAttack";
-import { checkPassiable } from "../system/AttackSystem";
-import type { CreatureAttack } from "../units/Creature";
 
 import { BasicAttackSelector } from "../selector/BasicAttackSelector";
-import { tileSize } from "../envSetting";
+
 import { useStandAction } from "../system/InitiativeSystem";
-import { generateWays } from "../utils/PathfinderUtil";
-import { BasicSelector } from "../selector/BasicSelector";
+
 import { CharacterController } from "./CharacterController";
+import * as AttackSystem from "@/core/system/AttackSystem";
 
 export class CharCombatAttackController {
   public static isUse: boolean = false;
@@ -25,8 +21,23 @@ export class CharCombatAttackController {
   constructor() {
     // 初始化逻辑
   }
-  attackSelect = (attack: CreatureAttack): Promise<any> => {
+  getAttack = (unit: Unit, num: number) => {
+    const weapon = unit.creature?.weapons?.[num - 1];
+    const attackParams = {
+      attackFormula: "[STR]",
+      damageFormula: "[W]+[STR]",
+      keyWords: [],
+      weapon: weapon,
+      unit: unit,
+    };
+    const attack = AttackSystem.createAttack(attackParams);
+
+    return attack;
+  };
+  attackSelect = (): Promise<any> => {
     const unit = this.selectedCharacter;
+    if (!unit) return Promise.resolve({});
+    const attack = this.getAttack(unit, 1);
     if (CharacterController.onAnim) {
       console.warn("当前有动画正在执行，无法进行攻击选择");
       return Promise.resolve({});
@@ -44,7 +55,6 @@ export class CharCombatAttackController {
       return Promise.resolve({});
     }
     //
-
 
     const range = attack.range ? attack.range : 1; // 默认攻击范围为1
 

@@ -1,33 +1,28 @@
 import { UnitSystem } from "../../../system/UnitSystem";
-import { Weapon } from "../../../units/Weapon";
 import { Unit } from "@/core/units/Unit";
 import { AbstractPwoerController } from "../AbstractPwoerController";
-import type { CreatureAttack } from "@/core/units/Creature";
 
 import { golbalSetting } from "@/core/golbalSetting";
 
-import { checkPassiable as moveGridsCheckPassiable } from "@/core/system/UnitMoveSystem";
 import { checkPassiable as attackCheckPassiable } from "@/core/system/AttackSystem";
 import { tileSize } from "@/core/envSetting";
 import { generateWays } from "@/core/utils/PathfinderUtil";
 import { BasicSelector } from "@/core/selector/BasicSelector";
-import { ShiftAnim } from "@/core/anim/ShiftAnim";
+
 import { MessageTipSystem } from "@/core/system/MessageTipSystem";
-import { AbilityValueSystem } from "@/core/system/AbilitiyValueSystem";
+
 import {
   BasicLineSelector,
   type ScanData,
 } from "@/core/selector/BasicLineSelector";
 import { moveMovement } from "@/core/action/UnitMove";
 import {
-  attackMovementToUnit,
   attackMovementToXY,
-  playerSelectAttackMovement,
 } from "@/core/action/UnitAttack";
-import { WeaponSystem } from "@/core/system/WeaponSystem";
 import { segmentsIntersect } from "@/core/utils/MathUtil";
 import type { TiledMap } from "@/core/MapClass";
-import { useAction, useStandAction } from "@/core/system/InitiativeSystem";
+import { useAction } from "@/core/system/InitiativeSystem";
+import * as AttackSystem from "@/core/system/AttackSystem";
 
 export class ChargeAttackController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -38,7 +33,13 @@ export class ChargeAttackController extends AbstractPwoerController {
   constructor() {
     super();
   }
+  getAttack = (unit: Unit, num: number) => {
+    const weapon = unit.creature?.weapons?.[num - 1];
+    const attackParams={attackFormula:'[STR]', damageFormula:'[W]+[STR]', keyWords:[], weapon:weapon, unit:unit}
+    const attack = AttackSystem.createAttack(attackParams);
 
+    return attack;
+  };
   doSelect = async (): Promise<any> => {
     if (!this.preFix()) return Promise.resolve();
     const { x, y } = this.getXY();
@@ -158,26 +159,7 @@ export class ChargeAttackController extends AbstractPwoerController {
     console.log("resolveCallback", {});
     return promise;
   };
-  getAttack = (unit: Unit, num: number) => {
-    const weapon = unit.creature?.weapons?.[num - 1];
-    const attack = {} as CreatureAttack;
-    const range = weapon?.range ?? 1; // 默认攻击范围为1
-    const modifer = AbilityValueSystem.getInstance().getAbilityModifier(
-      unit,
-      "STR"
-    );
-    attack.attackBonus =
-      AbilityValueSystem.getInstance().getLevelModifier(unit);
-    attack.attackBonus += modifer;
-    attack.attackBonus += weapon?.bonus ?? 0; // 添加武器加值
-    attack.attackBonus += 1 + 3 + 1; // 武器大师、擅长加值、战斗专长
-    attack.damage = weapon?.damage ?? "1d6"; // 默认伤害为1d6
-    attack.damage += `+${weapon?.bonus ?? 0}+${modifer}+1`; // 添加攻击加值到伤害
-    attack.name = "Funneling Flurry";
-    attack.type = "melee";
-    attack.range = range;
-    return attack;
-  };
+ 
 }
 export const checkPassiable = (
   unit: Unit,

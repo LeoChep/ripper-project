@@ -160,11 +160,8 @@ export class CharacterCombatController {
       console.warn("没有可用的武器，无法进行攻击选择");
       return;
     }
-    const attack = WeaponSystem.getInstance().createWeaponAttack(
-      attacker,
-      attacker.creature?.weapons?.[0]
-    );
-    atkController.attackSelect(attack).then((result) => {
+
+    atkController.attackSelect().then((result) => {
       console.log("attackSelect result", result);
       if (!result.cancel && InitiativeSystem.isInBattle()) {
         this.resetDivideWalk();

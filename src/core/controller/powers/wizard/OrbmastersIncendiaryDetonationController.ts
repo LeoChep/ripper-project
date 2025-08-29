@@ -11,7 +11,7 @@ import { golbalSetting } from "@/core/golbalSetting";
 import { tileSize, zIndexSetting } from "@/core/envSetting";
 import { generateWays } from "@/core/utils/PathfinderUtil";
 import { BasicSelector } from "@/core/selector/BasicSelector";
-
+import * as AttackSystem from "@/core/system/AttackSystem";
 import { getAnimSpriteFromPNGpacks } from "@/core/anim/AnimSpriteFromPNGpacks";
 import { UnitSystem } from "@/core/system/UnitSystem";
 import { takeDamage } from "@/core/system/DamageSystem";
@@ -25,6 +25,8 @@ import type { Unit } from "@/core/units/Unit";
 import { Area } from "@/core/area/Area";
 import { OrbmastersIncendiaryDetonationEvent } from "@/core/power/wizard/OrbmastersIncendiaryDetonation/OrbmastersIncendiaryDetonationEvent";
 import { AreaSystem } from "@/core/system/AreaSystem";
+import { Proned } from "@/core/buff/Proned";
+import { BuffSystem } from "@/core/system/BuffSystem";
 
 export class OrbmastersIncendiaryDetonationController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -39,25 +41,15 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
     if (!this.preFix()) return Promise.resolve();
     const { x, y } = this.getXY();
     const unit = this.selectedCharacter as Unit;
-    const weapon = unit.creature?.weapons?.[0];
-    const attack = {} as CreatureAttack;
-    attack.name = "Ice Ray";
-    attack.type = "ranged";
-    attack.action = "attack";
+    const implement = unit.creature?.implements?.[0] || undefined;
+    const attack = AttackSystem.createAttack({
+      attackFormula: "[INT]",
+      damageFormula: "1d6+[INT]",
+      keyWords: [],
+      implement: implement,
+      unit: unit,
+    });
     attack.range = 10; // Example range
-    attack.attackBonus =
-      AbilityValueSystem.getInstance().getLevelModifier(unit); // Example attack bonus
-    attack.target = "enemy";
-    attack.damage = "1d10"; // Example damage
-    const modifer = AbilityValueSystem.getInstance().getAbilityModifier(
-      unit,
-      "INT"
-    );
-    attack.attackBonus += modifer;
-    attack.attackBonus += weapon?.bonus ?? 0; // 添加武器加值
-    attack.attackBonus += 1; // 精准法器
-    // iceRayAttack.damage += `+${  weapon?.bonus ?? 0}+(${modifer})`; // 添加攻击加值到伤害
-    // console.log("icerays attack", attack);
     const grids = generateWays({
       start: { x, y },
       range: attack.range,
@@ -92,19 +84,32 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
         selected.y,
         1
       );
-      const effect = await this.createAreaEffect(
+      await this.createArea(
         this.selectedCharacter as Unit,
         selector.brustGridSet
       );
-      const area = new Area();
-      area.effects.push(effect);
-      AreaSystem.getInstance().addArea(area);
-      const event = new OrbmastersIncendiaryDetonationEvent(
-        this.selectedCharacter as Unit,
-        area,
-        2
-      );
-      event.hook();
+      //寻找范围内的单位
+      const unitsInBrust = this.findUnitInBrustGrids(selector.brustGridSet);
+      const attackPromises: Promise<void>[] = [];
+      for (const targetUnit of unitsInBrust) {
+        const attackPromise = new Promise<void>(async (resolve) => {
+          const hit = await checkHit(unit, targetUnit, attack, "Ref");
+          createMissOrHitAnimation(targetUnit, hit.hit);
+          if (hit.hit) {
+            const damage = await getDamage(targetUnit, unit, attack);
+            takeDamage(damage, targetUnit);
+            createDamageAnim(damage.toString(), targetUnit);
+            const hitEffect = new Proned();
+            hitEffect.source = "Proned";
+            hitEffect.owner = targetUnit;
+            hitEffect.giver = unit;
+            BuffSystem.getInstance().addTo(hitEffect, targetUnit);
+          }
+          resolve();
+        });
+        attackPromises.push(attackPromise);
+      }
+      await Promise.all(attackPromises);
       resolveCallback({});
     } else {
       console.log("result.cancel", result);
@@ -112,6 +117,19 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
     }
     return promise;
   };
+  findUnitInBrustGrids(gridSet: Set<{ x: number; y: number; step: number }>) {
+    const unitSet = new Set<Unit>();
+    gridSet.forEach((grid) => {
+      const targetUnit = UnitSystem.getInstance().findUnitByGridxy(
+        grid.x,
+        grid.y
+      );
+      if (targetUnit) {
+        unitSet.add(targetUnit);
+      }
+    });
+    return unitSet;
+  }
   async createAreaEffect(
     owner: Unit,
     gridSet: Set<{ x: number; y: number; step: number }>
@@ -120,6 +138,21 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
     effect.grids = gridSet;
     await effect.build();
     return effect;
+  }
+  async createArea(
+    owner: Unit,
+    gridSet: Set<{ x: number; y: number; step: number }>
+  ) {
+    const effect = await this.createAreaEffect(owner, gridSet);
+    const area = new Area();
+    area.effects.push(effect);
+    AreaSystem.getInstance().addArea(area);
+    const event = new OrbmastersIncendiaryDetonationEvent(
+      this.selectedCharacter as Unit,
+      area,
+      2
+    );
+    event.hook();
   }
   static async playAnim(
     unit: Unit,
