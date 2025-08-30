@@ -132,7 +132,10 @@ export async function startCombatTurn() {
           initiativeCursor.pointAt.owner.ai?.autoAction &&
           initiativeCursor.map
         ) {
-          lockOn(initiativeCursor.pointAt.owner.x, initiativeCursor.pointAt.owner.y);
+          lockOn(
+            initiativeCursor.pointAt.owner.x,
+            initiativeCursor.pointAt.owner.y
+          );
           initiativeCursor.pointAt.owner.ai.autoAction(
             initiativeCursor.pointAt.owner,
             initiativeCursor.map
@@ -147,6 +150,8 @@ export async function startCombatTurn() {
         CharacterController.selectCharacter(unit);
         CharacterCombatController.instance?.useMoveController();
       }
+
+      BattleEvenetSystem.getInstance().handleEvent('UnitStartTurnEvent', initiativeCursor.pointAt.owner);
     }
   }
   //所有人都行动过开启新一轮
@@ -199,8 +204,10 @@ export function useMoveAction(unit: Unit) {
   if (unit.initiative.moveActionNumber >= 1) {
     unit.initiative.moveActionNumber--;
     return true;
+  } else {
+    return useStandAction(unit);
   }
-  return false;
+
 }
 
 export function useStandAction(unit: Unit) {
@@ -221,27 +228,28 @@ export function useMinorAction(unit: Unit) {
   if (unit.initiative.minorActionNumber >= 1) {
     unit.initiative.minorActionNumber--;
     return true;
+  } else {
+    return useMoveAction(unit);
   }
-  return false;
 }
 export function useAction(unit: Unit, actionType: string) {
   if (!unit.initiative) {
     return false;
   }
   if (actionType === "standard") {
-    if ((unit.initiative.standerActionNumber >= 1)) {
+    if (unit.initiative.standerActionNumber >= 1) {
       unit.initiative.standerActionNumber--;
       return true;
     }
   }
   if (actionType === "move") {
-    if ((unit.initiative.moveActionNumber >= 1)) {
+    if (unit.initiative.moveActionNumber >= 1) {
       unit.initiative.moveActionNumber--;
       return true;
     }
   }
   if (actionType === "minor") {
-    if ((unit.initiative.minorActionNumber >= 1)) {
+    if (unit.initiative.minorActionNumber >= 1) {
       unit.initiative.minorActionNumber--;
       return true;
     }
@@ -357,11 +365,16 @@ export async function playStartAnim() {
   return animPromise;
 }
 async function playAnim(unit: Unit) {
-  const container = golbalSetting.tipContainer
+  const container = golbalSetting.tipContainer;
   const lineLayer = getLayers().lineLayer;
   //
   const graphics = new PIXI.Graphics();
-  graphics.rect(-(container?.x ?? 0), -(container?.y ?? 0), appSetting.width, appSetting.height);
+  graphics.rect(
+    -(container?.x ?? 0),
+    -(container?.y ?? 0),
+    appSetting.width,
+    appSetting.height
+  );
   let color = 0xff0000; // 默认颜色为红色
   if (unit.party === "player") {
     color = 0x0000ff;
@@ -492,13 +505,13 @@ export function loadInitRecord(initRecord: {
   inBattle: boolean;
   initiativeCursor: { pointAt: string };
 }) {
-  initiativeCursor.map=golbalSetting.map
+  initiativeCursor.map = golbalSetting.map;
   const initiativeSheet = InitiativeSerializer.deserializeArray(
     initRecord.initiativeSheet,
     (uid: string) => {
       return golbalSetting.map?.sprites.find(
         (item) => item.id.toString() === uid
-      ) 
+      );
     }
   );
   InitiativeSheet.splice(0, InitiativeSheet.length, ...initiativeSheet);
@@ -516,7 +529,7 @@ export function loadInitRecord(initRecord: {
       CharacterCombatController.getInstance().selectedCharacter = unit;
       CharacterCombatController.getInstance().useMoveController();
     }
-    console.log('LOAD INIT',initiativeSheet,initiativeCursor)
+    console.log("LOAD INIT", initiativeSheet, initiativeCursor);
   } else {
     initiativeCursor.pointAt = null;
   }

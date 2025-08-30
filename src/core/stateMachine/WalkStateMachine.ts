@@ -1,3 +1,4 @@
+import { BattleEvenetSystem } from "../system/BattleEventSystem";
 import { OpportunitySystem } from "../system/OpportunitySystem";
 import { UnitSystem } from "../system/UnitSystem";
 import type { Unit } from "../units/Unit";
@@ -58,7 +59,7 @@ export class WalkStateMachine extends StateMachine {
     if (
       unitX !== this.currentGrids[0]?.x ||
       unitY !== this.currentGrids[0]?.y
-    ) {
+    ) { 
       haveMoveToNewTile = true;
       this.oldGrids = this.currentGrids;
       this.currentGrids = UnitSystem.getInstance().getUnitGrids(this.owner);
@@ -66,9 +67,8 @@ export class WalkStateMachine extends StateMachine {
     //判断是否需要移动到新的格子
 
     if (haveMoveToNewTile) {
-      console.log(
-        `单位 (${unitX}, ${unitY}) 移动到目标格子 (${nextPathPoint.x}, ${nextPathPoint.y})`
-      );
+
+      BattleEvenetSystem.getInstance().handleEvent('moveToNewGridEvent', this.owner);
       // 检查是否有单位可以触
       if (this.walkType != "step") this.checkOpportunity(this.oldGrids);
     }

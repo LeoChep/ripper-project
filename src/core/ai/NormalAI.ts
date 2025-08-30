@@ -7,10 +7,12 @@ import * as UnitMove from "../action/UnitMove";
 import * as UnitMoveSystem from "../system/UnitMoveSystem";
 import * as AttackSystem from "../system/AttackSystem";
 import * as UnitAttack from "../action/UnitAttack";
+import * as InitiativeSysteam from "../system/InitiativeSystem";
 import { segmentsIntersect } from "../utils/MathUtil";
 import { golbalSetting } from "../golbalSetting";
 import { ModifierSystem } from "../system/ModifierSystem";
 import { UnitSystem } from "../system/UnitSystem";
+import { BuffSystem } from "../system/BuffSystem";
 
 const tileSize = 64; // 假设每个格子的大小为64像素
 export class NormalAI implements AIInterface {
@@ -24,6 +26,7 @@ export class NormalAI implements AIInterface {
     //寻找目标
     // 这里可以实现AI的目标选择逻辑
     //用于存放结果
+    const initiative = unit.initiative;
     const result: any = { canAttack: false };
     const unitX = Math.floor(unit.x / tileSize);
     const unitY = Math.floor(unit.y / tileSize);
@@ -56,7 +59,17 @@ export class NormalAI implements AIInterface {
         step: number;
       };
       let isCantAttack = !result.canAttack;
+      //粗暴的用于跳出
+      for (let num=1;num<2;num++)
       if (rc) {
+        //检测倒立起立
+
+        standAI(unit);
+        if (
+        !InitiativeSysteam.useMoveAction(unit)){
+          break;
+        };
+
         let speed = ModifierSystem.getInstance().getValueStack(
           unit,
           "speed"
@@ -72,6 +85,7 @@ export class NormalAI implements AIInterface {
               y: number;
               step: number;
             };
+
             noUnit = true;
             golbalSetting?.map?.sprites.forEach((sprite) => {
               const spriteX = Math.floor(sprite.x / tileSize);
@@ -103,6 +117,15 @@ export class NormalAI implements AIInterface {
               step: number;
             };
             least--;
+            if (least === 0) {
+              //移动力使用殆尽，使用标准动作继续移动
+              if (InitiativeController.useMoveAction(unit)) {
+                least = ModifierSystem.getInstance().getValueStack(
+                  unit,
+                  "speed"
+                ).finalValue;
+              }
+            }
           }
         }
         console.log("AI停止路径:", path[`${result.x},${result.y}`], result);
@@ -112,6 +135,9 @@ export class NormalAI implements AIInterface {
       }
 
       console.log("aiUnit state", unit);
+      if(!InitiativeSysteam.useStandAction(unit)){
+        isCantAttack=true;
+      }
       if (!isCantAttack) {
         const attack = unit.creature?.attacks[0];
         const enemyX = Math.floor(result.target.x / tileSize);
@@ -153,7 +179,19 @@ export class NormalAI implements AIInterface {
     );
   }
 }
-
+function standAI(unit: Unit) {
+  let pronedBuff;
+  unit.creature?.buffs.forEach((buff) => {
+    if (buff.name === "Proned") {
+      pronedBuff = buff;
+    }
+  });
+  if (pronedBuff) {
+    if (InitiativeSysteam.useMoveAction(unit)) {
+      BuffSystem.getInstance().removeBuff(pronedBuff, unit);
+    }
+  }
+}
 function findAttackTarget(
   nx: number,
   ny: number,
@@ -191,8 +229,8 @@ function findAttackTarget(
   //获得攻击范围内格子
   const size = unit?.creature?.size ? unit.creature.size : "middle";
   const grids = UnitSystem.getInstance().getGridsBySize(x, y, size);
-  const unitSettingx = x ;
-  const unitSettingy = y ;
+  const unitSettingx = x;
+  const unitSettingy = y;
   const attakRangeWays = generateWays({
     start: grids,
     range: unit.creature?.attacks[0].range,

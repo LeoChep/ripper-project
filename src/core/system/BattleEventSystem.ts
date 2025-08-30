@@ -4,7 +4,7 @@ import type { EventSerializeData } from "../event/EventSerializeData";
 type EventHandler = (...args: any[]) => Promise<any>;
 export class BattleEvenetSystem {
   static instance: BattleEvenetSystem | null = null;
-  eventMap : Map<string,GameEvent[]>
+  eventMap: Map<string, GameEvent[]>;
   static getInstance() {
     if (!BattleEvenetSystem.instance) {
       BattleEvenetSystem.instance = new BattleEvenetSystem();
@@ -12,35 +12,41 @@ export class BattleEvenetSystem {
     return BattleEvenetSystem.instance;
   }
   constructor() {
-    this.eventMap = new Map<string,GameEvent[]>();
+    this.eventMap = new Map<string, GameEvent[]>();
   }
   hookEvent(gameEvent: GameEvent) {
-    const events=this.eventMap.get(gameEvent.eventType);
-    if (!events){
-      this.eventMap.set(gameEvent.eventType,[gameEvent]);
-      return;
+    const eventTypeStr = gameEvent.eventType;
+    const eventTypes = eventTypeStr.split("|");
+    console.log(`Hooking event:`, eventTypes, gameEvent);
+    for (let eventType of eventTypes) {
+      const events = this.eventMap.get(eventType);
+      console.log(`Current events for ${eventType}:`, events);
+      if (!events) {
+        this.eventMap.set(eventType, [gameEvent]);
+        continue;
+      }
+      // 检查事件是否已存在
+      if (events.some((event) => event === gameEvent)) {
+        console.warn(`Event is already hooked.`);
+        continue;
+      }
+      events.push(gameEvent);
     }
-    // 检查事件是否已存在
-    if (events.some((event) => event === gameEvent)) {
-      console.warn(`Event is already hooked.`);
-      return;
-    }
-    events.push(gameEvent);
   }
   clearEvents() {
-     this.eventMap.clear()
+    this.eventMap.clear();
   }
   // 添加事件处理方法
   async handleEvent(eventType: string, ...args: any[]) {
     // 这里可以添加事件处理逻辑
     const allPromise = [] as Promise<any>[];
-    const events= this.eventMap.get(eventType);
+    const events = this.eventMap.get(eventType);
     if (!events) {
-      console.warn(`No events found for ${eventType}`);
+      console.warn(`No events found for ${eventType}`, this.eventMap);
       return;
     }
     const length = events.length;
-    console.log(`Handling event: ${eventType}, args:`,[...args]);
+    console.log(`Handling event: ${eventType}, args:`, [...args]);
     for (let i = 0; i < length; i++) {
       const event = events[i];
       if (event) {
@@ -54,6 +60,8 @@ export class BattleEvenetSystem {
   serializeEvents(): EventSerializeData[] {
     console.log(`Serializing events:`, this.eventMap);
     const allEvents = Array.from(this.eventMap.values()).flat();
-    return allEvents.map((event) => event.getSerializer().serialize(event));
+    //去重
+    const uniqueEvents = Array.from(new Set(allEvents));
+    return uniqueEvents.map((event) => event.getSerializer().serialize(event));
   }
 }

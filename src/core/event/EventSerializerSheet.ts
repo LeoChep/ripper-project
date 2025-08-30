@@ -1,4 +1,5 @@
 import { ShieldEdgeBlockEvent } from "../power/fighter/ShieldEdgeBlock/ShieldEdgeBlockEvent";
+import { OrbmastersIncendiaryDetonationDamageEvent } from "../power/wizard/OrbmastersIncendiaryDetonation/OrbmastersIncendiaryDetonationDamageEvent";
 import { OrbmastersIncendiaryDetonationEvent } from "../power/wizard/OrbmastersIncendiaryDetonation/OrbmastersIncendiaryDetonationEvent";
 import { CombatChallengeGiveEvent } from "../trait/fighter/CombatChallenge/CombatChallengeGiveEvent";
 import { CombatChallengeUseEvent } from "../trait/fighter/CombatChallenge/CombatChallengeUseEvent";
@@ -43,4 +44,5 @@ function initEventSerializer(): void {
   registerEventSerializer(EndTurnRemoveBuffEvent);
   registerEventSerializer(ShieldEdgeBlockEvent);
   registerEventSerializer(OrbmastersIncendiaryDetonationEvent);
+  registerEventSerializer(OrbmastersIncendiaryDetonationDamageEvent);
 }

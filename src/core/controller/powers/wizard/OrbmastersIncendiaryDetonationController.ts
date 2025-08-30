@@ -27,6 +27,8 @@ import { OrbmastersIncendiaryDetonationEvent } from "@/core/power/wizard/Orbmast
 import { AreaSystem } from "@/core/system/AreaSystem";
 import { Proned } from "@/core/buff/Proned";
 import { BuffSystem } from "@/core/system/BuffSystem";
+import { OrbmastersIncendiaryDetonation } from "@/core/power/wizard/OrbmastersIncendiaryDetonation/OrbmastersIncendiaryDetonation";
+import { OrbmastersIncendiaryDetonationDamageEvent } from "@/core/power/wizard/OrbmastersIncendiaryDetonation/OrbmastersIncendiaryDetonationDamageEvent";
 
 export class OrbmastersIncendiaryDetonationController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -153,6 +155,11 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
       2
     );
     event.hook();
+    const damageEvent = new OrbmastersIncendiaryDetonationDamageEvent(
+      this.selectedCharacter as Unit,
+      area
+    );
+    damageEvent.hook();
   }
   static async playAnim(
     unit: Unit,

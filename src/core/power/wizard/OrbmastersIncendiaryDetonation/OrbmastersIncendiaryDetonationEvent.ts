@@ -36,7 +36,7 @@ export class OrbmastersIncendiaryDetonationEvent extends BasedAbstractEvent {
     uid?: string
   ) {
     super(uid);
-    this.eventName= OrbmastersIncendiaryDetonationEvent.name;
+    this.eventName = OrbmastersIncendiaryDetonationEvent.name;
     this.eventType = OrbmastersIncendiaryDetonationEvent.type;
     this.owner = owner;
     this.area = area;
@@ -54,7 +54,7 @@ export class OrbmastersIncendiaryDetonationEvent extends BasedAbstractEvent {
     BattleEvenetSystem.getInstance().hookEvent(this);
   };
   eventHandler = async (endturnUnit: Unit) => {
-    console.log("当前回合数:",this.owner, endturnUnit, this.turnCount);
+    console.log("当前回合数:", this.owner, endturnUnit, this.turnCount);
     if (this.owner === endturnUnit) {
       this.turnCount--;
       console.log("当前回合数:", this.turnCount);
@@ -65,7 +65,9 @@ export class OrbmastersIncendiaryDetonationEvent extends BasedAbstractEvent {
       this.area?.effects.forEach((effect) => {
         effect.remove();
       });
+      if (this.area) AreaSystem.getInstance().removeArea(this.area);
     }
+
     return Promise.resolve();
   };
 }
