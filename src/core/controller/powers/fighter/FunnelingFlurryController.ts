@@ -13,6 +13,7 @@ import { generateWays } from "@/core/utils/PathfinderUtil";
 import { BasicSelector } from "@/core/selector/BasicSelector";
 import { ShiftAnim } from "@/core/anim/ShiftAnim";
 import { MessageTipSystem } from "@/core/system/MessageTipSystem";
+import { ShiftSelector } from "@/core/selector/ShiftSelector";
 
 export class FunnelingFlurryController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -200,14 +201,9 @@ export class FunnelingFlurryController extends AbstractPwoerController {
           return movePassible && shiftPassibleResult;
         }
       });
-      BasicSelector.getInstance().selectBasic(
-        fistShiftGrids,
-        1,
-        "yellow",
-        true
-      );
+       ShiftSelector.getInstance().selectBasic(fistShiftGrids, beAttack, 1, 1, "yellow", "red", true);
       MessageTipSystem.getInstance().setMessage("请选择滑动位置");
-      const firstShiftResult = await BasicSelector.getInstance().promise;
+      const firstShiftResult = await ShiftSelector.getInstance().promise;
       MessageTipSystem.getInstance().clearMessage();
       if (firstShiftResult.cancel !== true) {
         console.log("firstShiftResult", firstShiftResult, beAttack);

@@ -95,7 +95,7 @@ export class UnitSystem {
 
     return arroundGrids;
   }
-  getGridsBySize(x: number, y: number, size: string) {
+  getGridsBySize(x: number, y: number, size?: string) {
     // 构建范围数组
 
     let range = 1; // 默认范围为0，可根据需要调整
