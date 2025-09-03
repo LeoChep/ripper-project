@@ -160,6 +160,7 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
       area
     );
     damageEvent.hook();
+    event.damageEventId = damageEvent.eventId;
   }
   static async playAnim(
     unit: Unit,

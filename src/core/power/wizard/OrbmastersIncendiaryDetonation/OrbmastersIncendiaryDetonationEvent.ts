@@ -21,6 +21,7 @@ import { AbilityValueSystem } from "@/core/system/AbilitiyValueSystem";
 import { checkPassiable } from "@/core/system/AttackSystem";
 import type { Area } from "@/core/area/Area";
 import { AreaSystem } from "@/core/system/AreaSystem";
+import type { OrbmastersIncendiaryDetonationDamageEvent } from "./OrbmastersIncendiaryDetonationDamageEvent";
 
 export class OrbmastersIncendiaryDetonationEvent extends BasedAbstractEvent {
   static readonly type = "UnitEndTurnEvent";
@@ -28,7 +29,7 @@ export class OrbmastersIncendiaryDetonationEvent extends BasedAbstractEvent {
   owner: Unit | null = null; // 释放单位
   area: Area | null = null; // 影响区域
   turnCount: number = 0; // 回合数
-
+  damageEventId: string | undefined; // 关联的伤害事件ID
   constructor(
     owner: Unit,
     area: Area | null,
@@ -66,6 +67,10 @@ export class OrbmastersIncendiaryDetonationEvent extends BasedAbstractEvent {
         effect.remove();
       });
       if (this.area) AreaSystem.getInstance().removeArea(this.area);
+    }else if (this.damageEventId){
+      //重置受伤单位
+      const damageEvent=BattleEvenetSystem.getInstance().getEventById(this.damageEventId) as OrbmastersIncendiaryDetonationDamageEvent;
+      damageEvent.handledUnit=[];
     }
 
     return Promise.resolve();
@@ -86,6 +91,7 @@ export class OrbmastersIncendiaryDetonationEventSerializer extends BasedEventSer
     data.eventName = "OrbmastersIncendiaryDetonationEvent";
     data.eventData.areaUid = event.area?.uid;
     data.eventData.turnCount = event.turnCount;
+    data.eventData.damageEventId = event.damageEventId;
     return data;
   }
   deserialize(
@@ -106,6 +112,8 @@ export class OrbmastersIncendiaryDetonationEventSerializer extends BasedEventSer
       data.eventId
     );
     console.log("反序列化的区域数据:", area, owner, event);
+    //
+    event.damageEventId = data.eventData.damageEventId;
     return event;
   }
 }
