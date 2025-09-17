@@ -14,6 +14,7 @@ import { BasicSelector } from "@/core/selector/BasicSelector";
 import { ShiftAnim } from "@/core/anim/ShiftAnim";
 import { MessageTipSystem } from "@/core/system/MessageTipSystem";
 import { ShiftSelector } from "@/core/selector/ShiftSelector";
+import { ShiftSystem } from "@/core/system/ShiftSystem";
 
 export class FunnelingFlurryController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -193,7 +194,7 @@ export class FunnelingFlurryController extends AbstractPwoerController {
             y * tileSize,
             golbalSetting.map
           );
-          const shiftPassibleResult = shiftPassible(
+          const shiftPassibleResult = ShiftSystem.getInstance().shiftPassible(
             beAttack,
             x,
             y
@@ -212,19 +213,4 @@ export class FunnelingFlurryController extends AbstractPwoerController {
     }
   };
 }
-const shiftPassible = (unit: Unit, x: number, y: number) => {
-  const map = golbalSetting.map;
-  const units = map?.sprites;
-  let result = true;
-  units?.forEach((u) => {
-    if (u instanceof Unit && u !== unit) {
-      const unitX = Math.floor(u.x / tileSize);
-      const unitY = Math.floor(u.y / tileSize);
-      if (unitX === x && unitY === y) {
-        result = false;
-      }
-    }
 
-  });
-  return result
-};
