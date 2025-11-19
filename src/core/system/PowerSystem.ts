@@ -84,6 +84,10 @@ export class PowerSystem {
         return import("../power/wizard/MagicMissile/MagicMissile").then(
           (module) => module.MagicMissile
         );
+      case "FreezingBurst":
+        return import("../power/wizard/FreezingBurst/FreezingBurst").then(
+          (module) => module.FreezingBurst
+        );
       case "OrbmastersIncendiaryDetonation":
         return import(
           "../power/wizard/OrbmastersIncendiaryDetonation/OrbmastersIncendiaryDetonation"
@@ -109,6 +113,10 @@ export class PowerSystem {
         return import(
           "../controller/powers/wizard/OrbmastersIncendiaryDetonationController"
         ).then((module) => module.OrbmastersIncendiaryDetonationController);
+      case "FreezingBurst":
+        return import(
+          "../controller/powers/wizard/FreezingBurstController"
+        ).then((module) => module.FreezingBurstController);
       case "MagicMissile":
         return import(
           "../controller/powers/wizard/MagicMissileController"

@@ -8,16 +8,6 @@ import { useInitiativeStore } from "@/stores/initiativeStore";
 import * as envSetting from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
-const tileSize = 64;
-
-type Rlayer = {
-  basicLayer: PIXI.IRenderLayer;
-  spriteLayer: PIXI.IRenderLayer;
-  lineLayer: PIXI.IRenderLayer;
-  fogLayer: PIXI.IRenderLayer;
-  selectLayer: PIXI.IRenderLayer;
-  controllerLayer: PIXI.IRenderLayer;
-};
 
 export class CharCombatStepController {
   public static isUse: boolean = false;

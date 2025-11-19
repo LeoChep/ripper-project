@@ -87,14 +87,13 @@
     }
   ],
   "powers": [
-    {
+        {
       "name": "IceRays",
       "displayName": "冰冻射线",
       "useType": "encounter",
       "actionType": "standard",
       "range": null,
       "target": null,
-      "description": "冰冻射线 Ice Rays  MP\n法师攻击 1\n你发出一束冰冷的射线，击中了远处的敌人。\n遭遇✦法术，远程\n标准动作✦法术攻击\n目标： 一个生物\n攻击： 智力 - 1 vs. AC\n命中： 2[W] + 智力调整值的伤害。",
       "damage": null,
       "attackBonus": null,
       "missEffect": null
@@ -118,7 +117,6 @@
       "actionType": "standard",
       "range": null,
       "target": null,
-      "description": "冰冻射线 Ice Rays  MP\n法师攻击 1\n你发出一束冰冷的射线，击中了远处的敌人。\n遭遇✦法术，远程\n标准动作✦法术攻击\n目标： 一个生物\n攻击： 智力 - 1 vs. AC\n命中： 2[W] + 智力调整值的伤害。",
       "damage": null,
       "attackBonus": null,
       "missEffect": null

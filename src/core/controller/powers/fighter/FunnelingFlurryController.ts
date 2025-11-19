@@ -172,7 +172,6 @@ export class FunnelingFlurryController extends AbstractPwoerController {
         }
       | undefined
   ) => {
-    console.log("attackResult shiftFunc", attackResult);
     if (attackResult && "beAttack" in attackResult && attackResult.beAttack) {
       const beAttack = attackResult.beAttack;
       const beAttackX = Math.floor(beAttack.x / tileSize);
