@@ -215,8 +215,8 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":1,
-                 "y":2
+                 "x":-0.333333,
+                 "y":-54
                 }, 
                 {
                  "height":0,
@@ -792,8 +792,8 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":508.667,
-                 "y":896
+                 "x":568.667,
+                 "y":884
                 }, 
                 {
                  "gid":739,
@@ -881,8 +881,8 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":381.667,
-                 "y":899
+                 "x":319,
+                 "y":895
                 }, 
                 {
                  "gid":830,
@@ -914,7 +914,7 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":377.333,
+                 "x":321.333,
                  "y":1085.33
                 }, 
                 {
@@ -1013,8 +1013,8 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":704,
-                 "y":958.667
+                 "x":637.333,
+                 "y":956
                 }, 
                 {
                  "gid":792,
@@ -1045,9 +1045,37 @@
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":138.666666666667,
-                 "x":380,
-                 "y":449.333333333333
+                 "width":138.667,
+                 "x":378.667,
+                 "y":1022.67
+                }, 
+                {
+                 "gid":909,
+                 "height":64,
+                 "id":63,
+                 "name":"\u7267\u5e08",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"dragonCleric"
+                        }, 
+                        {
+                         "name":"party",
+                         "type":"string",
+                         "value":"player"
+                        }, 
+                        {
+                         "name":"unitTypeName",
+                         "type":"string",
+                         "value":"dragonCleric"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":513.333333333333,
+                 "y":190.666666666667
                 }],
          "offsetx":4,
          "offsety":0,
@@ -1058,7 +1086,7 @@
          "y":0
         }],
  "nextlayerid":6,
- "nextobjectid":63,
+ "nextobjectid":65,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
@@ -1124,6 +1152,19 @@
          "imagewidth":832,
          "margin":0,
          "name":"slash",
+         "spacing":0,
+         "tilecount":52,
+         "tileheight":64,
+         "tilewidth":64
+        }, 
+        {
+         "columns":13,
+         "firstgid":881,
+         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/dragonCleric\/anim\/standard\/walk.png",
+         "imageheight":256,
+         "imagewidth":832,
+         "margin":0,
+         "name":"walk",
          "spacing":0,
          "tilecount":52,
          "tileheight":64,
