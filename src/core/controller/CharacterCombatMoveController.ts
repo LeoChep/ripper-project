@@ -1,3 +1,4 @@
+import { ModifierSystem } from './../system/ModifierSystem';
 import * as PIXI from "pixi.js";
 import { Unit } from "../units/Unit";
 import * as UnitMoveSystem from "../system/UnitMoveSystem";
@@ -43,7 +44,7 @@ export class CharCombatMoveController {
       this.removeFunction();
     }
     //显示可移动范围
-    let range = unit.creature?.speed ?? 0;
+    let range = Number(ModifierSystem.getCacheKey(unit,'speed'));
     const walkMachine = unit.stateMachinePack.getMachine(
       "walk"
     ) as WalkStateMachine;
