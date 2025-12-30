@@ -44,7 +44,8 @@ export class CharCombatMoveController {
       this.removeFunction();
     }
     //显示可移动范围
-    let range = Number(ModifierSystem.getCacheKey(unit,'speed'));
+    let range = ModifierSystem.getFianleValue(unit,'speed')
+   
     const walkMachine = unit.stateMachinePack.getMachine(
       "walk"
     ) as WalkStateMachine;

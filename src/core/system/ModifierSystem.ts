@@ -13,6 +13,10 @@ export class ModifierSystem {
     }
     return ModifierSystem.instance;
   }
+  static getFianleValue(unit: Unit, valueName: string): number {
+    return ModifierSystem.getInstance().getValueStack(unit, valueName).finalValue;
+  }
+
   static getCacheKey(unit: Unit, valueName: string): string {
     return `${unit.id}.${valueName}`;
   }
