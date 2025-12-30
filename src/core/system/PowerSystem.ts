@@ -92,6 +92,12 @@ export class PowerSystem {
         return import(
           "../power/wizard/OrbmastersIncendiaryDetonation/OrbmastersIncendiaryDetonation"
         ).then((module) => module.OrbmastersIncendiaryDetonation);
+      case "WeaponOfDivineProtection":
+        return import(
+          "../power/cleric/WeaponOfDivineProtection/WeaponOfDivineProtection"
+        ).then((module) => module.WeaponOfDivineProtection);
+      default:
+        return null;
     }
   }
   getPowerControllerClass(powerName: string) {
@@ -126,6 +132,10 @@ export class PowerSystem {
         return import(
           "../controller/powers/fighter/ChargeAttackController"
         ).then((module) => module.ChargeAttackController);
+      case "WeaponOfDivineProtection":
+        return import(
+          "../controller/powers/cleric/WeaponOfDivineProtectionController"
+        ).then((module) => module.WeaponOfDivineProtectionController);
     }
     return null;
   }
