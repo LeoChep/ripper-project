@@ -27,6 +27,8 @@ export class AreaSerializer {
   serialize(area: Area): AreaSerializeData {
     return {
       uid: area.uid,
+      name: area.name,
+      des: area.des,  
       effects: area.effects.map(effect => effect.getSerializer().serialize(effect))
     };
   }
@@ -39,7 +41,8 @@ export class AreaSerializer {
    */
   deserialize(data: AreaSerializeData): Area {
     const area = new Area(data.uid);
-    
+    area.name=data.name;
+    area.des=data.des;
     // 反序列化effects数组
     const effectSheet = EffectSerializerSheet.getInstance();
     if (data.effects && data.effects.length > 0) {

@@ -72,5 +72,8 @@ export class BattleEvenetSystem {
     //去重
     const uniqueEvents = Array.from(new Set(allEvents));
     return uniqueEvents.map((event) => event.getSerializer().serialize(event));
+      //  return uniqueEvents.map((event) =>{
+      //   console.log('Serializing event:', event.eventName,event);
+      //   return event.serialize()});
   }
 }

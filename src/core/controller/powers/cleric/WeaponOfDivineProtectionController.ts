@@ -8,6 +8,10 @@ import { useStandAction } from "@/core/system/InitiativeSystem";
 import { BasicAttackSelector } from "@/core/selector/BasicAttackSelector";
 
 import type { FederatedPointerEvent } from "pixi.js";
+import { Area } from "@/core/area/Area";
+import { AreaSystem } from "@/core/system/AreaSystem";
+import { WeaponOfDivineProtectionEvent } from "@/core/power/cleric/WeaponOfDivineProtection/WeaponOfDivineProtectionEvent";
+import { BattleEvenetSystem } from "@/core/system/BattleEventSystem";
 
 export class WeaponOfDivineProtectionController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -62,6 +66,19 @@ export class WeaponOfDivineProtectionController extends AbstractPwoerController 
             golbalSetting.map
           ).then(() => {
             console.log("resolveCallback", {});
+            //使用威能效果，以牧师为中心的光环为周围队友提供+2ac威能
+            //创建区域
+            const area=new Area()
+            area.name="Divine Protection Area"
+            area.des="Area of effect for Divine Protection"
+            AreaSystem.getInstance().addArea(area);
+            //创建hook
+            const event=new WeaponOfDivineProtectionEvent(
+              unit,
+              10
+            )
+            event.hook();
+            console.log("创建WeaponOfDivineProtectionEvent事件:", event,BattleEvenetSystem.getInstance());
             resolveCallback({});
           });
         } else {

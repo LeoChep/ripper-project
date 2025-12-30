@@ -6,7 +6,8 @@ import type { AreaSerializeData } from "./AreaSerializeData";
 export class Area{
     uid:string
     effects:Effect[]
-    
+    name:string=""
+    des:string=""
     constructor(uid?:string) {
 
         this.uid=uid?uid:UuidUtil.generate();

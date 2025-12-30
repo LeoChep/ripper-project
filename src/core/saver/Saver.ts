@@ -21,6 +21,7 @@ import type { EndTurnRemoveBuffEvent } from "../event/EndTurnRemoveBuffEvent";
 import type { BasedAbstractEvent } from "../event/BasedAbstractEvent";
 import type { GameEvent } from "../event/Event";
 import { AreaSystem } from "../system/AreaSystem";
+import { EventSheet } from '../event/EventSheet';
 
 export class Saver {
   static gameState: any;
@@ -147,9 +148,7 @@ export class Saver {
     const events: GameEvent[] = [];
     eventSerializeDatas.forEach((eventSerializeData: EventSerializeData) => {
       console.log("反序列化事件:", eventSerializeData);
-      const deserializer = EventDeserializerFactory.getDeserializer(
-        eventSerializeData.eventName
-      );
+      const deserializer = EventSheet.getInstance().getSerializer(eventSerializeData.eventName);
           console.log('获取反序列化器:', deserializer);
       if (deserializer) {
         const event = deserializer.deserialize(eventSerializeData);

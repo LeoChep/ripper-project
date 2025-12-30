@@ -30,6 +30,7 @@ export class BurnAreaEffect extends Effect {
     const effectContainer = new Container();
     container.addChild(effectContainer);
     const grids = this.grids;
+    //创建动画
     for (const grid of grids) {
       const { x: gridx, y: gridy } = grid;
       // 每个格子2~3个火焰
