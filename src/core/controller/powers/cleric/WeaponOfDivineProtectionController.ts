@@ -14,6 +14,12 @@ import { WeaponOfDivineProtectionEvent } from "@/core/power/cleric/WeaponOfDivin
 import { BattleEvenetSystem } from "@/core/system/BattleEventSystem";
 import { WeaponOfDivineProtectionDefUp } from "@/core/power/cleric/WeaponOfDivineProtection/WeaponOfDivineProtectionDefUp";
 import { BuffSystem } from "@/core/system/BuffSystem";
+import { Weapon } from "@/core/units/Weapon";
+import { WeaponOfDivineProtectionAreaMoveEvent } from "@/core/power/cleric/WeaponOfDivineProtection/WeaponOfDivineProtectionAreaMoveEvent";
+import { AreaEffect } from "@/core/effect/areaEffect/AreaEffect";
+import { tileSize } from "@/core/envSetting";
+import { getBrustRange } from "@/core/utils/MathUtil";
+import { WeaponOfDivineProtectionAreaEffect } from "@/core/power/cleric/WeaponOfDivineProtection/WeaponOfDivineProtectionAreaEffect";
 
 export class WeaponOfDivineProtectionController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -71,6 +77,14 @@ export class WeaponOfDivineProtectionController extends AbstractPwoerController 
             //使用威能效果，以牧师为中心的光环为周围队友提供+2ac威能
             //创建区域
             const area=new Area()
+            const weaponOfDivineProtectionEffect=new WeaponOfDivineProtectionAreaEffect(unit)
+            const grids=getBrustRange(Math.floor(unit.x/tileSize),Math.floor(unit.y/tileSize),3)
+            weaponOfDivineProtectionEffect.grids=new Set();
+            grids.forEach(grid=>{
+              weaponOfDivineProtectionEffect.grids.add({x:grid.x,y:grid.y,step:0})
+            });
+            weaponOfDivineProtectionEffect.build();
+            area.effects.push(weaponOfDivineProtectionEffect)
             area.name="Divine Protection Area"
             area.des="Area of effect for Divine Protection"
             AreaSystem.getInstance().addArea(area);
@@ -80,6 +94,11 @@ export class WeaponOfDivineProtectionController extends AbstractPwoerController 
               10
             )
             event.hook();
+            //创造进出区域事件
+            const inOutAreaMoveEvent=new WeaponOfDivineProtectionAreaMoveEvent(
+              unit,
+              area);
+            inOutAreaMoveEvent.hook();
             const buff=new WeaponOfDivineProtectionDefUp();
             //给队友添加buff
             BuffSystem.getInstance().addTo(buff,unit);

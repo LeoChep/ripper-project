@@ -53,23 +53,56 @@ export class WalkStateMachine extends StateMachine {
     const nextX = nextPathPoint.x * tileSize;
     const nextY = nextPathPoint.y * tileSize;
     //借机判断
+
+    if (this.currentGrids.length === 0) {
+      this.currentGrids = UnitSystem.getInstance().getUnitGrids(this.owner);
+    }
+    let haveMoveToNewTile = false;
     const unitX = Math.floor(this.owner.x / tileSize);
     const unitY = Math.floor(this.owner.y / tileSize);
-    let haveMoveToNewTile = false;
+
     if (
       unitX !== this.currentGrids[0]?.x ||
       unitY !== this.currentGrids[0]?.y
-    ) { 
+    ) {
       haveMoveToNewTile = true;
       this.oldGrids = this.currentGrids;
       this.currentGrids = UnitSystem.getInstance().getUnitGrids(this.owner);
+      console.log(
+        "单位移动到新格子:",
+        unitX,
+        unitY,
+        this.oldGrids,
+        this.currentGrids
+      );
+    }
+    const unitX2 = Math.ceil(this.owner.x / tileSize);
+    const unitY2 = Math.ceil(this.owner.y / tileSize);
+
+    if (
+      unitX2 !== this.currentGrids[0]?.x ||
+      unitY2 !== this.currentGrids[0]?.y
+    ) {
+      haveMoveToNewTile = true;
+      this.oldGrids = this.currentGrids;
+      this.currentGrids = UnitSystem.getInstance().getUnitGrids(this.owner);
+      console.log(
+        "单位移动到新格子:",
+        unitX2,
+        unitY2,
+        this.oldGrids,
+        this.currentGrids
+      );
     }
     //判断是否需要移动到新的格子
 
     if (haveMoveToNewTile) {
-
-      BattleEvenetSystem.getInstance().handleEvent('moveToNewGridEvent', this.owner);
       // 检查是否有单位可以触
+      BattleEvenetSystem.getInstance().handleEvent(
+        "moveToNewGridEvent",
+        this.owner,
+        this.oldGrids
+      );
       if (this.walkType != "step") this.checkOpportunity(this.oldGrids);
     }
     //
@@ -158,6 +191,11 @@ export class WalkStateMachine extends StateMachine {
       if (unitX === this.targetX && unitY === this.targetY) {
         spriteUnit.x = this.targetX * tileSize;
         spriteUnit.y = this.targetY * tileSize;
+        BattleEvenetSystem.getInstance().handleEvent(
+          "moveToNewGridEvent",
+          this.owner,
+          this.oldGrids
+        );
         if (this.owner.animUnit) {
           console.log(
             "到达目标位置，停止移动",
