@@ -75,7 +75,7 @@ export class EndTurnTimerSerializer extends EventSerializer {
   }
   serialize(event: EndTurnTimer): EventSerializeData {
     const data = super.serialize(event);
-    data.eventName = "EndTurnTimer";
+    data.eventName = event.eventName;
     data.eventData = {
       endTurnUnitId: event.endTurnUnit.id.toString(),
       turnCount: event.turnCount,

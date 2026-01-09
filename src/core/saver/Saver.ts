@@ -148,7 +148,10 @@ export class Saver {
     const events: GameEvent[] = [];
     eventSerializeDatas.forEach((eventSerializeData: EventSerializeData) => {
       console.log("反序列化事件:", eventSerializeData);
-      const deserializer = EventSheet.getInstance().getSerializer(eventSerializeData.eventName);
+      // const deserializer = EventSheet.getInstance().getSerializer(eventSerializeData.eventName);
+      const deserializer = EventDeserializerFactory.getDeserializer(
+        eventSerializeData.eventName
+      );
           console.log('获取反序列化器:', deserializer);
       if (deserializer) {
         const event = deserializer.deserialize(eventSerializeData);

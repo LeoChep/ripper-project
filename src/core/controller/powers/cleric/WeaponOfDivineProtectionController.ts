@@ -12,6 +12,8 @@ import { Area } from "@/core/area/Area";
 import { AreaSystem } from "@/core/system/AreaSystem";
 import { WeaponOfDivineProtectionEvent } from "@/core/power/cleric/WeaponOfDivineProtection/WeaponOfDivineProtectionEvent";
 import { BattleEvenetSystem } from "@/core/system/BattleEventSystem";
+import { WeaponOfDivineProtectionDefUp } from "@/core/power/cleric/WeaponOfDivineProtection/WeaponOfDivineProtectionDefUp";
+import { BuffSystem } from "@/core/system/BuffSystem";
 
 export class WeaponOfDivineProtectionController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -78,6 +80,9 @@ export class WeaponOfDivineProtectionController extends AbstractPwoerController 
               10
             )
             event.hook();
+            const buff=new WeaponOfDivineProtectionDefUp();
+            //给队友添加buff
+            BuffSystem.getInstance().addTo(buff,unit);
             console.log("创建WeaponOfDivineProtectionEvent事件:", event,BattleEvenetSystem.getInstance());
             resolveCallback({});
           });

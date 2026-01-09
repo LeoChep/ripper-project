@@ -244,7 +244,7 @@ export class UnitAnimSpirite extends Container {
       const iconContainer = new PIXI.Container();
       iconContainer.label = "effect";
       statusIcons[buff.uid] = iconContainer;
-      const iconUrl = getStatusEffectsIconUrl(buff.icon);
+      const iconUrl = getStatusEffectsIconUrl(buff.icon, buff.iconType);
       await PIXI.Assets.load(iconUrl);
 
       const iconGraphic = new PIXI.Graphics();
@@ -267,7 +267,6 @@ export class UnitAnimSpirite extends Container {
       iconSprite.scale.x = tileSize / lineIconLimit / iconSprite.width;
       iconSprite.scale.y = tileSize / lineIconLimit / iconSprite.height;
       iconContainer.addChild(iconSprite);
-
 
       animUnit.addChild(iconContainer);
       // golbalSetting.rlayers.spriteLayer?.attach(iconSprite);
@@ -309,8 +308,7 @@ export class UnitAnimSpirite extends Container {
     let drawIndex = 0;
     iconKeys.forEach((key) => {
       const icon = statusIcons[key];
-      if (!icon)
-        return;
+      if (!icon) return;
       // console.log("statusIcons", icon);
       if (icon.renderable) {
         // icon.renderable=false

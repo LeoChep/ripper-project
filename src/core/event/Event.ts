@@ -14,11 +14,19 @@ export abstract class GameEvent {
   static deserialize(data: EventSerializeData): GameEvent | null {
     return GameEvent.getSerializer().deserialize(data);
   }
+
+  /*
+  @deprecated 
+  **/
   serialize(){
-    return GameEvent.getSerializer().serialize(this);
+    return this.getSerializer().serialize(this);
   }
+  
+   /*
+  @deprecated 
+  **/
   deserialize(data: EventSerializeData): GameEvent | null {
-    return GameEvent.getSerializer().deserialize(data);
+    return this.getSerializer().deserialize(data);
   }
   static getSerializer(): EventSerializer {
     // throw new Error("Method not implemented.");

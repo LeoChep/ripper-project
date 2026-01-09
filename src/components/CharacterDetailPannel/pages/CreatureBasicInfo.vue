@@ -39,7 +39,7 @@
       <div class="defense-grid">
         <div class="defense-item ac">
           <div class="defense-label">护甲等级</div>
-          <div class="defense-value">{{ creature.ac }}</div>
+          <div class="defense-value">{{ ac }}</div>
         </div>
         <div class="defense-item fort">
           <div class="defense-label">强韧</div>
@@ -136,11 +136,12 @@
 
 <script setup lang="ts">
 import { createAttack } from "@/core/system/AttackSystem";
+import { ModifierSystem } from "@/core/system/ModifierSystem";
 import type { Creature, CreatureAttack } from "@/core/units/Creature";
 import type { Unit } from "@/core/units/Unit";
 import type { Weapon } from "@/core/units/Weapon";
 import { inject, onMounted, ref, type Ref, watch } from "vue";
-
+const ac=ref(0)
 const props = defineProps<{
   creature: Creature | null;
   unit: Unit | null;
@@ -152,6 +153,7 @@ const weaponAttack: Ref<CreatureAttack[]> = ref([]);
 onMounted(() => {
   if (props.unit && props.unit.creature && props.unit.creature.weapons) {
     weaponAttack.value = props.unit.creature.weapons.map((w) => getAttack(w)).filter((a): a is CreatureAttack => a !== null);
+    ac.value=ModifierSystem.getFianleValue(props.unit,"ac",)
   }
 });
 

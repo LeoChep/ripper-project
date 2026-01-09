@@ -18,11 +18,11 @@ export const getEffectFileUrl = (effectName: string, frameName: string) => {
 
   return new URL(`../assets/effect/${effectName}/${frameName}.png`, import.meta.url).href;
 };
-export const getStatusEffectsIconUrl = (effectName: string) => {
-  return new URL(`../assets/effect/statusEffects/${effectName}.svg`, import.meta.url).href;
+export const getStatusEffectsIconUrl = (effectName: string,iconType: string='svg') => {
+  return new URL(`../assets/effect/statusEffects/${effectName}.${iconType}`, import.meta.url).href;
 };
-export const getStatusEffectsIcon = async (effectName: string) => {
-  const url = getStatusEffectsIconUrl(effectName);
+export const getStatusEffectsIcon = async (effectName: string, iconType: string = 'svg') => {
+  const url = getStatusEffectsIconUrl(effectName, iconType);
   await Assets.load(url);
   
 };

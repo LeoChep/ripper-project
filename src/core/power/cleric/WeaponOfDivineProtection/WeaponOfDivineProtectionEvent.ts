@@ -15,13 +15,15 @@ export class WeaponOfDivineProtectionEvent extends EndTurnTimer {
   area: Area | null = null; // 影响区域
   turnCount: number = 0; // 回合数
   damageEventId: string | undefined; // 关联的伤害事件ID
+  eventName = 'WeaponOfDivineProtectionEvent';
   static getSerializer(): EndTurnTimerSerializer {
-    return EndTurnTimer.getSerializer();
+    return WeaponOfDivineProtectionEventSerializer.getInstance();
   }
   static deserialize: (
     data: EventSerializeData
   ) => WeaponOfDivineProtectionEvent | null = (data: EventSerializeData) => {
     const endTurnTimer = EndTurnTimer.getSerializer().deserialize(data);
+  
     console.log("反序列化WeaponOfDivineProtectionEvent:", endTurnTimer);
     if (endTurnTimer) {
       return new WeaponOfDivineProtectionEvent(
@@ -55,4 +57,26 @@ export class WeaponOfDivineProtectionEvent extends EndTurnTimer {
       alert("神圣守护之武器效果结束");
     }
   };
+}
+class WeaponOfDivineProtectionEventSerializer extends EndTurnTimerSerializer {
+
+  static instance: WeaponOfDivineProtectionEventSerializer;
+  static getInstance(): WeaponOfDivineProtectionEventSerializer {
+    if (!this.instance) {
+      this.instance = new WeaponOfDivineProtectionEventSerializer();
+    }
+    return this.instance;
+  }
+  deserialize(data: EventSerializeData): WeaponOfDivineProtectionEvent | null {
+
+    const endTurnTimer = super.deserialize(data);
+    if (endTurnTimer) {
+      return new WeaponOfDivineProtectionEvent(
+        endTurnTimer.endTurnUnit,
+        endTurnTimer.turnCount,
+        endTurnTimer.eventId
+      );
+    }
+    return null;
+  }
 }

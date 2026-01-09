@@ -7,6 +7,7 @@ export abstract class BuffInterface {
 name = "";
   description = "";
   icon = "";
+  iconType:string='svg';
   type = "";
   duration = 0; // 永久效果
   isPositive = false; // 正面效果
