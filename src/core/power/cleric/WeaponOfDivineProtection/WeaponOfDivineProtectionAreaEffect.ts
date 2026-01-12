@@ -36,7 +36,7 @@ export class WeaponOfDivineProtectionAreaEffect extends AreaEffect {
       const drawX = grid.x * tileSize;
       const drawY = grid.y * tileSize;
       graphics.rect(drawX, drawY, tileSize, tileSize);
-      graphics.fill({ color: "yellow" });
+      graphics.fill({ color: "yellow" , alpha: 0.3 });
       this.anim?.addChild(graphics);
        basicLayer.attach(graphics);
     });

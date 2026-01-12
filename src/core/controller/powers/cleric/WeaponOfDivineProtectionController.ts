@@ -78,7 +78,7 @@ export class WeaponOfDivineProtectionController extends AbstractPwoerController 
             //创建区域
             const area=new Area()
             const weaponOfDivineProtectionEffect=new WeaponOfDivineProtectionAreaEffect(unit)
-            const grids=getBrustRange(Math.floor(unit.x/tileSize),Math.floor(unit.y/tileSize),3)
+            const grids=getBrustRange(Math.floor(unit.x/tileSize),Math.floor(unit.y/tileSize),1)
             weaponOfDivineProtectionEffect.grids=new Set();
             grids.forEach(grid=>{
               weaponOfDivineProtectionEffect.grids.add({x:grid.x,y:grid.y,step:0})
@@ -99,10 +99,7 @@ export class WeaponOfDivineProtectionController extends AbstractPwoerController 
               unit,
               area);
             inOutAreaMoveEvent.hook();
-            const buff=new WeaponOfDivineProtectionDefUp();
-            //给队友添加buff
-            BuffSystem.getInstance().addTo(buff,unit);
-            console.log("创建WeaponOfDivineProtectionEvent事件:", event,BattleEvenetSystem.getInstance());
+          
             resolveCallback({});
           });
         } else {

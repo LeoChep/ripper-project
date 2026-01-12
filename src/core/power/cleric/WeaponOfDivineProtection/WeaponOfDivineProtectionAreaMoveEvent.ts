@@ -22,6 +22,8 @@ import {
   InOutAreaMoveEventSerializer,
 } from "@/core/event/inOutArea/InOutAreaMoveEvent";
 import type { AreaEffect } from "@/core/effect/areaEffect/AreaEffect";
+import { BuffSystem } from "@/core/system/BuffSystem";
+import { WeaponOfDivineProtectionDefUp } from "./WeaponOfDivineProtectionDefUp";
 
 export class WeaponOfDivineProtectionAreaMoveEvent extends InOutAreaMoveEvent {
   static readonly type = "UnitStartTurnEvent|moveToNewGridEvent";
@@ -49,20 +51,91 @@ export class WeaponOfDivineProtectionAreaMoveEvent extends InOutAreaMoveEvent {
   hook = () => {
     BattleEvenetSystem.getInstance().hookEvent(this);
   };
-  eventHandler = async (handlerUnit: Unit, oldGrids?: { x: number; y: number }[]) => {
-    //判断是否已经伤害过
-    if (this.handledUnit.includes(handlerUnit)) return Promise.resolve();
+  eventHandler = async (
+    handlerUnit: Unit,
+    oldGrids?: { x: number; y: number }[]
+  ) => {
+    //
+    if (handlerUnit.id === this.owner?.id) {
+      return Promise.resolve();
+    }
+    const effectGrids = (this.area?.effects[0] as AreaEffect).grids;
     const unitX = Math.floor(handlerUnit.x / tileSize);
     const unitY = Math.floor(handlerUnit.y / tileSize);
-    console.log("神圣守护之武器触发:", unitX, unitY,oldGrids);
-    (this.area?.effects[0] as AreaEffect).grids.forEach(async (grid) => {
-      // 处理每个格子的逻辑
-      if (grid.x === unitX && grid.y === unitY) {
-        // 触发燃烧效果
-        alert("神圣守护之武器触发保护效果，免疫伤害");
+    console.log("神圣守护之武器触发:", unitX, unitY, oldGrids);
+    //如果在生效单位里，则判断是否走出，否则判断是否进入
+    let isEffectUnit = false;
+    if (this.handledUnit.find((u) => u.id === handlerUnit.id)) {
+      isEffectUnit = true;
+    }
+    const isStillIn = this.checkIn(handlerUnit, effectGrids);
+    if (isEffectUnit && !isStillIn) {
+      // 移除处理过的单位
+      this.handledUnit = this.handledUnit.filter(
+        (u) => u.id !== handlerUnit.id
+      );
+      //
+      // alert("离开神圣武器范围");
+       this.removeBuff(handlerUnit);
+    }
+    if (!isEffectUnit && isStillIn) {
+      // 添加处理过的单位
+      this.handledUnit.push(handlerUnit);
+      // alert("进入神圣武器范围，获得保护");
+      this.giveBuff(handlerUnit);
+    }
+
+    return Promise.resolve();
+  };
+  giveBuff = (target: Unit) => {
+    const buffs = BuffSystem.getInstance().findBuffByName(
+      target,
+      WeaponOfDivineProtectionDefUp.name
+    );
+    const buff = buffs?.find((buff) => {
+      return buff.giver?.id === this.owner?.id;
+    });
+    if (buff) {
+      console.log(
+        "目标已存在神圣守护之武器防御提升buff，跳过添加:",
+        target,
+        buff
+      );
+      return;
+    }
+    const newBuff = new WeaponOfDivineProtectionDefUp();
+    newBuff.giver=this.owner;
+    BuffSystem.getInstance().addTo(newBuff, target);
+    console.log("给予神圣守护之武器防御提升buff:", target, newBuff);
+  };
+  removeBuff=(target: Unit) => {
+    const buffs = BuffSystem.getInstance().findBuffByName(
+      target,
+      WeaponOfDivineProtectionDefUp.name
+    );
+    buffs?.forEach((buff) => {
+      if (buff.giver?.id === this.owner?.id) {
+        BuffSystem.getInstance().removeBuff(buff, target);
+        console.log("移除神圣守护之武器防御提升buff:", target, buff);
       }
     });
-    return Promise.resolve();
+  }
+  checkIn = (
+    handleUnit: Unit,
+    effectGrids: Set<{ x: number; y: number; step: number }>
+  ) => {
+    const unitGrids = UnitSystem.getInstance().getUnitGrids(handleUnit);
+    let isStillIn = false;
+    for (const grid of effectGrids) {
+      const isStillIGrid = unitGrids.find(
+        (ug) => ug.x === grid.x && ug.y === grid.y
+      );
+      if (isStillIGrid) {
+        //在一个格子里，说明在区域里
+        isStillIn = true;
+      }
+    }
+    return isStillIn;
   };
 }
 

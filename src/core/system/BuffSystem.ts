@@ -23,6 +23,9 @@ export class BuffSystem {
   findBuffInUnit(unit: Unit, buffId: string) {
     return unit.creature?.buffs?.find((buff) => buff.uid === buffId);
   }
+  findBuffByName(unit: Unit, buffName: string) {
+    return unit.creature?.buffs?.filter((buff) => buff.name === buffName);
+  }
   async addTo(buff: BuffInterface, unit: Unit) {
     console.log("Adding buff:", buff.name, "to unit:", unit.name);
     if (!unit.creature) {
