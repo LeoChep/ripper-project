@@ -24,6 +24,7 @@ import { Immobilized } from "@/core/buff/Immobilized";
 import { EndTurnRemoveBuffEvent } from "@/core/event/EndTurnRemoveBuffEvent";
 import { ModifierSystem } from "@/core/system/ModifierSystem";
 import { AbilityValueSystem } from "@/core/system/AbilitiyValueSystem";
+import { BattleEvenetSystem } from "@/core/system/BattleEventSystem";
 
 export class IceRaysController extends AbstractPwoerController {
   public static isUse: boolean = false;

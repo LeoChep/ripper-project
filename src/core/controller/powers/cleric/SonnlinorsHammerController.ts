@@ -8,6 +8,9 @@ import { useStandAction } from "@/core/system/InitiativeSystem";
 import { BasicAttackSelector } from "@/core/selector/BasicAttackSelector";
 
 import type { FederatedPointerEvent } from "pixi.js";
+import { SonnlinorsHammerDamageDown } from "@/core/power/cleric/SonnlinorsHammer/SonnlinorsHammerDamageDown";
+import { BuffSystem } from "@/core/system/BuffSystem";
+import { EndTurnRemoveBuffEvent } from "@/core/event/EndTurnRemoveBuffEvent";
 
 export class SonnlinorsHammerController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -60,11 +63,28 @@ export class SonnlinorsHammerController extends AbstractPwoerController {
             unit,
             attack,
             golbalSetting.map
-          ).then(() => {
+          ).then((result) => {
             console.log("resolveCallback", {});
 
             //创建hook
-           
+            if (
+              result &&
+              (result as { hit: boolean; beAttack: Unit }).hit == true &&
+              (result as { hit: boolean; beAttack: Unit }).beAttack
+            ) {
+              const buff = new SonnlinorsHammerDamageDown();
+              const targetUnit = (result as { hit: boolean; beAttack: Unit })
+                .beAttack;
+              buff.owner = targetUnit;
+              buff.giver = unit;
+              BuffSystem.getInstance().addTo(buff, targetUnit);
+
+              new EndTurnRemoveBuffEvent(
+                targetUnit,
+                buff,
+                2 //下回合移除
+              ).hook();
+            }
 
             resolveCallback({});
           });

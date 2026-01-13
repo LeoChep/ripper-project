@@ -38,6 +38,21 @@ export class BattleEvenetSystem {
     //放入idmap
     this.eventIdMap.set(gameEvent.eventId, gameEvent);
   }
+  removeEventById(eventId: string) {
+    const event = this.eventIdMap.get(eventId);
+    if (!event) return;
+    const eventTypeStr = event.eventType;
+    const eventTypes = eventTypeStr.split("|");
+    for (let eventType of eventTypes) {
+      const events = this.eventTypedMap.get(eventType);
+      if (!events) continue;
+      const index = events.findIndex((e) => e.eventId === eventId);
+      if (index !== -1) {
+        events.splice(index, 1);
+      }
+    }
+    this.eventIdMap.delete(eventId);
+  }
   getEventById(eventId: string): GameEvent | undefined {
     return this.eventIdMap.get(eventId);
   }

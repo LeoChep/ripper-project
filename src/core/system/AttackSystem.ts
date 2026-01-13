@@ -13,6 +13,7 @@ import { golbalSetting } from "../golbalSetting";
 import { AbilityValueSystem } from "./AbilitiyValueSystem";
 import { evaluate } from "maths.ts";
 import { ModifierSystem } from "./ModifierSystem";
+import { BattleEvenetSystem } from "./BattleEventSystem";
 
 // 创建攻击的参数接口
 export interface CreateAttackParams {
@@ -37,6 +38,12 @@ export async function checkHit(
   against: string = "AC"
 ) {
   // 检查攻击是否命中
+  await BattleEvenetSystem.getInstance().handleEvent(
+    "attackEvent",
+    unit,
+    target,
+    attack
+  );
   const attackBonus = attack.attackBonus || 0; // 攻击加值
   const targetAC = target.creature?.ac || 10; // 目标护甲等级，默认10
   let targetDef = 0;
@@ -73,6 +80,12 @@ export async function getDamage(
   attack: CreatureAttack
 ) {
   // 检查攻击是否命中
+  BattleEvenetSystem.getInstance().handleEvent(
+    "damageBeforeRollEvent",
+    unit,
+    target,
+    attack
+  );
   const roll = parseInt(await diceRoll(attack.damage));
   return roll;
 }
@@ -149,13 +162,26 @@ export const checkPassiableBySize = (
 };
 
 export const createAttack = (params: CreateAttackParams) => {
-  const { attackFormula, damageFormula, keyWords, unit, weapon, implement } = params;
+  const { attackFormula, damageFormula, keyWords, unit, weapon, implement } =
+    params;
 
   // 解析攻击公式
-  const abValue = getAttackBonus(attackFormula, keyWords, unit, weapon, implement);
-  const damageText = getDamageFormula(damageFormula, keyWords, unit, weapon, implement);
+  const abValue = getAttackBonus(
+    attackFormula,
+    keyWords,
+    unit,
+    weapon,
+    implement
+  );
+  const damageText = getDamageFormula(
+    damageFormula,
+    keyWords,
+    unit,
+    weapon,
+    implement
+  );
   const attack = {} as CreatureAttack;
-  
+
   // 设置攻击属性，优先使用武器，其次使用法器
   if (weapon) {
     attack.range = weapon.range;
@@ -170,13 +196,18 @@ export const createAttack = (params: CreateAttackParams) => {
     attack.name = "未知攻击";
     attack.type = "未知";
   }
-  
+
   attack.attackBonus = abValue;
   attack.damage = damageText;
   return attack;
 };
 const getDamageFormula = (
-damageFormula: string, keyWords: string[], unit: Unit, weapon: Weapon | undefined, implement: any) => {
+  damageFormula: string,
+  keyWords: string[],
+  unit: Unit,
+  weapon: Weapon | undefined,
+  implement: any
+) => {
   // 解析伤害公式
   if (weapon) {
     damageFormula = damageFormula.replace(
@@ -210,7 +241,12 @@ damageFormula: string, keyWords: string[], unit: Unit, weapon: Weapon | undefine
   return damageFormula;
 };
 const getAttackBonus = (
-attackFormula: string, keyWords: string[], unit: Unit, weapon?: Weapon, implement?: any) => {
+  attackFormula: string,
+  keyWords: string[],
+  unit: Unit,
+  weapon?: Weapon,
+  implement?: any
+) => {
   const attackAttributes = getAttributes(attackFormula);
   //提取出公式中的属性，通过AbilityValueSystem等系统获取属性值
   attackAttributes.forEach((key) => {

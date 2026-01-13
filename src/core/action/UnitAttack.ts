@@ -58,12 +58,12 @@ export async function attackMovementToUnit(
   if (mapPassiable && mapPassiable.sprites) {
     const target = targetUnit;
     // 执行攻击逻辑
-    await BattleEvenetSystem.getInstance().handleEvent(
-      "attackEvent",
-      unit,
-      target,
-      attack
-    );
+    // await BattleEvenetSystem.getInstance().handleEvent(
+    //   "attackEvent",
+    //   unit,
+    //   target,
+    //   attack
+    // );
     console.log(target);
     if (unit.state === "dead") {
       console.warn("单位已死亡，无法执行攻击");

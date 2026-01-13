@@ -18,7 +18,7 @@ export class WeaponOfDivineProtectionDefUp extends BuffInterface {
     // 初始化效果
      const modifier = new Modifier({
           to: "ac",
-          value: 2, // 减少速度
+          value: 2, 
           type: "power",
           modifierType: "+",
         });

@@ -1,3 +1,4 @@
+import { SonnlinorsHammerDamageDownEvent } from "../power/cleric/SonnlinorsHammer/SonnlinorsHammerDamageDownEvent";
 import { WeaponOfDivineProtectionAreaMoveEvent } from "../power/cleric/WeaponOfDivineProtection/WeaponOfDivineProtectionAreaMoveEvent";
 import { WeaponOfDivineProtectionEvent } from "../power/cleric/WeaponOfDivineProtection/WeaponOfDivineProtectionEvent";
 import { ShieldEdgeBlockEvent } from "../power/fighter/ShieldEdgeBlock/ShieldEdgeBlockEvent";
@@ -49,4 +50,5 @@ function initEventSerializer(): void {
   registerEventSerializer(OrbmastersIncendiaryDetonationDamageEvent);
   registerEventSerializer(WeaponOfDivineProtectionEvent);
   registerEventSerializer(WeaponOfDivineProtectionAreaMoveEvent)
+  registerEventSerializer(SonnlinorsHammerDamageDownEvent)
 }

@@ -4,6 +4,7 @@ import { removeFromInitiativeSheet } from "./InitiativeSystem";
 import { golbalSetting } from "../golbalSetting";
 
 export async function takeDamage(damage: number, unit: Unit) {
+  
   if (unit.creature && typeof unit.creature.hp === "number") {
     unit.creature.hp -= damage;
     if (unit.creature.hp <= 0) {
