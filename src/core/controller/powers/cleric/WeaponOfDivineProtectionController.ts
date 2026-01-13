@@ -92,7 +92,7 @@ export class WeaponOfDivineProtectionController extends AbstractPwoerController 
             //创建hook
             const event=new WeaponOfDivineProtectionEvent(
               unit,
-              1
+              2 
             )
             event.hook();
             //创造进出区域事件
