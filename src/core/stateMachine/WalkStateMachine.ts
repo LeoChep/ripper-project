@@ -58,42 +58,49 @@ export class WalkStateMachine extends StateMachine {
       this.currentGrids = UnitSystem.getInstance().getUnitGrids(this.owner);
     }
     let haveMoveToNewTile = false;
-    const unitX = Math.floor(this.owner.x / tileSize);
-    const unitY = Math.floor(this.owner.y / tileSize);
-
-    if (
-      unitX !== this.currentGrids[0]?.x ||
-      unitY !== this.currentGrids[0]?.y
-    ) {
+    if (nextPathPoint.x !== this.currentGrids[0]?.x || nextPathPoint.y !== this.currentGrids[0]?.y) {
       haveMoveToNewTile = true;
+    }
+    if (haveMoveToNewTile) {
       this.oldGrids = this.currentGrids;
       this.currentGrids = UnitSystem.getInstance().getUnitGrids(this.owner);
-      console.log(
-        "单位移动到新格子:",
-        unitX,
-        unitY,
-        this.oldGrids,
-        this.currentGrids
-      );
     }
-    const unitX2 = Math.ceil(this.owner.x / tileSize);
-    const unitY2 = Math.ceil(this.owner.y / tileSize);
+    // const unitX = Math.floor(this.owner.x / tileSize);
+    // const unitY = Math.floor(this.owner.y / tileSize);
 
-    if (
-      unitX2 !== this.currentGrids[0]?.x ||
-      unitY2 !== this.currentGrids[0]?.y
-    ) {
-      haveMoveToNewTile = true;
-      this.oldGrids = this.currentGrids;
-      this.currentGrids = UnitSystem.getInstance().getUnitGrids(this.owner);
-      console.log(
-        "单位移动到新格子:",
-        unitX2,
-        unitY2,
-        this.oldGrids,
-        this.currentGrids
-      );
-    }
+    // if (
+    //   unitX !== this.currentGrids[0]?.x ||
+    //   unitY !== this.currentGrids[0]?.y
+    // ) {
+    //   haveMoveToNewTile = true;
+    //   this.oldGrids = this.currentGrids;
+    //   this.currentGrids = UnitSystem.getInstance().getUnitGrids(this.owner);
+    //   console.log(
+    //     "单位移动到新格子:",
+    //     unitX,
+    //     unitY,
+    //     this.oldGrids,
+    //     this.currentGrids
+    //   );
+    // }
+    // const unitX2 = Math.ceil(this.owner.x / tileSize);
+    // const unitY2 = Math.ceil(this.owner.y / tileSize);
+
+    // if (
+    //   unitX2 !== this.currentGrids[0]?.x ||
+    //   unitY2 !== this.currentGrids[0]?.y
+    // ) {
+    //   haveMoveToNewTile = true;
+    //   this.oldGrids = this.currentGrids;
+    //   this.currentGrids = UnitSystem.getInstance().getUnitGrids(this.owner);
+    //   console.log(
+    //     "单位移动到新格子:",
+    //     unitX2,
+    //     unitY2,
+    //     this.oldGrids,
+    //     this.currentGrids
+    //   );
+    // }
     //判断是否需要移动到新的格子
 
     if (haveMoveToNewTile) {

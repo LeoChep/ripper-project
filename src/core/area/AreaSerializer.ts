@@ -51,6 +51,7 @@ export class AreaSerializer {
         const serializer = effectSheet.getSerializer(effectData.effectName);
         console.log('找到的序列化器:', serializer)
         const effect = serializer?.deserialize(effectData);
+        console.log('反序列化得到的效果对象:', effect)
         if (effect) {
           area.effects.push(effect);
         }

@@ -66,6 +66,18 @@
     }
   ],
   "powers": [
+     {
+      "name": "SonnlinorsHammer",
+      "displayName": "索离诺尔之锤",
+      "useType": "atwill",
+      "actionType": "standard",
+      "range": null,
+      "target": null,
+      "description": "武器在你的手中成为可以进行强大的攻击和保卫盟友的神圣工具。",
+      "damage": null,
+      "attackBonus": null,
+      "missEffect": null
+    },
     {
       "name": "WeaponOfDivineProtection",
       "displayName": "神圣守护武器",

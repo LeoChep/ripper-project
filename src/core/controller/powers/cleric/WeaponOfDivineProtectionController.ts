@@ -78,6 +78,7 @@ export class WeaponOfDivineProtectionController extends AbstractPwoerController 
             //创建区域
             const area=new Area()
             const weaponOfDivineProtectionEffect=new WeaponOfDivineProtectionAreaEffect(unit)
+            console.log("创建神圣守护之武器区域效果:",weaponOfDivineProtectionEffect)
             const grids=getBrustRange(Math.floor(unit.x/tileSize),Math.floor(unit.y/tileSize),1)
             weaponOfDivineProtectionEffect.grids=new Set();
             grids.forEach(grid=>{
@@ -91,7 +92,7 @@ export class WeaponOfDivineProtectionController extends AbstractPwoerController 
             //创建hook
             const event=new WeaponOfDivineProtectionEvent(
               unit,
-              10
+              1
             )
             event.hook();
             //创造进出区域事件

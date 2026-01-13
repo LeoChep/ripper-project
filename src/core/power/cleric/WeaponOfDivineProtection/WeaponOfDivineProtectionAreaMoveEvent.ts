@@ -24,6 +24,8 @@ import {
 import type { AreaEffect } from "@/core/effect/areaEffect/AreaEffect";
 import { BuffSystem } from "@/core/system/BuffSystem";
 import { WeaponOfDivineProtectionDefUp } from "./WeaponOfDivineProtectionDefUp";
+import { getBrustRange } from "@/core/utils/MathUtil";
+import type { WeaponOfDivineProtectionAreaEffect } from "./WeaponOfDivineProtectionAreaEffect";
 
 export class WeaponOfDivineProtectionAreaMoveEvent extends InOutAreaMoveEvent {
   static readonly type = "UnitStartTurnEvent|moveToNewGridEvent";
@@ -57,8 +59,25 @@ export class WeaponOfDivineProtectionAreaMoveEvent extends InOutAreaMoveEvent {
   ) => {
     //
     if (handlerUnit.id === this.owner?.id) {
+      //更新区域效果位置
+      console.log("更新神圣守护之武器区域效果位置:", handlerUnit);
+      const grids = getBrustRange(
+        Math.floor(handlerUnit.x / tileSize),
+        Math.floor(handlerUnit.y / tileSize),
+        1
+      );
+      const areaEffect = this.area
+        ?.effects[0] as WeaponOfDivineProtectionAreaEffect;
+        console.log("获取到的区域效果:",areaEffect);
+      areaEffect.anim?.removeChildren()
+      areaEffect.grids = new Set();
+      grids.forEach((grid) => {
+        areaEffect.grids.add({ x: grid.x, y: grid.y, step: 0 });
+      });
+      await areaEffect.build();
       return Promise.resolve();
     }
+
     const effectGrids = (this.area?.effects[0] as AreaEffect).grids;
     const unitX = Math.floor(handlerUnit.x / tileSize);
     const unitY = Math.floor(handlerUnit.y / tileSize);
@@ -76,7 +95,7 @@ export class WeaponOfDivineProtectionAreaMoveEvent extends InOutAreaMoveEvent {
       );
       //
       // alert("离开神圣武器范围");
-       this.removeBuff(handlerUnit);
+      this.removeBuff(handlerUnit);
     }
     if (!isEffectUnit && isStillIn) {
       // 添加处理过的单位
@@ -87,7 +106,9 @@ export class WeaponOfDivineProtectionAreaMoveEvent extends InOutAreaMoveEvent {
 
     return Promise.resolve();
   };
+  solveBuffUnit = () => {};
   giveBuff = (target: Unit) => {
+    if (this.owner?.party != target.party) return;
     const buffs = BuffSystem.getInstance().findBuffByName(
       target,
       WeaponOfDivineProtectionDefUp.name
@@ -104,11 +125,11 @@ export class WeaponOfDivineProtectionAreaMoveEvent extends InOutAreaMoveEvent {
       return;
     }
     const newBuff = new WeaponOfDivineProtectionDefUp();
-    newBuff.giver=this.owner;
+    newBuff.giver = this.owner;
     BuffSystem.getInstance().addTo(newBuff, target);
     console.log("给予神圣守护之武器防御提升buff:", target, newBuff);
   };
-  removeBuff=(target: Unit) => {
+  removeBuff = (target: Unit) => {
     const buffs = BuffSystem.getInstance().findBuffByName(
       target,
       WeaponOfDivineProtectionDefUp.name
@@ -119,7 +140,7 @@ export class WeaponOfDivineProtectionAreaMoveEvent extends InOutAreaMoveEvent {
         console.log("移除神圣守护之武器防御提升buff:", target, buff);
       }
     });
-  }
+  };
   checkIn = (
     handleUnit: Unit,
     effectGrids: Set<{ x: number; y: number; step: number }>
@@ -167,10 +188,10 @@ export class WeaponOfDivineProtectionAreaMoveEventSerializer extends InOutAreaMo
     );
     console.log("反序列化的区域数据:", area, owner, event);
     //增加处理过的单位信息
-    // if (data.eventData.handledUnitIds)
-    //   event.handledUnit = data.eventData.handledUnitIds.map((id: string) =>
-    //     UnitSystem.getInstance().getUnitById(id)
-    //   );
+    if (data.eventData.handledUnitIds)
+      event.handledUnit = data.eventData.handledUnitIds.map((id: string) =>
+        UnitSystem.getInstance().getUnitById(id)
+      );
     event.handledUnit = inOutEvent?.handledUnit || [];
     return event;
   }

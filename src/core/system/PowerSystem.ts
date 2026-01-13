@@ -96,6 +96,10 @@ export class PowerSystem {
         return import(
           "../power/cleric/WeaponOfDivineProtection/WeaponOfDivineProtection"
         ).then((module) => module.WeaponOfDivineProtection);
+      case "SonnlinorsHammer":
+        return import(
+          "../power/cleric/SonnlinorsHammer/SonnlinorsHammer"
+        ).then((module) => module.SonnlinorsHammer);
       default:
         return null;
     }
@@ -136,6 +140,10 @@ export class PowerSystem {
         return import(
           "../controller/powers/cleric/WeaponOfDivineProtectionController"
         ).then((module) => module.WeaponOfDivineProtectionController);
+      case "SonnlinorsHammer":
+        return import(
+          "../controller/powers/cleric/SonnlinorsHammerController"
+        ).then((module) => module.SonnlinorsHammerController);
     }
     return null;
   }

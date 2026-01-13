@@ -1,3 +1,4 @@
+import { WeaponOfDivineProtectionAreaEffect } from "../power/cleric/WeaponOfDivineProtection/WeaponOfDivineProtectionAreaEffect";
 import { BurnAreaEffect } from "../power/wizard/OrbmastersIncendiaryDetonation/BurnAreaEffect";
 import type { EffectSerializer } from "./EffectSerializer";
 
@@ -36,5 +37,5 @@ function registerEffectSerializer(effectClass: EffectClassWithSerializer) {
 }
 function initEffectSerializer(): void {
   registerEffectSerializer(BurnAreaEffect)
-
+  registerEffectSerializer(WeaponOfDivineProtectionAreaEffect)
 }

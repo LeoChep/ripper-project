@@ -15,7 +15,7 @@ import * as PIXI from "pixi.js";
 export class WeaponOfDivineProtectionAreaEffect extends AreaEffect {
   static override readonly type = "WeaponOfDivineProtectionAreaEffect";
   static override readonly name = "WeaponOfDivineProtectionAreaEffect";
-  owner: Unit | null = null; // 施法单位
+  declare owner: Unit | null; // 施法单位
   anim: Container | null = null;
   grids: Set<{ x: number; y: number; step: number }> = new Set();
   static getSerializer(): WeaponOfDivineProtectionAreaEffectSerializer {
@@ -25,20 +25,23 @@ export class WeaponOfDivineProtectionAreaEffect extends AreaEffect {
     return WeaponOfDivineProtectionAreaEffect.getSerializer();
   }
   constructor(owner: Unit, uid?: string) {
+    console.log("创建WeaponOfDivineProtectionAreaEffect实例，owner:", owner);
     super(owner, uid);
+    // this.owner= owner;
+    console.log("创建WeaponOfDivineProtectionAreaEffect实例", this,owner);
   }
   async build(): Promise<void> {
     super.build();
-     const basicLayer = golbalSetting.rlayers.basicLayer;
-     if (!basicLayer) return;
+    const basicLayer = golbalSetting.rlayers.basicLayer;
+    if (!basicLayer) return;
     this.grids.forEach((grid) => {
       const graphics = new PIXI.Graphics();
       const drawX = grid.x * tileSize;
       const drawY = grid.y * tileSize;
       graphics.rect(drawX, drawY, tileSize, tileSize);
-      graphics.fill({ color: "yellow" , alpha: 0.3 });
+      graphics.fill({ color: "yellow", alpha: 0.3 });
       this.anim?.addChild(graphics);
-       basicLayer.attach(graphics);
+      basicLayer.attach(graphics);
     });
   }
   remove() {
@@ -63,7 +66,8 @@ export class WeaponOfDivineProtectionAreaEffectSerializer extends AreaEffectSeri
     data.effectName = "WeaponOfDivineProtectionAreaEffect";
     console.log(
       "WeaponOfDivineProtectionAreaEffect  serialize",
-      data.effectData
+      data.effectData,
+      effect
     );
     data.effectData.grids = [];
     effect.grids.forEach((grid) => {
@@ -76,11 +80,19 @@ export class WeaponOfDivineProtectionAreaEffectSerializer extends AreaEffectSeri
     data: EffectSerializeData
   ): WeaponOfDivineProtectionAreaEffect | null {
     const { ownerId } = data.effectData;
+    console.log(
+      "反序列化WeaponOfDivineProtectionAreaEffect，ownerId:",
+      ownerId
+    );
     if (!ownerId) return null;
+    console.log(
+      "反序列化WeaponOfDivineProtectionAreaEffect，ownerId:",
+      ownerId
+    );
     const owner = UnitSystem.getInstance().getUnitById(ownerId);
-
+    console.log("反序列化WeaponOfDivineProtectionAreaEffect，owner:", owner);
     if (!owner) return null;
-
+    console.log("反序列化WeaponOfDivineProtectionAreaEffect，owner存在，继续");
     const effect = new WeaponOfDivineProtectionAreaEffect(owner, data.effectId);
     effect.grids = new Set(data.effectData.grids);
     return effect;
