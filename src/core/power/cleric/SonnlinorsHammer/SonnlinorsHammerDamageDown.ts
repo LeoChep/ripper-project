@@ -5,7 +5,7 @@ import type { Unit } from "@/core/units/Unit";
 export class SonnlinorsHammerDamageDown extends BuffInterface {
    name = "SonnlinorsHammerDamageDown";
    description = "索离诺尔之锤伤害降低";
-   icon = "";
+   icon = "SonnlinorsHammer";
    iconType:string='png';
    type = "effect";
    duration = 1; // 永久效果

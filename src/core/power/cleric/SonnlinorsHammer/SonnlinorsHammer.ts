@@ -16,7 +16,7 @@ export class SonnlinorsHammer extends Power {
   rangeText: string=`近战武器`;
   targetType = "one";
   target: string=`一个`;
-  hitText: string=`1[W] + 感知调整值的伤害。在你下一回合结束前，目标下一次攻击在伤害骰上受到等同于你魅力调整值的减值`;
+  hitText: string=`1[W] + 感知调整值的伤害。在你下一回合结束前，目标下一次攻击在伤害骰上受到-5的减值`;
 
   attackText: string=`感知 vs. AC`;
   owner = null as any; // 反应的拥有者
