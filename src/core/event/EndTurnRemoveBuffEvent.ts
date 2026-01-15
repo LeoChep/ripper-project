@@ -13,6 +13,7 @@ export class EndTurnRemoveBuffEvent extends GameEvent {
   static readonly type = "UnitEndTurnEvent";
   static readonly name = "EndTurnRemoveBuffEvent";
   endTurnUnit: Unit; // 结束回合的单位
+  targetUnit: Unit | null = null; // 目标单位
   buff: BuffInterface; // 要移除的增益效果
   turnCount: number; // 回合数
   constructor(
@@ -26,7 +27,6 @@ export class EndTurnRemoveBuffEvent extends GameEvent {
     this.buff = buff;
     this.turnCount = turnCount; // 记录回合数
     this.eventId = uid ? uid : UuidUtil.generate();
-
   }
   eventId: string;
   eventData: any;

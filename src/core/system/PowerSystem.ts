@@ -100,6 +100,10 @@ export class PowerSystem {
         return import(
           "../power/cleric/SonnlinorsHammer/SonnlinorsHammer"
         ).then((module) => module.SonnlinorsHammer);
+      case "DivineGlow":
+        return import(
+          "../power/cleric/DivineGlow/DivineGlow"
+        ).then((module) => module.DivineGlow);
       default:
         return null;
     }
@@ -144,7 +148,12 @@ export class PowerSystem {
         return import(
           "../controller/powers/cleric/SonnlinorsHammerController"
         ).then((module) => module.SonnlinorsHammerController);
+      case "DivineGlow":
+        return import(
+          "../controller/powers/cleric/DivineGlowController"
+        ).then((module) => module.DivineGlowController);
     }
+
     return null;
   }
 }

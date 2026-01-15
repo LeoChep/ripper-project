@@ -45,6 +45,19 @@ export class UnitSystem {
     });
     return target;
   }
+  findUnitInGrids(gridSet: Set<{ x: number; y: number; step: number }>) {
+    const unitSet = new Set<Unit>();
+    gridSet.forEach((grid) => {
+      const targetUnit = UnitSystem.getInstance().findUnitByGridxy(
+        grid.x,
+        grid.y
+      );
+      if (targetUnit) {
+        unitSet.add(targetUnit);
+      }
+    });
+    return unitSet;
+  }
   getUnitGrids(unit: Unit) {
     if (!unit.creature) {
       console.warn("unit.creature 未定义");
@@ -78,8 +91,8 @@ export class UnitSystem {
     if (size === "big") {
       range = 2;
     }
-    range+=2;
-    const arroundGrids = this.getGridsByRange(spriteX-1, spriteY-1, range);
+    range += 2;
+    const arroundGrids = this.getGridsByRange(spriteX - 1, spriteY - 1, range);
     const girds = this.getGridsByRange(spriteX, spriteY, range - 2);
     //从 arroundGrids中删去Grids的部分
     // 从 arroundGrids 中删去 girds 的部分
@@ -116,11 +129,11 @@ export class UnitSystem {
   constructor() {
     // 初始化逻辑
   }
-  checkUnitInGrid(unit:Unit,x:number,y:number){
-    const grids=this.getUnitGrids(unit);
-    console.log('检查单位在格子内:', unit, x, y, grids);
-    for(const grid of grids){
-      if(grid.x===x&&grid.y===y){
+  checkUnitInGrid(unit: Unit, x: number, y: number) {
+    const grids = this.getUnitGrids(unit);
+    console.log("检查单位在格子内:", unit, x, y, grids);
+    for (const grid of grids) {
+      if (grid.x === x && grid.y === y) {
         return true;
       }
     }

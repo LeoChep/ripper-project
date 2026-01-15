@@ -44,8 +44,10 @@ export async function checkHit(
     target,
     attack
   );
-  const attackBonus = attack.attackBonus || 0; // 攻击加值
+  let attackBonus = attack.attackBonus || 0; // 攻击加值
   const targetAC = target.creature?.ac || 10; // 目标护甲等级，默认10
+  const modifierBonus = ModifierSystem.getInstance().getValueStack(unit, "attack-bonus").finalValue;
+  attackBonus += modifierBonus;
   let targetDef = 0;
   if (against === "AC") {
     targetDef = targetAC;
