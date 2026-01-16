@@ -2,10 +2,10 @@ import { BuffInterface } from "@/core/buff/BuffInterface";
 import type { Unit } from "@/core/units/Unit";
 
 
-export class SonnlinorsHammerDamageDown extends BuffInterface {
-   name = "SonnlinorsHammerDamageDown";
-   description = "索离诺尔之锤伤害降低";
-   icon = "SonnlinorsHammerDamageDown";
+export class HearteningStrikeAimBuff extends BuffInterface {
+   name = "HearteningStrikeAimBuff";
+   description = "振奋打击瞄准效果";
+   icon = "HearteningStrikeAimBuff";
    iconType:string='png';
    type = "effect";
    duration = 1; // 永久效果

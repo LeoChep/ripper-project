@@ -49,6 +49,7 @@ export interface CreatureOptions {
     size: string;
     type: string;
     hp: number;
+    thp?: number; // 临时生命值
     bloodied: number;
     ac: number;
     fortitude: number;
@@ -83,6 +84,7 @@ export class Creature {
     size: string;
     type: string;
     hp: number;
+    thp: number = 0; // 临时生命值
     bloodied: number;
     ac: number;
     fortitude: number;
@@ -118,6 +120,7 @@ export class Creature {
         this.type = options.type;
         this.hp = options.hp;
         this.maxHp = options.maxHp; // Initialize maxHp with hp
+        this.thp = options.thp ?? 0;
         this.bloodied = options.bloodied;
         this.ac = options.ac;
         this.fortitude = options.fortitude;
@@ -420,6 +423,7 @@ export function createCreatureOptions(txt: string): CreatureOptions {
         size,
         type,
         hp,
+        thp: 0, // 解析时默认无临时生命值
         bloodied,
         ac,
         fortitude,

@@ -19,6 +19,7 @@ export class CreatureSerializer {
       hp: creature.hp,
       maxHp: creature.maxHp,
       bloodied: creature.bloodied,
+      thp: creature.thp,
       ac: creature.ac,
       fortitude: creature.fortitude,
       reflex: creature.reflex,
@@ -122,7 +123,9 @@ export class CreatureSerializer {
    * 从 JSON 字符串反序列化为 CreatureOptions
    */
   static fromJSON(json: string): CreatureOptions {
-    return JSON.parse(json) as CreatureOptions;
+    const obj = JSON.parse(json) as CreatureOptions;
+    if (typeof obj.thp !== 'number') obj.thp = 0;
+    return obj;
   }
 
   /**

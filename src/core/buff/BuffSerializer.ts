@@ -1,6 +1,7 @@
 import type { Modifier } from "../modifier/Modifier";
 import { BuffSystem } from "../system/BuffSystem";
 import type { Unit } from "../units/Unit";
+import { Buff } from "./Buff";
 import { BuffInterface } from "./BuffInterface";
 
 /**
@@ -11,6 +12,7 @@ export interface SerializedBuffData {
   name: string;
   description: string;
   icon: string;
+  iconType: string;
   type: string;
   duration: number;
   isPositive: boolean;
@@ -32,6 +34,7 @@ export class BuffSerializer {
       name: data?.name ?? "",
       description: data?.description ?? "",
       icon: data?.icon ?? "",
+      iconType: data?.iconType ?? "svg",
       type: data?.type ?? "",
       duration: data?.duration ?? 0,
       isPositive: data?.isPositive ?? false,
@@ -41,7 +44,12 @@ export class BuffSerializer {
       modifiers: data?.modifiers ?? [],
     };
   }
-
+  get iconType(): string {
+    return this._data.iconType;
+  }
+  set iconType(value: string) {
+    this._data.iconType = value;
+  }
   // Getters
   get uid(): string {
     return this._data.uid;
@@ -121,6 +129,7 @@ export class BuffSerializer {
       name: buff.name,
       description: buff.description,
       icon: buff.icon,
+      iconType: buff.iconType,
       type: buff.type,
       duration: buff.duration,
       isPositive: buff.isPositive,
@@ -150,7 +159,7 @@ export class BuffSerializer {
     BuffClass: new () => T,
     unitResolver?: (uid: string) => Unit | null
   ): T {
-        console.log("Deserializing buff:", this._data.name);
+    console.log("Deserializing buff:", this._data.name);
     const buff = new BuffClass();
 
     buff.uid = this._data.uid;
@@ -158,6 +167,7 @@ export class BuffSerializer {
     buff.description = this._data.description;
     buff.icon = this._data.icon;
     buff.type = this._data.type;
+    buff.iconType = this._data.iconType ?? "svg";
     buff.duration = this._data.duration;
     buff.isPositive = this._data.isPositive;
     buff.source = this._data.source;
@@ -220,10 +230,9 @@ export class BuffSerializer {
    * 批量序列化 BuffInterface 数组
    */
   static serializeArray(buffs: BuffInterface[]): any[] {
-    const buffSerialize= buffs.map((buff) => this.serialize(buff));
+    const buffSerialize = buffs.map((buff) => this.serialize(buff));
     console.log("Serializing buffs:", buffSerialize);
-    return buffSerialize
-   
+    return buffSerialize;
   }
 
   /**
@@ -231,7 +240,7 @@ export class BuffSerializer {
    */
   static async deserializeArray<T extends BuffInterface>(
     serializedBuffs: BuffSerializer[],
-    BuffClass?:new () => T,
+    BuffClass?: new () => T,
     unitResolver?: (uid: string) => Unit | null
   ): Promise<T[]> {
     const buffs: T[] = [];
@@ -239,7 +248,7 @@ export class BuffSerializer {
     console.log("Deserializing buffs:", serializedBuffs);
     for (const serialized of serializedBuffs) {
       const buffDeserializePromise = new Promise<void>(async (resolve) => {
-                console.log("Deserializing buff:", serialized);
+        console.log("Deserializing buff:", serialized);
         const serializedInstance = new BuffSerializer(serialized._data);
 
         if (BuffClass) {
@@ -262,8 +271,11 @@ export class BuffSerializer {
   static async getBuffClass(buffName: string, type?: string) {
     // 根据 traitName 返回对应的 Trait 类
 
-    const module = await import(`./${buffName}`);
-    return module[buffName];
+    // const module = await import(`./${buffName}`);
+    // return module[buffName];
+    const module = await import(`./Buff`);
+    return module["Buff"] as any;
+    // return Buff
   }
 
   /**

@@ -2,9 +2,23 @@ import type { Container } from "pixi.js";
 import { Unit } from "../units/Unit";
 import { removeFromInitiativeSheet } from "./InitiativeSystem";
 import { golbalSetting } from "../golbalSetting";
-
+export async function getThp(thpNum: number, unit: Unit) {
+  if (!unit.creature) return;
+  if (unit.creature?.thp && unit.creature?.thp >= 0) {
+    if (thpNum > unit.creature.thp) unit.creature.thp = thpNum;
+  }else{
+    unit.creature.thp = thpNum;
+  }
+}
 export async function takeDamage(damage: number, unit: Unit) {
-  
+  if (unit.creature && typeof unit.creature.thp === "number") {
+    if (unit.creature.thp >= damage) {
+      unit.creature.thp -= damage;
+    } else {
+      damage -= unit.creature.thp;
+      unit.creature.thp = 0;
+    }
+  }
   if (unit.creature && typeof unit.creature.hp === "number") {
     unit.creature.hp -= damage;
     if (unit.creature.hp <= 0) {
@@ -36,7 +50,7 @@ function playDeathAnim(unit: Unit) {
   framesEndPromise.then(() => {
     if (unit.animUnit) {
       unit.animUnit.anims[unit.animUnit.state]?.stop();
-      unit.animUnit.eventMode='none'
+      unit.animUnit.eventMode = "none";
       setTimeout(() => {
         // 延时一段时间后删除
         if (unit.animUnit) {

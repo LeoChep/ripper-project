@@ -104,6 +104,10 @@ export class PowerSystem {
         return import(
           "../power/cleric/DivineGlow/DivineGlow"
         ).then((module) => module.DivineGlow);
+      case "HearteningStrike":
+        return import(
+          "../power/cleric/HearteningStrike/HearteningStrike"
+        ).then((module) => module.HearteningStrike);
       default:
         return null;
     }
@@ -152,6 +156,10 @@ export class PowerSystem {
         return import(
           "../controller/powers/cleric/DivineGlowController"
         ).then((module) => module.DivineGlowController);
+      case "HearteningStrike":
+        return import(
+          "../controller/powers/cleric/HearteningStrikeController"
+        ).then((module) => module.HearteningStrikeController);
     }
 
     return null;

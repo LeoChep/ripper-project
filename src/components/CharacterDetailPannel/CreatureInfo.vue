@@ -45,10 +45,14 @@
                   <span class="value">{{ creature.ac }}</span>
                 </div>
                 <!-- HP -->
-                <!-- <div class="info-item-inline">
-                  <span class="label">生命值</span>
+                <div class="info-item-inline">
+                  <span class="label">HP</span>
                   <span class="value">{{ creature.hp }}</span>
-                </div> -->
+                </div>
+                <div class="info-item-inline">
+                  <span class="label">THP</span>
+                  <span class="value">{{ creature.thp }}</span>
+                </div>
                 <!-- 速度 -->
                 <div class="info-item-inline">
                   <span class="label">速度</span>

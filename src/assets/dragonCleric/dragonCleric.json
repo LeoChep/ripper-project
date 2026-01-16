@@ -101,6 +101,18 @@
       "damage": null,
       "attackBonus": null,
       "missEffect": null
+    },
+    {
+      "name": "HearteningStrike",
+      "displayName": "神圣光辉",
+      "useType": "atwill",
+      "actionType": "standard",
+      "range": null,
+      "target": null,
+      "description": "武器在你的手中成为可以进行强大的攻击和保卫盟友的神圣工具。",
+      "damage": null,
+      "attackBonus": null,
+      "missEffect": null
     }
   ],
   "traits": [
