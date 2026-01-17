@@ -24,6 +24,7 @@ const initiativeCursor = {
   pointAt: null as null | InitiativeClass,
   map: null as null | TiledMap,
   inBattle: false,
+  lastParty: null as null | string, // 记录上一回合的方阵
 };
 
 export async function addUnitsToInitiativeSheet(units: Unit[]) {
@@ -130,8 +131,13 @@ export async function startCombatTurn() {
         );
       }
 
-      //播放动画
-      await playAnim(initiativeCursor.pointAt.owner);
+      //播放动画 - 只在方阵切换时播放
+      const currentParty = initiativeCursor.pointAt.owner.party;
+      const shouldPlayAnim = initiativeCursor.lastParty !== currentParty;
+      if (shouldPlayAnim) {
+        await playAnim(initiativeCursor.pointAt.owner);
+      }
+      initiativeCursor.lastParty = currentParty;
 
       //设置选中角色
       if (initiativeCursor.pointAt.owner.party !== "player") {
@@ -401,7 +407,8 @@ async function playAnim(unit: Unit) {
   }
   let turnTextContent = "";
   if (unit.party === "player") {
-    turnTextContent = unit.name + "的回合";
+    //turnTextContent = unit.name + "的回合";
+    turnTextContent = "我方行动";
   } else {
     turnTextContent = "敌方行动";
   }
@@ -446,6 +453,7 @@ export function checkIsTurn(unit: Unit) {
 export async function endBattle() {
   // 清空InitiativeSheet
   initiativeCursor.inBattle = false;
+  initiativeCursor.lastParty = null;
   while (InitiativeSheet.length > 0) {
     InitiativeSheet.pop();
   }
