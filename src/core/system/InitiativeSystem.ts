@@ -1,9 +1,9 @@
+import { Unit } from '@/core/units/Unit';
 import { CharacterController } from "./../controller/CharacterController";
 import { getLayers } from "@/stores/container";
 import { diceRoll } from "../DiceTryer";
 import type { TiledMap } from "../MapClass";
 import { InitiativeClass } from "../type/InitiativeClass";
-import { Unit } from "../units/Unit";
 import * as PIXI from "pixi.js";
 import { useInitiativeStore } from "@/stores/initiativeStore";
 import { CharacterOutCombatController } from "../controller/CharacterOutCombatController";
@@ -34,6 +34,14 @@ export async function addUnitsToInitiativeSheet(units: Unit[]) {
   });
   await Promise.all(allAddedPromise);
   return;
+}
+export const getUnits=()=>{
+  const units=[] as Unit[];
+  InitiativeSheet.forEach((initiative)=>{
+    if (initiative.owner&&initiative.owner.state!=='dead')
+    units.push(initiative.owner);
+  })
+  return units;
 }
 export function setMap(map: TiledMap) {
   initiativeCursor.map = map;
@@ -320,6 +328,7 @@ export function startBattle() {
   });
   return playStartAnim();
 }
+export const playStartUIhandles=[] as any[]
 export async function playStartAnim() {
   const container = golbalSetting.tipContainer;
   const lineLayer = getLayers().lineLayer;
@@ -362,6 +371,11 @@ export async function playStartAnim() {
       resolve();
     }, 1500);
   });
+  animPromise.then(()=>{
+    playStartUIhandles.forEach((func)=>{
+      func();
+    })
+  })
   return animPromise;
 }
 async function playAnim(unit: Unit) {

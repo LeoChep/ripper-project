@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import UnitBox from '@/components/ThePlayerUnitBox/UnitBox.vue';
-import GamePannel from '@/components/GamePannel/GamePannel.vue';
-import ActionPannel from '@/components/ActionPannel/ActionPannel.vue';
-import { useInitiativeStore } from '@/stores/initiativeStore';
-const initiative= useInitiativeStore()
-initiative.initializeInitiative(0);
+import UnitBox from "@/components/ThePlayerUnitBox/UnitBox.vue";
+import GamePannel from "@/components/GamePannel/GamePannel.vue";
+import ActionPannel from "@/components/ActionPannel/ActionPannel.vue";
+import { useInitiativeStore } from "@/stores/initiativeStore";
+const initiative = useInitiativeStore();
+initiative.initializeInitiative();
 </script>
 
 <template>
@@ -25,4 +25,3 @@ initiative.initializeInitiative(0);
   z-index: 1000;
 }
 </style>
-

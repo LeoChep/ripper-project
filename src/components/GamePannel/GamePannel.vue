@@ -1,6 +1,7 @@
 <template>
   <div class="game-pannel" id="game-pannel"></div>
   <!-- <img :src="hitURL"> -->
+  <InitBar></InitBar>
   <CreatureInfo
     :creature="selectedCreature"
     :unit="selectedUnit"
@@ -62,6 +63,7 @@ import * as InitiativeSystem from "@/core/system/InitiativeSystem";
 import { CharacterCombatController } from "@/core/controller/CharacterCombatController";
 import { Saver } from "@/core/saver/Saver";
 import { AreaSystem } from "@/core/system/AreaSystem";
+import InitBar from "../ActionBar/InitBar.vue";
 const appSetting = envSetting.appSetting;
 onMounted(async () => {
   const app = new PIXI.Application();
