@@ -2,6 +2,7 @@
   <div class="game-pannel" id="game-pannel"></div>
   <!-- <img :src="hitURL"> -->
   <InitBar></InitBar>
+  <TurnAnnouncement ref="turnAnnouncementRef" />
   <CreatureInfo
     :creature="selectedCreature"
     :unit="selectedUnit"
@@ -64,6 +65,7 @@ import { CharacterCombatController } from "@/core/controller/CharacterCombatCont
 import { Saver } from "@/core/saver/Saver";
 import { AreaSystem } from "@/core/system/AreaSystem";
 import InitBar from "../ActionBar/InitBar.vue";
+import TurnAnnouncement from "../TurnAnnouncement/TurnAnnouncement.vue";
 const appSetting = envSetting.appSetting;
 onMounted(async () => {
   const app = new PIXI.Application();

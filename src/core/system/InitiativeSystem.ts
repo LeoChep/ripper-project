@@ -135,7 +135,16 @@ export async function startCombatTurn() {
       const currentParty = initiativeCursor.pointAt.owner.party;
       const shouldPlayAnim = initiativeCursor.lastParty !== currentParty;
       if (shouldPlayAnim) {
-        await playAnim(initiativeCursor.pointAt.owner);
+        if (initiativeCursor.pointAt.owner.party === "player") {
+          for (const func of playPlayerTurnAnnouncementAnimHandles) {
+            await func(initiativeCursor.pointAt.owner);
+          }
+        } else {
+          for (const func of playEnemyTurnAnnouncementAnimHandles) {
+            await func(initiativeCursor.pointAt.owner);
+          }
+        }
+       // await playAnim(initiativeCursor.pointAt.owner);
       }
       initiativeCursor.lastParty = currentParty;
 
@@ -384,6 +393,8 @@ export async function playStartAnim() {
   })
   return animPromise;
 }
+export const playEnemyTurnAnnouncementAnimHandles=[] as any[]
+export const playPlayerTurnAnnouncementAnimHandles=[] as any[]
 async function playAnim(unit: Unit) {
   const container = golbalSetting.tipContainer;
   const lineLayer = getLayers().lineLayer;
