@@ -1,5 +1,8 @@
 <template>
-  <div class="init-bar-wrapper">
+  <div
+    class="init-bar-wrapper"
+    :style="{ '--init-avatarbox-bg': `url(${initAvatarBoxImg})` }"
+  >
     <div class="init-bar-scroll" ref="scrollContainer" @wheel="onWheel">
       <div
         v-for="unit in units"
@@ -9,11 +12,11 @@
       >
         <img
           v-if="isCurrentUnit(unit)"
-          src="/src/assets/ui/init-cursor.png"
+          :src="initCursorImg"
           class="init-cursor"
           alt="cursor"
         />
-        <div class="init-bar-avatarbox">
+        <div :class="['init-bar-avatarbox', unit.party === 'player' ? 'ally' : 'enemy']">
           <img
             :src="getAvatar(unit.unitTypeName)"
             class="init-bar-avatar"
@@ -31,6 +34,8 @@ import { ref, computed, watch } from "vue";
 import { useInitiativeStore } from "@/stores/initiativeStore";
 import { getUnitAvatar } from "@/utils/utils";
 import * as InitSystem from "@/core/system/InitiativeSystem";
+import initCursorImg from "@/assets/ui/init-cursor.png";
+import initAvatarBoxImg from "@/assets/ui/init-avtarbox2.png";
 const scrollContainer = ref<HTMLDivElement | null>(null);
 const initiativeStore = useInitiativeStore();
 const isAvatarBoxLoaded = ref(false);
@@ -42,15 +47,15 @@ const avatarBoxImg = new Image();
 avatarBoxImg.onload = () => {
   isAvatarBoxLoaded.value = true;
 };
-avatarBoxImg.src = "/src/assets/ui/init-avtarbox2.png";
+avatarBoxImg.src = initAvatarBoxImg;
 
 const cursorImg = new Image();
 cursorImg.onload = () => {
   isCursorLoaded.value = true;
 };
-cursorImg.src = "/src/assets/ui/init-cursor.png";
+cursorImg.src = initCursorImg;
 
-InitSystem.playStartUIhandles.push(() => {
+InitSystem.loadBattleUIhandles.push(() => {
   initiativeStore.initializeInitiative();
 });
 // 假设 store 中有 sortedUnits，包含 { id, avatar, name } 按先攻顺序排列
@@ -186,12 +191,76 @@ function onWheel(e: WheelEvent) {
   top: 0;
   width: 100%;
   height: 100%;
-  background-image: url("/src/assets/ui/init-avtarbox2.png");
+  background-image: var(--init-avatarbox-bg);
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
   z-index: 3;
   pointer-events: none;
+}
+
+/* Edge glow pseudo-element - sits behind the frame (::after) but outside the avatar */
+.init-bar-avatarbox::before {
+  content: "";
+  position: absolute;
+  left: 0px;
+  top: -6px;
+  width: calc(100%);
+  height: calc(100% + 6px);
+  border-radius: 12px;
+  z-index: 2;
+  pointer-events: none;
+  background: transparent; /* 不填充中间，只用阴影制造光晕 */
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0); /* 默认无色，靠各阵营覆盖 */
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.init-bar-avatarbox.ally::before {
+  box-shadow: 0 0 6px rgba(230, 230, 230, 0.35), 0 0 12px rgba(230, 230, 230, 0.22);
+  animation: pulseAlly 1.8s ease-in-out infinite;
+}
+
+.init-bar-avatarbox.enemy::before {
+  box-shadow: 0 0 6px rgba(255, 40, 40, 0.38), 0 0 14px rgba(255, 40, 40, 0.24);
+  animation: pulseEnemy 1.8s ease-in-out infinite;
+}
+
+@keyframes pulseAlly {
+  0% {
+    box-shadow: 0 0 3px rgba(230, 230, 230, 0.14), 0 0 8px rgba(230, 230, 230, 0.1);
+    transform: scale(0.995);
+  }
+  35% {
+    box-shadow: 0 0 10px rgba(230, 230, 230, 0.55), 0 0 18px rgba(230, 230, 230, 0.32);
+    transform: scale(1.01);
+  }
+  65% {
+    box-shadow: 0 0 10px rgba(230, 230, 230, 0.55), 0 0 18px rgba(230, 230, 230, 0.32);
+    transform: scale(1.01);
+  }
+  100% {
+    box-shadow: 0 0 3px rgba(230, 230, 230, 0.14), 0 0 8px rgba(230, 230, 230, 0.1);
+    transform: scale(0.995);
+  }
+}
+
+@keyframes pulseEnemy {
+  0% {
+    box-shadow: 0 0 3px rgba(255, 40, 40, 0.12), 0 0 8px rgba(255, 40, 40, 0.08);
+    transform: scale(0.995);
+  }
+  35% {
+    box-shadow: 0 0 12px rgba(255, 40, 40, 0.6), 0 0 22px rgba(255, 40, 40, 0.35);
+    transform: scale(1.01);
+  }
+  65% {
+    box-shadow: 0 0 12px rgba(255, 40, 40, 0.6), 0 0 22px rgba(255, 40, 40, 0.35);
+    transform: scale(1.01);
+  }
+  100% {
+    box-shadow: 0 0 3px rgba(255, 40, 40, 0.12), 0 0 8px rgba(255, 40, 40, 0.08);
+    transform: scale(0.995);
+  }
 }
 .init-bar-item.is-current .init-bar-avatarbox {
   width: 64px;

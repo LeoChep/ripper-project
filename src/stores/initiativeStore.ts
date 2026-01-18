@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { InitiativeClass } from '../core/type/InitiativeClass'
 import type { Unit } from '../core/units/Unit'
-import { getUnits } from '@/core/system/InitiativeSystem'
+import { getUnits,getPointAtUnit, getPointAtInitiative } from '@/core/system/InitiativeSystem'
 
 export const useInitiativeStore = defineStore('initiative', {
   state: () => ({
@@ -26,7 +26,7 @@ export const useInitiativeStore = defineStore('initiative', {
 
   actions: {
     initializeInitiative() {
-      this.currentInitiative = new InitiativeClass(0)
+      this.currentInitiative = getPointAtInitiative() || new InitiativeClass(0);
       this.initiativeUnits=getUnits();
     },
 

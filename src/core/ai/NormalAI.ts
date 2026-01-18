@@ -26,6 +26,7 @@ export class NormalAI implements AIInterface {
     //寻找目标
     // 这里可以实现AI的目标选择逻辑
     //用于存放结果
+    console.log("AI行动:", unit);
     const initiative = unit.initiative;
     const result: any = { canAttack: false };
     const unitX = Math.floor(unit.x / tileSize);
@@ -48,7 +49,7 @@ export class NormalAI implements AIInterface {
       "AI路径计算结果:",
       path,
       path[`${result.x},${result.y}`],
-      result
+      result,
     );
     if (result.target && path) {
       //移动
@@ -60,83 +61,105 @@ export class NormalAI implements AIInterface {
       };
       let isCantAttack = !result.canAttack;
       //粗暴的用于跳出
-      for (let num=1;num<2;num++)
-      if (rc) {
-        //检测倒立起立
+      for (let num = 1; num < 2; num++)
+        if (rc) {
+          //检测倒立起立
 
-        standAI(unit);
-        if (
-        !InitiativeSysteam.useMoveAction(unit)){
-          break;
-        };
-
-        let speed = ModifierSystem.getInstance().getValueStack(
-          unit,
-          "speed"
-        ).finalValue;
-
-        if (isCantAttack) {
-          //如果不能攻击,检查是否为拥堵情况
-          let noUnit = false;
-          while (!noUnit && rc) {
-            //如果是拥堵情况，往前找到不拥堵位置为止
-            rc = path[`${rc.x},${rc.y}`] as unknown as {
-              x: number;
-              y: number;
-              step: number;
-            };
-
-            noUnit = true;
-            golbalSetting?.map?.sprites.forEach((sprite) => {
-              const spriteX = Math.floor(sprite.x / tileSize);
-              const spriteY = Math.floor(sprite.y / tileSize);
-              if (
-                rc &&
-                rc.x === spriteX &&
-                rc.y === spriteY &&
-                sprite.state !== "dead"
-              ) {
-                noUnit = false;
-              }
-            });
-            console.log(`AI单位 ${unit.name} 在 ` + rc + ` 位置拥堵，继续寻找`);
+          standAI(unit);
+          if (!InitiativeSysteam.useMoveAction(unit)) {
+            break;
           }
-        }
-        if (rc && rc.step > speed) {
-          console.log(
-            `AI单位 ${unit.name} 的步数 ${rc.step} 超过速度 ${speed}`
-          );
-          isCantAttack = true; //如果步数大于速度，就不能攻击
-          let least = rc.step - speed;
-          while (least > 0) {
-            result.x = rc.x;
-            result.y = rc.y;
-            rc = path[`${result.x},${result.y}`] as unknown as {
-              x: number;
-              y: number;
-              step: number;
-            };
-            least--;
-            if (least === 0) {
-              //移动力使用殆尽，使用标准动作继续移动
-              if (InitiativeController.useMoveAction(unit)) {
-                least = ModifierSystem.getInstance().getValueStack(
-                  unit,
-                  "speed"
-                ).finalValue;
+
+          let speed = ModifierSystem.getInstance().getValueStack(
+            unit,
+            "speed",
+          ).finalValue;
+
+          if (isCantAttack) {
+            //如果不能攻击,检查是否为拥堵情况
+            let noUnit = false;
+            while (!noUnit && rc) {
+              //如果是拥堵情况，往前找到不拥堵位置为止
+              const moveEndGrids = UnitSystem.getInstance().getGridsBySize(
+                rc.x,
+                rc.y,
+                unit.creature?.size ?? "middle",
+              );
+              console.log(
+                "检测拥堵位置的格子:",
+                moveEndGrids,
+                rc,
+                unitX,
+                unitY,
+                unit,
+              );
+              rc = path[`${rc.x},${rc.y}`] as unknown as {
+                x: number;
+                y: number;
+                step: number;
+              };
+
+              noUnit = true;
+
+              for (let grid of moveEndGrids) {
+                const findUnit = UnitSystem.getInstance().findUnitByGridxy(
+                  grid.x,
+                  grid.y,
+                );
+                if (
+                  rc &&
+                  findUnit &&
+                  findUnit !== unit &&
+                  findUnit.state !== "dead"
+                ) {
+                  noUnit = false;
+                }
+              }
+              // golbalSetting?.map?.sprites.forEach((sprite) => {
+              //   const spriteX = Math.floor(sprite.x / tileSize);
+              //   const spriteY = Math.floor(sprite.y / tileSize);
+
+              // });
+              console.log(
+                `AI单位 ${unit.name} 在 ` + rc + ` 位置拥堵，继续寻找`,
+              );
+            }
+          }
+          if (rc && rc.step > speed) {
+            console.log(
+              `AI单位 ${unit.name} 的步数 ${rc.step} 超过速度 ${speed}`,
+            );
+            isCantAttack = true; //如果步数大于速度，就不能攻击
+            let least = rc.step - speed;
+            while (least > 0) {
+              result.x = rc.x;
+              result.y = rc.y;
+              rc = path[`${result.x},${result.y}`] as unknown as {
+                x: number;
+                y: number;
+                step: number;
+              };
+              least--;
+              if (least === 0) {
+                //移动力使用殆尽，使用标准动作继续移动
+                if (InitiativeController.useMoveAction(unit)) {
+                  least = ModifierSystem.getInstance().getValueStack(
+                    unit,
+                    "speed",
+                  ).finalValue;
+                }
               }
             }
           }
+          console.log("AI停止路径:", path[`${result.x},${result.y}`], result);
+          if (rc) {
+            await UnitMove.moveMovement(result.x, result.y, unit, path);
+          }
         }
-        console.log("AI停止路径:", path[`${result.x},${result.y}`], result);
-        if (rc) {
-          await UnitMove.moveMovement(result.x, result.y, unit, path);
-        }
-      }
 
       console.log("aiUnit state", unit);
-      if(!InitiativeSysteam.useStandAction(unit)){
-        isCantAttack=true;
+      if (!InitiativeSysteam.useStandAction(unit)) {
+        isCantAttack = true;
       }
       if (!isCantAttack) {
         const attack = unit.creature?.attacks[0];
@@ -148,7 +171,7 @@ export class NormalAI implements AIInterface {
             enemyY,
             unit,
             attack,
-            map
+            map,
           );
         }
       }
@@ -175,7 +198,7 @@ export class NormalAI implements AIInterface {
       targetUnit,
       this.owner,
       this.owner.creature?.attacks[0],
-      golbalSetting.map
+      golbalSetting.map,
     );
   }
 }
@@ -199,7 +222,7 @@ function findAttackTarget(
   y: number,
   unit: Unit,
   tiledMap: TiledMap,
-  result: any
+  result: any,
 ) {
   //没找到敌人就继续寻找
   let continueFind = true;
@@ -211,20 +234,25 @@ function findAttackTarget(
       y * tileSize,
       nx * tileSize,
       ny * tileSize,
-      tiledMap
+      tiledMap,
     );
   }
   if (!passiable) {
     return false; // 如果不可通行，直接返回
   }
   let noUnit = true;
-  const findUnitInThisPoint = UnitSystem.getInstance().findUnitByGridxy(x, y);
-  if (
-    findUnitInThisPoint &&
-    findUnitInThisPoint !== unit &&
-    findUnitInThisPoint.state !== "dead"
-  ) {
-    noUnit = false;
+  //判断是否有单位阻止你站在这里
+  const moveEndGrids = UnitSystem.getInstance().getGridsBySize(
+    x,
+    y,
+    unit.creature?.size ?? "middle",
+  );
+
+  for (let grid of moveEndGrids) {
+    const findUnit = UnitSystem.getInstance().findUnitByGridxy(grid.x, grid.y);
+    if (findUnit && findUnit !== unit && findUnit.state !== "dead") {
+      noUnit = false;
+    }
   }
   //获得攻击范围内格子
   const size = unit?.creature?.size ? unit.creature.size : "middle";
@@ -240,7 +268,7 @@ function findAttackTarget(
         unitSettingx,
         unitSettingy,
         x,
-        y
+        y,
       );
     },
   });
@@ -300,7 +328,7 @@ function checkEdges(
   x1: number,
   y1: number,
   x2: number,
-  y2: number
+  y2: number,
 ) {
   let passiable = true; // 默认可通行
   if (tiledMap) {
@@ -324,7 +352,7 @@ function checkEdges(
             edge.x1,
             edge.y1,
             edge.x2,
-            edge.y2
+            edge.y2,
           )
         ) {
           passiable = false; // 如果中点的连线与边相交，则不可通行

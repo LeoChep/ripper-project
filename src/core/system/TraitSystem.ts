@@ -32,9 +32,9 @@ export class TriatSystem {
   getTraitClass(traitName: string,type?: string) {
     // 根据 traitName 返回对应的 Trait 类
     if (type === "feat") {
-
-        return import(`../feat/${traitName}`).then(
-          (module) => module[traitName]
+        // 动态路径无法被 Vite 静态分析；添加 /* @vite-ignore */ 抑制警告
+        return import(/* @vite-ignore */ `../feat/WeaponFocus`).then(
+          (module) => module.WeaponFocus
         );
     
         

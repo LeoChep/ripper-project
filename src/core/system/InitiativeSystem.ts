@@ -1,4 +1,4 @@
-import { Unit } from '@/core/units/Unit';
+import { Unit } from "@/core/units/Unit";
 import { CharacterController } from "./../controller/CharacterController";
 import { getLayers } from "@/stores/container";
 import { diceRoll } from "../DiceTryer";
@@ -27,6 +27,7 @@ const initiativeCursor = {
   lastParty: null as null | string, // 记录上一回合的方阵
 };
 
+
 export async function addUnitsToInitiativeSheet(units: Unit[]) {
   const allAddedPromise = [] as Promise<any>[];
   units.forEach((unit) => {
@@ -36,14 +37,14 @@ export async function addUnitsToInitiativeSheet(units: Unit[]) {
   await Promise.all(allAddedPromise);
   return;
 }
-export const getUnits=()=>{
-  const units=[] as Unit[];
-  InitiativeSheet.forEach((initiative)=>{
-    if (initiative.owner&&initiative.owner.state!=='dead')
-    units.push(initiative.owner);
-  })
+export const getUnits = () => {
+  const units = [] as Unit[];
+  InitiativeSheet.forEach((initiative) => {
+    if (initiative.owner && initiative.owner.state !== "dead")
+      units.push(initiative.owner);
+  });
   return units;
-}
+};
 export function setMap(map: TiledMap) {
   initiativeCursor.map = map;
 }
@@ -112,7 +113,7 @@ export async function startCombatTurn() {
   if (initiativeCursor.pointAt != null) {
     console.log(
       "initiativeCursor.pointAt.owner.name",
-      initiativeCursor.pointAt
+      initiativeCursor.pointAt,
     );
     if (initiativeCursor.pointAt.owner) {
       initiativeCursor.pointAt.standerActionNumber = 1;
@@ -121,13 +122,13 @@ export async function startCombatTurn() {
       initiativeCursor.pointAt.reactionNumber = 1;
       (
         initiativeCursor.pointAt.owner.stateMachinePack?.getMachine?.(
-          "walk"
+          "walk",
         ) as WalkStateMachine
       ).onDivideWalk = false;
       //设置Store
       if (initiativeCursor.pointAt.owner.initiative) {
         useInitiativeStore().setIniitiative(
-          initiativeCursor.pointAt.owner.initiative
+          initiativeCursor.pointAt.owner.initiative,
         );
       }
 
@@ -144,7 +145,7 @@ export async function startCombatTurn() {
             await func(initiativeCursor.pointAt.owner);
           }
         }
-       // await playAnim(initiativeCursor.pointAt.owner);
+        // await playAnim(initiativeCursor.pointAt.owner);
       }
       initiativeCursor.lastParty = currentParty;
 
@@ -157,11 +158,11 @@ export async function startCombatTurn() {
         ) {
           lockOn(
             initiativeCursor.pointAt.owner.x,
-            initiativeCursor.pointAt.owner.y
+            initiativeCursor.pointAt.owner.y,
           );
           initiativeCursor.pointAt.owner.ai.autoAction(
             initiativeCursor.pointAt.owner,
-            initiativeCursor.map
+            initiativeCursor.map,
           );
         }
       } else {
@@ -174,7 +175,10 @@ export async function startCombatTurn() {
         CharacterCombatController.instance?.useMoveController();
       }
 
-      BattleEvenetSystem.getInstance().handleEvent('UnitStartTurnEvent', initiativeCursor.pointAt.owner);
+      BattleEvenetSystem.getInstance().handleEvent(
+        "UnitStartTurnEvent",
+        initiativeCursor.pointAt.owner,
+      );
     }
   }
   //所有人都行动过开启新一轮
@@ -230,7 +234,6 @@ export function useMoveAction(unit: Unit) {
   } else {
     return useStandAction(unit);
   }
-
 }
 
 export function useStandAction(unit: Unit) {
@@ -343,7 +346,7 @@ export function startBattle() {
   });
   return playStartAnim();
 }
-export const playStartUIhandles=[] as any[]
+export const loadBattleUIhandles = [] as any[];
 export async function playStartAnim() {
   const container = golbalSetting.tipContainer;
   const lineLayer = getLayers().lineLayer;
@@ -386,15 +389,20 @@ export async function playStartAnim() {
       resolve();
     }, 1500);
   });
-  animPromise.then(()=>{
-    playStartUIhandles.forEach((func)=>{
-      func();
-    })
-  })
+  animPromise.then(() => {
+    loadBattleUI();
+  });
   return animPromise;
 }
-export const playEnemyTurnAnnouncementAnimHandles=[] as any[]
-export const playPlayerTurnAnnouncementAnimHandles=[] as any[]
+export const loadBattleUI = () => {
+  loadBattleUIhandles.forEach((func) => {
+    func();
+  });
+  console.log("loadBattleUIhandles", loadBattleUIhandles);
+  console.log("loadBattleUI called", playEnemyTurnAnnouncementAnimHandles, playPlayerTurnAnnouncementAnimHandles);
+};
+export const playEnemyTurnAnnouncementAnimHandles = [] as any[];
+export const playPlayerTurnAnnouncementAnimHandles = [] as any[];
 async function playAnim(unit: Unit) {
   const container = golbalSetting.tipContainer;
   const lineLayer = getLayers().lineLayer;
@@ -404,7 +412,7 @@ async function playAnim(unit: Unit) {
     -(container?.x ?? 0),
     -(container?.y ?? 0),
     appSetting.width,
-    appSetting.height
+    appSetting.height,
   );
   let color = 0xff0000; // 默认颜色为红色
   if (unit.party === "player") {
@@ -533,6 +541,12 @@ export function getInitRecord() {
   };
   return initRecord;
 }
+export function getPointAtUnit() {
+  return initiativeCursor.pointAt?.owner || null;
+}
+export function getPointAtInitiative() {
+  return initiativeCursor.pointAt || null;
+} 
 export function loadInitRecord(initRecord: {
   initiativeSheet: InitiativeSerializer[];
   inBattle: boolean;
@@ -543,9 +557,9 @@ export function loadInitRecord(initRecord: {
     initRecord.initiativeSheet,
     (uid: string) => {
       return golbalSetting.map?.sprites.find(
-        (item) => item.id.toString() === uid
+        (item) => item.id.toString() === uid,
       );
-    }
+    },
   );
   InitiativeSheet.splice(0, InitiativeSheet.length, ...initiativeSheet);
   initiativeCursor.inBattle = initRecord.inBattle;
@@ -561,9 +575,11 @@ export function loadInitRecord(initRecord: {
       CharacterController.selectCharacter(unit);
       CharacterCombatController.getInstance().selectedCharacter = unit;
       CharacterCombatController.getInstance().useMoveController();
+      
     }
     console.log("LOAD INIT", initiativeSheet, initiativeCursor);
   } else {
     initiativeCursor.pointAt = null;
   }
+  loadBattleUI();
 }
