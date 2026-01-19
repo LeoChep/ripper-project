@@ -139,4 +139,13 @@ export class UnitSystem {
     }
     return false;
   }
+  checkOverlapAt(unit: Unit, x: number, y: number) {
+    const grids = this.getGridsBySize(x,y, unit.creature?.size);
+    for (const grid of grids) {
+      if (this.findUnitByGridxy( grid.x, grid.y)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

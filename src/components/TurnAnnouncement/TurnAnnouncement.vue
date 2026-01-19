@@ -33,15 +33,15 @@ function dampedOscillation(t: number, frequency: number, damping: number): numbe
 }
 
 // 显示玩家回合动画
-function showPlayerTurn() {
+async function showPlayerTurn() {
   currentImage.value = playerTurnImg;
-  showAnimation();
+  await showAnimation();
 }
 
 // 显示敌方回合动画
-function showEnemyTurn() {
+async function showEnemyTurn() {
   currentImage.value = enemyTurnImg;
-  showAnimation();
+  await showAnimation();
 }
 
 InitSystem.playPlayerTurnAnnouncementAnimHandles.push(showPlayerTurn);

@@ -87,7 +87,7 @@ onMounted(async () => {
   //加载地图
   const mapPassiable = await loadMap("A");
   golbalSetting.map = mapPassiable;
-  drawFog(mapPassiable, rlayers, container, app);
+  // drawFog(mapPassiable, rlayers, container, app);
   const spritesOBJ = mapPassiable.sprites;
   console.log("加载的地图数据:", mapPassiable);
   const units = createUnitsFromMapSprites(spritesOBJ, mapPassiable);
@@ -350,9 +350,9 @@ const drawMap = (mapView, container, rlayers) => {
   const ms = new PIXI.Sprite(mapView);
   ms.zIndex = envSetting.zIndexSetting.mapZindex;
   ms.label = "map";
-  const allFog = new PIXI.Graphics();
-  container.addChild(allFog);
-  ms.setMask({ mask: allFog });
+  // const allFog = new PIXI.Graphics();
+  // container.addChild(allFog);
+  // ms.setMask({ mask: allFog });
   golbalSetting.mapContainer.addChild(ms);
   rlayers.basicLayer.attach(ms);
 };

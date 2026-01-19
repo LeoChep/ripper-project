@@ -6,6 +6,7 @@ import { golbalSetting } from "../golbalSetting";
 import { MessageTipSystem } from "../system/MessageTipSystem";
 
 import type { Unit } from "../units/Unit";
+import { UnitSystem } from "../system/UnitSystem";
 
 export class MoveSelector {
   public graphics: PIXI.Graphics | null = null;
@@ -64,7 +65,7 @@ export class MoveSelector {
         this.sizeGraphics.parent.removeChild(this.sizeGraphics);
         this.sizeGraphics.destroy();
       }
-      if (path[`${targetXY.x},${targetXY.y}`]) {
+      if (!UnitSystem.getInstance().checkOverlapAt(unit, targetXY.x, targetXY.y)) {
         this.sizeGraphics = this.drawSizeGrids(targetXY, unit, "blue");
       } else {
         this.sizeGraphics = this.drawSizeGrids(targetXY, unit, "red");
@@ -136,7 +137,8 @@ export class MoveSelector {
       const x = e.data.global.x - golbalSetting.rootContainer?.x;
       const y = e.data.global.y - golbalSetting.rootContainer?.y;
       const xy = this.getXY(x, y);
-      if (!checkPassiable(xy.x, xy.y)) {
+      console.log("点击位置:", xy, UnitSystem.getInstance().checkOverlapAt(unit, xy.x, xy.y));
+      if (!checkPassiable(xy.x, xy.y)|| UnitSystem.getInstance().checkOverlapAt(unit, xy.x, xy.y)) {
         console.warn("点击位置不可用");
         return;
       }
