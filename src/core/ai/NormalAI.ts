@@ -13,6 +13,7 @@ import { golbalSetting } from "../golbalSetting";
 import { ModifierSystem } from "../system/ModifierSystem";
 import { UnitSystem } from "../system/UnitSystem";
 import { BuffSystem } from "../system/BuffSystem";
+import { testDraw } from "../anim/DrawTest";
 
 const tileSize = 64; // 假设每个格子的大小为64像素
 export class NormalAI implements AIInterface {
@@ -27,7 +28,10 @@ export class NormalAI implements AIInterface {
     // 这里可以实现AI的目标选择逻辑
     //用于存放结果
     console.log("AI行动:", unit);
+    //检测倒立起立
+    standAI(unit);
     const initiative = unit.initiative;
+
     const result: any = { canAttack: false };
     const unitX = Math.floor(unit.x / tileSize);
     const unitY = Math.floor(unit.y / tileSize);
@@ -51,21 +55,28 @@ export class NormalAI implements AIInterface {
       path[`${result.x},${result.y}`],
       result,
     );
+
     if (result.target && path) {
-      //移动
-      //计算可以移动到的格子
-      let rc = path[`${result.x},${result.y}`] as unknown as {
+      // testDraw(result.x, result.y, "green");
+      let lastStep = path[`${result.x},${result.y}`] as unknown as {
         x: number;
         y: number;
         step: number;
       };
+      let stepnum = 0;
+      if (lastStep?.step) stepnum = lastStep.step;
+      let rc = { x: result.x, y: result.y, step: stepnum };
+      //移动
+      //计算可以移动到的格子
+      //  rc = path[`${result.x},${result.y}`] as unknown as {
+      //   x: number;
+      //   y: number;
+      //   step: number;
+      // };
       let isCantAttack = !result.canAttack;
       //粗暴的用于跳出
       for (let num = 1; num < 2; num++)
         if (rc) {
-          //检测倒立起立
-
-          standAI(unit);
           if (!InitiativeSysteam.useMoveAction(unit)) {
             break;
           }
@@ -85,20 +96,6 @@ export class NormalAI implements AIInterface {
                 rc.y,
                 unit.creature?.size ?? "middle",
               );
-              console.log(
-                "检测拥堵位置的格子:",
-                moveEndGrids,
-                rc,
-                unitX,
-                unitY,
-                unit,
-              );
-              rc = path[`${rc.x},${rc.y}`] as unknown as {
-                x: number;
-                y: number;
-                step: number;
-              };
-
               noUnit = true;
 
               for (let grid of moveEndGrids) {
@@ -115,31 +112,51 @@ export class NormalAI implements AIInterface {
                   noUnit = false;
                 }
               }
-              // golbalSetting?.map?.sprites.forEach((sprite) => {
-              //   const spriteX = Math.floor(sprite.x / tileSize);
-              //   const spriteY = Math.floor(sprite.y / tileSize);
-
-              // });
               console.log(
-                `AI单位 ${unit.name} 在 ` + rc + ` 位置拥堵，继续寻找`,
+                "检测拥堵位置的格子:",
+                moveEndGrids,
+                rc,
+                unitX,
+                unitY,
+                unit,
               );
+              if (rc && !noUnit) {
+                // testDraw(rc.x, rc.y, "red");
+                console.log(
+                  `AI单位 ${unit.name} ${unit.id} 在 `,
+                  rc,
+                  ` 位置拥堵，继续寻找`,
+                  rc.step,
+                );
+                rc = path[`${rc.x},${rc.y}`] as unknown as {
+                  x: number;
+                  y: number;
+                  step: number;
+                };
+              }
+
+       
             }
           }
-          if (rc && rc.step > speed) {
+
+          if (rc) {
+            result.x = rc.x;
+            result.y = rc.y;
             console.log(
               `AI单位 ${unit.name} 的步数 ${rc.step} 超过速度 ${speed}`,
             );
             isCantAttack = true; //如果步数大于速度，就不能攻击
             let least = rc.step - speed;
+
             while (least > 0) {
-              result.x = rc.x;
-              result.y = rc.y;
               rc = path[`${result.x},${result.y}`] as unknown as {
                 x: number;
                 y: number;
                 step: number;
               };
               least--;
+              result.x = rc.x;
+              result.y = rc.y;
               if (least === 0) {
                 //移动力使用殆尽，使用标准动作继续移动
                 if (InitiativeController.useMoveAction(unit)) {
