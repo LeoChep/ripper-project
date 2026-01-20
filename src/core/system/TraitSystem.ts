@@ -1,5 +1,6 @@
 import type { Trait } from "../trait/Trait";
 import type { Unit } from "../units/Unit";
+import { FEAT_MAP } from "./featMap";
 
 export class TriatSystem {
   private traits: Map<string, Trait[]> = new Map();
@@ -32,12 +33,14 @@ export class TriatSystem {
   getTraitClass(traitName: string,type?: string) {
     // 根据 traitName 返回对应的 Trait 类
     if (type === "feat") {
-        // 动态路径无法被 Vite 静态分析；添加 /* @vite-ignore */ 抑制警告
-        return import(/* @vite-ignore */ `../feat/WeaponFocus`).then(
-          (module) => module.WeaponFocus
+        const featConfig = FEAT_MAP[traitName];
+        if (!featConfig) {
+          console.warn(`Feat not found in FEAT_MAP: ${traitName}`);
+          return null;
+        }
+        return import(/* @vite-ignore */ featConfig.path).then(
+          (module) => module[featConfig.className]
         );
-    
-        
     }
     switch (traitName) {
       case "CombatChallenge":
