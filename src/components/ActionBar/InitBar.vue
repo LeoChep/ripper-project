@@ -36,6 +36,7 @@ import { getUnitAvatar } from "@/utils/utils";
 import * as InitSystem from "@/core/system/InitiativeSystem";
 import initCursorImg from "@/assets/ui/init-cursor.png";
 import initAvatarBoxImg from "@/assets/ui/init-avtarbox2.png";
+import { appSetting } from "@/core/envSetting";
 const scrollContainer = ref<HTMLDivElement | null>(null);
 const initiativeStore = useInitiativeStore();
 const isAvatarBoxLoaded = ref(false);
@@ -117,8 +118,8 @@ function onWheel(e: WheelEvent) {
 
 <style scoped>
 .init-bar-wrapper {
-  width: 100vw;
-  position: fixed;
+  width: v-bind('appSetting.width + "px"');
+  position: absolute;
   top: 0;
   left: 0;
   z-index: 100;
@@ -134,7 +135,7 @@ function onWheel(e: WheelEvent) {
   gap: 0;
   overflow-x: auto;
   overflow-y: visible;
-  max-width: 900px;
+  max-width: 1100px;
   padding: 0 24px 40px 24px;
   scrollbar-width: none;
   pointer-events: auto;
@@ -160,8 +161,8 @@ function onWheel(e: WheelEvent) {
   bottom: -20px;
   left: 50%;
   transform: translateX(-50%);
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   z-index: 10;
   object-fit: contain;
   animation: bounce 1s ease-in-out infinite;
@@ -177,8 +178,8 @@ function onWheel(e: WheelEvent) {
 }
 .init-bar-avatarbox {
   position: relative;
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -263,8 +264,8 @@ function onWheel(e: WheelEvent) {
   }
 }
 .init-bar-item.is-current .init-bar-avatarbox {
-  width: 64px;
-  height: 64px;
+  width: 80px;
+  height: 80px;
 }
 .init-bar-avatar {
   position: absolute;

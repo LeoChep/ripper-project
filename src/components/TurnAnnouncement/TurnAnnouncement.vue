@@ -13,6 +13,7 @@ import { ref, nextTick } from "vue";
 import * as InitSystem from "@/core/system/InitiativeSystem";
 import playerTurnImg from "@/assets/ui/player-turn.png";
 import enemyTurnImg from "@/assets/ui/enemy-turn.png";
+import { appSetting } from "@/core/envSetting";
 const isVisible = ref(false);
 const currentImage = ref("");
 const contentRef = ref<HTMLDivElement | null>(null);
@@ -115,11 +116,11 @@ defineExpose({
 
 <style scoped>
 .turn-announcement-wrapper {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: v-bind('appSetting.width + "px"');
+  height: v-bind('appSetting.height + "px"');
   display: flex;
   align-items: center;
   justify-content: center;
