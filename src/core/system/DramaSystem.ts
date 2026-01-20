@@ -55,6 +55,9 @@ export class DramaSystem {
       console.warn("No drama is currently playing.");
     }
   }
+  speak = async (content: string): Promise<void> => {};
+  CGstart = () => {};
+  CGEnd = () => {};
   clearDramas(): void {
     this.dramaMap.clear();
   }
