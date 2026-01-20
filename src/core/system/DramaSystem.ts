@@ -56,6 +56,7 @@ export class DramaSystem {
     }
   }
   speak = async (content: string): Promise<void> => {};
+  unitSpeak = async (unitName: string, content: string): Promise<void> => {};
   CGstart = () => {};
   CGEnd = () => {};
   clearDramas(): void {

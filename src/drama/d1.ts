@@ -74,7 +74,7 @@ const door1Event = async () => {
   await dramaSystem.speak(
     "你走近废弃的房屋，发现门口有一扇破旧的门。你试图推开门，但它似乎被什么东西卡住了。你决定用力推开它。"
   );
-  await dramaSystem.speak("骷髅：咯吱吱……咯吱吱");
+  await dramaSystem.unitSpeak("skeleton","骷髅：咯吱吱……咯吱吱");
   dramaSystem.CGEnd();
   //开始战斗
   if (!d1.map) {

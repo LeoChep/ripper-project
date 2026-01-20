@@ -148,4 +148,9 @@ export class UnitSystem {
     }
     return false;
   }
+  getAllUnits(): Unit[] {
+    const map = golbalSetting.map;
+    if (!map) return [];
+    return map.sprites;
+  }
 }
