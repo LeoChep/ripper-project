@@ -62,7 +62,7 @@ InitSystem.loadBattleUIhandles.push(() => {
 // 假设 store 中有 sortedUnits，包含 { id, avatar, name } 按先攻顺序排列
 const units = computed(() => initiativeStore.sortedUnits);
 const currentUnit = computed(() => initiativeStore.getOwner);
-
+const currentUnitId = computed(() => initiativeStore.currentUnitId);
 // 监听units变化，预加载所有头像
 watch(
   units,
@@ -102,7 +102,7 @@ const isAllLoaded = computed(() => {
 });
 
 const isCurrentUnit = (unit: any) => {
-  return currentUnit.value && currentUnit.value.id === unit.id;
+  return currentUnitId.value && currentUnitId.value === unit.id;
 };
 
 const getAvatar = (unitTypeName: string) => {

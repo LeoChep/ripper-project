@@ -16,6 +16,7 @@ import { CharCombatStepController } from "./CharacterCombatStepController";
 export class CharacterCombatController {
   public inUse: boolean = false;
   public static instance: CharacterCombatController | null = null;
+  inUsePower: boolean = false;
   public static getInstance() {
     if (!CharacterCombatController.instance) {
       CharacterCombatController.instance = new CharacterCombatController();
@@ -71,6 +72,9 @@ export class CharacterCombatController {
     });
   }
   preCheck() {
+    if (this.inUsePower) {
+      return false;
+    }
     if (this.inUse === false || !golbalSetting.map) {
       return false;
     }
@@ -117,13 +121,14 @@ export class CharacterCombatController {
     }
     powerController.selectedCharacter = this.selectedCharacter;
     if (!powerController.preFix()) return ;
+    this.inUsePower=true;
     powerController.doSelect().then((result) => {
       console.log("powerController result", result);
       if (!result.cancel && InitiativeSystem.isInBattle()) {
         this.resetDivideWalk();
         powerController.use();
       }
-
+      this.inUsePower=false;
       setTimeout(() => {
         if (!result.from && InitiativeSystem.isInBattle()) {
           this.useMoveController();
@@ -212,12 +217,17 @@ export class CharacterCombatController {
     });
   }
   endTurn() {
+    console.log("CharacterCombatController endTurn",this);
+    if (this.inUsePower) {
+      return;
+    }
     if (!this.selectedCharacter) {
       console.warn("没有选中单位，无法结束回合");
       return;
     }
     CharCombatMoveController.instense?.removeFunction();
     CharCombatAttackController.instense?.removeFunction();
+    CharCombatStepController.instense?.removeFunction();
     this.powerController?.removeFunction();
     if (CharacterCombatController.instance) {
       CharacterCombatController.instance.inUse = false;

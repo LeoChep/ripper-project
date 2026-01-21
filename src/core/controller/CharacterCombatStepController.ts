@@ -155,7 +155,7 @@ export class CharCombatStepController {
     const ms = golbalSetting.rootContainer;
     const removeFunction = (info: any) => {
       removeGraphics();
-      if (info.from) {
+      if (info?.from) {
         resolveCallback(info);
       } else {
         resolveCallback({ cancel: true });
