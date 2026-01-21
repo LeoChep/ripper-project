@@ -6,12 +6,13 @@
     <div class="init-bar-scroll" ref="scrollContainer" @wheel="onWheel">
       <div
         v-for="unit in units"
+        :id="`init-${unit.id}`"
         :key="unit.id"
-        :class="['init-bar-item', { 'is-current': isCurrentUnit(unit) }]"
+        :class="['init-bar-item']"
         v-show="isAllLoaded"
       >
         <img
-          v-if="isCurrentUnit(unit)"
+          :id="`init-cursor-${unit.id}`"
           :src="initCursorImg"
           class="init-cursor"
           alt="cursor"
@@ -31,7 +32,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
-import { useInitiativeStore } from "@/stores/initiativeStore";
+import { currentInit, useInitiativeStore } from "@/stores/initiativeStore";
 import { getUnitAvatar } from "@/utils/utils";
 import * as InitSystem from "@/core/system/InitiativeSystem";
 import initCursorImg from "@/assets/ui/init-cursor.png";
@@ -102,9 +103,35 @@ const isAllLoaded = computed(() => {
 });
 
 const isCurrentUnit = (unit: any) => {
-  return currentUnitId.value && currentUnitId.value === unit.id;
+  return currentInit.currentUnitId === unit.id;
 };
-
+const lastUnitId = ref<number | null>(null);
+setInterval(() => {
+  if (isAllLoaded.value && currentUnitId.value && scrollContainer.value) {
+    if (lastUnitId.value) {
+      const lastUnitElement = document.getElementById(`init-${lastUnitId.value}`);
+      if (lastUnitElement) {
+        lastUnitElement.classList.remove("is-current");
+      }
+      const lastCursorElement = document.getElementById(
+        `init-cursor-${lastUnitId.value}`
+      );
+      if (lastCursorElement) {
+        lastCursorElement.style.display = "none";
+      }
+    }
+    const currentUnitId = currentInit.currentUnitId;
+    const currentUnitElement = document.getElementById(`init-${currentUnitId}`);
+    if (currentUnitElement) {
+      currentUnitElement.classList.add("is-current");
+    }
+    const currentCursorElement = document.getElementById(`init-cursor-${currentUnitId}`);
+    if (currentCursorElement) {
+      currentCursorElement.style.display = "block";
+    }
+    lastUnitId.value = currentUnitId;
+  }
+}, 500);
 const getAvatar = (unitTypeName: string) => {
   return getUnitAvatar(unitTypeName);
 };
@@ -129,6 +156,7 @@ function onWheel(e: WheelEvent) {
   justify-content: center;
   pointer-events: none;
 }
+
 .init-bar-scroll {
   display: flex;
   flex-direction: row;
@@ -140,9 +168,11 @@ function onWheel(e: WheelEvent) {
   scrollbar-width: none;
   pointer-events: auto;
 }
+
 .init-bar-scroll::-webkit-scrollbar {
   display: none;
 }
+
 .init-bar-item {
   display: flex;
   flex-direction: column;
@@ -153,9 +183,11 @@ function onWheel(e: WheelEvent) {
   position: relative;
   transition: all 0.3s ease;
 }
+
 .init-bar-item.is-current {
   /* filter: brightness(1.2); */
 }
+
 .init-cursor {
   position: absolute;
   bottom: -20px;
@@ -166,16 +198,20 @@ function onWheel(e: WheelEvent) {
   z-index: 10;
   object-fit: contain;
   animation: bounce 1s ease-in-out infinite;
+  display: none;
 }
+
 @keyframes bounce {
   0%,
   100% {
     transform: translateX(-50%) translateY(0);
   }
+
   50% {
     transform: translateX(-50%) translateY(-6px);
   }
 }
+
 .init-bar-avatarbox {
   position: relative;
   width: 64px;
@@ -185,6 +221,7 @@ function onWheel(e: WheelEvent) {
   justify-content: center;
   transition: all 0.3s ease;
 }
+
 .init-bar-avatarbox::after {
   content: "";
   position: absolute;
@@ -211,8 +248,10 @@ function onWheel(e: WheelEvent) {
   border-radius: 12px;
   z-index: 2;
   pointer-events: none;
-  background: transparent; /* 不填充中间，只用阴影制造光晕 */
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0); /* 默认无色，靠各阵营覆盖 */
+  background: transparent;
+  /* 不填充中间，只用阴影制造光晕 */
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0);
+  /* 默认无色，靠各阵营覆盖 */
   transition: box-shadow 0.25s ease, transform 0.25s ease;
 }
 
@@ -231,14 +270,17 @@ function onWheel(e: WheelEvent) {
     box-shadow: 0 0 3px rgba(230, 230, 230, 0.14), 0 0 8px rgba(230, 230, 230, 0.1);
     transform: scale(0.995);
   }
+
   35% {
     box-shadow: 0 0 10px rgba(230, 230, 230, 0.55), 0 0 18px rgba(230, 230, 230, 0.32);
     transform: scale(1.01);
   }
+
   65% {
     box-shadow: 0 0 10px rgba(230, 230, 230, 0.55), 0 0 18px rgba(230, 230, 230, 0.32);
     transform: scale(1.01);
   }
+
   100% {
     box-shadow: 0 0 3px rgba(230, 230, 230, 0.14), 0 0 8px rgba(230, 230, 230, 0.1);
     transform: scale(0.995);
@@ -250,23 +292,28 @@ function onWheel(e: WheelEvent) {
     box-shadow: 0 0 3px rgba(255, 40, 40, 0.12), 0 0 8px rgba(255, 40, 40, 0.08);
     transform: scale(0.995);
   }
+
   35% {
     box-shadow: 0 0 12px rgba(255, 40, 40, 0.6), 0 0 22px rgba(255, 40, 40, 0.35);
     transform: scale(1.01);
   }
+
   65% {
     box-shadow: 0 0 12px rgba(255, 40, 40, 0.6), 0 0 22px rgba(255, 40, 40, 0.35);
     transform: scale(1.01);
   }
+
   100% {
     box-shadow: 0 0 3px rgba(255, 40, 40, 0.12), 0 0 8px rgba(255, 40, 40, 0.08);
     transform: scale(0.995);
   }
 }
+
 .init-bar-item.is-current .init-bar-avatarbox {
   width: 80px;
   height: 80px;
 }
+
 .init-bar-avatar {
   position: absolute;
   left: 50%;
@@ -278,6 +325,7 @@ function onWheel(e: WheelEvent) {
   transform: translate(-50%, -50%);
   border-radius: 6px;
 }
+
 .init-bar-name {
   color: #eee;
   font-size: 14px;

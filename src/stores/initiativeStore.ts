@@ -6,6 +6,7 @@ import {
   getPointAtUnit,
   getPointAtInitiative,
 } from "@/core/system/InitiativeSystem";
+export const currentInit = { currentUnitId: 0 };
 export const useInitiativeStore = defineStore("initiative", {
   state: () => ({
     currentInitiative: new InitiativeClass(0),
@@ -32,8 +33,11 @@ export const useInitiativeStore = defineStore("initiative", {
   actions: {
     initializeInitiative() {
       this.currentInitiative = getPointAtInitiative() || new InitiativeClass(0);
-      this.currentUnitId = this.currentInitiative.owner ? this.currentInitiative.owner.id : null;
+      this.currentUnitId = this.currentInitiative.owner
+        ? this.currentInitiative.owner.id
+        : null;
       this.initiativeUnits = getUnits();
+      currentInit.currentUnitId = this.currentUnitId || 0;
     },
 
     setOwner(owner: Unit) {
@@ -55,8 +59,9 @@ export const useInitiativeStore = defineStore("initiative", {
       this.currentInitiative = new InitiativeClass(0);
     },
     setIniitiative(initative: InitiativeClass) {
+      currentInit.currentUnitId = initative.owner ? initative.owner.id : 0;
       // this.currentInitiative = initative;
-      this.currentUnitId = initative.owner ? initative.owner.id : null;
+      //this.currentUnitId = initative.owner ? initative.owner.id : null;
     },
     // 新增：设置先攻单位列表
     setInitiativeUnits(units: Unit[]) {
