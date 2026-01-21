@@ -1,4 +1,4 @@
-import type { Unit } from "@/core/units/Unit";
+import { Unit } from "@/core/units/Unit";
 import { AbstractPwoerController } from "../AbstractPwoerController";
 import { playerSelectAttackMovement } from "@/core/action/UnitAttack";
 
@@ -20,6 +20,7 @@ import { AreaEffect } from "@/core/effect/areaEffect/AreaEffect";
 import { tileSize } from "@/core/envSetting";
 import { getBrustRange } from "@/core/utils/MathUtil";
 import { WeaponOfDivineProtectionAreaEffect } from "@/core/power/cleric/WeaponOfDivineProtection/WeaponOfDivineProtectionAreaEffect";
+import { UnitSystem } from "@/core/system/UnitSystem";
 
 export class WeaponOfDivineProtectionController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -63,7 +64,7 @@ export class WeaponOfDivineProtectionController extends AbstractPwoerController 
         console.log(
           "basicAttackSelector result",
           result,
-          result.cancel !== true
+          result.cancel !== true,
         );
         if (result.cancel !== true) {
           useStandAction(unit);
@@ -71,42 +72,62 @@ export class WeaponOfDivineProtectionController extends AbstractPwoerController 
             result.event,
             unit,
             attack,
-            golbalSetting.map
+            golbalSetting.map,
           ).then(() => {
             console.log("resolveCallback", {});
             //使用威能效果，以牧师为中心的光环为周围队友提供+2ac威能
             //创建区域
-            const area=new Area()
-            const weaponOfDivineProtectionEffect=new WeaponOfDivineProtectionAreaEffect(unit)
-            console.log("创建神圣守护之武器区域效果:",weaponOfDivineProtectionEffect)
-            const grids=getBrustRange(Math.floor(unit.x/tileSize),Math.floor(unit.y/tileSize),1)
-            weaponOfDivineProtectionEffect.grids=new Set();
-            grids.forEach(grid=>{
-              weaponOfDivineProtectionEffect.grids.add({x:grid.x,y:grid.y,step:0})
+            const area = new Area();
+            const weaponOfDivineProtectionEffect =
+              new WeaponOfDivineProtectionAreaEffect(unit);
+            console.log(
+              "创建神圣守护之武器区域效果:",
+              weaponOfDivineProtectionEffect,
+            );
+            const grids = getBrustRange(
+              Math.floor(unit.x / tileSize),
+              Math.floor(unit.y / tileSize),
+              1,
+            );
+            weaponOfDivineProtectionEffect.grids = new Set();
+            grids.forEach((grid) => {
+              weaponOfDivineProtectionEffect.grids.add({
+                x: grid.x,
+                y: grid.y,
+                step: 0,
+              });
             });
             weaponOfDivineProtectionEffect.build();
-            area.effects.push(weaponOfDivineProtectionEffect)
-            area.name="Divine Protection Area"
-            area.des="Area of effect for Divine Protection"
+            area.effects.push(weaponOfDivineProtectionEffect);
+            area.name = "Divine Protection Area";
+            area.des = "Area of effect for Divine Protection";
             AreaSystem.getInstance().addArea(area);
             //创建hook
-            const event=new WeaponOfDivineProtectionEvent(
-              unit,
-              2 
-            )
+            const event = new WeaponOfDivineProtectionEvent(unit, 2);
             event.hook();
             //创造进出区域事件
-            const inOutAreaMoveEvent=new WeaponOfDivineProtectionAreaMoveEvent(
-              unit,
-              area);
+            const inOutAreaMoveEvent =
+              new WeaponOfDivineProtectionAreaMoveEvent(unit, area);
             inOutAreaMoveEvent.hook();
-          
+            event.area = area;
+            event.inOutEventId = inOutAreaMoveEvent.eventId;
+            grids.forEach((grid) => {
+              const targetUnit = UnitSystem.getInstance().findUnitByGridxy(
+                grid.x,
+                grid.y,
+              );
+              if (targetUnit && targetUnit.party == unit.party&& targetUnit.id !== unit.id) {
+    
+                inOutAreaMoveEvent.giveBuff(targetUnit);
+              }
+            });
+            console.log("创建神圣守护之武器事件:", event);
             resolveCallback({});
           });
         } else {
           resolveCallback(result);
         }
-      }
+      },
     );
 
     return promise;

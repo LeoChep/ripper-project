@@ -54,8 +54,9 @@ export class WeaponOfDivineProtectionEvent extends EndTurnTimer {
       this.turnCount--;
       console.log("当前回合数:", this.turnCount);
       if (this.turnCount <= 0) {
-        console.log("神圣守护之武器效果结束，移除增益");
+        console.log("神圣守护之武器效果结束，移除增益",this.area);
         if (this.area) AreaSystem.getInstance().removeArea(this.area);
+                console.log("神圣守护之武器效果结束，移除增益2");
         if (this.inOutEventId) {
           const inoutEvent = BattleEvenetSystem.getInstance().getEventById(
             this.inOutEventId

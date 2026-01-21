@@ -134,18 +134,18 @@ export class NormalAI implements AIInterface {
                   step: number;
                 };
               }
-
-       
             }
           }
-
+          if (rc && rc.step > speed) {
+            isCantAttack = true; //如果步数大于速度，就不能攻击
+          }
           if (rc) {
             result.x = rc.x;
             result.y = rc.y;
             console.log(
               `AI单位 ${unit.name} 的步数 ${rc.step} 超过速度 ${speed}`,
             );
-            isCantAttack = true; //如果步数大于速度，就不能攻击
+
             let least = rc.step - speed;
 
             while (least > 0) {

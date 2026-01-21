@@ -5,16 +5,16 @@
   "xp": 25,
   "size": "中型",
   "type": "",
-  "hp": 15,
-  "maxHp": 15,
-  "bloodied": 5,
-  "ac": 16,
-  "fortitude": 13,
-  "reflex": 14,
-  "will": 13,
+  "hp": 42,
+  "maxHp": 42,
+  "bloodied": 21,
+  "ac": 17,
+  "fortitude": 17,
+  "reflex": 21,
+  "will": 18,
   "speed": 6,
   "fly": null,
-  "initiative": 0,
+  "initiative": 2,
   "senses": "",
   "immunities": [],
   "resistances": [],
@@ -31,13 +31,13 @@
     },
     "DEX": {
       "name": "Dexterity",
-      "value": 17,
-      "modifier": 3
+      "value": 10,
+      "modifier": 0
     },
     "CON": {
       "name": "Constitution",
-      "value": 13,
-      "modifier": 1
+      "value": 16,
+      "modifier": 3
     },
     "INT": {
       "name": "Intelligence",
@@ -46,29 +46,27 @@
     },
     "WIS": {
       "name": "Wisdom",
-      "value": 14,
+      "value": 15,
       "modifier": 2
     },
     "CHA": {
       "name": "Charisma",
-      "value": 3,
-      "modifier": -4
+      "value": 8,
+      "modifier": -1
     }
   },
   "equipment": [
-    "长剑",
-    "短弓",
-    "20 支箭"
+    "法杖"
   ],
   "weapons": [
     {
-      "name": "长剑",
+      "name": "法杖",
       "type": "Melee",
       "action": "武器",
       "range": 1,
-      "attackBonus": 6,
+      "attackBonus": 2,
       "target": "ac",
-      "damage": "1d8+2",
+      "damage": "1d6",
       "effect": "",
       "missEffect": null
     }
@@ -87,7 +85,7 @@
     }
   ],
   "powers": [
-        {
+    {
       "name": "IceRays",
       "displayName": "冰冻射线",
       "useType": "encounter",

@@ -45,6 +45,7 @@ export class WeaponOfDivineProtectionAreaEffect extends AreaEffect {
     });
   }
   remove() {
+    console.log("移除WeaponOfDivineProtectionAreaEffect效果", this);
     this.anim?.parent?.removeChild(this.anim);
     this.anim?.destroy();
   }

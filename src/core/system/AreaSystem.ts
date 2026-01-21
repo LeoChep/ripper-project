@@ -19,7 +19,11 @@ export class AreaSystem {
   }
 
   removeArea(area: Area): void {
-    this.areas = this.areas.filter((a) => a !== area);
+
+    // this.areas = this.areas.filter((a) => a !== area);
+    area.effects.forEach((effect) => {
+      effect.remove();
+    })
   }
 
   getAreas(): Area[] {
