@@ -40,7 +40,6 @@ export class BasicLineSelector {
   }
 
   public canCancel: boolean = true;
-  public isCannelClick: boolean = false;
   public selected: { x: number; y: number }[] = [];
   public selecteNum: number = 0;
   private linePathGrid: {
@@ -89,7 +88,6 @@ export class BasicLineSelector {
       return selector;
     }
 
-    this.isCannelClick = false;
     const removeGraphics = () => {
       MessageTipSystem.getInstance().clearBottomMessage();
       MessageTipSystem.getInstance().clearMessage();
@@ -103,14 +101,9 @@ export class BasicLineSelector {
       }
     };
 
-    graphics.on("pointerup", (e) => {
-      console.log("pointerup");
+    graphics.on("click", (e) => {
+      console.log("click");
       e.stopPropagation();
-      if (this.isCannelClick) {
-        this.isCannelClick = false;
-        return;
-      }
-      this.isCannelClick = false;
       let { x, y } = e.data.global;
       console.log("rootContainer", golbalSetting.rootContainer);
       if (golbalSetting.rootContainer) {
@@ -187,7 +180,6 @@ export class BasicLineSelector {
     ms?.on("pointermove", scanInPIXIEvent);
     graphics.on("pointermove", scanInPIXIEventInGraphics);
     graphics.on("rightdown", (e) => {
-      this.isCannelClick = true;
       e.stopPropagation();
 
       if (selector.canCancel && selector.selected.length === 0) {
@@ -202,7 +194,6 @@ export class BasicLineSelector {
       }
     });
     selector.removeFunction = (input: any) => {
-      this.isCannelClick = true;
       removeGraphics();
       ms?.off("pointermove", scanInPIXIEvent);
       graphics.off("pointermove", scanInPIXIEventInGraphics);
@@ -231,7 +222,6 @@ export class BasicLineSelector {
 
     const msRemoveG = (e: { stopPropagation: () => void }) => {
       e.stopPropagation();
-      this.isCannelClick = true;
       if (selector.canCancel && selector.selected.length === 0) {
         removeGraphics();
         resolveCallback({ cancel: true });

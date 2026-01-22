@@ -21,7 +21,6 @@ export class BasicAttackSelector {
     return BasicAttackSelector.instance;
   }
   public canCancel: boolean = true;
-  public isCannelClick: boolean = false; // 记录事件是否是取消点击，用于区分左右键
   public selected: { x: number; y: number }[] = [];
   public selecteNum: number = 0;
   private static instance: BasicAttackSelector | null = null;
@@ -71,7 +70,6 @@ export class BasicAttackSelector {
       console.warn("Graphics not found in BasicSelector.");
       return selector;
     }
-    this.isCannelClick = false;
     const removeGraphics = () => {
       MessageTipSystem.getInstance().clearBottomMessage();
       MessageTipSystem.getInstance().clearMessage();
@@ -81,13 +79,8 @@ export class BasicAttackSelector {
       }
     };
 
-    graphics.on("pointerup", (e) => {
+    graphics.on("click", (e) => {
       e.stopPropagation();
-      if (this.isCannelClick) {
-      this.isCannelClick = false;
-      return;
-      }
-      this.isCannelClick = false;
       let { x, y } = e.data.global;
       if (golbalSetting.rootContainer) {
       x -= golbalSetting.rootContainer.x;
@@ -116,13 +109,11 @@ export class BasicAttackSelector {
     });
 
     selector.removeFunction = (input: any) => {
-      this.isCannelClick = true;
       removeGraphics();
       resolveCallback(input);
     };
 
     graphics.on("rightdown", (e) => {
-      this.isCannelClick = true;
       e.stopPropagation();
 
       if (selector.canCancel && selector.selected.length === 0) {
@@ -139,7 +130,6 @@ export class BasicAttackSelector {
     const ms = golbalSetting.mapContainer;
     const msRemoveG = (e: { stopPropagation: () => void }) => {
       e.stopPropagation();
-      this.isCannelClick = true;
       if (selector.canCancel && selector.selected.length === 0) {
       removeGraphics();
       resolveCallback({ cancel: true });

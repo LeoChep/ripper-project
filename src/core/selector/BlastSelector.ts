@@ -82,7 +82,6 @@ export class BlastSelector {
     // });
     // 右键取消
     graphics.on("rightdown", (e) => {
-      this.isCancelClick = true;
       e.stopPropagation();
       if (selector.canCancel && selector.selected.length === 0) {
         this.removeGraphics();
@@ -95,12 +94,8 @@ export class BlastSelector {
       }
     });
     // 左键选择
-    graphics.on("pointerup", (e) => {
+    graphics.on("click", (e) => {
       e.stopPropagation();
-      if (this.isCancelClick) {
-        this.isCancelClick = false;
-        return;
-      }
       if (!golbalSetting.rootContainer) return;
       const x = e.data.global.x - golbalSetting.rootContainer.x;
       const y = e.data.global.y - golbalSetting.rootContainer.y;

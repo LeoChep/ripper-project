@@ -23,7 +23,6 @@ export class ShiftSelector {
     return ShiftSelector.instance;
   }
   public canCancel: boolean = true;
-  public isCannelClick: boolean = false; // 记录事件是否是取消点击，用于区分左右键
   public selected: { x: number; y: number }[] = [];
   public selecteNum: number = 0;
   public shiftRange: number = 0;
@@ -75,7 +74,6 @@ export class ShiftSelector {
       this.drawShiftRange(targetXY, shiftColor, shiftUnit);
     });
     // 点击其他地方移除移动范围
-    this.isCannelClick = false;
     const removeGraphics = () => {
       MessageTipSystem.getInstance().clearBottomMessage();
       MessageTipSystem.getInstance().clearMessage();
@@ -93,13 +91,11 @@ export class ShiftSelector {
       resolveCallback = resolve;
     });
     selector.removeFunction = (input: any) => {
-      this.isCannelClick = true;
       removeGraphics();
       resolveCallback(input);
     };
     // 右键取消选择
     graphics.on("rightdown", (e) => {
-      this.isCannelClick = true;
       e.stopPropagation();
 
       if (selector.canCancel && selector.selected.length === 0) {
@@ -116,7 +112,6 @@ export class ShiftSelector {
     const ms = golbalSetting.mapContainer;
     const msRemoveG = (e: { stopPropagation: () => void }) => {
       e.stopPropagation();
-      this.isCannelClick = true;
       if (selector.canCancel && selector.selected.length === 0) {
         removeGraphics();
         resolveCallback({ cancel: true });
@@ -130,15 +125,9 @@ export class ShiftSelector {
     };
     ms?.on("rightdown", msRemoveG);
 
-    graphics.on("pointerup", (e) => {
-      console.log("pointerup");
+    graphics.on("click", (e) => {
+      console.log("click");
       e.stopPropagation();
-      if (this.isCannelClick) {
-        this.isCannelClick = false;
-        // resolveCallback({ cannel: true });
-        return;
-      }
-      this.isCannelClick = false;
       if (!golbalSetting.rootContainer) {
         return;
       }
