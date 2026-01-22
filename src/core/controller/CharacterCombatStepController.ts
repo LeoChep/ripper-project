@@ -20,7 +20,7 @@ export class CharCombatStepController {
     // 初始化逻辑
   }
   moveSelect = () => {
-    console.log("moveSSSS");
+    console.log("stepSSSS");
     const unit = this.selectedCharacter;
     if (unit === null) {
       console.warn("没有选中单位，无法进行移动选择");
@@ -32,7 +32,7 @@ export class CharCombatStepController {
     //显示可移动范围
     let range = 1;
     const walkMachine = unit.stateMachinePack.getMachine(
-      "walk"
+      "walk",
     ) as WalkStateMachine;
 
     const tileSize = 64;
@@ -61,9 +61,9 @@ export class CharCombatStepController {
           preY * tileSize,
           x * tileSize,
           y * tileSize,
-          golbalSetting.map
+          golbalSetting.map,
         );
-      }
+      },
     });
     // 绘制可移动范围
     graphics.clear();
@@ -104,25 +104,25 @@ export class CharCombatStepController {
         graphics.parent.removeChild(graphics);
       }
     };
-    let cancel = false;
 
-    graphics.on("pointerup", (e) => {
-      console.log("pointerup");
+    graphics.on("click", (e) => {
+      console.log("click");
       e.stopPropagation();
-      if (cancel) {
-        cancel = false;
-        return;
-      }
       removeGraphics();
       const result = {} as any;
       result.cancel = false;
-      
+
       // CharacterController.onAnim = true;
-      const walktype = (unit.stateMachinePack.getMachine("walk") as WalkStateMachine).walkType;
-      (unit.stateMachinePack.getMachine("walk") as WalkStateMachine).walkType = "step";
+      const walktype = (
+        unit.stateMachinePack.getMachine("walk") as WalkStateMachine
+      ).walkType;
+      (unit.stateMachinePack.getMachine("walk") as WalkStateMachine).walkType =
+        "step";
       playerSelectMovement(e, unit, path, result)?.then(() => {
         console.log("resolveCallback", result);
-           (unit.stateMachinePack.getMachine("walk") as WalkStateMachine).walkType = walktype
+        (
+          unit.stateMachinePack.getMachine("walk") as WalkStateMachine
+        ).walkType = walktype;
         setTimeout(() => {
           // CharacterController.onAnim = false;
         }, 50);
@@ -136,7 +136,7 @@ export class CharCombatStepController {
         useInitiativeStore().updateActionNumbers(
           unit.initiative.standerActionNumber,
           unit.initiative.minorActionNumber,
-          unit.initiative.moveActionNumber
+          unit.initiative.moveActionNumber,
         );
         console.log(`剩余移动次数: ${unit.initiative.moveActionNumber}`);
         if (result.least > 0) {
@@ -148,24 +148,44 @@ export class CharCombatStepController {
         }
       }
     });
+
+    // 右键取消选择
     graphics.on("rightdown", (e) => {
-      cancel = true;
-      this.removeFunction();
-    });
-    const ms = golbalSetting.rootContainer;
-    const removeFunction = (info: any) => {
+      e.stopPropagation();
+      console.log("rightdown on graphics");
       removeGraphics();
+      this.graphics = null;
+      resolveCallback({ cancel: true });
+    });
+
+    // 右键区域外取消
+    const ms = golbalSetting.mapContainer;
+    const msRemoveG = (e: { stopPropagation: () => void }) => {
+      if (e?.stopPropagation) {
+        e.stopPropagation();
+      }
+      console.log("rightdown outside graphics");
+      removeGraphics();
+      this.graphics = null;
+      resolveCallback({ cancel: true });
+      ms?.off("rightdown", msRemoveG);
+    };
+    ms?.on("rightdown", msRemoveG);
+
+    // 外部调用的 removeFunction，用于其他控制器切换时清理
+    this.removeFunction = (info?: any) => {
+      console.log("step removeFunction called with:", info);
+      removeGraphics();
+      this.graphics = null;
+      ms?.off("rightdown", msRemoveG);
+      // 如果 info 有 from 属性，说明是从其他控制器传来的，直接传递
       if (info?.from) {
         resolveCallback(info);
       } else {
         resolveCallback({ cancel: true });
       }
-
-      ms?.removeListener("rightdown", removeFunction);
-      this.removeFunction = () => {};
     };
-    this.removeFunction = removeFunction;
-    ms?.on("rightdown", removeFunction);
+
     return promise;
   };
   removeFunction = (args?: any) => {};

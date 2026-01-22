@@ -128,22 +128,17 @@ export const moveSelect = (
     if (graphics.parent) {
       graphics.parent.removeChild(graphics);
     }
-    container.off("pointerup", removeGraphics);
+    container.off("click", removeGraphics);
   };
-  let cannel = false;
   graphics.on("rightdown", (e) => {
     e.stopPropagation();
     console.log("rightdown");
-    cannel = true;
     removeGraphics();
   });
-  graphics.on("pointerup", (e) => {
-    console.log("pointerup");
+  graphics.on("click", (e) => {
+    console.log("click");
     e.stopPropagation();
     removeGraphics();
-    if (cannel) {
-      return;
-    }
     
     playerSelectMovement(e, unit, path,{});
     if (
@@ -160,5 +155,5 @@ export const moveSelect = (
     }
   });
 
-  container.on("pointerup", removeGraphics);
+  container.on("click", removeGraphics);
 };

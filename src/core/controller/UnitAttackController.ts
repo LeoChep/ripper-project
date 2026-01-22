@@ -170,22 +170,17 @@ const attackSelect = (
     if (graphics.parent) {
       graphics.parent.removeChild(graphics);
     }
-    container.off("pointerup", removeGraphics);
+    container.off("click", removeGraphics);
   };
-  let cannel = false;
   graphics.on("rightdown", (e) => {
     e.stopPropagation();
     console.log("rightdown");
-    cannel = true;
     removeGraphics();
   });
-  graphics.on("pointerup", (e) => {
-    console.log("pointerup");
+  graphics.on("click", (e) => {
+    console.log("click");
     e.stopPropagation();
     removeGraphics();
-    if (cannel) {
-      return;
-    }
        if (
           unit.initiative &&
           typeof unit.initiative.standerActionNumber === "number"
@@ -201,5 +196,5 @@ const attackSelect = (
     // moveMovement(e, unit, container, path);
   });
 
-  container.on("pointerup", removeGraphics);
+  container.on("click", removeGraphics);
 };

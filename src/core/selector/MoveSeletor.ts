@@ -108,6 +108,7 @@ export class MoveSelector {
     //右键区域外
     const ms = golbalSetting.mapContainer;
     const msRemoveG = (e: { stopPropagation: () => void }) => {
+      if (e.stopPropagation)
       e.stopPropagation();
       if (selector.canCancel) {
         removeGraphics();
@@ -116,7 +117,7 @@ export class MoveSelector {
       }
     };
     ms?.on("rightdown", msRemoveG);
-
+    // this.removeFunction = msRemoveG;
     graphics.on("click", (e) => {
       console.log("click");
       e.stopPropagation();
