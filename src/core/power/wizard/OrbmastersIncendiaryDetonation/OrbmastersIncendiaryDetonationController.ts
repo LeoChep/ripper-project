@@ -1,7 +1,6 @@
-import { EndTurnRemoveBuffEvent } from '@/core/event/EndTurnRemoveBuffEvent';
 import { distance } from "../../../system/DoorSystem";
 
-import { AbstractPwoerController } from "../AbstractPwoerController";
+import { AbstractPwoerController } from "../../../controller/AbstractPwoerController";
 import type { CreatureAttack } from "@/core/units/Creature";
 import {
   checkHit,
@@ -31,13 +30,12 @@ import { BuffSystem } from "@/core/system/BuffSystem";
 import { OrbmastersIncendiaryDetonation } from "@/core/power/wizard/OrbmastersIncendiaryDetonation/OrbmastersIncendiaryDetonation";
 import { OrbmastersIncendiaryDetonationDamageEvent } from "@/core/power/wizard/OrbmastersIncendiaryDetonation/OrbmastersIncendiaryDetonationDamageEvent";
 import { BlastSelector } from "@/core/selector/BlastSelector";
-import { DivineGlowAttackBonusUp } from "@/core/power/cleric/DivineGlow/DivineGlowAttackBonusUp";
 
-export class DivineGlowController extends AbstractPwoerController {
+export class OrbmastersIncendiaryDetonationController extends AbstractPwoerController {
   public static isUse: boolean = false;
-  public static instense: DivineGlowController | null =
+  public static instense: OrbmastersIncendiaryDetonationController | null =
     null;
-  powerName = "DivineGlow";
+  powerName = "OrbmastersIncendiaryDetonation";
   constructor() {
     super();
   }
@@ -48,27 +46,41 @@ export class DivineGlowController extends AbstractPwoerController {
     const unit = this.selectedCharacter as Unit;
     const implement = unit.creature?.implements?.[0] || undefined;
     const attack = AttackSystem.createAttack({
-      attackFormula: "[WIS]",
-      damageFormula: "1d6+[WIS]",
+      attackFormula: "[INT]",
+      damageFormula: "1d6+[INT]",
       keyWords: [],
       implement: implement,
       unit: unit,
     });
     attack.range = 10; // Example range
-
+    const grids = generateWays({
+      start: { x, y },
+      range: attack.range,
+      checkFunction: (gridX: any, gridY: any, preX: number, preY: number) => {
+        return checkPassiable(unit, gridX, gridY);
+      },
+    });
     let resolveCallback = (value: any) => {};
     const promise = new Promise((resolve) => {
       resolveCallback = resolve;
     });
-
-    const selector = BlastSelector.getInstance().selectBlast(
-      [{ x, y }],
-      3,
+    const selector = BrustSelector.getInstance().selectBasic(
+      grids,
+      1,
       1,
       "yellow",
       "red",
-      true
+
+      true,
+      () => true
     );
+    // const selector = BlastSelector.getInstance().selectBlast(
+    //   [{ x, y }],
+    //   3,
+    //   1,
+    //   "yellow",
+    //   true
+    // );
     this.graphics = selector.graphics;
     this.removeFunction = selector.removeFunction;
     const result = await selector.promise;
@@ -77,29 +89,22 @@ export class DivineGlowController extends AbstractPwoerController {
       console.log("selected blast center:", result);
       const selected = result.selected[0];
 
-      await DivineGlowController.playAnim(
+      await OrbmastersIncendiaryDetonationController.playAnim(
         this.selectedCharacter as Unit,
-        selected[4].x,
-        selected[4].y,
+        selected.x,
+        selected.y,
         1
       );
-
-      //寻找范围内的单位
-      const unitsInBrust = UnitSystem.getInstance().findUnitInGrids(
-        selector.blastGridSet as Set<{ x: number; y: number; step: number }>
+      await this.createArea(
+        this.selectedCharacter as Unit,
+        selector.brustGridSet as Set<{ x: number; y: number; step: number }>
       );
-      const enemyUnits = [];
-      const friendUnits = [];
-      for (const u of unitsInBrust){
-        if (u.party !== unit.party){
-          enemyUnits.push(u);
-        } else {
-          friendUnits.push(u);
-        }
-      }
+      //寻找范围内的单位
+      const unitsInBrust = this.findUnitInBrustGrids(
+        selector.brustGridSet as Set<{ x: number; y: number; step: number }>
+      );
       const attackPromises: Promise<void>[] = [];
-      for (const targetUnit of enemyUnits) {
-
+      for (const targetUnit of unitsInBrust) {
         const attackPromise = new Promise<void>(async (resolve) => {
           const hit = await checkHit(unit, targetUnit, attack, "Ref");
           createMissOrHitAnimation(targetUnit, hit.hit);
@@ -107,18 +112,17 @@ export class DivineGlowController extends AbstractPwoerController {
             const damage = await getDamage(targetUnit, unit, attack);
             takeDamage(damage, targetUnit);
             createDamageAnim(damage.toString(), targetUnit);
+            const hitEffect = new Proned();
+            hitEffect.source = "Proned";
+            hitEffect.owner = targetUnit;
+            hitEffect.giver = unit;
+            BuffSystem.getInstance().addTo(hitEffect, targetUnit);
           }
           resolve();
         });
         attackPromises.push(attackPromise);
       }
       await Promise.all(attackPromises);
-      for (const targetUnit of friendUnits) {
-        const buff = new DivineGlowAttackBonusUp();
-        BuffSystem.getInstance().addTo(buff,targetUnit);
-        const event=new EndTurnRemoveBuffEvent(unit,buff,2);
-        event.hook();
-      }
       resolveCallback({});
     } else {
       console.log("result.cancel", result);
@@ -126,7 +130,49 @@ export class DivineGlowController extends AbstractPwoerController {
     }
     return promise;
   };
-
+  findUnitInBrustGrids(gridSet: Set<{ x: number; y: number; step: number }>) {
+    const unitSet = new Set<Unit>();
+    gridSet.forEach((grid) => {
+      const targetUnit = UnitSystem.getInstance().findUnitByGridxy(
+        grid.x,
+        grid.y
+      );
+      if (targetUnit) {
+        unitSet.add(targetUnit);
+      }
+    });
+    return unitSet;
+  }
+  async createAreaEffect(
+    owner: Unit,
+    gridSet: Set<{ x: number; y: number; step: number }>
+  ) {
+    const effect = new BurnAreaEffect(owner);
+    effect.grids = gridSet;
+    await effect.build();
+    return effect;
+  }
+  async createArea(
+    owner: Unit,
+    gridSet: Set<{ x: number; y: number; step: number }>
+  ) {
+    const effect = await this.createAreaEffect(owner, gridSet);
+    const area = new Area();
+    area.effects.push(effect);
+    AreaSystem.getInstance().addArea(area);
+    const event = new OrbmastersIncendiaryDetonationEvent(
+      this.selectedCharacter as Unit,
+      area,
+      2
+    );
+    event.hook();
+    const damageEvent = new OrbmastersIncendiaryDetonationDamageEvent(
+      this.selectedCharacter as Unit,
+      area
+    );
+    damageEvent.hook();
+    event.damageEventId = damageEvent.eventId;
+  }
   static async playAnim(
     unit: Unit,
     gridX: number,

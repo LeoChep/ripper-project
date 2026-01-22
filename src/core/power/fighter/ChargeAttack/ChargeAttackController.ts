@@ -1,6 +1,6 @@
 import { UnitSystem } from "../../../system/UnitSystem";
 import { Unit } from "@/core/units/Unit";
-import { AbstractPwoerController } from "../AbstractPwoerController";
+import { AbstractPwoerController } from "../../../controller/AbstractPwoerController";
 
 import { golbalSetting } from "@/core/golbalSetting";
 

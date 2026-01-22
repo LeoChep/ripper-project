@@ -9,9 +9,9 @@
                 <div class="list-name">{{ character.name }}</div>
             </div>
         </div>
-        <ActionBar :character="selectedCharacter" />
+        <ActionBar :character="selectedCharacter" id="action-bar" />
         <!-- 原位置显示选中角色详情 -->
-        <div v-if="selectedCharacter" class="character-detail-panel">
+        <div v-if="selectedCharacter" class="character-detail-panel" id="character-detail-panel">
             <!-- 动作条 - 独立组件 -->
 
 
@@ -46,8 +46,8 @@ import ActionBar from '../ActionBar/ActionBar.vue'
 import { CharacterController } from '@/core/controller/CharacterController'
 import { lockOn } from '@/core/anim/LockOnAnim'
 import { useTalkStateStore } from '@/stores/talkStateStore'
-
-
+import { CharacterCombatController } from "@/core/controller/CharacterCombatController";
+import * as InitiativeSystem from "@/core/system/InitiativeSystem";
 const characters = ref([])
 const hp = ref(0)
 const maxHp = ref(0)
@@ -59,9 +59,28 @@ const show = computed(() => {
 const selectedIndex = ref(0)
 const selectedCharacter = ref(null)
 const actionPanelRef = ref(null)
+const checkUsePowerHandler = () => {
+    if (CharacterCombatController.getInstance().inUsePower) {
+        const actionPanel = document.getElementById('character-detail-panel')
+        actionPanel.style.display = 'none'
+        const actionBar = document.getElementById('action-bar')
+        if (!actionBar) return
+        actionBar.style.display = 'none'
+    } else {
+        const actionPanel = document.getElementById('character-detail-panel')
+        actionPanel.style.display = 'flex'
+        const actionBar = document.getElementById('action-bar')
+        if (!actionBar) return
+        actionBar.style.display = 'block'
+    }
+
+}
 
 onMounted(() => {
     // 可以在这里加载角色数据
+    setInterval(() => {
+        checkUsePowerHandler()
+    }, 100);
     characterStore.value = useCharacterStore();
     const updataCharacters = () => {
         characters.value = []
@@ -113,11 +132,17 @@ const handleActionSelected = (action) => {
 }
 
 function selectCharacter(character, index) {
+     if (!InitiativeSystem.checkIsTurn(character)) {
+      console.warn("当前单位无法结束回合，因为不是它的回合");
+      return;
+    }
     console.log('选中角色:', character);
     CharacterController.curser = character.id;
     characterStore.value.selectedCharacterId = character.id;
     selectedIndex.value = index;
     selectedCharacter.value = character;
+  
+    CharacterCombatController.getInstance().selectedCharacter = character;
     lockOn(character.x, character.y);
 }
 

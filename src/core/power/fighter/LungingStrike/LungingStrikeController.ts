@@ -1,5 +1,5 @@
 import type { Unit } from "@/core/units/Unit";
-import { AbstractPwoerController } from "../AbstractPwoerController";
+import { AbstractPwoerController } from "../../../controller/AbstractPwoerController";
 import { playerSelectAttackMovement } from "@/core/action/UnitAttack";
 
 import * as AttackSystem from "@/core/system/AttackSystem";
@@ -8,17 +8,13 @@ import { useStandAction } from "@/core/system/InitiativeSystem";
 import { BasicAttackSelector } from "@/core/selector/BasicAttackSelector";
 
 import type { FederatedPointerEvent } from "pixi.js";
-import { HearteningStrikeAimBuff } from "@/core/power/cleric/HearteningStrike/HearteningStrikeAimBuff";
-import { BuffSystem } from "@/core/system/BuffSystem";
-import { HearteningStrikeAimEvent } from "@/core/power/cleric/HearteningStrike/HearteningStrikeAimEvent";
-import { HearteningStrikeTimerEvent } from "@/core/power/cleric/HearteningStrike/HearteningStrikeTimerEvent";
 
-export class HearteningStrikeController extends AbstractPwoerController {
+export class LungingStrikeController extends AbstractPwoerController {
   public static isUse: boolean = false;
-  public static instense: HearteningStrikeController | null = null;
+  public static instense: LungingStrikeController | null = null;
 
   selectedCharacter: Unit | null = null;
-  powerName = "HearteningStrike";
+  powerName = "LungingStrike";
   constructor() {
     super();
   }
@@ -29,13 +25,16 @@ export class HearteningStrikeController extends AbstractPwoerController {
     const unit = this.selectedCharacter as Unit;
     const weapon = unit.creature?.weapons?.[0];
     const attackParams = {
-      attackFormula: "[WIS]",
-      damageFormula: "2*[W]+[WIS]",
+      attackFormula: "[STR]",
+      damageFormula: "[W]+[STR]",
       keyWords: [],
       weapon: weapon,
       unit: unit,
     };
     const attack = AttackSystem.createAttack(attackParams);
+    if (attack?.range) {
+      attack.range++;
+    }
     // 执行攻击选择逻辑
     const basicAttackSelector = BasicAttackSelector.getInstance().selectBasic({
       unit: unit,
@@ -61,24 +60,8 @@ export class HearteningStrikeController extends AbstractPwoerController {
             unit,
             attack,
             golbalSetting.map
-          ).then((result) => {
+          ).then(() => {
             console.log("resolveCallback", {});
-            const buff = new HearteningStrikeAimBuff();
-            buff.giver = unit;
-            // if (typeof result == typeof {}) {
-            //   resolveCallback({});
-            //   return;
-            // }
-            const r2=result as unknown as {beAttack:Unit}
-            const target = r2?.beAttack as unknown as Unit;
-            BuffSystem.getInstance().addTo(buff, target);
-              console.log("resolveCallback",target);
-            const aimEvent = new HearteningStrikeAimEvent(unit);
-            aimEvent.curesdUnit = target;
-            const continueEvent = new HearteningStrikeTimerEvent(unit, 2);
-            continueEvent.childEventId = aimEvent.eventId;
-            aimEvent.hook();
-            continueEvent.hook;
             resolveCallback({});
           });
         } else {

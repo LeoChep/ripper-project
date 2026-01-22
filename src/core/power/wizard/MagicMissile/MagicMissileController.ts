@@ -1,6 +1,6 @@
 import { distance } from "./../../../system/DoorSystem";
 import type { Unit } from "@/core/units/Unit";
-import { AbstractPwoerController } from "../AbstractPwoerController";
+import { AbstractPwoerController } from "../../../controller/AbstractPwoerController";
 import type { CreatureAttack } from "@/core/units/Creature";
 import {
   checkHit,

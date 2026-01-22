@@ -1,5 +1,5 @@
 import { Power } from "./../power/Power";
-import type { AbstractPwoerController } from "../controller/powers/AbstractPwoerController";
+import type { AbstractPwoerController } from "../controller/AbstractPwoerController";
 
 import type { Unit } from "../units/Unit";
 
@@ -117,48 +117,48 @@ export class PowerSystem {
     switch (powerName) {
       case "LungingStrike":
         return import(
-          "../controller/powers/fighter/LungingStrikeController"
+          "../power/fighter/LungingStrike/LungingStrikeController"
         ).then((module) => module.LungingStrikeController);
       case "FunnelingFlurry":
         return import(
-          "../controller/powers/fighter/FunnelingFlurryController"
+          "../power/fighter/FunnelingFlurry/FunnelingFlurryController"
         ).then((module) => module.FunnelingFlurryController);
       case "IceRays":
-        return import("../controller/powers/wizard/IceRaysController").then(
+        return import("../power/wizard/IceRays/IceRaysController").then(
           (module) => module.IceRaysController
         );
       case "OrbmastersIncendiaryDetonation":
         return import(
-          "../controller/powers/wizard/OrbmastersIncendiaryDetonationController"
+          "../power/wizard/OrbmastersIncendiaryDetonation/OrbmastersIncendiaryDetonationController"
         ).then((module) => module.OrbmastersIncendiaryDetonationController);
       case "FreezingBurst":
         return import(
-          "../controller/powers/wizard/FreezingBurstController"
+          "../power/wizard/FreezingBurst/FreezingBurstController"
         ).then((module) => module.FreezingBurstController);
       case "MagicMissile":
         return import(
-          "../controller/powers/wizard/MagicMissileController"
+          "../power/wizard/MagicMissile/MagicMissileController"
         ).then((module) => module.MagicMissileController);
 
       case "ChargeAttack":
         return import(
-          "../controller/powers/fighter/ChargeAttackController"
+          "../power/fighter/ChargeAttack/ChargeAttackController"
         ).then((module) => module.ChargeAttackController);
       case "WeaponOfDivineProtection":
         return import(
-          "../controller/powers/cleric/WeaponOfDivineProtectionController"
+          "../power/cleric/WeaponOfDivineProtection/WeaponOfDivineProtectionController"
         ).then((module) => module.WeaponOfDivineProtectionController);
       case "SonnlinorsHammer":
         return import(
-          "../controller/powers/cleric/SonnlinorsHammerController"
+          "../power/cleric/SonnlinorsHammer/SonnlinorsHammerController"
         ).then((module) => module.SonnlinorsHammerController);
       case "DivineGlow":
         return import(
-          "../controller/powers/cleric/DivineGlowController"
+          "../power/cleric/DivineGlow/DivineGlowController"
         ).then((module) => module.DivineGlowController);
       case "HearteningStrike":
         return import(
-          "../controller/powers/cleric/HearteningStrikeController"
+          "../power/cleric/HearteningStrike/HearteningStrikeController"
         ).then((module) => module.HearteningStrikeController);
     }
 

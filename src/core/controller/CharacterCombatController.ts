@@ -8,7 +8,7 @@ import { CharCombatAttackController } from "./CharacterCombatAttackController";
 import type { CreatureAttack } from "../units/Creature";
 import * as InitiativeSystem from "../system/InitiativeSystem";
 import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
-import { AbstractPwoerController } from "./powers/AbstractPwoerController";
+import { AbstractPwoerController } from "./AbstractPwoerController";
 import { Power } from "../power/Power";
 import { PowerSystem } from "../system/PowerSystem";
 import { WeaponSystem } from "../system/WeaponSystem";
@@ -33,7 +33,7 @@ export class CharacterCombatController {
       return;
     }
     const walkMachine = this.selectedCharacter?.stateMachinePack.getMachine(
-      "walk"
+      "walk",
     ) as WalkStateMachine;
     if (
       !InitiativeSystem.checkActionUseful(this.selectedCharacter, "move") &&
@@ -63,11 +63,11 @@ export class CharacterCombatController {
             this.useMoveController();
           }, 50);
         }
-      }else if (!result){
+      } else if (!result) {
         console.log("moveSelect result", result);
-         setTimeout(() => {
-            this.useMoveController();
-          }, 50);
+        setTimeout(() => {
+          this.useMoveController();
+        }, 50);
       }
     });
   }
@@ -78,12 +78,14 @@ export class CharacterCombatController {
     if (this.inUse === false || !golbalSetting.map) {
       return false;
     }
+    if (!this.selectedCharacter) return false;
+    console.log("preCheck selectedCharacter", this.selectedCharacter);
+    if (!InitiativeSystem.checkIsTurn(this.selectedCharacter)) return false;
     this.selectedCharacter = golbalSetting.map.sprites.find(
-      (sprite) => sprite.id === CharacterController.curser
+      (sprite) => sprite.id === CharacterController.curser,
     );
-    if ( !(this.selectedCharacter?.state === "idle"))
-      return false
-   
+    if (!(this.selectedCharacter?.state === "idle")) return false;
+
     if (!this.selectedCharacter) {
       console.warn("没有选中单位，无法进行操作选择");
       return false;
@@ -99,7 +101,7 @@ export class CharacterCombatController {
     if (
       !InitiativeSystem.checkActionUseful(
         this.selectedCharacter,
-        power.actionType
+        power.actionType,
       )
     ) {
       return;
@@ -112,7 +114,7 @@ export class CharacterCombatController {
     CharCombatMoveController.instense?.removeFunction(cancelInfo);
     this.powerController?.removeFunction(cancelInfo);
     const powerController = await PowerSystem.getInstance().getController(
-      power.name
+      power.name,
     );
     this.powerController = powerController;
     if (!powerController) {
@@ -120,15 +122,15 @@ export class CharacterCombatController {
       return;
     }
     powerController.selectedCharacter = this.selectedCharacter;
-    if (!powerController.preFix()) return ;
-    this.inUsePower=true;
+    if (!powerController.preFix()) return;
+    this.inUsePower = true;
     powerController.doSelect().then((result) => {
       console.log("powerController result", result);
       if (!result.cancel && InitiativeSystem.isInBattle()) {
         this.resetDivideWalk();
         powerController.use();
       }
-      this.inUsePower=false;
+      this.inUsePower = false;
       setTimeout(() => {
         if (!result.from && InitiativeSystem.isInBattle()) {
           this.useMoveController();
@@ -217,12 +219,16 @@ export class CharacterCombatController {
     });
   }
   endTurn() {
-    console.log("CharacterCombatController endTurn",this);
+    console.log("CharacterCombatController endTurn", this);
     if (this.inUsePower) {
       return;
     }
     if (!this.selectedCharacter) {
       console.warn("没有选中单位，无法结束回合");
+      return;
+    }
+    if (!InitiativeSystem.checkIsTurn(this.selectedCharacter)) {
+      console.warn("当前单位无法结束回合，因为不是它的回合");
       return;
     }
     CharCombatMoveController.instense?.removeFunction();
@@ -236,7 +242,7 @@ export class CharacterCombatController {
   }
   resetDivideWalk() {
     const walkMachine = this.selectedCharacter?.stateMachinePack.getMachine(
-      "walk"
+      "walk",
     ) as WalkStateMachine;
     if (walkMachine.onDivideWalk === true) {
       walkMachine.onDivideWalk = false;

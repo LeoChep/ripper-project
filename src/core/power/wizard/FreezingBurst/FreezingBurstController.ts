@@ -1,4 +1,4 @@
-import { AbstractPwoerController } from "../AbstractPwoerController";
+import { AbstractPwoerController } from "../../../controller/AbstractPwoerController";
 import {
   checkHit,
   checkPassiable,

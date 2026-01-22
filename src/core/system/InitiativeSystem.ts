@@ -464,7 +464,8 @@ async function playAnim(unit: Unit) {
 }
 export function checkIsTurn(unit: Unit) {
   if (!unit.initiative) return false;
-  if (initiativeCursor.pointAt && initiativeCursor.pointAt.owner === unit) {
+  console.log("checkIsTurn", unit, initiativeCursor.pointAt);
+  if (initiativeCursor.pointAt && initiativeCursor.pointAt.owner?.id === unit.id) {
     return true;
   }
   return false;
