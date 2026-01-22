@@ -132,16 +132,20 @@ const handleActionSelected = (action) => {
 }
 
 function selectCharacter(character, index) {
-     if (!InitiativeSystem.checkIsTurn(character)) {
-      console.warn("当前单位无法结束回合，因为不是它的回合");
-      return;
+    //  if (!InitiativeSystem.checkIsTurn(character)) {
+    //   console.warn("当前单位无法结束回合，因为不是它的回合");
+    //   return;
+    // }
+    if (CharacterCombatController.getInstance().inUsePower) {
+        console.warn("当前正在使用威能，无法切换角色");
+        return;
     }
     console.log('选中角色:', character);
     CharacterController.curser = character.id;
     characterStore.value.selectedCharacterId = character.id;
     selectedIndex.value = index;
     selectedCharacter.value = character;
-  
+
     CharacterCombatController.getInstance().selectedCharacter = character;
     lockOn(character.x, character.y);
 }

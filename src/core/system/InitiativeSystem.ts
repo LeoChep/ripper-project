@@ -27,7 +27,6 @@ const initiativeCursor = {
   lastParty: null as null | string, // 记录上一回合的方阵
 };
 
-
 export async function addUnitsToInitiativeSheet(units: Unit[]) {
   const allAddedPromise = [] as Promise<any>[];
   units.forEach((unit) => {
@@ -172,6 +171,8 @@ export async function startCombatTurn() {
         }
         const unit = initiativeCursor.pointAt.owner;
         CharacterController.selectCharacter(unit);
+        CharacterCombatController.getInstance().selectedCharacter = unit;
+
         CharacterCombatController.instance?.useMoveController();
       }
 
@@ -399,7 +400,11 @@ export const loadBattleUI = () => {
     func();
   });
   console.log("loadBattleUIhandles", loadBattleUIhandles);
-  console.log("loadBattleUI called", playEnemyTurnAnnouncementAnimHandles, playPlayerTurnAnnouncementAnimHandles);
+  console.log(
+    "loadBattleUI called",
+    playEnemyTurnAnnouncementAnimHandles,
+    playPlayerTurnAnnouncementAnimHandles,
+  );
 };
 export const playEnemyTurnAnnouncementAnimHandles = [] as any[];
 export const playPlayerTurnAnnouncementAnimHandles = [] as any[];
@@ -465,7 +470,10 @@ async function playAnim(unit: Unit) {
 export function checkIsTurn(unit: Unit) {
   if (!unit.initiative) return false;
   console.log("checkIsTurn", unit, initiativeCursor.pointAt);
-  if (initiativeCursor.pointAt && initiativeCursor.pointAt.owner?.id === unit.id) {
+  if (
+    initiativeCursor.pointAt &&
+    initiativeCursor.pointAt.owner?.id === unit.id
+  ) {
     return true;
   }
   return false;
@@ -547,7 +555,87 @@ export function getPointAtUnit() {
 }
 export function getPointAtInitiative() {
   return initiativeCursor.pointAt || null;
-} 
+}
+
+/**
+ * 重新排列先攻顺序
+ * @param fromIndex 原始位置索引（基于sortedUnits）
+ * @param toIndex 目标位置索引（基于sortedUnits）
+ */
+export function reorderInitiative(fromIndex: number, toIndex: number) {
+  // 获取当前排序后的单位列表
+  const sortedUnits = getUnits().sort((a, b) => {
+    return (
+      (b.initiative?.initativeValue ?? 0) - (a.initiative?.initativeValue ?? 0)
+    );
+  });
+
+  if (
+    fromIndex < 0 ||
+    fromIndex >= sortedUnits.length ||
+    toIndex < 0 ||
+    toIndex >= sortedUnits.length
+  ) {
+    console.error("Invalid index for reordering initiative");
+    return;
+  }
+
+  const draggedUnit = sortedUnits[fromIndex];
+  const targetUnit = sortedUnits[toIndex];
+
+  if (!draggedUnit.initiative || !targetUnit.initiative) {
+    console.error("Units don't have initiative values");
+    return;
+  }
+
+  // 计算新的先攻值
+  // 如果向后拖（延迟），新的先攻值应该略低于目标位置的值
+  // 如果向前拖，新的先攻值应该略高于目标位置的值
+  let newInitValue: number;
+
+  if (toIndex > fromIndex) {
+    // 向后拖动（延迟）
+    if (toIndex === sortedUnits.length - 1) {
+      // 拖到最后一位
+      newInitValue = targetUnit.initiative.initativeValue - 1;
+    } else {
+      // 插入到目标位置和下一位之间
+      const nextUnit = sortedUnits[toIndex + 1];
+      if (nextUnit.initiative) {
+        newInitValue =
+          (targetUnit.initiative.initativeValue +
+            nextUnit.initiative.initativeValue) /
+          2;
+      } else {
+        newInitValue = targetUnit.initiative.initativeValue - 0.5;
+      }
+    }
+  } else {
+    // 向前拖动
+    if (toIndex === 0) {
+      // 拖到第一位
+      newInitValue = targetUnit.initiative.initativeValue + 1;
+    } else {
+      // 插入到前一位和目标位置之间
+      const prevUnit = sortedUnits[toIndex - 1];
+      if (prevUnit.initiative) {
+        newInitValue =
+          (prevUnit.initiative.initativeValue +
+            targetUnit.initiative.initativeValue) /
+          2;
+      } else {
+        newInitValue = targetUnit.initiative.initativeValue + 0.5;
+      }
+    }
+  }
+
+  // 更新被拖动单位的先攻值
+  draggedUnit.initiative.initativeValue = newInitValue;
+
+  console.log(
+    `Reordered initiative: ${draggedUnit.name} from ${fromIndex} to ${toIndex}, new value: ${newInitValue}`,
+  );
+}
 export function loadInitRecord(initRecord: {
   initiativeSheet: InitiativeSerializer[];
   inBattle: boolean;
@@ -576,7 +664,6 @@ export function loadInitRecord(initRecord: {
       CharacterController.selectCharacter(unit);
       CharacterCombatController.getInstance().selectedCharacter = unit;
       CharacterCombatController.getInstance().useMoveController();
-      
     }
     console.log("LOAD INIT", initiativeSheet, initiativeCursor);
   } else {

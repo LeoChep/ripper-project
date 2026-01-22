@@ -16,9 +16,7 @@ import {
   type ScanData,
 } from "@/core/selector/BasicLineSelector";
 import { moveMovement } from "@/core/action/UnitMove";
-import {
-  attackMovementToXY,
-} from "@/core/action/UnitAttack";
+import { attackMovementToXY } from "@/core/action/UnitAttack";
 import { segmentsIntersect } from "@/core/utils/MathUtil";
 import type { TiledMap } from "@/core/MapClass";
 import { useAction } from "@/core/system/InitiativeSystem";
@@ -27,7 +25,7 @@ import * as AttackSystem from "@/core/system/AttackSystem";
 export class ChargeAttackController extends AbstractPwoerController {
   public static isUse: boolean = false;
   public static instense: ChargeAttackController | null = null;
-  powerName='ChargeAttack'
+  powerName = "ChargeAttack";
   selectedCharacter: Unit | null = null;
 
   constructor() {
@@ -35,7 +33,13 @@ export class ChargeAttackController extends AbstractPwoerController {
   }
   getAttack = (unit: Unit, num: number) => {
     const weapon = unit.creature?.weapons?.[num - 1];
-    const attackParams={attackFormula:'[STR]', damageFormula:'[W]+[STR]', keyWords:[], weapon:weapon, unit:unit}
+    const attackParams = {
+      attackFormula: "[STR]",
+      damageFormula: "[W]+[STR]",
+      keyWords: [],
+      weapon: weapon,
+      unit: unit,
+    };
     const attack = AttackSystem.createAttack(attackParams);
 
     return attack;
@@ -58,9 +62,9 @@ export class ChargeAttackController extends AbstractPwoerController {
           prey * tileSize,
           nx * tileSize,
           ny * tileSize,
-          golbalSetting.map
+          golbalSetting.map,
         );
-      }
+      },
     });
     let canCharge = false;
     const scanFunction = (scanData: ScanData) => {
@@ -73,29 +77,40 @@ export class ChargeAttackController extends AbstractPwoerController {
       const gridy = scanData.gridy;
       Object.keys(linePath).forEach((key) => {
         const [x, y] = key.split(",").map(Number);
-        if (linePath[key] && linePath[key].step > (speed ?? 0)+1) {
+        if (linePath[key] && linePath[key].step > (speed ?? 0) + 1) {
           outSpeedFlag = true;
         }
-        const unitInGrid=UnitSystem.getInstance().findUnitByGridxy(x, y);
-        if (unitInGrid && unitInGrid !== unit&&unitInGrid.party!=unit.party&&unitInGrid.state !== "dead") {
-          const finalChargeTarget=UnitSystem.getInstance().findUnitByGridxy(gridx, gridy);
-          if (unitInGrid!=finalChargeTarget) {
-            console.log('unitInGrid at charge',unitInGrid,finalChargeTarget)
+        const unitInGrid = UnitSystem.getInstance().findUnitByGridxy(x, y);
+        if (
+          unitInGrid &&
+          unitInGrid !== unit &&
+          unitInGrid.party != unit.party &&
+          unitInGrid.state !== "dead"
+        ) {
+          const finalChargeTarget = UnitSystem.getInstance().findUnitByGridxy(
+            gridx,
+            gridy,
+          );
+          if (unitInGrid != finalChargeTarget) {
+            console.log("unitInGrid at charge", unitInGrid, finalChargeTarget);
             beBlockFlag = true;
           }
         }
-      })
+      });
 
       const targetGrid = linePath[`${gridx},${gridy}`];
       if (targetGrid && targetGrid.step <= 2) {
         tooShortFlag = true;
       }
-      if (targetGrid){
-         const noBeblockByWall=attackCheckPassiable(unit, targetGrid.x , targetGrid.y );
-         if (!noBeblockByWall)
-          beBlockFlag = true;
-        }
-       
+      if (targetGrid) {
+        const noBeblockByWall = attackCheckPassiable(
+          unit,
+          targetGrid.x,
+          targetGrid.y,
+        );
+        if (!noBeblockByWall) beBlockFlag = true;
+      }
+
       if (outSpeedFlag) {
         MessageTipSystem.getInstance().setMessage("超出冲锋范围");
         canCharge = false;
@@ -120,9 +135,11 @@ export class ChargeAttackController extends AbstractPwoerController {
       1,
       "blue",
       true,
-      () => {return canCharge},
+      () => {
+        return canCharge;
+      },
       scanFunction,
-      { x: x, y: y }
+      { x: x, y: y },
     );
     MessageTipSystem.getInstance().setMessage("请选择主目标");
     this.graphics = BasicSelector.getInstance().graphics;
@@ -133,7 +150,10 @@ export class ChargeAttackController extends AbstractPwoerController {
     });
 
     const result = await basicAttackSelector.promise;
-
+    if (!result?.selected) {
+      resolveCallback({ cancel: true });
+      return promise;
+    }
     const linePathGrid = result.linePathGrid;
     const moveEnd =
       linePathGrid[`${result.selected[0].x},${result.selected[0].y}`];
@@ -149,7 +169,7 @@ export class ChargeAttackController extends AbstractPwoerController {
         result.selected[0].y,
         unit,
         mainAttack1,
-        golbalSetting.map
+        golbalSetting.map,
       ).then(() => {
         console.log("resolveCallback", {});
         resolveCallback({});
@@ -159,7 +179,6 @@ export class ChargeAttackController extends AbstractPwoerController {
     console.log("resolveCallback", {});
     return promise;
   };
- 
 }
 export const checkPassiable = (
   unit: Unit,
@@ -167,7 +186,7 @@ export const checkPassiable = (
   prey: number,
   x: number,
   y: number,
-  mapPassiable: TiledMap | null
+  mapPassiable: TiledMap | null,
 ) => {
   if (!mapPassiable) {
     return false;
@@ -190,7 +209,7 @@ export const checkPassiable = (
       "目标位置",
       x,
       y,
-      mapPassiable
+      mapPassiable,
     );
     // 检查是否穿过边
     if (edges) {
@@ -238,7 +257,7 @@ export const checkPassiable = (
                 edge.x1,
                 edge.y1,
                 edge.x2,
-                edge.y2
+                edge.y2,
               )
             ) {
               intersectCount++;
@@ -248,7 +267,7 @@ export const checkPassiable = (
             passiable = false;
             return;
           }
-        }
+        },
       );
     }
     // 检查是否被敌人阻挡

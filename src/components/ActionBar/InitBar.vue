@@ -3,12 +3,12 @@
     class="init-bar-wrapper"
     :style="{ '--init-avatarbox-bg': `url(${initAvatarBoxImg})` }"
   >
-    <div class="init-bar-scroll" ref="scrollContainer" @wheel="onWheel">
+    <div class="init-bar-scroll" :class="{ 'dragging-active': isDragging }" ref="scrollContainer" @wheel="onWheel" @mousemove="onMouseMove" @click="onContainerClick">
       <div
-        v-for="unit in units"
+        v-for="(unit, index) in previewUnits"
         :id="`init-${unit.id}`"
         :key="unit.id"
-        :class="['init-bar-item']"
+        :class="['init-bar-item', { 'is-dragging': isDragging && draggedUnitId === unit.id, 'is-drop-target': isDropTarget(unit.originalIndex), 'preview-position': isDragging && unit.originalIndex !== index }]"
         v-show="isAllLoaded"
       >
         <img
@@ -24,6 +24,22 @@
             :alt="unit.name"
           />
         </div>
+        <!-- 预览位置索引 - 显示先攻值 -->
+        <div v-if="isDragging && unit.originalIndex !== index" class="preview-index">
+          {{ unit.initiative?.initativeValue?.toFixed(1) || 0 }}
+        </div>
+        <!-- 延迟按钮 - 只在当前回合单位上显示 -->
+        <button
+          :id="`delay-button-${unit.id}`"
+          v-if=" !isDragging"
+          class="delay-button"
+          @click.stop="onDelayClick(unit)"
+        >
+          延迟
+        </button>
+        <!-- <div v-if="isDragging && draggedUnitId === unit.id" class="drag-tip">
+          移动鼠标选择位置，点击确认
+        </div> -->
         <!-- <div class="init-bar-name">{{ unit.name }}</div> -->
       </div>
     </div>
@@ -38,11 +54,19 @@ import * as InitSystem from "@/core/system/InitiativeSystem";
 import initCursorImg from "@/assets/ui/init-cursor.png";
 import initAvatarBoxImg from "@/assets/ui/init-avtarbox2.png";
 import { appSetting } from "@/core/envSetting";
+import type { Unit } from "@/class/Unit";
+
 const scrollContainer = ref<HTMLDivElement | null>(null);
 const initiativeStore = useInitiativeStore();
 const isAvatarBoxLoaded = ref(false);
 const isCursorLoaded = ref(false);
 const loadedAvatarCount = ref(0);
+
+// 拖拽相关状态
+const isDragging = ref(false);
+const draggedUnitId = ref<number | null>(null);
+const draggedFromIndex = ref<number | null>(null);
+const dropTargetIndex = ref<number | null>(null);
 
 // 预加载框体图片资源
 const avatarBoxImg = new Image();
@@ -64,6 +88,32 @@ InitSystem.loadBattleUIhandles.push(() => {
 const units = computed(() => initiativeStore.sortedUnits);
 const currentUnit = computed(() => initiativeStore.getOwner);
 const currentUnitId = computed(() => initiativeStore.currentUnitId);
+
+// 预览单位顺序 - 在拖拽时显示拖动后的排列
+const previewUnits = computed(() => {
+  const unitsArray = units.value.map((unit, idx) => ({
+    ...unit,
+    originalIndex: idx
+  }));
+  
+  if (!isDragging.value || draggedFromIndex.value === null || dropTargetIndex.value === null) {
+    return unitsArray;
+  }
+  
+  const fromIndex = draggedFromIndex.value;
+  const toIndex = dropTargetIndex.value;
+  
+  if (fromIndex === toIndex) {
+    return unitsArray;
+  }
+  
+  // 创建预览数组
+  const preview = [...unitsArray];
+  const [draggedUnit] = preview.splice(fromIndex, 1);
+  preview.splice(toIndex, 0, draggedUnit);
+  
+  return preview;
+});
 // 监听units变化，预加载所有头像
 watch(
   units,
@@ -119,11 +169,21 @@ setInterval(() => {
       if (lastCursorElement) {
         lastCursorElement.style.display = "none";
       }
+      const lastDelayButton = document.getElementById(
+        `delay-button-${lastUnitId.value}`
+      );
+      if (lastDelayButton) {
+        lastDelayButton.style.display = "none";
+      }
     }
     const currentUnitId = currentInit.currentUnitId;
     const currentUnitElement = document.getElementById(`init-${currentUnitId}`);
     if (currentUnitElement) {
       currentUnitElement.classList.add("is-current");
+    }
+    const currentDelayButton = document.getElementById(`delay-button-${currentUnitId}`);
+    if (currentDelayButton) {
+      currentDelayButton.style.display = "block";
     }
     const currentCursorElement = document.getElementById(`init-cursor-${currentUnitId}`);
     if (currentCursorElement) {
@@ -135,11 +195,115 @@ setInterval(() => {
 const getAvatar = (unitTypeName: string) => {
   return getUnitAvatar(unitTypeName);
 };
+
 function onWheel(e: WheelEvent) {
   e.preventDefault();
   if (scrollContainer.value) {
     scrollContainer.value.scrollLeft += e.deltaY > 0 ? 60 : -60;
   }
+}
+
+// 延迟按钮点击事件
+function onDelayClick(unit: any) {
+  isDragging.value = true;
+  draggedUnitId.value = unit.id;
+  const currentIndex = units.value.findIndex((u) => u.id === unit.id);
+  draggedFromIndex.value = currentIndex;
+  dropTargetIndex.value = currentIndex; // 默认目标位置为当前位置
+  
+  // 监听ESC键取消
+  document.addEventListener('keydown', onEscapeKey);
+  // 监听右键取消
+  document.addEventListener('contextmenu', onRightClick);
+}
+
+// ESC键取消拖拽
+function onEscapeKey(e: KeyboardEvent) {
+  if (e.key === 'Escape' && isDragging.value) {
+    resetDragState();
+  }
+}
+
+// 鼠标移动事件 - 计算应该插入的位置
+function onMouseMove(e: MouseEvent) {
+  if (!isDragging.value || !scrollContainer.value) return;
+  
+  const scrollRect = scrollContainer.value.getBoundingClientRect();
+  const mouseX = e.clientX - scrollRect.left + scrollContainer.value.scrollLeft;
+  
+  // 遍历原始顺序的单位，基于它们的原始索引计算位置
+  let closestIndex = draggedFromIndex.value ?? 0;
+  let minDistance = Infinity;
+  
+  // 使用 previewUnits 但根据 originalIndex 来判断
+  previewUnits.value.forEach((unit) => {
+    const element = document.getElementById(`init-${unit.id}`);
+    if (element) {
+      const rect = element.getBoundingClientRect();
+      const elementX = rect.left - scrollRect.left + scrollContainer.value!.scrollLeft + rect.width / 2;
+      const distance = Math.abs(mouseX - elementX);
+      
+      // 使用原始索引来避免循环依赖
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestIndex = unit.originalIndex;
+      }
+    }
+  });
+  
+  // 如果指针在自己当前位置上，不进行预览变化
+  if (closestIndex === draggedFromIndex.value) {
+    return;
+  }
+  
+  // 只在索引真正改变时才更新，减少不必要的重渲染
+  if (dropTargetIndex.value !== closestIndex) {
+    dropTargetIndex.value = closestIndex;
+  }
+}
+
+// 点击确认插入位置
+function onContainerClick(e: MouseEvent) {
+  if (!isDragging.value || draggedFromIndex.value === null || dropTargetIndex.value === null) return;
+  
+  const fromIndex = draggedFromIndex.value;
+  const targetIndex = dropTargetIndex.value;
+  
+  if (fromIndex === targetIndex) {
+    resetDragState();
+    return;
+  }
+  
+  // 调用重排函数
+  InitSystem.reorderInitiative(fromIndex, targetIndex);
+  
+  // 重新初始化store中的数据
+  initiativeStore.initializeInitiative();
+  
+  resetDragState();
+}
+
+// 右键取消拖拽
+function onRightClick(e: MouseEvent) {
+  if (isDragging.value) {
+    e.preventDefault();
+    resetDragState();
+  }
+}
+
+// 重置拖拽状态
+function resetDragState() {
+  isDragging.value = false;
+  draggedUnitId.value = null;
+  draggedFromIndex.value = null;
+  dropTargetIndex.value = null;
+  document.removeEventListener('keydown', onEscapeKey);
+  document.removeEventListener('contextmenu', onRightClick);
+}
+
+// 判断是否为放置目标（使用原始索引判断）
+function isDropTarget(originalIndex: number) {
+  return isDragging.value && dropTargetIndex.value === originalIndex && draggedFromIndex.value !== originalIndex;
 }
 </script>
 
@@ -169,6 +333,10 @@ function onWheel(e: WheelEvent) {
   pointer-events: auto;
 }
 
+.init-bar-scroll.dragging-active {
+  cursor: grabbing;
+}
+
 .init-bar-scroll::-webkit-scrollbar {
   display: none;
 }
@@ -184,8 +352,9 @@ function onWheel(e: WheelEvent) {
   transition: all 0.3s ease;
 }
 
-.init-bar-item.is-current {
-  /* filter: brightness(1.2); */
+/* 拖拽激活时，禁用单位项的过渡效果，避免抖动 */
+.dragging-active .init-bar-item {
+  transition: none;
 }
 
 .init-cursor {
@@ -220,6 +389,11 @@ function onWheel(e: WheelEvent) {
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
+}
+
+/* 拖拽时禁用头像框的过渡效果 */
+.dragging-active .init-bar-avatarbox {
+  transition: none;
 }
 
 .init-bar-avatarbox::after {
@@ -312,6 +486,146 @@ function onWheel(e: WheelEvent) {
 .init-bar-item.is-current .init-bar-avatarbox {
   width: 80px;
   height: 80px;
+}
+
+/* 延迟按钮样式 */
+.delay-button {
+  margin-top: 4px;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  display: none;
+}
+
+.delay-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.delay-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 拖动提示 */
+.drag-tip {
+  margin-top: 4px;
+  padding: 6px 10px;
+  background: rgba(74, 222, 128, 0.9);
+  color: white;
+  border-radius: 4px;
+  font-size: 11px;
+  text-align: center;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  animation: tipPulse 1.5s ease-in-out infinite;
+  z-index: 10;
+}
+
+@keyframes tipPulse {
+  0%, 100% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+/* 拖拽相关样式 */
+.init-bar-item.is-dragging {
+  opacity: 0.5;
+  cursor: move;
+}
+
+.init-bar-item.preview-position {
+  position: relative;
+}
+
+.init-bar-item.preview-position::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 2px dashed rgba(74, 222, 128, 0.6);
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* 移除可能导致抖动的动画 */
+@keyframes slidePreview {
+  from {
+    opacity: 0.9;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 预览位置索引 */
+.preview-index {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  z-index: 20;
+  animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.init-bar-item.is-drop-target {
+  position: relative;
+}
+
+.init-bar-item.is-drop-target::after {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background: #4ade80;
+  border-radius: 2px;
+  box-shadow: 0 0 8px #4ade80;
+  animation: dropIndicator 0.6s ease-in-out infinite;
+}
+
+@keyframes dropIndicator {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .init-bar-avatar {
