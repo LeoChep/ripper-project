@@ -9,7 +9,7 @@ export class InitiativeClass {
     reactionNumber:number=0;
     roundNumber:number=0;
     ready:boolean=true;
-
+    canDelay:boolean=true;
     constructor(initativeValue: number) {
         this.initativeValue = initativeValue;
     }

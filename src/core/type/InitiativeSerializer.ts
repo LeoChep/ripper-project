@@ -1,11 +1,11 @@
 import { InitiativeClass } from "./InitiativeClass";
 import type { Unit } from "../units/Unit";
 
-
 /**
  * InitiativeClass 序列化数据接口
  */
 export interface SerializedInitiativeData {
+  canDelay: boolean;
   initativeValue: number;
   ownerUid?: string; // 只存储 Unit 的 uid，避免循环引用
   standerActionNumber: number;
@@ -32,6 +32,7 @@ export class InitiativeSerializer {
       reactionNumber: data?.reactionNumber ?? 0,
       ready: data?.ready ?? true,
       roundNumber: data?.roundNumber ?? 0,
+      canDelay: data?.canDelay ?? true,
     };
   }
 
@@ -57,6 +58,9 @@ export class InitiativeSerializer {
   get ready(): boolean {
     return this._data.ready;
   }
+  get canDelay(): boolean {
+    return this._data.canDelay;
+  }
 
   // Setters
   set initativeValue(value: number) {
@@ -80,7 +84,9 @@ export class InitiativeSerializer {
   set ready(value: boolean) {
     this._data.ready = value;
   }
-
+  set canDelay(value: boolean) {
+    this._data.canDelay = value;
+  }
   /**
    * 从 InitiativeClass 对象序列化
    */
@@ -94,6 +100,7 @@ export class InitiativeSerializer {
       reactionNumber: initiative.reactionNumber,
       roundNumber: initiative.roundNumber,
       ready: initiative.ready,
+      canDelay: initiative.canDelay,
     });
   }
 
@@ -105,11 +112,12 @@ export class InitiativeSerializer {
 
     // 恢复所有属性
     initiative.standerActionNumber = this._data.standerActionNumber;
-    initiative.minorActionNumber = this._data.minorActionNumber
+    initiative.minorActionNumber = this._data.minorActionNumber;
     initiative.moveActionNumber = this._data.moveActionNumber;
     initiative.reactionNumber = this._data.reactionNumber;
     initiative.ready = this._data.ready;
     initiative.roundNumber = this._data.roundNumber;
+    initiative.canDelay = this._data.canDelay ?? true;
     // 通过 uid 解析 Unit 对象
     if (this._data.ownerUid && unitResolver) {
       initiative.owner = unitResolver(this._data.ownerUid);
@@ -152,7 +160,7 @@ export class InitiativeSerializer {
    * 批量序列化 InitiativeClass 数组
    */
   static serializeArray(
-    initiatives: InitiativeClass[]
+    initiatives: InitiativeClass[],
   ): InitiativeSerializer[] {
     return initiatives.map((initiative) => this.serialize(initiative));
   }
@@ -162,7 +170,7 @@ export class InitiativeSerializer {
    */
   static deserializeArray(
     serializedData: InitiativeSerializer[],
-    unitResolver?: (uid: string) => Unit | null
+    unitResolver?: (uid: string) => Unit | null,
   ): InitiativeClass[] {
     console.log("InitiativeSerializer.deserializeArray", serializedData);
     return serializedData.map((data) => {
@@ -175,7 +183,7 @@ export class InitiativeSerializer {
    * 便捷方法：序列化并转换为普通对象数组（用于存档）
    */
   static serializeToPlainArray(
-    initiatives: InitiativeClass[]
+    initiatives: InitiativeClass[],
   ): SerializedInitiativeData[] {
     return this.serializeArray(initiatives).map((s) => s.toPlainObject());
   }
@@ -222,7 +230,7 @@ export class InitiativeSerializer {
    */
   consumeAction(
     actionType: "stander" | "minor" | "move" | "reaction",
-    amount: number = 1
+    amount: number = 1,
   ): boolean {
     switch (actionType) {
       case "stander":
@@ -248,7 +256,7 @@ export class InitiativeSerializer {
    */
   hasAvailableAction(
     actionType: "stander" | "minor" | "move" | "reaction",
-    limit: number = 1
+    limit: number = 1,
   ): boolean {
     switch (actionType) {
       case "stander":

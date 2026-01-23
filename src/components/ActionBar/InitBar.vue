@@ -1,12 +1,12 @@
 <template>
   <div class="init-bar-wrapper" :style="{ '--init-avatarbox-bg': `url(${initAvatarBoxImg})` }">
     <div class="init-bar-scroll" :class="{ 'dragging-active': isDragging }" ref="scrollContainer" @wheel="onWheel"
-      @mousemove="onMouseMove" @click="onContainerClick">
+      @mousemove="onMouseMove">
       <div v-for="(unit, index) in previewUnits" :id="`init-${unit.id}`" :key="unit.id"
         :class="['init-bar-item', { 'is-dragging': isDragging && draggedUnitId === unit.id, 'is-drop-target': isDropTarget(unit.originalIndex), 'preview-position': isDragging && unit.originalIndex !== index }]"
         v-show="isAllLoaded">
         <img :id="`init-cursor-${unit.id}`" :src="initCursorImg" class="init-cursor" alt="cursor"
-          @click.stop="onDelayClick(unit)" />
+          @mousedown.stop="onDelayStart(unit, $event)" />
         <div :class="['init-bar-avatarbox', unit.party === 'player' ? 'ally' : 'enemy']">
           <img :src="getAvatar(unit.unitTypeName)" class="init-bar-avatar" :alt="unit.name" />
         </div>
@@ -16,7 +16,7 @@
         </div>
         <!-- 延迟按钮 - 只在当前回合单位上显示 -->
         <button :id="`delay-button-${unit.id}`" v-if="!isDragging" class="delay-button"
-          @click.stop="onDelayClick(unit)">
+          @mousedown.stop="onDelayStart(unit, $event)">
           延迟
         </button>
         <!-- <div v-if="isDragging && draggedUnitId === unit.id" class="drag-tip">
@@ -39,6 +39,8 @@ import delayButtonImg from "@/assets/ui/delay-button.png";
 import { appSetting } from "@/core/envSetting";
 import type { Unit } from "@/class/Unit";
 import { UnitSystem } from "@/core/system/UnitSystem";
+import { CharacterCombatController } from "@/core/controller/CharacterCombatController";
+import { CharacterCombatDelayControlle } from "@/core/controller/CharacterCombatDelayControlle";
 
 const scrollContainer = ref<HTMLDivElement | null>(null);
 const initiativeStore = useInitiativeStore();
@@ -194,24 +196,30 @@ function onWheel(e: WheelEvent) {
   }
 }
 
-// 延迟按钮点击事件
-function onDelayClick(unit: any) {
+// 延迟按钮按下事件 - 开始拖拽
+function onDelayStart(unit: any, event?: MouseEvent) {
+  if (event) {
+    event.preventDefault(); // 阻止默认的文本选择行为
+  }
   isDragging.value = true;
   draggedUnitId.value = unit.id;
   const currentIndex = units.value.findIndex((u) => u.id === unit.id);
   draggedFromIndex.value = currentIndex;
   dropTargetIndex.value = currentIndex; // 默认目标位置为当前位置
-
+  CharacterCombatController.getInstance().useDelayController()
   // 监听ESC键取消
   document.addEventListener('keydown', onEscapeKey);
   // 监听右键取消
   document.addEventListener('contextmenu', onRightClick);
+  // 监听鼠标释放（在document上，支持容器外释放）
+  document.addEventListener('mouseup', onDelayEnd);
 }
 
 // ESC键取消拖拽
 function onEscapeKey(e: KeyboardEvent) {
   if (e.key === 'Escape' && isDragging.value) {
     resetDragState();
+    cancelDelay();
   }
 }
 
@@ -219,8 +227,8 @@ function onEscapeKey(e: KeyboardEvent) {
 function onMouseMove(e: MouseEvent) {
   if (!isDragging.value || !scrollContainer.value) return;
 
-  const scrollRect = scrollContainer.value.getBoundingClientRect();
-  const mouseX = e.clientX - scrollRect.left + scrollContainer.value.scrollLeft;
+  // 使用绝对鼠标位置
+  const mouseX = e.clientX;
 
   // 遍历原始顺序的单位，基于它们的原始索引计算位置
   let closestIndex = draggedFromIndex.value ?? 0;
@@ -231,8 +239,9 @@ function onMouseMove(e: MouseEvent) {
     const element = document.getElementById(`init-${unit.id}`);
     if (element) {
       const rect = element.getBoundingClientRect();
-      const elementX = rect.left - scrollRect.left + scrollContainer.value!.scrollLeft + rect.width / 2;
-      const distance = Math.abs(mouseX - elementX);
+      // 头像中轴线的绝对位置
+      const elementCenterX = rect.left + rect.width / 2;
+      const distance = Math.abs(mouseX - elementCenterX);
 
       // 使用原始索引来避免循环依赖
       if (distance < minDistance) {
@@ -303,9 +312,14 @@ function calculateDelayToNumber(fromIndex: number, targetIndex: number, sortedUn
   return delayToNumber;
 }
 
-// 点击确认插入位置
-function onContainerClick(e: MouseEvent) {
-  if (!isDragging.value || draggedFromIndex.value === null || dropTargetIndex.value === null || draggedUnitId.value === null) return;
+// 鼠标释放 - 完成拖拽
+function onDelayEnd(e: MouseEvent) {
+  if (!isDragging.value) return;
+
+  if (draggedFromIndex.value === null || dropTargetIndex.value === null || draggedUnitId.value === null) {
+    resetDragState();
+    return;
+  }
 
   const fromIndex = draggedFromIndex.value;
   const targetIndex = dropTargetIndex.value;
@@ -322,13 +336,9 @@ function onContainerClick(e: MouseEvent) {
     resetDragState();
     return;
   }
+  //使用delay控制器完成延迟操作
+  CharacterCombatDelayControlle.getInstence().resolve({ unitId: draggedUnitId.value, delayToNumber:delayToNumber });
 
-  // 调用delay方法
-  InitSystem.delay(draggedUnitId.value, delayToNumber);
-  const idStr = draggedUnitId.value.toString();
-  const unit = UnitSystem.getInstance().getUnitById(idStr);
-  if (unit)
-    InitSystem.endTurn(unit, true);
   // 重新初始化store中的数据
   initiativeStore.initializeInitiative();
 
@@ -340,17 +350,22 @@ function onRightClick(e: MouseEvent) {
   if (isDragging.value) {
     e.preventDefault();
     resetDragState();
+    cancelDelay();
   }
 }
-
+function cancelDelay() {
+  CharacterCombatDelayControlle.getInstence().resolve({ cancel: true });
+}
 // 重置拖拽状态
 function resetDragState() {
   isDragging.value = false;
   draggedUnitId.value = null;
   draggedFromIndex.value = null;
   dropTargetIndex.value = null;
+
   document.removeEventListener('keydown', onEscapeKey);
   document.removeEventListener('contextmenu', onRightClick);
+  document.removeEventListener('mouseup', onDelayEnd);
 }
 
 // 判断是否为放置目标（使用原始索引判断）
@@ -387,6 +402,8 @@ function isDropTarget(originalIndex: number) {
 
 .init-bar-scroll.dragging-active {
   cursor: grabbing;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .init-bar-scroll::-webkit-scrollbar {
@@ -423,6 +440,8 @@ function isDropTarget(originalIndex: number) {
   display: none;
   cursor: pointer;
   transition: filter 0.3s ease;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .init-cursor:hover {
@@ -572,6 +591,8 @@ function isDropTarget(originalIndex: number) {
   transition: all 0.3s ease;
   z-index: 10;
   display: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .delay-button:hover:not(:disabled) {

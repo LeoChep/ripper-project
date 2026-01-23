@@ -177,7 +177,7 @@ export async function startCombatTurn() {
         const unit = initiativeCursor.pointAt.owner;
         CharacterController.selectCharacter(unit);
         CharacterCombatController.getInstance().selectedCharacter = unit;
-
+        initiativeCursor.pointAt.canDelay = true;
         CharacterCombatController.instance?.useMoveController();
       }
 

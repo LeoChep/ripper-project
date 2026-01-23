@@ -13,6 +13,7 @@ import { Power } from "../power/Power";
 import { PowerSystem } from "../system/PowerSystem";
 import { WeaponSystem } from "../system/WeaponSystem";
 import { CharCombatStepController } from "./CharacterCombatStepController";
+import { CharacterCombatDelayControlle } from "./CharacterCombatDelayControlle";
 export class CharacterCombatController {
   public inUse: boolean = false;
   public static instance: CharacterCombatController | null = null;
@@ -58,6 +59,7 @@ export class CharacterCombatController {
     move.then((result) => {
       console.log("moveSelect result", result);
       if (result?.cancel === false) {
+        this.setUnDelay();
         if (walkMachine.onDivideWalk === true) {
           setTimeout(() => {
             this.useMoveController();
@@ -129,6 +131,7 @@ export class CharacterCombatController {
       if (!result.cancel && InitiativeSystem.isInBattle()) {
         this.resetDivideWalk();
         powerController.use();
+        this.setUnDelay();
       }
       this.inUsePower = false;
       setTimeout(() => {
@@ -172,6 +175,7 @@ export class CharacterCombatController {
       console.log("attackSelect result", result);
       if (!result.cancel && InitiativeSystem.isInBattle()) {
         this.resetDivideWalk();
+        this.setUnDelay();
       }
 
       setTimeout(() => {
@@ -209,10 +213,48 @@ export class CharacterCombatController {
       console.log("attackSelect result", result);
       if (!result.cancel && InitiativeSystem.isInBattle()) {
         this.resetDivideWalk();
+        this.setUnDelay();
       }
 
       setTimeout(() => {
         if (!result.from && InitiativeSystem.isInBattle()) {
+          this.useMoveController();
+        }
+      }, 90);
+    });
+  }
+  useDelayController() {
+    if (!this.preCheck() || !this.selectedCharacter) {
+      return;
+    }
+    if (this.selectedCharacter?.initiative?.canDelay === false) {
+      return;
+    }
+    // if (!InitiativeSystem.checkActionUseful(this.selectedCharacter, "move")) {
+    //   return;
+    // }
+    const cancelInfo = {
+      from: "delayController",
+      cancel: true,
+    };
+    CharCombatStepController.instense?.removeFunction(cancelInfo);
+    CharCombatAttackController.instense?.removeFunction(cancelInfo);
+    CharCombatMoveController.instense?.removeFunction(cancelInfo);
+    CharCombatStepController.instense?.removeFunction(cancelInfo);
+    this.powerController?.removeFunction(cancelInfo);
+
+    let controller = CharacterCombatDelayControlle.instense;
+    if (!controller) {
+      controller = new CharacterCombatDelayControlle();
+      CharacterCombatDelayControlle.instense = controller;
+    }
+    controller.selectedCharacter = this.selectedCharacter;
+
+    controller.delaySelect().then((result) => {
+      console.log("delaySelect result", result);
+
+      setTimeout(() => {
+        if (result.cancel && InitiativeSystem.isInBattle()) {
           this.useMoveController();
         }
       }, 90);
@@ -247,6 +289,11 @@ export class CharacterCombatController {
     if (walkMachine.onDivideWalk === true) {
       walkMachine.onDivideWalk = false;
       walkMachine.leastDivideSpeed = 0;
+    }
+  }
+  setUnDelay() {
+    if (this.selectedCharacter?.initiative) {
+      this.selectedCharacter.initiative.canDelay = false;
     }
   }
 }
