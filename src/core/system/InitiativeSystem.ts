@@ -18,13 +18,13 @@ import {
   type SerializedInitiativeData,
 } from "../type/InitiativeSerializer";
 import { lockOn } from "../anim/LockOnAnim";
-
 export const InitiativeSheet = [] as InitiativeClass[];
 const initiativeCursor = {
   pointAt: null as null | InitiativeClass,
   map: null as null | TiledMap,
   inBattle: false,
   lastParty: null as null | string, // 记录上一回合的方阵
+  roundCount: 0, // 当前回合数
 };
 
 export async function addUnitsToInitiativeSheet(units: Unit[]) {
@@ -99,7 +99,11 @@ export async function startCombatTurn() {
   initiativeCursor.pointAt = null;
   if (InitiativeSheet.length > 0) {
     for (let cursor = 0; cursor < InitiativeSheet.length; cursor++) {
-      if (InitiativeSheet[cursor].ready) {
+      if (
+        InitiativeSheet[cursor].ready &&
+        InitiativeSheet[cursor].roundNumber <= initiativeCursor.roundCount
+      ) {
+      
         allNotReady = false;
         if (InitiativeSheet[cursor].initativeValue > maxInitiative) {
           initiativeCursor.pointAt = InitiativeSheet[cursor];
@@ -114,6 +118,7 @@ export async function startCombatTurn() {
       "initiativeCursor.pointAt.owner.name",
       initiativeCursor.pointAt,
     );
+    initiativeCursor.pointAt.roundNumber = initiativeCursor.roundCount;
     if (initiativeCursor.pointAt.owner) {
       initiativeCursor.pointAt.standerActionNumber = 1;
       initiativeCursor.pointAt.moveActionNumber = 1;
@@ -184,6 +189,8 @@ export async function startCombatTurn() {
   }
   //所有人都行动过开启新一轮
   if (allNotReady) {
+    console.log("新一轮行动开始");
+    initiativeCursor.roundCount++;
     for (let cursor = 0; cursor < InitiativeSheet.length; cursor++) {
       InitiativeSheet[cursor].ready = true;
     }
@@ -191,11 +198,13 @@ export async function startCombatTurn() {
   }
 }
 
-export async function endTurn(unit: Unit) {
+export async function endTurn(unit: Unit, isDelay = false) {
   CharacterController.removeLookOn();
-  if (unit.initiative) {
+  if (unit.initiative && isDelay === false) {
     unit.initiative.ready = false;
+    unit.initiative.roundNumber++;
   }
+
   await BattleEvenetSystem.getInstance().handleEvent("UnitEndTurnEvent", unit);
   //移除单位的状态
   const stayPromisee = new Promise<void>((resolve) => {
@@ -345,6 +354,7 @@ export function startBattle() {
       });
     }
   });
+  initiativeCursor.roundCount = 1;
   return playStartAnim();
 }
 export const loadBattleUIhandles = [] as any[];
@@ -544,6 +554,7 @@ export function getInitRecord() {
   const initRecord = {
     initiativeSheet: initSheet,
     inBattle: initiativeCursor.inBattle,
+    roundCount: initiativeCursor.roundCount,
     initiativeCursor: {
       pointAt: initiativeCursor.pointAt?.owner?.id.toString(),
     },
@@ -558,87 +569,39 @@ export function getPointAtInitiative() {
 }
 
 /**
- * 重新排列先攻顺序
- * @param fromIndex 原始位置索引（基于sortedUnits）
- * @param toIndex 目标位置索引（基于sortedUnits）
+ * 延迟单位的先攻顺序
+ * @param unitId 要延迟的单位ID
+ * @param delayToNumber 延迟到的先攻值
  */
-export function reorderInitiative(fromIndex: number, toIndex: number) {
-  // 获取当前排序后的单位列表
-  const sortedUnits = getUnits().sort((a, b) => {
-    return (
-      (b.initiative?.initativeValue ?? 0) - (a.initiative?.initativeValue ?? 0)
-    );
-  });
+export function delay(unitId: number, delayToNumber: number) {
+  // 查找要延迟的单位
+  const unit = getUnits().find((u) => u.id === unitId);
 
-  if (
-    fromIndex < 0 ||
-    fromIndex >= sortedUnits.length ||
-    toIndex < 0 ||
-    toIndex >= sortedUnits.length
-  ) {
-    console.error("Invalid index for reordering initiative");
+  if (!unit) {
+    console.error(`Unit with id ${unitId} not found`);
     return;
   }
 
-  const draggedUnit = sortedUnits[fromIndex];
-  const targetUnit = sortedUnits[toIndex];
-
-  if (!draggedUnit.initiative || !targetUnit.initiative) {
-    console.error("Units don't have initiative values");
+  if (!unit.initiative) {
+    console.error(`Unit ${unit.name} doesn't have initiative value`);
     return;
   }
 
-  // 计算新的先攻值
-  // 如果向后拖（延迟），新的先攻值应该略低于目标位置的值
-  // 如果向前拖，新的先攻值应该略高于目标位置的值
-  let newInitValue: number;
+  const oldValue = unit.initiative.initativeValue;
 
-  if (toIndex > fromIndex) {
-    // 向后拖动（延迟）
-    if (toIndex === sortedUnits.length - 1) {
-      // 拖到最后一位
-      newInitValue = targetUnit.initiative.initativeValue - 1;
-    } else {
-      // 插入到目标位置和下一位之间
-      const nextUnit = sortedUnits[toIndex + 1];
-      if (nextUnit.initiative) {
-        newInitValue =
-          (targetUnit.initiative.initativeValue +
-            nextUnit.initiative.initativeValue) /
-          2;
-      } else {
-        newInitValue = targetUnit.initiative.initativeValue - 0.5;
-      }
-    }
-  } else {
-    // 向前拖动
-    if (toIndex === 0) {
-      // 拖到第一位
-      newInitValue = targetUnit.initiative.initativeValue + 1;
-    } else {
-      // 插入到前一位和目标位置之间
-      const prevUnit = sortedUnits[toIndex - 1];
-      if (prevUnit.initiative) {
-        newInitValue =
-          (prevUnit.initiative.initativeValue +
-            targetUnit.initiative.initativeValue) /
-          2;
-      } else {
-        newInitValue = targetUnit.initiative.initativeValue + 0.5;
-      }
-    }
+  // 直接设置新的先攻值
+  unit.initiative.initativeValue = delayToNumber;
+  if (delayToNumber > oldValue) {
+    unit.initiative.roundNumber;
   }
-
-  // 更新被拖动单位的先攻值
-  draggedUnit.initiative.initativeValue = newInitValue;
-
   console.log(
-    `Reordered initiative: ${draggedUnit.name} from ${fromIndex} to ${toIndex}, new value: ${newInitValue}`,
+    `Delayed initiative: ${unit.name} from ${oldValue} to ${delayToNumber}`,
   );
 }
 export function loadInitRecord(initRecord: {
   initiativeSheet: InitiativeSerializer[];
   inBattle: boolean;
+  roundCount?: number;
   initiativeCursor: { pointAt: string };
 }) {
   initiativeCursor.map = golbalSetting.map;
@@ -652,6 +615,7 @@ export function loadInitRecord(initRecord: {
   );
   InitiativeSheet.splice(0, InitiativeSheet.length, ...initiativeSheet);
   initiativeCursor.inBattle = initRecord.inBattle;
+  initiativeCursor.roundCount = initRecord.roundCount ?? 1;
   console.log("initiativeCursor", initRecord);
   if (initRecord.initiativeCursor.pointAt) {
     const pointAtId = parseInt(initRecord.initiativeCursor.pointAt);

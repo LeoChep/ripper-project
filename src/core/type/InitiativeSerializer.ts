@@ -13,6 +13,7 @@ export interface SerializedInitiativeData {
   moveActionNumber: number;
   reactionNumber: number;
   ready: boolean;
+  roundNumber: number;
 }
 
 /**
@@ -30,6 +31,7 @@ export class InitiativeSerializer {
       moveActionNumber: data?.moveActionNumber ?? 0,
       reactionNumber: data?.reactionNumber ?? 0,
       ready: data?.ready ?? true,
+      roundNumber: data?.roundNumber ?? 0,
     };
   }
 
@@ -90,6 +92,7 @@ export class InitiativeSerializer {
       minorActionNumber: initiative.minorActionNumber,
       moveActionNumber: initiative.moveActionNumber,
       reactionNumber: initiative.reactionNumber,
+      roundNumber: initiative.roundNumber,
       ready: initiative.ready,
     });
   }
@@ -106,7 +109,7 @@ export class InitiativeSerializer {
     initiative.moveActionNumber = this._data.moveActionNumber;
     initiative.reactionNumber = this._data.reactionNumber;
     initiative.ready = this._data.ready;
-
+    initiative.roundNumber = this._data.roundNumber;
     // 通过 uid 解析 Unit 对象
     if (this._data.ownerUid && unitResolver) {
       initiative.owner = unitResolver(this._data.ownerUid);

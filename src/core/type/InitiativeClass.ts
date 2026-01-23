@@ -7,8 +7,9 @@ export class InitiativeClass {
     minorActionNumber:number=0;
     moveActionNumber:number=0;
     reactionNumber:number=0;
-    turnNumber:number=0;
+    roundNumber:number=0;
     ready:boolean=true;
+
     constructor(initativeValue: number) {
         this.initativeValue = initativeValue;
     }

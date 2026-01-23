@@ -1,40 +1,21 @@
 <template>
-  <div
-    class="init-bar-wrapper"
-    :style="{ '--init-avatarbox-bg': `url(${initAvatarBoxImg})` }"
-  >
-    <div class="init-bar-scroll" :class="{ 'dragging-active': isDragging }" ref="scrollContainer" @wheel="onWheel" @mousemove="onMouseMove" @click="onContainerClick">
-      <div
-        v-for="(unit, index) in previewUnits"
-        :id="`init-${unit.id}`"
-        :key="unit.id"
+  <div class="init-bar-wrapper" :style="{ '--init-avatarbox-bg': `url(${initAvatarBoxImg})` }">
+    <div class="init-bar-scroll" :class="{ 'dragging-active': isDragging }" ref="scrollContainer" @wheel="onWheel"
+      @mousemove="onMouseMove" @click="onContainerClick">
+      <div v-for="(unit, index) in previewUnits" :id="`init-${unit.id}`" :key="unit.id"
         :class="['init-bar-item', { 'is-dragging': isDragging && draggedUnitId === unit.id, 'is-drop-target': isDropTarget(unit.originalIndex), 'preview-position': isDragging && unit.originalIndex !== index }]"
-        v-show="isAllLoaded"
-      >
-        <img
-          :id="`init-cursor-${unit.id}`"
-          :src="initCursorImg"
-          class="init-cursor"
-          alt="cursor"
-        />
+        v-show="isAllLoaded">
+        <img :id="`init-cursor-${unit.id}`" :src="initCursorImg" class="init-cursor" alt="cursor" />
         <div :class="['init-bar-avatarbox', unit.party === 'player' ? 'ally' : 'enemy']">
-          <img
-            :src="getAvatar(unit.unitTypeName)"
-            class="init-bar-avatar"
-            :alt="unit.name"
-          />
+          <img :src="getAvatar(unit.unitTypeName)" class="init-bar-avatar" :alt="unit.name" />
         </div>
         <!-- 预览位置索引 - 显示先攻值 -->
         <div v-if="isDragging && unit.originalIndex !== index" class="preview-index">
           {{ unit.initiative?.initativeValue?.toFixed(1) || 0 }}
         </div>
         <!-- 延迟按钮 - 只在当前回合单位上显示 -->
-        <button
-          :id="`delay-button-${unit.id}`"
-          v-if=" !isDragging"
-          class="delay-button"
-          @click.stop="onDelayClick(unit)"
-        >
+        <button :id="`delay-button-${unit.id}`" v-if="!isDragging" class="delay-button"
+          @click.stop="onDelayClick(unit)">
           延迟
         </button>
         <!-- <div v-if="isDragging && draggedUnitId === unit.id" class="drag-tip">
@@ -55,6 +36,7 @@ import initCursorImg from "@/assets/ui/init-cursor.png";
 import initAvatarBoxImg from "@/assets/ui/init-avtarbox2.png";
 import { appSetting } from "@/core/envSetting";
 import type { Unit } from "@/class/Unit";
+import { UnitSystem } from "@/core/system/UnitSystem";
 
 const scrollContainer = ref<HTMLDivElement | null>(null);
 const initiativeStore = useInitiativeStore();
@@ -95,23 +77,23 @@ const previewUnits = computed(() => {
     ...unit,
     originalIndex: idx
   }));
-  
+
   if (!isDragging.value || draggedFromIndex.value === null || dropTargetIndex.value === null) {
     return unitsArray;
   }
-  
+
   const fromIndex = draggedFromIndex.value;
   const toIndex = dropTargetIndex.value;
-  
+
   if (fromIndex === toIndex) {
     return unitsArray;
   }
-  
+
   // 创建预览数组
   const preview = [...unitsArray];
   const [draggedUnit] = preview.splice(fromIndex, 1);
   preview.splice(toIndex, 0, draggedUnit);
-  
+
   return preview;
 });
 // 监听units变化，预加载所有头像
@@ -157,7 +139,10 @@ const isCurrentUnit = (unit: any) => {
 };
 const lastUnitId = ref<number | null>(null);
 setInterval(() => {
-  if (isAllLoaded.value && currentUnitId.value && scrollContainer.value) {
+
+  const currentUnitId = InitSystem.getPointAtUnit()?.id || null;
+  const unit = UnitSystem.getInstance().getUnitById(currentUnitId?.toString() || '');
+  if (isAllLoaded.value && currentUnitId && scrollContainer.value) {
     if (lastUnitId.value) {
       const lastUnitElement = document.getElementById(`init-${lastUnitId.value}`);
       if (lastUnitElement) {
@@ -166,6 +151,7 @@ setInterval(() => {
       const lastCursorElement = document.getElementById(
         `init-cursor-${lastUnitId.value}`
       );
+
       if (lastCursorElement) {
         lastCursorElement.style.display = "none";
       }
@@ -176,15 +162,18 @@ setInterval(() => {
         lastDelayButton.style.display = "none";
       }
     }
-    const currentUnitId = currentInit.currentUnitId;
+
     const currentUnitElement = document.getElementById(`init-${currentUnitId}`);
     if (currentUnitElement) {
       currentUnitElement.classList.add("is-current");
     }
     const currentDelayButton = document.getElementById(`delay-button-${currentUnitId}`);
-    if (currentDelayButton) {
-      currentDelayButton.style.display = "block";
+    if (unit?.party === 'player') {
+      if (currentDelayButton) {
+        currentDelayButton.style.display = "block";
+      }
     }
+
     const currentCursorElement = document.getElementById(`init-cursor-${currentUnitId}`);
     if (currentCursorElement) {
       currentCursorElement.style.display = "block";
@@ -210,7 +199,7 @@ function onDelayClick(unit: any) {
   const currentIndex = units.value.findIndex((u) => u.id === unit.id);
   draggedFromIndex.value = currentIndex;
   dropTargetIndex.value = currentIndex; // 默认目标位置为当前位置
-  
+
   // 监听ESC键取消
   document.addEventListener('keydown', onEscapeKey);
   // 监听右键取消
@@ -227,14 +216,14 @@ function onEscapeKey(e: KeyboardEvent) {
 // 鼠标移动事件 - 计算应该插入的位置
 function onMouseMove(e: MouseEvent) {
   if (!isDragging.value || !scrollContainer.value) return;
-  
+
   const scrollRect = scrollContainer.value.getBoundingClientRect();
   const mouseX = e.clientX - scrollRect.left + scrollContainer.value.scrollLeft;
-  
+
   // 遍历原始顺序的单位，基于它们的原始索引计算位置
   let closestIndex = draggedFromIndex.value ?? 0;
   let minDistance = Infinity;
-  
+
   // 使用 previewUnits 但根据 originalIndex 来判断
   previewUnits.value.forEach((unit) => {
     const element = document.getElementById(`init-${unit.id}`);
@@ -242,7 +231,7 @@ function onMouseMove(e: MouseEvent) {
       const rect = element.getBoundingClientRect();
       const elementX = rect.left - scrollRect.left + scrollContainer.value!.scrollLeft + rect.width / 2;
       const distance = Math.abs(mouseX - elementX);
-      
+
       // 使用原始索引来避免循环依赖
       if (distance < minDistance) {
         minDistance = distance;
@@ -250,36 +239,97 @@ function onMouseMove(e: MouseEvent) {
       }
     }
   });
-  
+
   // 如果指针在自己当前位置上，不进行预览变化
   if (closestIndex === draggedFromIndex.value) {
     return;
   }
-  
+
   // 只在索引真正改变时才更新，减少不必要的重渲染
   if (dropTargetIndex.value !== closestIndex) {
     dropTargetIndex.value = closestIndex;
   }
 }
 
+/**
+ * 计算目标拖拽先攻值
+ * @param fromIndex 原始位置索引
+ * @param targetIndex 目标位置索引
+ * @param sortedUnits 排序后的单位列表
+ * @returns 计算出的先攻值，如果无法计算则返回null
+ */
+function calculateDelayToNumber(fromIndex: number, targetIndex: number, sortedUnits: any[]): number | null {
+  const targetUnit = sortedUnits[targetIndex];
+
+  if (!targetUnit || !targetUnit.initiative) {
+    console.error("Target unit doesn't have initiative value");
+    return null;
+  }
+
+  let delayToNumber: number;
+
+  if (targetIndex > fromIndex) {
+    // 向后拖动（延迟）
+    if (targetIndex === sortedUnits.length - 1) {
+      // 拖到最后一位
+      delayToNumber = targetUnit.initiative.initativeValue - 1;
+    } else {
+      // 插入到目标位置和下一位之间
+      const nextUnit = sortedUnits[targetIndex + 1];
+      if (nextUnit.initiative) {
+        delayToNumber = (targetUnit.initiative.initativeValue + nextUnit.initiative.initativeValue) / 2;
+      } else {
+        delayToNumber = targetUnit.initiative.initativeValue - 0.01;
+      }
+    }
+  } else {
+    // 向前拖动
+    if (targetIndex === 0) {
+      // 拖到第一位
+      delayToNumber = targetUnit.initiative.initativeValue + 1;
+    } else {
+      // 插入到前一位和目标位置之间
+      const prevUnit = sortedUnits[targetIndex - 1];
+      if (prevUnit.initiative) {
+        delayToNumber = (prevUnit.initiative.initativeValue + targetUnit.initiative.initativeValue) / 2;
+      } else {
+        delayToNumber = targetUnit.initiative.initativeValue + 0.01;
+      }
+    }
+  }
+
+  return delayToNumber;
+}
+
 // 点击确认插入位置
 function onContainerClick(e: MouseEvent) {
-  if (!isDragging.value || draggedFromIndex.value === null || dropTargetIndex.value === null) return;
-  
+  if (!isDragging.value || draggedFromIndex.value === null || dropTargetIndex.value === null || draggedUnitId.value === null) return;
+
   const fromIndex = draggedFromIndex.value;
   const targetIndex = dropTargetIndex.value;
-  
+
   if (fromIndex === targetIndex) {
     resetDragState();
     return;
   }
-  
-  // 调用重排函数
-  InitSystem.reorderInitiative(fromIndex, targetIndex);
-  
+
+  // 计算目标先攻值
+  const delayToNumber = calculateDelayToNumber(fromIndex, targetIndex, units.value);
+
+  if (delayToNumber === null) {
+    resetDragState();
+    return;
+  }
+
+  // 调用delay方法
+  InitSystem.delay(draggedUnitId.value, delayToNumber);
+  const idStr = draggedUnitId.value.toString();
+  const unit = UnitSystem.getInstance().getUnitById(idStr);
+  if (unit)
+    InitSystem.endTurn(unit, true);
   // 重新初始化store中的数据
   initiativeStore.initializeInitiative();
-  
+
   resetDragState();
 }
 
@@ -371,6 +421,7 @@ function isDropTarget(originalIndex: number) {
 }
 
 @keyframes bounce {
+
   0%,
   100% {
     transform: translateX(-50%) translateY(0);
@@ -531,10 +582,13 @@ function isDropTarget(originalIndex: number) {
 }
 
 @keyframes tipPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.9;
     transform: scale(1);
   }
+
   50% {
     opacity: 1;
     transform: scale(1.02);
@@ -566,6 +620,7 @@ function isDropTarget(originalIndex: number) {
   from {
     opacity: 0.9;
   }
+
   to {
     opacity: 1;
   }
@@ -596,6 +651,7 @@ function isDropTarget(originalIndex: number) {
     transform: scale(0);
     opacity: 0;
   }
+
   100% {
     transform: scale(1);
     opacity: 1;
@@ -620,9 +676,12 @@ function isDropTarget(originalIndex: number) {
 }
 
 @keyframes dropIndicator {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.6;
   }
+
   50% {
     opacity: 1;
   }
