@@ -5,7 +5,8 @@
       <div v-for="(unit, index) in previewUnits" :id="`init-${unit.id}`" :key="unit.id"
         :class="['init-bar-item', { 'is-dragging': isDragging && draggedUnitId === unit.id, 'is-drop-target': isDropTarget(unit.originalIndex), 'preview-position': isDragging && unit.originalIndex !== index }]"
         v-show="isAllLoaded">
-        <img :id="`init-cursor-${unit.id}`" :src="initCursorImg" class="init-cursor" alt="cursor" />
+        <img :id="`init-cursor-${unit.id}`" :src="initCursorImg" class="init-cursor" alt="cursor"
+          @click.stop="onDelayClick(unit)" />
         <div :class="['init-bar-avatarbox', unit.party === 'player' ? 'ally' : 'enemy']">
           <img :src="getAvatar(unit.unitTypeName)" class="init-bar-avatar" :alt="unit.name" />
         </div>
@@ -34,6 +35,7 @@ import { getUnitAvatar } from "@/utils/utils";
 import * as InitSystem from "@/core/system/InitiativeSystem";
 import initCursorImg from "@/assets/ui/init-cursor.png";
 import initAvatarBoxImg from "@/assets/ui/init-avtarbox2.png";
+import delayButtonImg from "@/assets/ui/delay-button.png";
 import { appSetting } from "@/core/envSetting";
 import type { Unit } from "@/class/Unit";
 import { UnitSystem } from "@/core/system/UnitSystem";
@@ -378,7 +380,7 @@ function isDropTarget(originalIndex: number) {
   overflow-x: auto;
   overflow-y: visible;
   max-width: 1100px;
-  padding: 0 24px 40px 24px;
+  padding: 0 24px 80px 24px;
   scrollbar-width: none;
   pointer-events: auto;
 }
@@ -400,6 +402,7 @@ function isDropTarget(originalIndex: number) {
   border-radius: 12px;
   position: relative;
   transition: all 0.3s ease;
+  overflow: visible;
 }
 
 /* 拖拽激活时，禁用单位项的过渡效果，避免抖动 */
@@ -414,10 +417,16 @@ function isDropTarget(originalIndex: number) {
   transform: translateX(-50%);
   width: 40px;
   height: 40px;
-  z-index: 10;
+  z-index: 15;
   object-fit: contain;
   animation: bounce 1s ease-in-out infinite;
   display: none;
+  cursor: pointer;
+  transition: filter 0.3s ease;
+}
+
+.init-cursor:hover {
+  filter: brightness(1.2) drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
 }
 
 @keyframes bounce {
@@ -539,26 +548,35 @@ function isDropTarget(originalIndex: number) {
   height: 80px;
 }
 
+/* 拖动时禁用当前头像的大小变化 */
+.dragging-active .init-bar-item.is-current .init-bar-avatarbox {
+  width: 64px;
+  height: 64px;
+}
+
 /* 延迟按钮样式 */
 .delay-button {
-  margin-top: 4px;
-  padding: 4px 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  position: absolute;
+  bottom: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 30px;
+  padding: 0;
+  background: url('@/assets/ui/delay-button.png') no-repeat;
+  background-size: 100% 100%;
+  color: transparent;
   border: none;
-  border-radius: 4px;
-  font-size: 12px;
+  font-size: 0;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   z-index: 10;
   display: none;
 }
 
 .delay-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px) translateX(-50%) scale(1.05);
+  filter: brightness(1.1);
 }
 
 .delay-button:disabled {

@@ -592,7 +592,7 @@ export function delay(unitId: number, delayToNumber: number) {
   // 直接设置新的先攻值
   unit.initiative.initativeValue = delayToNumber;
   if (delayToNumber > oldValue) {
-    unit.initiative.roundNumber;
+    unit.initiative.roundNumber++;
   }
   console.log(
     `Delayed initiative: ${unit.name} from ${oldValue} to ${delayToNumber}`,

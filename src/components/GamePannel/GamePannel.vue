@@ -34,7 +34,7 @@ import {
   getAnimSpriteImgUrl,
 } from "@/utils/utils";
 import * as PIXI from "pixi.js";
-import { UnitRightEvent } from "@/core/controller/UnitRightEventController";
+// import { UnitRightEvent } from "@/core/controller/UnitRightEventController";
 import { TiledMap } from "@/core/MapClass";
 import { UnitAnimSpirite } from "@/core/anim/UnitAnimSprite";
 import {
@@ -432,10 +432,10 @@ const addAnimSpriteUnit = (unit, container, rlayers, mapPassiable) => {
   rlayers.spriteLayer.attach(animSpriteUnit);
   // animSpriteUnit.zIndex=20;
   animSpriteUnit.eventMode = "static";
-  animSpriteUnit.on("rightdown", (event) => {
-    console.log("rightdown", unit);
-    UnitRightEvent(event, unit, container, rlayers, mapPassiable);
-  });
+  // animSpriteUnit.on("rightdown", (event) => {
+  //   console.log("rightdown", unit);
+  //   UnitRightEvent(event, unit, container, rlayers, mapPassiable);
+  // });
   animSpriteUnit.on("click", (event) => {
     // alert(`Clicked on unit: ${unit.unitTypeName}`);
     if (unit.creature) {
