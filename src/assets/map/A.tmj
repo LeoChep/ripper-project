@@ -1108,7 +1108,7 @@
         {
          "columns":9,
          "firstgid":721,
-         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/wolf\/anim\/standard\/walk.png",
+         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/creature\/wolf\/anim\/standard\/walk.png",
          "imageheight":256,
          "imagewidth":576,
          "margin":0,
@@ -1121,7 +1121,7 @@
         {
          "columns":9,
          "firstgid":757,
-         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/skeleton\/anim\/standard\/walk.png",
+         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/creature\/skeleton\/anim\/standard\/walk.png",
          "imageheight":256,
          "imagewidth":576,
          "margin":0,
@@ -1134,7 +1134,7 @@
         {
          "columns":9,
          "firstgid":793,
-         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/manFighter\/anim\/standard\/walk.png",
+         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/creature\/manFighter\/anim\/standard\/walk.png",
          "imageheight":256,
          "imagewidth":576,
          "margin":0,
@@ -1147,7 +1147,7 @@
         {
          "columns":13,
          "firstgid":829,
-         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/skeletonArcher\/anim\/standard\/slash.png",
+         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/creature\/skeletonArcher\/anim\/standard\/slash.png",
          "imageheight":256,
          "imagewidth":832,
          "margin":0,
@@ -1160,7 +1160,7 @@
         {
          "columns":13,
          "firstgid":881,
-         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/dragonCleric\/anim\/standard\/walk.png",
+         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/creature\/dragonCleric\/anim\/standard\/walk.png",
          "imageheight":256,
          "imagewidth":832,
          "margin":0,

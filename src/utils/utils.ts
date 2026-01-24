@@ -1,7 +1,7 @@
 import { Assets } from 'pixi.js';
 
 export const getUnitAvatar = (unitTypeName: string) => {
-  return new URL(`../assets/${unitTypeName}/avatar.png`, import.meta.url)
+  return new URL(`../assets/creature/${unitTypeName}/avatar.png`, import.meta.url)
     .href;
 };
 export const getDoorSvg=(state:string)=>{
@@ -78,10 +78,10 @@ export const fetchJsonFile = (jsonUrl: string) => {
 export const getAnimMetaJsonFile = (unitTypeName: string) => {
   console.log(
     "getJsonFile",
-    `../assets/${unitTypeName}/anim/credits/metadata.json`
+    `../assets/creature/${unitTypeName}/anim/credits/metadata.json`
   );
   const jsonUrl = new URL(
-    `../assets/${unitTypeName}/anim/credits/metadata.json`,
+    `../assets/creature/${unitTypeName}/anim/credits/metadata.json`,
     import.meta.url
   ).href;
   console.log(jsonUrl);
@@ -93,7 +93,7 @@ export const getAnimSpriteImgUrl = (
   dir: string
 ) => {
   return new URL(
-    `../assets/${unitTypeName}/anim/${dir}/${actionNmae}.png`,
+    `../assets/creature/${unitTypeName}/anim/${dir}/${actionNmae}.png`,
     import.meta.url
   ).href;
 };
@@ -104,10 +104,10 @@ export const getAnimActionSpriteJsonFile = (
 ) => {
   console.log(
     "getJsonFile",
-    `../assets/${unitTypeName}/anim/${dir}/${actionName}.json`
+    `../assets/creature/${unitTypeName}/anim/${dir}/${actionName}.json`
   );
   const jsonUrl = new URL(
-    `../assets/${unitTypeName}/anim/${dir}/${actionName}.json`,
+    `../assets/creature/${unitTypeName}/anim/${dir}/${actionName}.json`,
     import.meta.url
   ).href;
   console.log(jsonUrl);
@@ -126,3 +126,11 @@ export const getJsonFile = (
   console.log(jsonUrl);
   return fetchJsonFile(jsonUrl);
 };
+export const getUnitTypeJsonFile = (unitTypeName: string) => { 
+   const jsonUrl = new URL(
+    `../assets/creature/${unitTypeName}/${unitTypeName}.json`,
+    import.meta.url
+  ).href;
+  console.log(jsonUrl);
+  return fetchJsonFile(jsonUrl);
+ }

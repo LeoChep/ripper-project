@@ -85,7 +85,7 @@ export class BlastSelector {
       e.stopPropagation();
       if (selector.canCancel && selector.selected.length === 0) {
         this.removeGraphics();
-        selector.promise = Promise.resolve({ cancel: true });
+        resolveCallback({ cancel: true });
       } else if (selector.selected.length > 0) {
         selector.selected.pop();
         MessageTipSystem.getInstance().setBottomMessage(

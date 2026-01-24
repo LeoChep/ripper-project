@@ -66,6 +66,7 @@ import { Saver } from "@/core/saver/Saver";
 import { AreaSystem } from "@/core/system/AreaSystem";
 import InitBar from "../ActionBar/InitBar.vue";
 import TurnAnnouncement from "../TurnAnnouncement/TurnAnnouncement.vue";
+import {getUnitTypeJsonFile} from '@/utils/utils';
 const appSetting = envSetting.appSetting;
 onMounted(async () => {
   const app = new PIXI.Application();
@@ -374,7 +375,7 @@ const generateAnimSprite = async (unit, container, rlayers, mapPassiable) => {
 };
 
 const createUnitCreature = async (unitTypeName, unit) => {
-  const json = await getJsonFile(unitTypeName, unitTypeName, "json");
+  const json = await getUnitTypeJsonFile(unitTypeName);
   if (!json) {
     console.error(`Creature JSON file for ${unitTypeName} not found.`);
     return null;
