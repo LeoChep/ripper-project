@@ -64,48 +64,55 @@ async function showAnimation() {
   const startTime = performance.now(); // 使用 performance.now() 获得更高精度
   let animationId: number;
 
-  function animate(currentTime: number) {
-    const elapsed = currentTime - startTime;
-    if (!element) return;
+  // 创建 Promise 在动画结束时 resolve
+  return new Promise<void>((resolve) => {
+    function animate(currentTime: number) {
+      const elapsed = currentTime - startTime;
+      if (!element) {
+        resolve();
+        return;
+      }
 
-    if (elapsed < dropDuration) {
-      // 阶段1：自由落体下落
-      const progress = elapsed / dropDuration;
-      const easedProgress = easeInCubic(progress);
-      const translateY = -300 + 300 * easedProgress;
-      element.style.transform = `translateY(${translateY}px) rotate(0deg)`;
-      element.style.opacity = String(Math.min(1, progress * 1.5));
-      animationId = requestAnimationFrame(animate);
-    } else if (elapsed < dropDuration + shakeDuration) {
-      // 阶段2：阻尼振动晃动
-      const shakeProgress = (elapsed - dropDuration) / shakeDuration;
-      const angle = dampedOscillation(shakeProgress * 6, 12, 3) * 25;
-      const verticalBounce =
-        Math.exp(-shakeProgress * 2.5) * Math.sin(shakeProgress * 20) * 12;
-      element.style.transform = `translateY(${verticalBounce}px) rotate(${angle}deg)`;
-      element.style.opacity = "1";
-      animationId = requestAnimationFrame(animate);
-    } else if (elapsed < dropDuration + shakeDuration + flyDuration) {
-      // 阶段3：向上飞出（使用更平滑的缓动）
-      const flyProgress = (elapsed - dropDuration - shakeDuration) / flyDuration;
-      const easedFlyProgress = easeOutCubic(flyProgress);
-      const translateY = -450 * easedFlyProgress; // 增加飞出距离
-      const scale = 1 - flyProgress * 0.15; // 减少缩放幅度
-      const opacity = Math.max(0, 1 - Math.pow(flyProgress, 1.2) * 1.3); // 使用指数函数使淡出更平滑
+      if (elapsed < dropDuration) {
+        // 阶段1：自由落体下落
+        const progress = elapsed / dropDuration;
+        const easedProgress = easeInCubic(progress);
+        const translateY = -300 + 300 * easedProgress;
+        element.style.transform = `translateY(${translateY}px) rotate(0deg)`;
+        element.style.opacity = String(Math.min(1, progress * 1.5));
+        animationId = requestAnimationFrame(animate);
+      } else if (elapsed < dropDuration + shakeDuration) {
+        // 阶段2：阻尼振动晃动
+        const shakeProgress = (elapsed - dropDuration) / shakeDuration;
+        const angle = dampedOscillation(shakeProgress * 6, 12, 3) * 25;
+        const verticalBounce =
+          Math.exp(-shakeProgress * 2.5) * Math.sin(shakeProgress * 20) * 12;
+        element.style.transform = `translateY(${verticalBounce}px) rotate(${angle}deg)`;
+        element.style.opacity = "1";
+        animationId = requestAnimationFrame(animate);
+      } else if (elapsed < dropDuration + shakeDuration + flyDuration) {
+        // 阶段3：向上飞出（使用更平滑的缓动）
+        const flyProgress = (elapsed - dropDuration - shakeDuration) / flyDuration;
+        const easedFlyProgress = easeOutCubic(flyProgress);
+        const translateY = -450 * easedFlyProgress; // 增加飞出距离
+        const scale = 1 - flyProgress * 0.15; // 减少缩放幅度
+        const opacity = Math.max(0, 1 - Math.pow(flyProgress, 1.2) * 1.3); // 使用指数函数使淡出更平滑
 
-      element.style.transform = `translateY(${translateY}px) rotate(0deg) scale(${scale})`;
-      element.style.opacity = String(opacity);
-      element.style.willChange = "transform, opacity"; // 提示浏览器优化性能
+        element.style.transform = `translateY(${translateY}px) rotate(0deg) scale(${scale})`;
+        element.style.opacity = String(opacity);
+        element.style.willChange = "transform, opacity"; // 提示浏览器优化性能
 
-      animationId = requestAnimationFrame(animate);
-    } else {
-      // 动画结束
-      element.style.willChange = "auto";
-      isVisible.value = false;
+        animationId = requestAnimationFrame(animate);
+      } else {
+        // 动画结束
+        element.style.willChange = "auto";
+        isVisible.value = false;
+        resolve(); // 动画完成，resolve Promise
+      }
     }
-  }
 
-  animationId = requestAnimationFrame(animate);
+    animationId = requestAnimationFrame(animate);
+  });
 }
 
 defineExpose({
