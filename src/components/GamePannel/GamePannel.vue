@@ -16,7 +16,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import FormationEditorButton from "@/components/TeamPannel/FormationEditorButton.vue";
 import MessageTipTool from "@/components/MessageTipTool/MessageTipTool.vue";
 import CreatureInfo from "../CharacterDetailPannel/CreatureInfo.vue";
@@ -69,7 +69,10 @@ onMounted(async () => {
   const app = new PIXI.Application();
   await app.init(appSetting);
 
-  document.getElementById("game-pannel").appendChild(app.canvas);
+  const gamePannel = document.getElementById("game-pannel");
+  if (gamePannel) {
+    gamePannel.appendChild(app.canvas);
+  }
 
   golbalSetting.app = app;
 
@@ -88,13 +91,15 @@ onMounted(async () => {
   // drawFog(mapPassiable, rlayers, container, app);
   const spritesOBJ = mapPassiable.sprites;
   console.log("加载的地图数据:", mapPassiable);
-  const units = createUnitsFromMapSprites(spritesOBJ, mapPassiable);
-  const createCreatureEndPromise = [];
+  const units = createUnitsFromMapSprites(spritesOBJ);
+  const createCreatureEndPromise: Promise<void>[] = [];
   units.forEach((unit) => {
     unit.y -= unit.height;
-    const creatCreature = new Promise(async (resolve, reject) => {
+    const creatCreature = new Promise<void>(async (resolve, reject) => {
       const unitCreature = await createUnitCreature(unit.unitTypeName, unit);
-      unit.creature = unitCreature;
+      if (unitCreature) {
+        unit.creature = unitCreature;
+      }
       resolve();
     });
     createCreatureEndPromise.push(creatCreature);
@@ -102,7 +107,7 @@ onMounted(async () => {
   await Promise.all(createCreatureEndPromise);
   mapPassiable.sprites = units;
   console.log("加载的地图数据:", mapPassiable);
-  initByMap(mapPassiable);
+  //initByMap(mapPassiable);
   console.log("加载的地图数据2:", mapPassiable);
 
   //绘制格子
@@ -119,7 +124,8 @@ onMounted(async () => {
   const characterOutCombatController = CharacterOutCombatController.getInstance();
 
   setInterval(() => {
-    const units = golbalSetting.map.sprites;
+    const units = golbalSetting.map?.sprites;
+    if (!units) return;
     units.forEach((unit) => {
       unit.stateMachinePack.doAction();
     });
@@ -130,7 +136,7 @@ onMounted(async () => {
   DramaSystem.getInstance().setDramaUse("d1");
   DramaSystem.getInstance().play();
 });
-const initByMap = async (mapPassiable) => {
+const initByMap = async (mapPassiable: any) => {
   //创建单位
   golbalSetting.map = mapPassiable;
   const container = golbalSetting.rootContainer;
@@ -143,15 +149,15 @@ const initByMap = async (mapPassiable) => {
 
   //创建门
   const doors = mapPassiable.doors;
-  doors.forEach(async (door) => {
+  doors.forEach(async (door: any) => {
     const doorSprite = await createDoorAnimSpriteFromDoor(door);
-    container.addChild(doorSprite);
-    rlayers.controllerLayer.attach(doorSprite);
+    if (container) container.addChild(doorSprite);
+    if (rlayers.controllerLayer) rlayers.controllerLayer.attach(doorSprite);
   });
 
   //创建单位
-  let createEndPromise = [];
-  units.forEach((unit) => {
+  let createEndPromise: Promise<any>[] = [];
+  units.forEach((unit: any) => {
     const promise = generateAnimSprite(unit, container, rlayers, mapPassiable);
     createEndPromise.push(promise);
   });
@@ -159,13 +165,13 @@ const initByMap = async (mapPassiable) => {
   mapPassiable.sprites = units;
   const characterStore = useCharacterStore();
 
-  units.forEach((unit) => {
+  units.forEach((unit: any) => {
     if (unit.party === "player") {
       characterStore.addCharacter(unit);
     }
   });
 };
-const drawFog = (mapPassiable, rlayers, container, app) => {
+const drawFog = (mapPassiable: any, rlayers: any, container: any, app: any) => {
   //增加遮罩
   console.log("drawFog", app);
   const fogSystem = FogSystem.initFog(mapPassiable, container, app);
@@ -231,30 +237,31 @@ const loadGameState = async () => {
     const url = getMapAssetFile("A");
     const mapTexture = await PIXI.Assets.load(url);
     const map = golbalSetting.map;
-    map.textures = mapTexture;
-    await initByMap(map);
+
     DramaSystem.getInstance().play();
     AreaSystem.getInstance().rebuildAreas();
     if (InitiativeSystem.isInBattle()) {
       CharacterCombatController.getInstance().inUse = true;
-      console.log("进入战斗状态",InitiativeSystem);
+      console.log("进入战斗状态", InitiativeSystem);
       const unit = InitiativeSystem.getPointAtUnit();
       if (unit) {
-    
+
         console.log("loadInitRecord selectCharacter", unit);
         CharacterController.selectCharacter(unit);
         CharacterCombatController.getInstance().selectedCharacter = unit;
         CharacterCombatController.getInstance().useMoveController();
       }
     } else {
-      new CharacterOutCombatController(
-        golbalSetting.rlayers,
-        golbalSetting.rootContainer,
-        map
-      );
+      if (golbalSetting.rlayers && golbalSetting.rootContainer && map) {
+        new CharacterOutCombatController();
+      }
     }
     console.log("恢复的地图数据2:", map);
     console.log("游戏状态已读取", gameState);
+    if (map) {
+      map.textures = mapTexture;
+      await initByMap(map);
+    }
     // console.log("恢复的角色数据:", characterStore.characters);
     alert("游戏已读取!");
   } catch (error) {
@@ -266,14 +273,14 @@ const clear = () => {
   const characterStore = useCharacterStore();
   characterStore.characters = [];
   const rootContainer = golbalSetting.rootContainer;
-  const clearContainer = (container) => {
+  const clearContainer = (container: any) => {
     if (container.children) {
       const children = container.children;
       for (let i = container.children.length - 1; i >= 0; i--) {
         const child = container.children[i];
         children.push(child);
       }
-      children.forEach((child) => {
+      children.forEach((child: any) => {
         clearContainer(child);
       });
       container.destroy();
@@ -282,13 +289,22 @@ const clear = () => {
       container.destroy();
     }
   };
-  clearContainer(rootContainer);
-  console.log("清空容器完成", rootContainer.parent);
-  rootContainer.destroy();
+  if (rootContainer) {
+    clearContainer(rootContainer);
+    console.log("清空容器完成", rootContainer.parent);
+    rootContainer.destroy();
+  }
   characterStore.clearCharacters();
 };
-const createRenderLayers = (app) => {
-  const rlayers = {};
+const createRenderLayers = (app: any) => {
+  const rlayers: any = {
+    basicLayer: null,
+    spriteLayer: null,
+    lineLayer: null,
+    fogLayer: null,
+    selectLayer: null,
+    controllerLayer: null
+  };
   rlayers.basicLayer = new PIXI.RenderLayer();
   rlayers.spriteLayer = new PIXI.RenderLayer();
   rlayers.lineLayer = new PIXI.RenderLayer();
@@ -312,7 +328,7 @@ const createRenderLayers = (app) => {
   return rlayers;
 };
 
-const createContainer = (app, rlayers) => {
+const createContainer = (app: any, rlayers: any) => {
   app.stage.interactive = true;
   const container = new PIXI.Container();
   // 创建一个 800x600 的矩形图形作为底盘
@@ -345,7 +361,7 @@ const createContainer = (app, rlayers) => {
   return container;
 };
 
-const loadMap = async (mapName) => {
+const loadMap = async (mapName: string) => {
   const url = getMapAssetFile(mapName);
   const mapTexture = await PIXI.Assets.load(url);
   const mapPassiablePOJO = await getJsonFile("map", mapName, "tmj");
@@ -353,18 +369,27 @@ const loadMap = async (mapName) => {
   return mapPassiable;
 };
 
-const drawMap = (mapView, container, rlayers) => {
+const drawMap = (mapView: any, container: any, rlayers: any) => {
+  if (golbalSetting.mapContainer) {
+    golbalSetting.mapContainer.children.forEach((child: any) => {
+      golbalSetting.mapContainer!.removeChild(child);
+      child.destroy();
+    });
+
+  }
   const ms = new PIXI.Sprite(mapView);
   ms.zIndex = envSetting.zIndexSetting.mapZindex;
   ms.label = "map";
   // const allFog = new PIXI.Graphics();
   // container.addChild(allFog);
   // ms.setMask({ mask: allFog });
-  golbalSetting.mapContainer.addChild(ms);
-  rlayers.basicLayer.attach(ms);
+  if (golbalSetting.mapContainer) {
+    golbalSetting.mapContainer.addChild(ms);
+  }
+  // rlayers.basicLayer.attach(ms);
 };
 
-const generateAnimSprite = async (unit, container, rlayers, mapPassiable) => {
+const generateAnimSprite = async (unit: any, container: any, rlayers: any, mapPassiable: any) => {
   console.log("generateAnimSprite", unit);
   const animSpriteUnit = await createAnimSpriteUnits(unit.unitTypeName, unit);
 
@@ -380,14 +405,14 @@ const generateAnimSprite = async (unit, container, rlayers, mapPassiable) => {
   return unit;
 };
 
-const createUnitCreature = async (unitTypeName, unit) => {
-  const json = await getUnitTypeJsonFile(unitTypeName);
+const createUnitCreature = async (unitTypeName: string, unit: any) => {
+  const json: any = await getUnitTypeJsonFile(unitTypeName);
   if (!json) {
     console.error(`Creature JSON file for ${unitTypeName} not found.`);
     return null;
   }
 
-  const creature = createCreature(json);
+  const creature = createCreature(json as any);
   const unitCreature = creature;
   unit.creature = unitCreature;
   loadTraits(unit, unitCreature);
@@ -395,13 +420,13 @@ const createUnitCreature = async (unitTypeName, unit) => {
 
   return creature;
 };
-const createAnimSpriteUnits = async (unitTypeName, unit) => {
+const createAnimSpriteUnits = async (unitTypeName: string, unit: any) => {
   // 这里可以根据 unitTypeName 创建不同的动画精灵
   // 例如，如果 unitTypeName 是 'wolf'，则加载对应的动画精
   //读取animation meta json
   console.log("创建动画精灵单位:", unitTypeName, unit);
   const testJsonFetchPromise = getAnimMetaJsonFile(unitTypeName);
-  const animMetaJson = new AnimMetaJson(await testJsonFetchPromise);
+  const animMetaJson = new AnimMetaJson(await testJsonFetchPromise as any);
   //遍历获取所有动画组
   const animSpriteUnit = new UnitAnimSpirite(unit);
 
@@ -414,7 +439,7 @@ const createAnimSpriteUnits = async (unitTypeName, unit) => {
     if (unit.creature.size == "big")
       animSpriteUnit.visisualSizeValue = { width: 128, height: 128 };
   } else {
-    animSpriteUnit.visisualSize = { width: 64, height: 64 };
+    animSpriteUnit.visisualSizeValue = { width: 64, height: 64 };
   }
   animMetaJson.getAllExportedAnimations().forEach(async (anim) => {
     console.log(anim);
@@ -422,9 +447,9 @@ const createAnimSpriteUnits = async (unitTypeName, unit) => {
     const sheetTexture = await PIXI.Assets.load(spriteUrl);
     console.log(anim);
     const jsonFetchPromise = getAnimActionSpriteJsonFile(unitTypeName, anim, "standard");
-    const json = await jsonFetchPromise;
+    const json: any = await jsonFetchPromise;
     if (json && json.frames) {
-      const spritesheet = new PIXI.Spritesheet(sheetTexture, json);
+      const spritesheet = new PIXI.Spritesheet(sheetTexture, json as any);
       await spritesheet.parse();
       animSpriteUnit.addAnimationSheet(anim, spritesheet);
     }
@@ -433,7 +458,7 @@ const createAnimSpriteUnits = async (unitTypeName, unit) => {
   return animSpriteUnit;
 };
 
-const addAnimSpriteUnit = (unit, container, rlayers, mapPassiable) => {
+const addAnimSpriteUnit = (unit: any, container: any, rlayers: any, mapPassiable: any) => {
   const animSpriteUnit = unit.animUnit;
   console.log("addAnimSpriteUnit", unit);
   rlayers.spriteLayer.attach(animSpriteUnit);
@@ -443,14 +468,16 @@ const addAnimSpriteUnit = (unit, container, rlayers, mapPassiable) => {
   //   console.log("rightdown", unit);
   //   UnitRightEvent(event, unit, container, rlayers, mapPassiable);
   // });
-  animSpriteUnit.on("click", (event) => {
+  animSpriteUnit.on("click", (event: any) => {
     // alert(`Clicked on unit: ${unit.unitTypeName}`);
     if (unit.creature) {
       selectedCreature.value = unit.creature;
       selectedUnit.value = unit;
     }
   });
-  golbalSetting.spriteContainer.addChild(animSpriteUnit);
+  if (golbalSetting.spriteContainer) {
+    golbalSetting.spriteContainer.addChild(animSpriteUnit);
+  }
 };
 
 const addListenKeyboard = () => {
@@ -458,33 +485,33 @@ const addListenKeyboard = () => {
   document.addEventListener("keydown", (event) => {
     const container = golbalSetting.rootContainer;
     console.log("keydown", event.key);
-    if (event.key === "s") {
+    if (event.key === "s" && container) {
       container.y -= 64;
     }
   });
   //监听键盘A键
   document.addEventListener("keydown", (event) => {
     const container = golbalSetting.rootContainer;
-    if (event.key === "a") {
+    if (event.key === "a" && container) {
       container.x += 64;
     }
   });
   //监听键盘D键
   document.addEventListener("keydown", (event) => {
     const container = golbalSetting.rootContainer;
-    if (event.key === "d") {
+    if (event.key === "d" && container) {
       container.x -= 64;
     }
   });
   //监听键盘W键
   document.addEventListener("keydown", (event) => {
     const container = golbalSetting.rootContainer;
-    if (event.key === "w") {
+    if (event.key === "w" && container) {
       container.y += 64;
     }
   });
 };
-const drawGrid = (app, rlayers) => {
+const drawGrid = (app: any, rlayers: any) => {
   //格子
   const lineContainer = new PIXI.Container();
   const gridSize = 64;
