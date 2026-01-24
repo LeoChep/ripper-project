@@ -17,7 +17,7 @@ import {
   InitiativeSerializer,
   type SerializedInitiativeData,
 } from "../type/InitiativeSerializer";
-import { lockOn } from "../anim/LockOnAnim";
+import { lookOn } from "../anim/LookOnAnim";
 export const InitiativeSheet = [] as InitiativeClass[];
 const initiativeCursor = {
   pointAt: null as null | InitiativeClass,
@@ -160,7 +160,8 @@ export async function startCombatTurn() {
           initiativeCursor.pointAt.owner.ai?.autoAction &&
           initiativeCursor.map
         ) {
-          lockOn(
+          
+          lookOn(
             initiativeCursor.pointAt.owner.x,
             initiativeCursor.pointAt.owner.y,
           );
@@ -199,7 +200,7 @@ export async function startCombatTurn() {
 }
 
 export async function endTurn(unit: Unit, isDelay = false) {
-  CharacterController.removeLookOn();
+  CharacterController.removeSelectEffect();
   if (unit.initiative && isDelay === false) {
     unit.initiative.ready = false;
     unit.initiative.roundNumber++;
@@ -497,7 +498,7 @@ export async function endBattle() {
   }
 
   await endTurn(CharacterController.selectedCharacter as Unit);
-  CharacterController.removeLookOn();
+  CharacterController.removeSelectEffect();
 
   await playEndAnim();
   CharacterOutCombatController.isUse = true;

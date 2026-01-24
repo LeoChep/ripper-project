@@ -44,7 +44,7 @@ import { getUnitAvatar } from '@/utils/utils'
 import ActionPannel from '../ActionPannel/ActionPannel.vue'
 import ActionBar from '../ActionBar/ActionBar.vue'
 import { CharacterController } from '@/core/controller/CharacterController'
-import { lockOn } from '@/core/anim/LockOnAnim'
+import { lookOn } from '@/core/anim/LookOnAnim'
 import { useTalkStateStore } from '@/stores/talkStateStore'
 import { CharacterCombatController } from "@/core/controller/CharacterCombatController";
 import * as InitiativeSystem from "@/core/system/InitiativeSystem";
@@ -147,7 +147,7 @@ function selectCharacter(character, index) {
     selectedCharacter.value = character;
 
     CharacterCombatController.getInstance().selectedCharacter = character;
-    lockOn(character.x, character.y);
+    lookOn(character.x, character.y);
 }
 
 </script>
