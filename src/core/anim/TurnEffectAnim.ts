@@ -30,7 +30,9 @@ export class TurnEffectAnim {
       return;
     }
 
-    const enemyTurnSprite = new EnemyTurnUnitAnimSprite();
+    // 获取单位的实际尺寸
+    const size = unit.animUnit!.visisualSizeValue;
+    const enemyTurnSprite = new EnemyTurnUnitAnimSprite(size.width, size.height);
     enemyTurnSprite.label = "enemyTurn";
     enemyTurnSprite.activate();
 
@@ -56,7 +58,9 @@ export class TurnEffectAnim {
 
     const effectContainer = this.getOrCreateEffectContainer(unit.animUnit!);
 
-    const arrowSprite = new SelectAnimSprite();
+    // 获取单位的实际尺寸
+    const size = unit.animUnit!.visisualSizeValue;
+    const arrowSprite = new SelectAnimSprite(size.width, size.height);
     arrowSprite.label = "arrow";
     arrowSprite.select();
 

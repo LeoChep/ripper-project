@@ -8,9 +8,13 @@ export class SelectAnimSprite extends Container {
   private animationTime: number = 0;
   private animationSpeed: number = 0.05;
   private borderThickness: number = 3;
+  private unitWidth: number;
+  private unitHeight: number;
 
-  constructor() {
+  constructor(width: number = tileSize, height: number = tileSize) {
     super();
+    this.unitWidth = width;
+    this.unitHeight = height;
 
     // 底部填充层 - 微弱的高亮
     this.fillGraphics = new Graphics();
@@ -26,7 +30,7 @@ export class SelectAnimSprite extends Container {
   private drawInitialState() {
     // 绘制底部微弱的填充
     this.fillGraphics.clear();
-    this.fillGraphics.rect(0, 0, tileSize, tileSize);
+    this.fillGraphics.rect(0, 0, this.unitWidth, this.unitHeight);
     this.fillGraphics.fill({ color: 0xffffff, alpha: 0.1 });
 
     // 绘制边框
@@ -37,10 +41,12 @@ export class SelectAnimSprite extends Container {
     this.borderGraphics.clear();
     
     const inset = this.borderThickness / 2;
-    const size = tileSize - this.borderThickness;
+    const sizeW = this.unitWidth - this.borderThickness;
+    const sizeH = this.unitHeight - this.borderThickness;
+    const minSize = Math.min(this.unitWidth, this.unitHeight);
 
     // 绘制四个角的强调线
-    const cornerSize = tileSize * 0.25;
+    const cornerSize = minSize * 0.25;
     
     // 左上角
     this.borderGraphics.moveTo(inset, inset + cornerSize);
@@ -48,19 +54,19 @@ export class SelectAnimSprite extends Container {
     this.borderGraphics.lineTo(inset + cornerSize, inset);
     
     // 右上角
-    this.borderGraphics.moveTo(size + inset - cornerSize, inset);
-    this.borderGraphics.lineTo(size + inset, inset);
-    this.borderGraphics.lineTo(size + inset, inset + cornerSize);
+    this.borderGraphics.moveTo(sizeW + inset - cornerSize, inset);
+    this.borderGraphics.lineTo(sizeW + inset, inset);
+    this.borderGraphics.lineTo(sizeW + inset, inset + cornerSize);
     
     // 右下角
-    this.borderGraphics.moveTo(size + inset, size + inset - cornerSize);
-    this.borderGraphics.lineTo(size + inset, size + inset);
-    this.borderGraphics.lineTo(size + inset - cornerSize, size + inset);
+    this.borderGraphics.moveTo(sizeW + inset, sizeH + inset - cornerSize);
+    this.borderGraphics.lineTo(sizeW + inset, sizeH + inset);
+    this.borderGraphics.lineTo(sizeW + inset - cornerSize, sizeH + inset);
     
     // 左下角
-    this.borderGraphics.moveTo(inset + cornerSize, size + inset);
-    this.borderGraphics.lineTo(inset, size + inset);
-    this.borderGraphics.lineTo(inset, size + inset - cornerSize);
+    this.borderGraphics.moveTo(inset + cornerSize, sizeH + inset);
+    this.borderGraphics.lineTo(inset, sizeH + inset);
+    this.borderGraphics.lineTo(inset, sizeH + inset - cornerSize);
 
     this.borderGraphics.stroke({ 
       color: 0xffff00, 
