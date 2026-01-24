@@ -1,5 +1,6 @@
 import { Unit } from "@/core/units/Unit";
 import { CharacterController } from "./../controller/CharacterController";
+import { TurnEffectAnim } from "./../anim/TurnEffectAnim";
 import { getLayers } from "@/stores/container";
 import { diceRoll } from "../DiceTryer";
 import type { TiledMap } from "../MapClass";
@@ -18,6 +19,7 @@ import {
   type SerializedInitiativeData,
 } from "../type/InitiativeSerializer";
 import { lookOn } from "../anim/LookOnAnim";
+
 export const InitiativeSheet = [] as InitiativeClass[];
 const initiativeCursor = {
   pointAt: null as null | InitiativeClass,
@@ -155,12 +157,13 @@ export async function startCombatTurn() {
 
       //设置选中角色
       if (initiativeCursor.pointAt.owner.party !== "player") {
-        //如果是npc,则自动行动
+        //如果是npc,则自动行动        // 显示敌方回合效果
+        TurnEffectAnim.showEnemyEffect(initiativeCursor.pointAt.owner);
         if (
           initiativeCursor.pointAt.owner.ai?.autoAction &&
           initiativeCursor.map
         ) {
-          
+
           lookOn(
             initiativeCursor.pointAt.owner.x,
             initiativeCursor.pointAt.owner.y,
@@ -201,6 +204,10 @@ export async function startCombatTurn() {
 
 export async function endTurn(unit: Unit, isDelay = false) {
   CharacterController.removeSelectEffect();
+  // 移除敌方回合效果
+  if (unit.party !== "player") {
+    TurnEffectAnim.removeEnemyEffect(unit);
+  }
   if (unit.initiative && isDelay === false) {
     unit.initiative.ready = false;
     unit.initiative.roundNumber++;
@@ -624,12 +631,7 @@ export function loadInitRecord(initRecord: {
     // 查找对应的 InitiativeClass
     initiativeCursor.pointAt =
       InitiativeSheet.find((item) => item.owner?.id === pointAtId) || null;
-    if (initiativeCursor.pointAt && initiativeCursor.pointAt.owner) {
-      const unit = initiativeCursor.pointAt.owner;
-      CharacterController.selectCharacter(unit);
-      CharacterCombatController.getInstance().selectedCharacter = unit;
-      CharacterCombatController.getInstance().useMoveController();
-    }
+
     console.log("LOAD INIT", initiativeSheet, initiativeCursor);
   } else {
     initiativeCursor.pointAt = null;

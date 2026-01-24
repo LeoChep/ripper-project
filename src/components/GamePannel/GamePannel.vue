@@ -3,12 +3,8 @@
   <!-- <img :src="hitURL"> -->
   <InitBar></InitBar>
   <TurnAnnouncement ref="turnAnnouncementRef" />
-  <CreatureInfo
-    :creature="selectedCreature"
-    :unit="selectedUnit"
-    v-if="selectedUnit"
-    @close="selectedCreature = null"
-  />
+  <CreatureInfo :creature="selectedCreature" :unit="selectedUnit" v-if="selectedUnit"
+    @close="selectedCreature = null" />
   <TalkPannel />
   <CharacterPannel />
   <MessageTipTool />
@@ -66,7 +62,8 @@ import { Saver } from "@/core/saver/Saver";
 import { AreaSystem } from "@/core/system/AreaSystem";
 import InitBar from "../ActionBar/InitBar.vue";
 import TurnAnnouncement from "../TurnAnnouncement/TurnAnnouncement.vue";
-import {getUnitTypeJsonFile} from '@/utils/utils';
+import { getUnitTypeJsonFile } from '@/utils/utils';
+import { CharacterController } from "@/core/controller/CharacterController";
 const appSetting = envSetting.appSetting;
 onMounted(async () => {
   const app = new PIXI.Application();
@@ -240,6 +237,15 @@ const loadGameState = async () => {
     AreaSystem.getInstance().rebuildAreas();
     if (InitiativeSystem.isInBattle()) {
       CharacterCombatController.getInstance().inUse = true;
+      console.log("进入战斗状态",InitiativeSystem);
+      const unit = InitiativeSystem.getPointAtUnit();
+      if (unit) {
+    
+        console.log("loadInitRecord selectCharacter", unit);
+        CharacterController.selectCharacter(unit);
+        CharacterCombatController.getInstance().selectedCharacter = unit;
+        CharacterCombatController.getInstance().useMoveController();
+      }
     } else {
       new CharacterOutCombatController(
         golbalSetting.rlayers,

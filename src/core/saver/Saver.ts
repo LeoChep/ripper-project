@@ -139,9 +139,7 @@ export class Saver {
     await Saver.loadUnit();
     Saver.loadDrama();
     Saver.loadArea();
-    if (gameState.initiativeRecord) {
-      InitiativeSystem.loadInitRecord(gameState.initiativeRecord);
-    }
+
     //加载战斗事
     BattleEvenetSystem.getInstance().clearEvents();
     const eventSerializeDatas = gameState.eventRecord || [];
@@ -163,5 +161,8 @@ export class Saver {
       }
     });
     console.log("加载的战斗事件:", events);
+        if (gameState.initiativeRecord) {
+      InitiativeSystem.loadInitRecord(gameState.initiativeRecord);
+    }
   }
 }
