@@ -132,8 +132,8 @@ export class Saver {
   static async loadGameState(gameState: any): Promise<any> {
     // 清空当前角色数据
     // 恢复角色数据
-    const map = {} as TiledMap;
-    golbalSetting.map = map;
+    // const map = {} as TiledMap;
+    // golbalSetting.map = map;
     Saver.gameState = gameState;
     Saver.loadWallAndDoor();
     await Saver.loadUnit();

@@ -1,11 +1,13 @@
 import { d1 } from "@/drama/d1";
 
+
 export class DramaSystem {
   private dramaMap: Map<string, any> = new Map();
   static instance: DramaSystem;
   records = [] as { name: any; variables: unknown[] }[];
   interval = null as unknown as NodeJS.Timeout;
   dramaUse: any;
+  
   static getInstance(): DramaSystem {
     if (!DramaSystem.instance) {
       DramaSystem.instance = new DramaSystem();
@@ -25,7 +27,7 @@ export class DramaSystem {
     return this.dramaMap.get(name);
   }
 
-  setDramaUse(dramaName: string): void {
+  async setDramaUse(dramaName: string): Promise<void> {
     const drama = this.getDrama(dramaName);
     let varliabeleArr: any[] = [];
     this.records.forEach((record) => {
@@ -34,7 +36,7 @@ export class DramaSystem {
       }
     });
     this.dramaUse = drama;
-    drama.load(varliabeleArr);
+    await drama.load(varliabeleArr);
   }
 
   play(): void {
@@ -57,6 +59,17 @@ export class DramaSystem {
   }
   speak = async (content: string): Promise<void> => {};
   unitSpeak = async (unitName: string, content: string): Promise<void> => {};
+  // createUnit = async (
+  //   unitName: string,
+  //   x: number,
+  //   y: number,
+  // ): Promise<void> => {
+  //   const unitJson = await getUnitTypeJsonFile(unitName);
+  //   const creature = createCreature(unitJson as any);   
+  //   const unitCreature = creature;
+  //  const unit=createUnitFromUnitInfo({});
+  //  unit.creature=unitCreature;
+  // };
   CGstart = () => {};
   CGEnd = () => {};
   clearDramas(): void {

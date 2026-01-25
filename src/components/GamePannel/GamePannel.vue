@@ -22,48 +22,25 @@ import MessageTipTool from "@/components/MessageTipTool/MessageTipTool.vue";
 import CreatureInfo from "../CharacterDetailPannel/CreatureInfo.vue";
 import TalkPannel from "../TalkPannel/TalkPannel.vue";
 import { ref, onMounted } from "vue";
-import {
-  getJsonFile,
-  getMapAssetFile,
-  getAnimMetaJsonFile,
-  getAnimActionSpriteJsonFile,
-  getAnimSpriteImgUrl,
-} from "@/utils/utils";
+import { getAnimActionSpriteJsonFile, getAnimMetaJsonFile, getAnimSpriteImgUrl, getMapAssetFile } from "@/utils/utils";
 import * as PIXI from "pixi.js";
-// import { UnitRightEvent } from "@/core/controller/UnitRightEventController";
-import { TiledMap } from "@/core/MapClass";
-import { UnitAnimSpirite } from "@/core/anim/UnitAnimSprite";
-import {
-  createUnitsFromMapSprites,
-  loadPowers,
-  loadTraits,
-  Unit,
-} from "@/core/units/Unit";
-import { AnimMetaJson } from "@/core/anim/AnimMetaJson";
-import { createCreature } from "@/core/units/Creature";
 import { setContainer, setLayer } from "@/stores/container";
-import { FogSystem } from "@/core/system/FogSystem_unuse";
-import { d1 } from "@/drama/d1";
 import CharacterPannel from "../CharacterPannel/CharacterPannel.vue";
 import { useCharacterStore } from "@/stores/characterStore";
 import { CharacterOutCombatController } from "@/core/controller/CharacterOutCombatController";
-import { createDoorFromDoorObj } from "@/core/units/Door";
-import { createDoorAnimSpriteFromDoor } from "@/core/anim/DoorAnimSprite";
 import * as envSetting from "@/core/envSetting";
 import { golbalSetting } from "@/core/golbalSetting";
-import { CreatureSerializer } from "@/core/units/CreatureSerializer";
 import { DramaSystem } from "@/core/system/DramaSystem";
-import { BuffInterface } from "@/core/buff/BuffInterface";
-import { BuffSerializer } from "@/core/buff/BuffSerializer";
-import { DoorSerializer } from "@/core/units/DoorSerializer";
 import * as InitiativeSystem from "@/core/system/InitiativeSystem";
 import { CharacterCombatController } from "@/core/controller/CharacterCombatController";
 import { Saver } from "@/core/saver/Saver";
 import { AreaSystem } from "@/core/system/AreaSystem";
 import InitBar from "../ActionBar/InitBar.vue";
 import TurnAnnouncement from "../TurnAnnouncement/TurnAnnouncement.vue";
-import { getUnitTypeJsonFile } from '@/utils/utils';
 import { CharacterController } from "@/core/controller/CharacterController";
+import { AnimMetaJson } from "@/core/anim/AnimMetaJson";
+import { createDoorAnimSpriteFromDoor } from "@/core/anim/DoorAnimSprite";
+import { UnitAnimSpirite } from "@/core/anim/UnitAnimSprite";
 const appSetting = envSetting.appSetting;
 onMounted(async () => {
   const app = new PIXI.Application();
@@ -82,33 +59,6 @@ onMounted(async () => {
   container.sortableChildren = true;
   setContainer(container);
   setLayer(rlayers);
-  //绘制迷雾
-
-  //绘制地图
-  //加载地图
-  const mapPassiable = await loadMap("A");
-  golbalSetting.map = mapPassiable;
-  // drawFog(mapPassiable, rlayers, container, app);
-  const spritesOBJ = mapPassiable.sprites;
-  console.log("加载的地图数据:", mapPassiable);
-  const units = createUnitsFromMapSprites(spritesOBJ);
-  const createCreatureEndPromise: Promise<void>[] = [];
-  units.forEach((unit) => {
-    unit.y -= unit.height;
-    const creatCreature = new Promise<void>(async (resolve, reject) => {
-      const unitCreature = await createUnitCreature(unit.unitTypeName, unit);
-      if (unitCreature) {
-        unit.creature = unitCreature;
-      }
-      resolve();
-    });
-    createCreatureEndPromise.push(creatCreature);
-  });
-  await Promise.all(createCreatureEndPromise);
-  mapPassiable.sprites = units;
-  console.log("加载的地图数据:", mapPassiable);
-  initByMap(mapPassiable);
-  console.log("加载的地图数据2:", mapPassiable);
 
   //绘制格子
   drawGrid(app, rlayers);
@@ -116,38 +66,37 @@ onMounted(async () => {
   //增加键盘监听
   addListenKeyboard();
 
-  //测试剧本
-
   //初始化玩家角色
-
-  //console.log('角色数据:', characterStore.characters);
   const characterOutCombatController = CharacterOutCombatController.getInstance();
 
+  // 单位状态机更新循环
   setInterval(() => {
     const units = golbalSetting.map?.sprites;
     if (!units) return;
     units.forEach((unit) => {
       unit.stateMachinePack.doAction();
     });
-  }, 1000 / 30); // 每秒60帧
+  }, 1000 / 30); // 每秒30帧
 
-  d1.map = mapPassiable;
-
-  DramaSystem.getInstance().setDramaUse("d1");
+  // 设置并启动剧情（会自动加载地图）
+  await DramaSystem.getInstance().setDramaUse("d1");
+  await initByMap(golbalSetting.map);
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   DramaSystem.getInstance().play();
 });
+// 辅助函数：根据地图初始化
 const initByMap = async (mapPassiable: any) => {
-  //创建单位
   golbalSetting.map = mapPassiable;
   const container = golbalSetting.rootContainer;
-
   const rlayers = golbalSetting.rlayers;
   const units = mapPassiable.sprites;
   const mapView = mapPassiable.textures;
+
+  // 绘制地图
   drawMap(mapView, container, rlayers);
   console.log(units);
 
-  //创建门
+  // 创建门
   const doors = mapPassiable.doors;
   doors.forEach(async (door: any) => {
     const doorSprite = await createDoorAnimSpriteFromDoor(door);
@@ -155,7 +104,7 @@ const initByMap = async (mapPassiable: any) => {
     if (rlayers.controllerLayer) rlayers.controllerLayer.attach(doorSprite);
   });
 
-  //创建单位
+  // 创建单位
   let createEndPromise: Promise<any>[] = [];
   units.forEach((unit: any) => {
     const promise = generateAnimSprite(unit, container, rlayers, mapPassiable);
@@ -163,21 +112,99 @@ const initByMap = async (mapPassiable: any) => {
   });
   if (createEndPromise.length > 0) await Promise.all(createEndPromise);
   mapPassiable.sprites = units;
-  const characterStore = useCharacterStore();
 
+  const characterStore = useCharacterStore();
   units.forEach((unit: any) => {
     if (unit.party === "player") {
       characterStore.addCharacter(unit);
     }
   });
 };
-const drawFog = (mapPassiable: any, rlayers: any, container: any, app: any) => {
-  //增加遮罩
-  console.log("drawFog", app);
-  const fogSystem = FogSystem.initFog(mapPassiable, container, app);
-  fogSystem.autoDraw();
+
+// 辅助函数：绘制地图
+const drawMap = (mapView: any, container: any, rlayers: any) => {
+  if (golbalSetting.mapContainer) {
+    golbalSetting.mapContainer.children.forEach((child: any) => {
+      golbalSetting.mapContainer!.removeChild(child);
+      child.destroy();
+    });
+  }
+  const ms = new PIXI.Sprite(mapView);
+  ms.zIndex = envSetting.zIndexSetting.mapZindex;
+  ms.label = "map";
+  if (golbalSetting.mapContainer) {
+    golbalSetting.mapContainer.addChild(ms);
+  }
 };
 
+// 辅助函数：生成动画精灵
+const generateAnimSprite = async (unit: any, container: any, rlayers: any, mapPassiable: any) => {
+  console.log("generateAnimSprite", unit);
+  const animSpriteUnit = await createAnimSpriteUnits(unit.unitTypeName, unit);
+
+  unit.animUnit = animSpriteUnit;
+  animSpriteUnit.zIndex = envSetting.zIndexSetting.spriteZIndex;
+
+  console.log("generateAnimSprite", unit, animSpriteUnit);
+  addAnimSpriteUnit(unit, container, rlayers, mapPassiable);
+  animSpriteUnit.x = Math.round(unit.x / 64) * 64;
+  animSpriteUnit.y = Math.round(unit.y / 64) * 64;
+  unit.x = animSpriteUnit.x;
+  unit.y = animSpriteUnit.y;
+  return unit;
+};
+
+// 辅助函数：创建动画精灵单位
+const createAnimSpriteUnits = async (unitTypeName: string, unit: any) => {
+  console.log("创建动画精灵单位:", unitTypeName, unit);
+  const testJsonFetchPromise = getAnimMetaJsonFile(unitTypeName);
+  const animMetaJson = new AnimMetaJson((await testJsonFetchPromise) as any);
+  const animSpriteUnit = new UnitAnimSpirite(unit);
+
+  animSpriteUnit.setFrameSize({
+    width: animMetaJson.frameSize,
+    height: animMetaJson.frameSize,
+  });
+  if (unit.creature) {
+    console.log("单位的视觉大小:", animSpriteUnit.visisualSizeValue, unit.creature.size);
+    if (unit.creature.size == "big")
+      animSpriteUnit.visisualSizeValue = { width: 128, height: 128 };
+  } else {
+    animSpriteUnit.visisualSizeValue = { width: 64, height: 64 };
+  }
+  animMetaJson.getAllExportedAnimations().forEach(async (anim) => {
+    console.log(anim);
+    const spriteUrl = getAnimSpriteImgUrl(unitTypeName, anim, "standard");
+    const sheetTexture = await PIXI.Assets.load(spriteUrl);
+    console.log(anim);
+    const jsonFetchPromise = getAnimActionSpriteJsonFile(unitTypeName, anim, "standard");
+    const json: any = await jsonFetchPromise;
+    if (json && json.frames) {
+      const spritesheet = new PIXI.Spritesheet(sheetTexture, json as any);
+      await spritesheet.parse();
+      animSpriteUnit.addAnimationSheet(anim, spritesheet);
+    }
+  });
+  return animSpriteUnit;
+};
+
+// 辅助函数：添加动画精灵单位
+const addAnimSpriteUnit = (unit: any, container: any, rlayers: any, mapPassiable: any) => {
+  const animSpriteUnit = unit.animUnit;
+  console.log("addAnimSpriteUnit", unit);
+  rlayers.spriteLayer.attach(animSpriteUnit);
+  animSpriteUnit.eventMode = "static";
+
+  animSpriteUnit.on("click", (event: any) => {
+    if (unit.creature) {
+      // 这里可以触发选择事件，但为了保持简洁，暂时移除选择逻辑
+      console.log("Clicked on unit:", unit.unitTypeName);
+    }
+  });
+  if (golbalSetting.spriteContainer) {
+    golbalSetting.spriteContainer.addChild(animSpriteUnit);
+  }
+};
 const selectedCreature = ref(null);
 const selectedUnit = ref(null);
 
@@ -232,12 +259,13 @@ const loadGameState = async () => {
     //
     DramaSystem.getInstance().stop();
     clear();
-    await Saver.loadGameState(gameState);
-    createContainer(golbalSetting.app, golbalSetting.rlayers);
-    const url = getMapAssetFile("A");
-    const mapTexture = await PIXI.Assets.load(url);
-    const map = golbalSetting.map;
 
+    createContainer(golbalSetting.app, golbalSetting.rlayers);
+
+    DramaSystem.getInstance().setDramaUse("d1");
+    const map = gameState.map;
+    await Saver.loadGameState(gameState);
+    await initByMap(golbalSetting.map)
     DramaSystem.getInstance().play();
     AreaSystem.getInstance().rebuildAreas();
     if (InitiativeSystem.isInBattle()) {
@@ -258,10 +286,7 @@ const loadGameState = async () => {
     }
     console.log("恢复的地图数据2:", map);
     console.log("游戏状态已读取", gameState);
-    if (map) {
-      map.textures = mapTexture;
-      await initByMap(map);
-    }
+
     // console.log("恢复的角色数据:", characterStore.characters);
     alert("游戏已读取!");
   } catch (error) {
@@ -359,125 +384,6 @@ const createContainer = (app: any, rlayers: any) => {
   golbalSetting.rootContainer = container;
   golbalSetting.tipContainer = tipContainer;
   return container;
-};
-
-const loadMap = async (mapName: string) => {
-  const url = getMapAssetFile(mapName);
-  const mapTexture = await PIXI.Assets.load(url);
-  const mapPassiablePOJO = await getJsonFile("map", mapName, "tmj");
-  const mapPassiable = new TiledMap(mapPassiablePOJO, mapTexture);
-  return mapPassiable;
-};
-
-const drawMap = (mapView: any, container: any, rlayers: any) => {
-  if (golbalSetting.mapContainer) {
-    golbalSetting.mapContainer.children.forEach((child: any) => {
-      golbalSetting.mapContainer!.removeChild(child);
-      child.destroy();
-    });
-
-  }
-  const ms = new PIXI.Sprite(mapView);
-  ms.zIndex = envSetting.zIndexSetting.mapZindex;
-  ms.label = "map";
-  // const allFog = new PIXI.Graphics();
-  // container.addChild(allFog);
-  // ms.setMask({ mask: allFog });
-  if (golbalSetting.mapContainer) {
-    golbalSetting.mapContainer.addChild(ms);
-  }
-  // rlayers.basicLayer.attach(ms);
-};
-
-const generateAnimSprite = async (unit: any, container: any, rlayers: any, mapPassiable: any) => {
-  console.log("generateAnimSprite", unit);
-  const animSpriteUnit = await createAnimSpriteUnits(unit.unitTypeName, unit);
-
-  unit.animUnit = animSpriteUnit;
-  animSpriteUnit.zIndex = envSetting.zIndexSetting.spriteZIndex;
-
-  console.log("generateAnimSprite", unit, animSpriteUnit);
-  addAnimSpriteUnit(unit, container, rlayers, mapPassiable);
-  animSpriteUnit.x = Math.round(unit.x / 64) * 64;
-  animSpriteUnit.y = Math.round(unit.y / 64) * 64;
-  unit.x = animSpriteUnit.x;
-  unit.y = animSpriteUnit.y;
-  return unit;
-};
-
-const createUnitCreature = async (unitTypeName: string, unit: any) => {
-  const json: any = await getUnitTypeJsonFile(unitTypeName);
-  if (!json) {
-    console.error(`Creature JSON file for ${unitTypeName} not found.`);
-    return null;
-  }
-
-  const creature = createCreature(json as any);
-  const unitCreature = creature;
-  unit.creature = unitCreature;
-  loadTraits(unit, unitCreature);
-  loadPowers(unit, unitCreature);
-
-  return creature;
-};
-const createAnimSpriteUnits = async (unitTypeName: string, unit: any) => {
-  // 这里可以根据 unitTypeName 创建不同的动画精灵
-  // 例如，如果 unitTypeName 是 'wolf'，则加载对应的动画精
-  //读取animation meta json
-  console.log("创建动画精灵单位:", unitTypeName, unit);
-  const testJsonFetchPromise = getAnimMetaJsonFile(unitTypeName);
-  const animMetaJson = new AnimMetaJson(await testJsonFetchPromise as any);
-  //遍历获取所有动画组
-  const animSpriteUnit = new UnitAnimSpirite(unit);
-
-  animSpriteUnit.setFrameSize({
-    width: animMetaJson.frameSize,
-    height: animMetaJson.frameSize,
-  });
-  if (unit.creature) {
-    console.log("单位的视觉大小:", animSpriteUnit.visisualSizeValue, unit.creature.size);
-    if (unit.creature.size == "big")
-      animSpriteUnit.visisualSizeValue = { width: 128, height: 128 };
-  } else {
-    animSpriteUnit.visisualSizeValue = { width: 64, height: 64 };
-  }
-  animMetaJson.getAllExportedAnimations().forEach(async (anim) => {
-    console.log(anim);
-    const spriteUrl = getAnimSpriteImgUrl(unitTypeName, anim, "standard");
-    const sheetTexture = await PIXI.Assets.load(spriteUrl);
-    console.log(anim);
-    const jsonFetchPromise = getAnimActionSpriteJsonFile(unitTypeName, anim, "standard");
-    const json: any = await jsonFetchPromise;
-    if (json && json.frames) {
-      const spritesheet = new PIXI.Spritesheet(sheetTexture, json as any);
-      await spritesheet.parse();
-      animSpriteUnit.addAnimationSheet(anim, spritesheet);
-    }
-  });
-  // spritesheet is ready to use!
-  return animSpriteUnit;
-};
-
-const addAnimSpriteUnit = (unit: any, container: any, rlayers: any, mapPassiable: any) => {
-  const animSpriteUnit = unit.animUnit;
-  console.log("addAnimSpriteUnit", unit);
-  rlayers.spriteLayer.attach(animSpriteUnit);
-  // animSpriteUnit.zIndex=20;
-  animSpriteUnit.eventMode = "static";
-  // animSpriteUnit.on("rightdown", (event) => {
-  //   console.log("rightdown", unit);
-  //   UnitRightEvent(event, unit, container, rlayers, mapPassiable);
-  // });
-  animSpriteUnit.on("click", (event: any) => {
-    // alert(`Clicked on unit: ${unit.unitTypeName}`);
-    if (unit.creature) {
-      selectedCreature.value = unit.creature;
-      selectedUnit.value = unit;
-    }
-  });
-  if (golbalSetting.spriteContainer) {
-    golbalSetting.spriteContainer.addChild(animSpriteUnit);
-  }
 };
 
 const addListenKeyboard = () => {

@@ -42,7 +42,7 @@ export class Unit {
   effects: any[] = []; // 特效数组
   traits: Trait[];
   powers: Power[];
-  
+
   animUnit: UnitAnimSpirite | undefined;
   initiative?: InitiativeClass;
   state: string = "idle"; // 状态，默认为 "idle"
@@ -73,7 +73,7 @@ export async function loadTraits(unit: Unit, unitCreature: Creature) {
     for (let i = 0; i < unitCreature.traits.length; i++) {
       const loadTrait = await TriatSystem.getInstance().createTrait(
         unitCreature.traits[i],
-        unit
+        unit,
       );
       if (loadTrait) {
         unitCreature.traits[i] = loadTrait; // 替换为加载后的 Trait 实例
@@ -82,82 +82,61 @@ export async function loadTraits(unit: Unit, unitCreature: Creature) {
       }
     }
   }
-    if (unitCreature.feats.length > 0) {
+  if (unitCreature.feats.length > 0) {
     for (let i = 0; i < unitCreature.feats.length; i++) {
       const loadTrait = await TriatSystem.getInstance().createTrait(
         unitCreature.feats[i],
         unit,
-        'feat'
+        "feat",
       );
       if (loadTrait) {
         unitCreature.feats[i] = loadTrait; // 替换为加载后的 Trait 实例
       } else {
-        console.warn(`Trait ${unitCreature.feats[i].name} could not be loaded.`);
+        console.warn(
+          `Trait ${unitCreature.feats[i].name} could not be loaded.`,
+        );
       }
     }
   }
 }
 export async function loadPowers(unit: Unit, unitCreature: Creature) {
-
   if (unitCreature.powers.length > 0) {
     for (let i = 0; i < unitCreature.powers.length; i++) {
-        const powerName = unitCreature.powers[i].name;
-        if (!powerName) {
-            console.warn("powerName is required.");
-            return null;
-        }
-        const power =await PowerSystem.getInstance().createPower(powerName,unit);
-        if (!power) {
-            console.warn(`Power class not found for: ${powerName}`);
-            continue
-        }
+      const powerName = unitCreature.powers[i].name;
+      if (!powerName) {
+        console.warn("powerName is required.");
+        return null;
+      }
+      const power = await PowerSystem.getInstance().createPower(
+        powerName,
+        unit,
+      );
+      if (!power) {
+        console.warn(`Power class not found for: ${powerName}`);
+        continue;
+      }
 
-        unitCreature.powers[i] = power; // 替换为加载后的 Power 实例
+      unitCreature.powers[i] = power; // 替换为加载后的 Power 实例
     }
   }
-  
 }
 // 工厂函数：根据 map.sprites 生成 Unit 实例数组
 export function createUnitsFromMapSprites(sprites: any[]): Unit[] {
   return sprites.map((obj) => {
-    const partyProp = obj.properties?.find((p: any) => p.name === "party");
-    const unitTypeNameProp = obj.properties?.find(
-      (p: any) => p.name === "unitTypeName"
-    );
-    const directionProp = obj.properties?.find(
-      (p: any) => p.name === "direction"
-    );
-    const unit = new Unit({
-      id: obj.id,
-      name: obj.name,
-      x: obj.x,
-      y: obj.y,
-      width: obj.width,
-      height: obj.height,
-      party: partyProp ? partyProp.value : "",
-      unitTypeName: unitTypeNameProp ? unitTypeNameProp.value : "",
-      gid: obj.gid,
-      direction: directionProp ? directionProp.value : 2, // 默认方向为 0
-    });
-    if (unit.party !== "player") {
-      unit.ai = new NormalAI();
-      unit.ai.owner = unit;
-    }
-
-    return unit;
+    return createUnitFromMapSprite(obj);
   });
 }
 
 // 工厂函数：根据单个 sprite 对象生成 Unit 实例
-export function createUnitFromSprite(obj: any): Unit {
+export function createUnitFromMapSprite(obj: any): Unit {
   const partyProp = obj.properties?.find((p: any) => p.name === "party");
   const unitTypeNameProp = obj.properties?.find(
-    (p: any) => p.name === "unitTypeName"
+    (p: any) => p.name === "unitTypeName",
   );
   const directionProp = obj.properties?.find(
-    (p: any) => p.name === "direction"
+    (p: any) => p.name === "direction",
   );
-  return new Unit({
+  const unitInfo = {
     id: obj.id,
     name: obj.name,
     x: obj.x,
@@ -166,7 +145,29 @@ export function createUnitFromSprite(obj: any): Unit {
     height: obj.height,
     party: partyProp ? partyProp.value : "",
     unitTypeName: unitTypeNameProp ? unitTypeNameProp.value : "",
-    direction: directionProp ? directionProp.value : 2, // 默认方向为 0
     gid: obj.gid,
+    direction: directionProp ? directionProp.value : 2, // 默认方向为 0
+  };
+  const unit = new Unit(unitInfo);
+
+  return unit;
+}
+export function createUnitFromUnitInfo(obj: any): Unit {
+  const unit = new Unit({
+    id: obj.id,
+    name: obj.name,
+    x: obj.x,
+    y: obj.y,
+    width: obj.width,
+    height: obj.height,
+    party: obj.party,
+    unitTypeName: obj.unitTypeName,
+    gid: obj.gid,
+    direction: obj.direction, // 默认方向为 0
   });
+  if (unit.party !== "player") {
+    unit.ai = new NormalAI();
+    unit.ai.owner = unit;
+  }
+  return unit;
 }
