@@ -763,7 +763,7 @@
          "name":"sprite",
          "objects":[
                 {
-                 "gid":785,
+                 "gid":768,
                  "height":64,
                  "id":20,
                  "name":"skeleton",
@@ -824,7 +824,7 @@
                  "y":187
                 }, 
                 {
-                 "gid":812,
+                 "gid":795,
                  "height":64,
                  "id":51,
                  "name":"\u6218\u58eb",
@@ -852,7 +852,7 @@
                  "y":190
                 }, 
                 {
-                 "gid":785,
+                 "gid":768,
                  "height":64,
                  "id":52,
                  "name":"skeleton",
@@ -885,7 +885,7 @@
                  "y":895
                 }, 
                 {
-                 "gid":830,
+                 "gid":797,
                  "height":64,
                  "id":57,
                  "name":"skeletonArcher4",
@@ -918,7 +918,7 @@
                  "y":1085.33
                 }, 
                 {
-                 "gid":830,
+                 "gid":797,
                  "height":64,
                  "id":58,
                  "name":"skeletonArcher3",
@@ -951,7 +951,7 @@
                  "y":1088
                 }, 
                 {
-                 "gid":830,
+                 "gid":797,
                  "height":64,
                  "id":59,
                  "name":"skeletonArcher2",
@@ -984,7 +984,7 @@
                  "y":1084
                 }, 
                 {
-                 "gid":830,
+                 "gid":797,
                  "height":64,
                  "id":60,
                  "name":"skeletonArcher",
@@ -1017,7 +1017,7 @@
                  "y":956
                 }, 
                 {
-                 "gid":792,
+                 "gid":775,
                  "height":132,
                  "id":62,
                  "name":"bigSkeleton",
@@ -1050,7 +1050,7 @@
                  "y":1022.67
                 }, 
                 {
-                 "gid":909,
+                 "gid":816,
                  "height":64,
                  "id":63,
                  "name":"\u7267\u5e08",
@@ -1074,8 +1074,35 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":513.333333333333,
-                 "y":190.666666666667
+                 "x":513.333,
+                 "y":190.667
+                }, 
+                {
+                 "height":64,
+                 "id":68,
+                 "name":"npc\u7267\u5e08",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"oldCleric"
+                        }, 
+                        {
+                         "name":"party",
+                         "type":"string",
+                         "value":"npc"
+                        }, 
+                        {
+                         "name":"unitTypeName",
+                         "type":"string",
+                         "value":"oldCleric"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":250.666666666667,
+                 "y":249.333333333333
                 }],
          "offsetx":4,
          "offsety":0,
@@ -1086,7 +1113,7 @@
          "y":0
         }],
  "nextlayerid":6,
- "nextobjectid":65,
+ "nextobjectid":69,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
@@ -1108,65 +1135,65 @@
         {
          "columns":9,
          "firstgid":721,
-         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/creature\/wolf\/anim\/standard\/walk.png",
+         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/wolf\/anim\/standard\/walk.png",
          "imageheight":256,
          "imagewidth":576,
          "margin":0,
          "name":"walk",
          "spacing":0,
-         "tilecount":36,
+         "tilecount":0,
          "tileheight":64,
          "tilewidth":64
         }, 
         {
          "columns":9,
-         "firstgid":757,
-         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/creature\/skeleton\/anim\/standard\/walk.png",
+         "firstgid":740,
+         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/skeleton\/anim\/standard\/walk.png",
          "imageheight":256,
          "imagewidth":576,
          "margin":0,
          "name":"walk",
          "spacing":0,
-         "tilecount":36,
+         "tilecount":0,
          "tileheight":64,
          "tilewidth":64
         }, 
         {
          "columns":9,
-         "firstgid":793,
-         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/creature\/manFighter\/anim\/standard\/walk.png",
+         "firstgid":776,
+         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/manFighter\/anim\/standard\/walk.png",
          "imageheight":256,
          "imagewidth":576,
          "margin":0,
          "name":"walk",
          "spacing":0,
-         "tilecount":36,
+         "tilecount":0,
          "tileheight":64,
          "tilewidth":64
         }, 
         {
          "columns":13,
-         "firstgid":829,
-         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/creature\/skeletonArcher\/anim\/standard\/slash.png",
+         "firstgid":796,
+         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/skeletonArcher\/anim\/standard\/slash.png",
          "imageheight":256,
          "imagewidth":832,
          "margin":0,
          "name":"slash",
          "spacing":0,
-         "tilecount":52,
+         "tilecount":0,
          "tileheight":64,
          "tilewidth":64
         }, 
         {
-         "columns":13,
-         "firstgid":881,
-         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/creature\/dragonCleric\/anim\/standard\/walk.png",
+         "columns":8,
+         "firstgid":798,
+         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/dragonCleric\/anim\/standard\/walk.png",
          "imageheight":256,
-         "imagewidth":832,
+         "imagewidth":569,
          "margin":0,
          "name":"walk",
          "spacing":0,
-         "tilecount":52,
+         "tilecount":0,
          "tileheight":64,
          "tilewidth":64
         }],

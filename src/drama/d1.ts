@@ -49,13 +49,11 @@ export const d1 = {
 const startEvent = async () => {
   const dramaSystem= DramaSystem.getInstance();
   dramaSystem.CGstart();
+  await dramaSystem.unitSpeak("npc牧师","你们终于来了……这里的亡灵作祟越来越可怕了，我们需要你们的帮助来消灭它们。");
   await dramaSystem.speak(
-    "你醒来时，发现自己躺在一片荒野上，四周一片寂静。你感到头痛欲裂，似乎刚刚经历了一场激烈的战斗。你环顾四周，发现自己身处一个陌生的地方，四周只有一些破旧的建筑和荒芜的土地。你决定站起来，寻找出路。"
+    "你们能听见神殿里传来骨头摩擦的声音，似乎有骷髅在里面徘徊。"
   );
-  await dramaSystem.speak(
-    "你站起身来，感到身体有些虚弱，发现这里一片荒凉，建筑物大多破败不堪。突然,你听到一阵低语声。你停下脚步，仔细聆听，发现声音来自一座废弃的房屋。你决定走近一探究竟。"
-  );
-
+ await dramaSystem.unitSpeak("npc牧师","培罗在上，我感觉它们简直随时都可能冲出来攻击我们。  还请你们小心行事。");
   dramaSystem.CGEnd();
   CharacterOutCombatController.isUse = true;
 };

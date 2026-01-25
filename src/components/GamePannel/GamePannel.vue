@@ -107,7 +107,7 @@ onMounted(async () => {
   await Promise.all(createCreatureEndPromise);
   mapPassiable.sprites = units;
   console.log("加载的地图数据:", mapPassiable);
-  //initByMap(mapPassiable);
+  initByMap(mapPassiable);
   console.log("加载的地图数据2:", mapPassiable);
 
   //绘制格子
