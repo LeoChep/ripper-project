@@ -145,7 +145,8 @@ function selectCharacter(character, index) {
     characterStore.value.selectedCharacterId = character.id;
     selectedIndex.value = index;
     selectedCharacter.value = character;
-
+    console.log('characterStore', characterStore.value);
+    // character.animUnit._state='slash'
     CharacterCombatController.getInstance().selectedCharacter = character;
     lookOn(character.x, character.y);
 }
