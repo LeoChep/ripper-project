@@ -1,4 +1,4 @@
-import { BattleEvenetSystem } from './../system/BattleEventSystem';
+import { BattleEvenetSystem } from "./../system/BattleEventSystem";
 import { golbalSetting } from "../golbalSetting";
 
 import { DramaSystem } from "../system/DramaSystem";
@@ -21,7 +21,7 @@ import type { EndTurnRemoveBuffEvent } from "../event/EndTurnRemoveBuffEvent";
 import type { BasedAbstractEvent } from "../event/BasedAbstractEvent";
 import type { GameEvent } from "../event/Event";
 import { AreaSystem } from "../system/AreaSystem";
-import { EventSheet } from '../event/EventSheet';
+import { EventSheet } from "../event/EventSheet";
 
 export class Saver {
   static gameState: any;
@@ -72,7 +72,15 @@ export class Saver {
     if (!map) {
       return false;
     }
+    console.log(
+      "[changemap-Saver] loadUnit 前 map.sprites:",
+      map.sprites?.length,
+    );
     map.sprites = createUnitsFromMapSprites(gameState.sprites);
+    console.log(
+      "[changemap-Saver] loadUnit 修改 map.sprites 后:",
+      map.sprites?.length,
+    );
     map.sprites.forEach((sprite: Unit, index: string | number) => {
       const savedSprite = gameState.sprites[index];
       if (savedSprite && savedSprite.creature) {
@@ -95,7 +103,7 @@ export class Saver {
       const deserializedBuffs = await BuffSerializer.deserializeArray(
         buffs,
         undefined,
-        findSprite
+        findSprite,
       );
       sprite.creature.buffs = deserializedBuffs;
       console.log("恢复的角色数据:", sprite.creature);
@@ -118,11 +126,12 @@ export class Saver {
     map.edges = gameState.edges || [];
     return true;
   }
-  static loadDrama() {
+  static async loadDrama() {
     const gameState = Saver.gameState;
     const vars = gameState.dramaRecord.recorders || [];
     DramaSystem.getInstance().records = vars;
-    DramaSystem.getInstance().setDramaUse(gameState.dramaRecord.use);
+    await DramaSystem.getInstance().setDramaUse(gameState.dramaRecord.use);
+    // DramaSystem.getInstance().setDramaUse(gameState.dramaRecord.use);
   }
   static loadArea() {
     const gameState = Saver.gameState;
@@ -134,10 +143,12 @@ export class Saver {
     // 恢复角色数据
     // const map = {} as TiledMap;
     // golbalSetting.map = map;
+
     Saver.gameState = gameState;
+    await Saver.loadDrama();
     Saver.loadWallAndDoor();
     await Saver.loadUnit();
-    Saver.loadDrama();
+
     Saver.loadArea();
 
     //加载战斗事
@@ -148,12 +159,12 @@ export class Saver {
       console.log("反序列化事件:", eventSerializeData);
       // const deserializer = EventSheet.getInstance().getSerializer(eventSerializeData.eventName);
       const deserializer = EventDeserializerFactory.getDeserializer(
-        eventSerializeData.eventName
+        eventSerializeData.eventName,
       );
-          console.log('获取反序列化器:', deserializer);
+      console.log("获取反序列化器:", deserializer);
       if (deserializer) {
         const event = deserializer.deserialize(eventSerializeData);
-        console.log("加载的战斗事件 one:", deserializer,event);
+        console.log("加载的战斗事件 one:", deserializer, event);
         if (event) {
           events.push(event);
           event.hook();
@@ -161,7 +172,7 @@ export class Saver {
       }
     });
     console.log("加载的战斗事件:", events);
-        if (gameState.initiativeRecord) {
+    if (gameState.initiativeRecord) {
       InitiativeSystem.loadInitRecord(gameState.initiativeRecord);
     }
   }

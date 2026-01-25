@@ -73,6 +73,7 @@ onMounted(async () => {
   // 单位状态机更新循环
   setInterval(() => {
     const units = golbalSetting.map?.sprites;
+    console.log("单位状态机更新循环", units,golbalSetting);
     if (!units) return;
     units.forEach((unit) => {
       unit.stateMachinePack.doAction();
@@ -80,14 +81,16 @@ onMounted(async () => {
   }, 1000 / 30); // 每秒30帧
 
   // 设置并启动剧情（会自动加载地图）
+  console.log("[changemap0] setDramaUse 前 golbalSetting.map:", golbalSetting.map);
   await DramaSystem.getInstance().setDramaUse("d1");
+  console.log("[changemap0] setDramaUse 后 golbalSetting.map:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
   await initByMap(golbalSetting.map);
   await new Promise((resolve) => setTimeout(resolve, 1000));
   DramaSystem.getInstance().play();
 });
 // 辅助函数：根据地图初始化
 const initByMap = async (mapPassiable: any) => {
-  golbalSetting.map = mapPassiable;
+  // golbalSetting.map = mapPassiable;
   const container = golbalSetting.rootContainer;
   const rlayers = golbalSetting.rlayers;
   const units = mapPassiable.sprites;
@@ -111,13 +114,16 @@ const initByMap = async (mapPassiable: any) => {
     const promise = generateAnimSprite(unit, container, rlayers, mapPassiable);
     createEndPromise.push(promise);
   });
+  
   if (createEndPromise.length > 0) await Promise.all(createEndPromise);
-  mapPassiable.sprites = units;
-
+  // mapPassiable.sprites = units;
+ console.log("所有单位创建完成:", units);
   const characterStore = useCharacterStore();
+  characterStore.clearCharacters();
   units.forEach((unit: any) => {
     if (unit.party === "player") {
       characterStore.addCharacter(unit);
+      console.log('characterStore',characterStore)
     }
   });
 };
@@ -262,31 +268,49 @@ const loadGameState = async () => {
     clear();
 
     createContainer(golbalSetting.app, golbalSetting.rlayers);
-    let map = {} as TiledMap;
-    golbalSetting.map = map;
-    await DramaSystem.getInstance().setDramaUse("d1");
-    map = golbalSetting.map;
+    // 重置地图为空对象
+    console.log("[changemap1] 读档前重置地图为空对象", golbalSetting.map);
+    golbalSetting.map = {} as TiledMap;
+    console.log("[changemap1] 重置后:", golbalSetting.map);
+    
+    // setDramaUse 会在 d1.ts 中加载并创建新的地图对象
+ 
+    console.log("[changemap3] setDramaUse 后, loadGameState 前:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
+   
+    // 从存档恢复游戏状态（可能会更新 golbalSetting.map）
     await Saver.loadGameState(gameState);
-    await initByMap(golbalSetting.map)
+    console.log("[changemap3] loadGameState 后:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
+    
+    // 初始化地图视觉元素
+    console.log("[changemap4] d1.loadTmj initByMap 前:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
+    await initByMap(golbalSetting.map);
+    console.log("[changemap4]  d1.loadTmj initByMap 后:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
+    
+    console.log("初始化地图完成:", golbalSetting.map);
+    
     DramaSystem.getInstance().play();
     AreaSystem.getInstance().rebuildAreas();
+    
     if (InitiativeSystem.isInBattle()) {
       CharacterCombatController.getInstance().inUse = true;
       console.log("进入战斗状态", InitiativeSystem);
       const unit = InitiativeSystem.getPointAtUnit();
       if (unit) {
-
         console.log("loadInitRecord selectCharacter", unit);
         CharacterController.selectCharacter(unit);
         CharacterCombatController.getInstance().selectedCharacter = unit;
         CharacterCombatController.getInstance().useMoveController();
       }
     } else {
-      if (golbalSetting.rlayers && golbalSetting.rootContainer && map) {
+      if (golbalSetting.rlayers && golbalSetting.rootContainer && golbalSetting.map) {
         new CharacterOutCombatController();
+        console.log("进入非战斗状态");
+        // 使用 JSON 序列化来快照当前状态，避免控制台延迟展开导致的不一致
+        console.log("进入非战斗状态 - 地图:", golbalSetting.map);
+       
       }
     }
-    console.log("恢复的地图数据2:", map);
+    console.log("恢复的地图数据:", golbalSetting.map,golbalSetting);
     console.log("游戏状态已读取", gameState);
 
     // console.log("恢复的角色数据:", characterStore.characters);

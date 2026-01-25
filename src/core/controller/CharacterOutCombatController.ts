@@ -37,7 +37,7 @@ export class CharacterOutCombatController {
       console.log("ms", ms);
       ms.eventMode = "static";
       ms.on("pointerdown", (e: PIXI.FederatedPointerEvent) => {
-        console.log("map click", e);
+        console.log("map click", );
 
         if (!CharacterOutCombatController.isUse) {
           return;
@@ -51,7 +51,10 @@ export class CharacterOutCombatController {
   }
 
   unitMove(e: PIXI.FederatedPointerEvent) {
+
+    console.log("unitMove CgolbalSetting", golbalSetting);
     const mapPassiable = golbalSetting.map;
+
     if (useTalkStateStore().talkState.onCg) {
       return;
     }
@@ -59,6 +62,8 @@ export class CharacterOutCombatController {
     const selectedCharacter = mapPassiable?.sprites.find(
       (sprite) => sprite.id === CharacterController.curser
     );
+    console.log("unitMove selectedCharacter", selectedCharacter);
+    console.log("unitMove mapPassiable", mapPassiable?.sprites);
     if (!selectedCharacter) {
       console.warn("No character selected for movement.");
       return;

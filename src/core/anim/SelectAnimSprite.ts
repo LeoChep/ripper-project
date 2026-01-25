@@ -39,8 +39,8 @@ export class SelectAnimSprite extends Container {
 
   private updateBorder(alpha: number) {
     if (!this.borderGraphics.context) return;
-    console.log(
-      'SelectAnimSprite:', this)
+    // console.log(
+    //   'SelectAnimSprite:', this)
     this.borderGraphics.clear();
 
     const inset = this.borderThickness / 2;

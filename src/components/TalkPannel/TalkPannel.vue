@@ -9,7 +9,7 @@
         class="portrait-image"
       />
       <div class="portrait-name-box">
-        <span class="portrait-name">{{ currentUnit.name }}</span>
+        <span class="portrait-name">{{ currentUnit.creature?.name }}</span>
       </div>
     </div>
   </div>
@@ -218,6 +218,7 @@ onMounted(() => {
   border: 2px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
   z-index: 3;
+  text-align: center;
 }
 
 .portrait-name {
