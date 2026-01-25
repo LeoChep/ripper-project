@@ -41,6 +41,7 @@ import { CharacterController } from "@/core/controller/CharacterController";
 import { AnimMetaJson } from "@/core/anim/AnimMetaJson";
 import { createDoorAnimSpriteFromDoor } from "@/core/anim/DoorAnimSprite";
 import { UnitAnimSpirite } from "@/core/anim/UnitAnimSprite";
+import type { TiledMap } from "@/core/MapClass";
 const appSetting = envSetting.appSetting;
 onMounted(async () => {
   const app = new PIXI.Application();
@@ -261,9 +262,10 @@ const loadGameState = async () => {
     clear();
 
     createContainer(golbalSetting.app, golbalSetting.rlayers);
-
-    DramaSystem.getInstance().setDramaUse("d1");
-    const map = gameState.map;
+    let map = {} as TiledMap;
+    golbalSetting.map = map;
+    await DramaSystem.getInstance().setDramaUse("d1");
+    map = golbalSetting.map;
     await Saver.loadGameState(gameState);
     await initByMap(golbalSetting.map)
     DramaSystem.getInstance().play();

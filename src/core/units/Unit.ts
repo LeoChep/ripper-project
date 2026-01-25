@@ -148,7 +148,7 @@ export function createUnitFromMapSprite(obj: any): Unit {
     gid: obj.gid,
     direction: directionProp ? directionProp.value : 2, // 默认方向为 0
   };
-  const unit = new Unit(unitInfo);
+  const unit = createUnitFromUnitInfo(unitInfo);
 
   return unit;
 }
