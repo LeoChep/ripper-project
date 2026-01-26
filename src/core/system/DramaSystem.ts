@@ -1,4 +1,5 @@
 import { d1 } from "@/drama/d1";
+import type { Drama } from "@/drama/drama";
 interface DialogOption {
   text: string;
   value: any;
@@ -21,11 +22,11 @@ export class DramaSystem {
     // Initialize the drama system if needed
   }
 
-  registerDrama(name: string, drama: any): void {
+  registerDrama(name: string, drama: Drama): void {
     this.dramaMap.set(name, drama);
   }
 
-  getDrama(name: string): any | undefined {
+  getDrama(name: string): Drama | undefined {
     return this.dramaMap.get(name);
   }
 
@@ -38,7 +39,7 @@ export class DramaSystem {
       }
     });
     this.dramaUse = drama;
-    await drama.load(varliabeleArr);
+    await this.load(drama, varliabeleArr);
   }
 
   play(): void {
@@ -68,21 +69,112 @@ export class DramaSystem {
     options: DialogOption[],
     dialogText?: string,
   ): Promise<any> => {};
-  // createUnit = async (
-  //   unitName: string,
-  //   x: number,
-  //   y: number,
-  // ): Promise<void> => {
-  //   const unitJson = await getUnitTypeJsonFile(unitName);
-  //   const creature = createCreature(unitJson as any);
-  //   const unitCreature = creature;
-  //  const unit=createUnitFromUnitInfo({});
-  //  unit.creature=unitCreature;
-  // };
+
   CGstart = () => {};
   CGEnd = () => {};
   clearDramas(): void {
     this.dramaMap.clear();
+  }
+
+  // 辅助函数：加载地图
+  async loadMap(mapName: string) {
+    const PIXI = await import("pixi.js");
+    const { getMapAssetFile, getJsonFile } = await import("@/utils/utils");
+    const url = getMapAssetFile(mapName);
+    const mapTexture = await PIXI.Assets.load(url);
+    const mapPassiablePOJO = await getJsonFile("map", mapName, "tmj");
+    const { TiledMap } = await import("@/core/MapClass");
+    const mapPassiable = new TiledMap(mapPassiablePOJO, mapTexture);
+    return mapPassiable;
+  }
+
+  // 辅助函数：创建单位生物
+  async createUnitCreature(unitTypeName: string, unit: any) {
+    const { getUnitTypeJsonFile } = await import("@/utils/utils");
+    const { createCreature } = await import("@/core/units/Creature");
+    const { loadTraits, loadPowers } = await import("@/core/units/Unit");
+
+    const json: any = await getUnitTypeJsonFile(unitTypeName);
+    if (!json) {
+      console.error(`Creature JSON file for ${unitTypeName} not found.`);
+      return null;
+    }
+
+    const creature = createCreature(json as any);
+    const unitCreature = creature;
+    unit.creature = unitCreature;
+    loadTraits(unit, unitCreature);
+    loadPowers(unit, unitCreature);
+
+    return creature;
+  }
+
+  // 加载剧情
+  async load(
+    drama: any,
+    variables: { name: string; value: any }[],
+  ): Promise<void> {
+    drama.variables.clear();
+    if (!variables) {
+      variables = [];
+    }
+    variables = [...variables];
+    for (let i = 0; i < variables.length; i++) {
+      drama.variables.set(variables[i].name, variables[i].value);
+    }
+
+    // 初始化地图
+    await this.loadTmj(drama);
+  }
+
+  // 获取剧情变量
+  getVariable(drama: any, key: string): any {
+    if (!drama.variables.has(key)) {
+      console.warn(`Variable "${key}" not found in drama variables.`);
+      this.setVariable(drama, key, false);
+    }
+    return drama.variables.get(key);
+  }
+
+  // 设置剧情变量
+  setVariable(drama: any, key: string, value: any): void {
+    drama.variables.set(key, value);
+  }
+
+  // 加载 Tiled 地图
+  async loadTmj(drama: any): Promise<void> {
+    const { createUnitsFromMapSprites } = await import("@/core/units/Unit");
+    const { golbalSetting } = await import("@/core/golbalSetting");
+
+    // 加载地图
+    const mapPassiable = await this.loadMap("A");
+    const spritesOBJ = mapPassiable.sprites;
+
+    // 创建单位
+    const units = createUnitsFromMapSprites(spritesOBJ);
+
+    // 使用 map 而不是 forEach，避免冗余的 Promise 包装
+    const createCreatureEndPromise = units.map(async (unit) => {
+      unit.y -= unit.height;
+      try {
+        const unitCreature = await this.createUnitCreature(
+          unit.unitTypeName,
+          unit,
+        );
+      } catch (error) {
+        console.error(
+          `[DramaSystem.loadTmj] 创建生物失败: ${unit.unitTypeName}`,
+          error,
+        );
+      }
+    });
+
+    await Promise.all(createCreatureEndPromise);
+    await new Promise((resolve) => setTimeout(resolve, 1000)); // 确保所有异步操作完成
+    mapPassiable.sprites = units;
+    // 设置全局地图
+    drama.map = mapPassiable;
+    golbalSetting.map = mapPassiable;
   }
   getRercords() {
     const recorders: { name: any; variables: unknown[] }[] = [];
