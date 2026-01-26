@@ -1,29 +1,39 @@
 <template>
   <!-- 角色立绘层 -->
-  <div v-if="currentUnit" class="character-portrait">
-    <div class="portrait-container">
-      <img
-        v-if="avatarUrl"
-        :src="avatarUrl"
-        :alt="currentUnit.name"
-        class="portrait-image"
-      />
-      <div class="portrait-name-box">
-        <span class="portrait-name">{{ currentUnit.creature?.name }}</span>
+  <div>
+    <div v-if="currentUnit" class="character-portrait">
+      <div class="portrait-container">
+        <img v-if="avatarUrl" :src="avatarUrl" :alt="currentUnit.name" class="portrait-image" />
+        <div class="portrait-name-box">
+          <span class="portrait-name">{{ currentUnit.creature?.name }}</span>
+        </div>
+
+
       </div>
     </div>
+
+    <!-- 对话框（无角色时使用） -->
+    <!-- 嵌入式选项 -->
+    <!-- 对话框（位于角色头像下方） -->
+    <div v-if="showFlag || talkState.options.length > 0" class="talk-window-portrait">
+      <div v-if="showFlag" class="talk-content-portrait">
+        <p>{{ talkContent }}</p>
+      </div>
+          <div v-if="talkState.options.length > 0" class="portrait-options">
+      <div v-for="(option, index) in talkState.options" :key="index"
+        :class="['portrait-option-item', { 'selected': index === talkState.selectedOption }]"
+        @click="handleOptionClick(index)" @mouseenter="handleOptionHover(index)">
+        <span class="option-text">{{ option.text }}</span>
+      </div>
+    </div>
+    </div>
+
   </div>
 
-  <!-- 对话框 -->
-  <div ref="talk_window" id="talk-window" v-show="showFlag">
-    <div class="talk-content">
-      <p>{{ talkContent }}</p>
-    </div>
-  </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed, ref, type Ref, type ComputedRef } from 'vue'
+import { onMounted, computed, ref, type Ref, type ComputedRef, watch } from 'vue'
 import { useTalkStateStore } from '@/stores/talkStateStore'
 import { useCharacterStore } from '@/stores/characterStore'
 import { DramaSystem } from '@/core/system/DramaSystem';
@@ -36,124 +46,225 @@ const talkState = useTalkStateStore();
 const characterStore = useCharacterStore();
 const showFlag: Ref<boolean> = ref(false);
 const count: Ref<number> = ref(0);
-const dramaSystem= DramaSystem.getInstance();
+const dramaSystem = DramaSystem.getInstance();
 const currentUnit: Ref<Unit | null> = ref(null);
 
 const talkContent: ComputedRef<string> = computed(() => {
-    if (talkState.talkState.content && talkState.talkState.content.length > 0) {
-        showFlag.value = true;
-        characterStore.setShow(false);
-    } else {
-        showFlag.value = false;
-        characterStore.setShow(true);
-    }
-    return talkState.talkState.input;
+  return talkState.talkState.input;
 });
-
+watch(
+  () => talkState.talkState.content,
+  (newVal) => {
+    showFlag.value = newVal.length > 0;
+  }
+);
 const avatarUrl: ComputedRef<string> = computed(() => {
-    if (currentUnit.value && currentUnit.value.unitTypeName) {
-        return getUnitAvatar(currentUnit.value.unitTypeName);
-    }
-    return '';
+  if (currentUnit.value && currentUnit.value.unitTypeName) {
+    return getUnitAvatar(currentUnit.value.unitTypeName);
+  }
+  return '';
 });
 
 // 表现层：打字机效果实现
 const speak = (content: string): Promise<void> => {
-    currentUnit.value = null; // 清除角色显示
-    return new Promise((resolve) => {
-        talkState.talkState.input = "";
-        talkState.talkState.endFlag = false;
-        talkState.talkState.content = content;
-        talkState.end = resolve;
-        const timer= setInterval(() => {
-            const input: string = talkState.talkState.input;
-            let endIndex: number = input.length + 1;
-            if (endIndex > content.length) {
-                endIndex = content.length;
-                window.clearInterval(timer);
-                talkState.talkState.endFlag = true;
-            }
-            talkState.talkState.input = content.substring(0, endIndex);
-        }, 50);
-        talkState.talkState.inputingTimer = timer;
-    });
+  currentUnit.value = null; // 清除角色显示
+  return new Promise((resolve) => {
+    talkState.talkState.input = "";
+    talkState.talkState.endFlag = false;
+    talkState.talkState.content = content;
+    talkState.end = resolve;
+    const timer = setInterval(() => {
+      const input: string = talkState.talkState.input;
+      let endIndex: number = input.length + 1;
+      if (endIndex > content.length) {
+        endIndex = content.length;
+        window.clearInterval(timer);
+        talkState.talkState.endFlag = true;
+      }
+      talkState.talkState.input = content.substring(0, endIndex);
+    }, 50);
+    talkState.talkState.inputingTimer = timer;
+  });
 };
 
 // 表现层：角色对话打字机效果（显示角色头像）
 
 const unitSpeak = (unit: Unit, content: string): Promise<void> => {
-    currentUnit.value = unit; // 设置当前角色
-    return new Promise((resolve) => {
-        talkState.talkState.input = "";
-        talkState.talkState.endFlag = false;
-        talkState.talkState.content = content;
-        talkState.end = () => {
-            currentUnit.value = null; // 对话结束时清除角色
-            resolve();
-        };
-        const timer= setInterval(() => {
-            const input: string = talkState.talkState.input;
-            let endIndex: number = input.length + 1;
-            if (endIndex > content.length) {
-                endIndex = content.length;
-                window.clearInterval(timer);
-                talkState.talkState.endFlag = true;
-            }
-            talkState.talkState.input = content.substring(0, endIndex);
-        }, 50);
-        talkState.talkState.inputingTimer = timer;
-    });
+  currentUnit.value = unit; // 设置当前角色
+  return new Promise((resolve) => {
+    talkState.talkState.input = "";
+    talkState.talkState.endFlag = false;
+    talkState.talkState.content = content;
+
+    talkState.end = () => {
+      currentUnit.value = null; // 对话结束时清除角色
+      resolve();
+    };
+    const timer = setInterval(() => {
+      const input: string = talkState.talkState.input;
+      let endIndex: number = input.length + 1;
+      if (endIndex > content.length) {
+        endIndex = content.length;
+        window.clearInterval(timer);
+        talkState.talkState.endFlag = true;
+      }
+      talkState.talkState.input = content.substring(0, endIndex);
+    }, 50);
+    talkState.talkState.inputingTimer = timer;
+  });
 };
 
 // 表现层：处理 Enter 键按下的逻辑
 const enterEnd = (): void => {
-    count.value++;
-    console.log("count", count.value);
-    if (!talkState.talkState.endFlag) {
-        // 第一次按 Enter：跳过打字机效果，直接显示全部内容
-        window.clearInterval(talkState.talkState.inputingTimer);
-        talkState.talkState.input = talkState.talkState.content;
-        console.log(talkState.talkState);
-        talkState.talkState.endFlag = true;
+  count.value++;
+  console.log("count", count.value);
+  if (!talkState.talkState.endFlag) {
+    // 第一次按 Enter：跳过打字机效果，直接显示全部内容
+    window.clearInterval(talkState.talkState.inputingTimer);
+    talkState.talkState.input = talkState.talkState.content;
+    console.log(talkState.talkState);
+    talkState.talkState.endFlag = true;
+  } else {
+    // 第二次按 Enter：结束对话，清空内容
+    if (!talkState.talkState.isOnChoice) {
+      talkState.end(true);
+      talkState.talkState.endFlag = false;
+      talkState.talkState.inputingTimer = null;
+      talkState.talkState.input = "";
+      talkState.talkState.content = "";
+      talkState.end = () => { };
     } else {
-        // 第二次按 Enter：结束对话，清空内容
-        talkState.end(true);
-        talkState.talkState.endFlag = false;
-        talkState.talkState.inputingTimer = null;
-        talkState.talkState.input = "";
-        talkState.talkState.content = "";
-        talkState.end = () => {};
+      // 如果在选项状态，不做任何操作
+      talkState.end(true);
+      talkState.end = () => { };
     }
+
+  }
 };
 const unitNameSpeak = (unitName: string, content: string): Promise<void> => {
-    const units = UnitSystem.getInstance().getAllUnits();
-    for (const unit of units) {
-        if (unit.name === unitName) {
-            return unitSpeak(unit, content);
-        }
+  const units = UnitSystem.getInstance().getAllUnits();
+  for (const unit of units) {
+    if (unit.name === unitName) {
+      return unitSpeak(unit, content);
     }
-    return unitSpeak({ name: unitName } as Unit, content);
+  }
+  return unitSpeak({ name: unitName } as Unit, content);
 };
+
+// 表现层：角色选择（带可选对话文本）
+const unitChoose = async (
+  unit: Unit,
+  options: { text: string; value: any }[],
+  dialogText?: string
+): Promise<any> => {
+  currentUnit.value = unit; // 设置当前角色
+
+  // 如果提供了对话文本，先显示对话
+  if (dialogText) {
+    await new Promise<void>((resolve) => {
+      talkState.talkState.input = "";
+      talkState.talkState.endFlag = false;
+      talkState.talkState.content = dialogText;
+      talkState.talkState.isOnChoice = true;
+      talkState.end = resolve;
+      const timer = setInterval(() => {
+        const input: string = talkState.talkState.input;
+        let endIndex: number = input.length + 1;
+        if (endIndex > dialogText.length) {
+          endIndex = dialogText.length;
+          window.clearInterval(timer);
+          talkState.talkState.endFlag = true;
+        }
+        talkState.talkState.input = dialogText.substring(0, endIndex);
+      }, 50);
+      talkState.talkState.inputingTimer = timer;
+    });
+  }
+
+  // 显示选项并等待选择
+  return new Promise((resolve) => {
+    talkState.showOptions(options, (value: any) => {
+      // 只有在有对话文本时才清空对话内容
+      // 这样对话框会在选项显示期间保持显示
+      if (dialogText) {
+        talkState.talkState.input = "";
+        talkState.talkState.content = "";
+        talkState.talkState.endFlag = false;
+        talkState.talkState.isOnChoice = false;
+      }
+      currentUnit.value = null; // 选择完成后清除角色
+      resolve(value);
+    });
+  });
+};
+
+// 表现层：通过角色名称进行选择
+const unitNameChoose = (
+  unitName: string,
+  options: { text: string; value: any }[],
+  dialogText?: string
+): Promise<any> => {
+  const units = UnitSystem.getInstance().getAllUnits();
+  for (const unit of units) {
+    if (unit.name === unitName) {
+      return unitChoose(unit, options, dialogText);
+    }
+  }
+  return unitChoose({ name: unitName } as Unit, options, dialogText);
+};
+
 dramaSystem.unitSpeak = unitNameSpeak;
 dramaSystem.speak = speak;
 dramaSystem.CGstart = talkState.CGstart;
-dramaSystem.CGEnd =talkState.CGEnd;
+dramaSystem.CGEnd = talkState.CGEnd;
+const choose = async (options: { text: string; value: any }[]): Promise<any> => {
+  return new Promise((resolve) => {
+    talkState.showOptions(options, (value: any) => {
+      resolve(value);
+    });
+  });
+};
+dramaSystem.choose = choose;
+dramaSystem.unitChoose = unitNameChoose;
+// 选项处理逻辑
+const handleOptionClick = (index: number): void => {
+  talkState.selectOption(index);
+};
+
+const handleOptionHover = (index: number): void => {
+  talkState.selectedOption = index;
+};
+
 // 键盘事件处理
 const handleKeyDown = (event: KeyboardEvent): void => {
-    if (event.key === 'Enter') {
-        enterEnd();
+  // 如果有选项显示，处理选项选择
+  if (talkState.options.length > 0) {
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      talkState.selectedOption = Math.max(0, talkState.selectedOption - 1);
+    } else if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      talkState.selectedOption = Math.min(talkState.options.length - 1, talkState.selectedOption + 1);
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      talkState.selectOption(talkState.selectedOption);
     }
+  } else if (event.key === 'Enter') {
+    enterEnd();
+  }
 };
 
 // 暴露方法供外部调用
 defineExpose({
-    speak,
-    unitSpeak
+  speak,
+  unitSpeak,
+  unitChoose,
+  showOptions: talkState.showOptions
 });
 
 onMounted(() => {
-    // 监听 Enter 键，触发对话流程控制
-    window.addEventListener('keydown', handleKeyDown);
+  // 监听 Enter 键，触发对话流程控制
+  window.addEventListener('keydown', handleKeyDown);
 });
 </script>
 
@@ -174,13 +285,13 @@ onMounted(() => {
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -70%);
   width: 400px;
   height: 500px;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .portrait-container::before {
@@ -230,36 +341,48 @@ onMounted(() => {
   letter-spacing: 2px;
 }
 
-/* 对话框 */
-#talk-window {
+/* 对话框（位于角色头像下方） */
+.talk-window-portrait {
   position: absolute;
-  font-size: 18px;
-  background-image: url("@/assets/ui/test3.png");
-  background-size: 800px 100%;
+  top: v-bind('appSetting.height / 2 + 170 + "px"');
+  left: v-bind('appSetting.width / 2 + "px"');
+  transform: translateX(-50%);
+  width: auto;
+  min-width: 800px;
+  max-width: 1200px;
+  min-height: 250px;
+  background-image: url("@/assets/ui/testtalkUI.png");
+  background-size: 100% 100%;
+  pointer-events: auto;
   background-repeat: no-repeat;
-  background-position: center bottom;
-  padding: 15px 15px 15px 20px;
-  z-index: 10;
-  left: 400px;
-  top: 730px;
-  width: 800px;
-  height: 170px;
-  gap: 5px;
+  background-position: center center;
+  padding: 20px 40px 40px 40px;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.talk-content {
-  width: calc(100%);
-  /* 考虑左右内边距的影响 */
-  margin: 35px 0px 15px 0px;
-  /* 调整边距适应新的内边距 */
-  padding: 0px;
+.talk-content-portrait {
+  width: 100%;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
 }
 
-p {
+.talk-content-portrait p {
   font-family: ipix_12pxregular;
-  /* font-weight: bold; */
-  font-size: 18px;
-  color: #121212;
-  text-shadow: 1px 1px 1px rgba(201, 199, 199, 0.3);
+  font-size: 20px;
+  color: #1a1a1a;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.4);
+  line-height: 1.8;
+  margin: 0;
+  padding: 0 40px;
+
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  font-weight: normal;
 }
 </style>

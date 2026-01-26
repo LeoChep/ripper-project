@@ -1,13 +1,15 @@
 import { d1 } from "@/drama/d1";
-
-
+interface DialogOption {
+  text: string;
+  value: any;
+}
 export class DramaSystem {
   private dramaMap: Map<string, any> = new Map();
   static instance: DramaSystem;
   records = [] as { name: any; variables: unknown[] }[];
   interval = null as unknown as NodeJS.Timeout;
   dramaUse: any;
-  
+
   static getInstance(): DramaSystem {
     if (!DramaSystem.instance) {
       DramaSystem.instance = new DramaSystem();
@@ -57,15 +59,22 @@ export class DramaSystem {
       console.warn("No drama is currently playing.");
     }
   }
+
   speak = async (content: string): Promise<void> => {};
   unitSpeak = async (unitName: string, content: string): Promise<void> => {};
+  choose = async (options: DialogOption[]): Promise<any> => {};
+  unitChoose = async (
+    unitName: string,
+    options: DialogOption[],
+    dialogText?: string,
+  ): Promise<any> => {};
   // createUnit = async (
   //   unitName: string,
   //   x: number,
   //   y: number,
   // ): Promise<void> => {
   //   const unitJson = await getUnitTypeJsonFile(unitName);
-  //   const creature = createCreature(unitJson as any);   
+  //   const creature = createCreature(unitJson as any);
   //   const unitCreature = creature;
   //  const unit=createUnitFromUnitInfo({});
   //  unit.creature=unitCreature;

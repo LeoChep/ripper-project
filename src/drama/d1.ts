@@ -129,6 +129,10 @@ const startEvent = async () => {
     "npc牧师",
     "培罗在上，我感觉它们简直随时都可能冲出来攻击我们。  还请你们小心行事。",
   );
+  
+  await dramaSystem.unitChoose("npc牧师", [
+    { text: "你发现这种情况多久了？", value: "option1" },
+    { text: "它们有什么弱点吗？", value: "option2" },],"还有什么事吗")
 
   dramaSystem.CGEnd();
   CharacterOutCombatController.isUse = true;
