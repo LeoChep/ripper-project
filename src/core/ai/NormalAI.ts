@@ -2,7 +2,7 @@ import type { TiledMap } from "../MapClass";
 import { Unit } from "../units/Unit";
 import type { AIInterface } from "../type/AIInterface";
 import * as InitiativeController from "../system/InitiativeSystem";
-import { generateWays } from "../utils/PathfinderUtil";
+import { generateWaysAsync } from "../utils/PathfinderUtil";
 import * as UnitMove from "../action/UnitMove";
 import * as UnitMoveSystem from "../system/UnitMoveSystem";
 import * as AttackSystem from "../system/AttackSystem";
@@ -35,9 +35,11 @@ export class NormalAI implements AIInterface {
     const result: any = { canAttack: false };
     const unitX = Math.floor(unit.x / tileSize);
     const unitY = Math.floor(unit.y / tileSize);
-    const path = generateWays({
+    
+    // 使用异步版本，真正不阻塞渲染
+    const path = await generateWaysAsync({
       start: { x: unitX, y: unitY },
-      range: 99,
+      range: 5,
       checkFunction: (nx: number, ny: number, x: number, y: number) => {
         return findAttackTarget(nx, ny, x, y, unit, map, result);
       },
@@ -49,6 +51,7 @@ export class NormalAI implements AIInterface {
         }
       },
     });
+    
     console.log(
       "AI路径计算结果:",
       path,
@@ -232,6 +235,46 @@ function standAI(unit: Unit) {
     }
   }
 }
+
+function generateAttackRangeGrids(
+  grids: { x: number; y: number }[],
+  range: number,
+  size: string,
+  unitSettingx: number,
+  unitSettingy: number,
+): { [key: string]: boolean } {
+  const attakRangeWays: { [key: string]: boolean } = {};
+  
+  for (const grid of grids) {
+    const centerX = grid.x;
+    const centerY = grid.y;
+    
+    // 遍历以当前格子为中心的 range*range 矩阵
+    for (let dx = -range; dx <= range; dx++) {
+      for (let dy = -range; dy <= range; dy++) {
+        const targetX = centerX + dx;
+        const targetY = centerY + dy;
+        const key = `${targetX},${targetY}`;
+        
+        // 检查是否可通过
+        if (
+          AttackSystem.checkPassiableBySize(
+            size,
+            unitSettingx,
+            unitSettingy,
+            targetX,
+            targetY,
+          )
+        ) {
+          attakRangeWays[key] = true;
+        }
+      }
+    }
+  }
+  
+  return attakRangeWays;
+}
+
 function findAttackTarget(
   nx: number,
   ny: number,
@@ -276,19 +319,16 @@ function findAttackTarget(
   const grids = UnitSystem.getInstance().getGridsBySize(x, y, size);
   const unitSettingx = x;
   const unitSettingy = y;
-  const attakRangeWays = generateWays({
-    start: grids,
-    range: unit.creature?.attacks[0].range,
-    checkFunction: (x, y, prex, prey) => {
-      return AttackSystem.checkPassiableBySize(
-        size,
-        unitSettingx,
-        unitSettingy,
-        x,
-        y,
-      );
-    },
-  });
+  const range = unit.creature?.attacks[0].range ?? 1;
+  
+  const attakRangeWays = generateAttackRangeGrids(
+    grids,
+    range,
+    size,
+    unitSettingx,
+    unitSettingy,
+  );
+  
   Object.keys(attakRangeWays).forEach((key) => {
     const [x, y] = key.split(",").map(Number);
     const findUnitInThisPoint = UnitSystem.getInstance().findUnitByGridxy(x, y);
@@ -312,31 +352,7 @@ function findAttackTarget(
       result.target = findUnitInThisPoint;
     }
   });
-  // tiledMap.sprites.forEach((sprite) => {
-  //   if (sprite === unit||sprite.state === "dead") {
-  //     return; // 如果是自己就跳过
-  //   }
-  //   const spriteX = Math.floor(sprite.x / tileSize);
-  //   const spriteY = Math.floor(sprite.y / tileSize);
-  //   if (sprite.party !== unit.party) {
-  //     let attackable = checkEdges(tiledMap, spriteX, spriteY, x, y);
-  //     //检测敌人是否在这个触及内,并且无障碍
-  //     const dx = Math.abs(spriteX - x);
-  //     const dy = Math.abs(spriteY - y);
-  //     const dis = Math.max(dx, dy);
 
-  //     if (dis <= (unit.creature?.attacks[0].range ?? 1) && attackable) {
-  //       //找到了就不需要继续寻找了,并且这个点没别人
-  //       if (noUnit) {
-  //         continueFind = false;
-  //         result.canAttack = true;
-  //       }
-  //       result.x = x;
-  //       result.y = y;
-  //       result.target = sprite;
-  //     }
-  //   }
-  // });
   return continueFind;
 }
 
