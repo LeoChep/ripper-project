@@ -39,7 +39,7 @@ export class NormalAI implements AIInterface {
     // 使用异步版本，真正不阻塞渲染
     const path = await generateWaysAsync({
       start: { x: unitX, y: unitY },
-      range: 5,
+      range: 20,
       checkFunction: (nx: number, ny: number, x: number, y: number) => {
         return findAttackTarget(nx, ny, x, y, unit, map, result);
       },
