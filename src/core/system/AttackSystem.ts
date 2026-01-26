@@ -128,7 +128,7 @@ export const checkPassiableBySize = (
         if (edge.useable === false) {
           return; // 如果边不可用，则跳过
         }
-        // 获取两个格子的四个顶点和中点
+       
 
         // 构建范围数组
 

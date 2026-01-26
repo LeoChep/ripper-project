@@ -2,7 +2,7 @@ import type { TiledMap } from "../MapClass";
 import { Unit } from "../units/Unit";
 import type { AIInterface } from "../type/AIInterface";
 import * as InitiativeController from "../system/InitiativeSystem";
-import { generateWaysAsync } from "../utils/PathfinderUtil";
+import { generateWays, generateWaysAsync } from "../utils/PathfinderUtil";
 import * as UnitMove from "../action/UnitMove";
 import * as UnitMoveSystem from "../system/UnitMoveSystem";
 import * as AttackSystem from "../system/AttackSystem";
@@ -35,23 +35,37 @@ export class NormalAI implements AIInterface {
     const result: any = { canAttack: false };
     const unitX = Math.floor(unit.x / tileSize);
     const unitY = Math.floor(unit.y / tileSize);
-    
+
     // 使用异步版本，真正不阻塞渲染
-    const path = await generateWaysAsync({
-      start: { x: unitX, y: unitY },
-      range: 20,
-      checkFunction: (nx: number, ny: number, x: number, y: number) => {
-        return findAttackTarget(nx, ny, x, y, unit, map, result);
-      },
-      endCheckFunction: () => {
-        if (result.target && result.canAttack) {
-          return true;
-        } else {
-          return false;
-        }
-      },
-    });
-    
+    //先检查原地
+    const findAttackTargetByUnitResult = findAttackTargetByUnit(
+      unitX,
+      unitY,
+      unitX,
+      unitY,
+      unit,
+      map,
+      result,
+    );
+    let path: any = {};
+    if (result.canAttack) {
+      path[`${result.x},${result.y}`] = null;
+    } else {
+      path = await generateWaysAsync({
+        start: { x: unitX, y: unitY },
+        range: 20,
+        checkFunction: (nx: number, ny: number, x: number, y: number) => {
+          return findAttackTargetByUnit(nx, ny, x, y, unit, map, result);
+        },
+        endCheckFunction: () => {
+          if (result.target && result.canAttack) {
+            return true;
+          } else {
+            return false;
+          }
+        },
+      });
+    }
     console.log(
       "AI路径计算结果:",
       path,
@@ -60,7 +74,6 @@ export class NormalAI implements AIInterface {
     );
 
     if (result.target && path) {
-      // testDraw(result.x, result.y, "green");
       let lastStep = path[`${result.x},${result.y}`] as unknown as {
         x: number;
         y: number;
@@ -69,6 +82,7 @@ export class NormalAI implements AIInterface {
       let stepnum = 0;
       if (lastStep?.step) stepnum = lastStep.step;
       let rc = { x: result.x, y: result.y, step: stepnum };
+      console.log("AI最终路径点:", rc);
       //移动
       //计算可以移动到的格子
       //  rc = path[`${result.x},${result.y}`] as unknown as {
@@ -91,6 +105,13 @@ export class NormalAI implements AIInterface {
 
           if (isCantAttack) {
             //如果不能攻击,检查是否为拥堵情况
+            console.log(
+              "不能攻击，检测是否为拥堵情况:",
+              rc,
+              unitX,
+              unitY,
+              unit,
+            );
             let noUnit = false;
             while (!noUnit && rc) {
               //如果是拥堵情况，往前找到不拥堵位置为止
@@ -171,7 +192,12 @@ export class NormalAI implements AIInterface {
               }
             }
           }
-          console.log("AI停止路径:", path[`${result.x},${result.y}`], result);
+          console.log(
+            "AI停止路径:",
+            path[`${result.x},${result.y}`],
+            result,
+            path,
+          );
           if (rc) {
             await UnitMove.moveMovement(result.x, result.y, unit, path);
           }
@@ -244,18 +270,18 @@ function generateAttackRangeGrids(
   unitSettingy: number,
 ): { [key: string]: boolean } {
   const attakRangeWays: { [key: string]: boolean } = {};
-  
+
   for (const grid of grids) {
     const centerX = grid.x;
     const centerY = grid.y;
-    
+
     // 遍历以当前格子为中心的 range*range 矩阵
     for (let dx = -range; dx <= range; dx++) {
       for (let dy = -range; dy <= range; dy++) {
         const targetX = centerX + dx;
         const targetY = centerY + dy;
         const key = `${targetX},${targetY}`;
-        
+
         // 检查是否可通过
         if (
           AttackSystem.checkPassiableBySize(
@@ -271,8 +297,139 @@ function generateAttackRangeGrids(
       }
     }
   }
-  
+
   return attakRangeWays;
+}
+function findAttackTargetByUnitMap(
+  unit: Unit,
+  settingx: number,
+  settingy: number,
+  range: number,
+) {
+  const units = UnitSystem.getInstance().getAllUnits();
+  const ememyUnits: Unit[] = [];
+  units.forEach((checkUnit) => {
+    if (checkUnit.party !== unit.party && checkUnit.state !== "dead") {
+      ememyUnits.push(checkUnit);
+    }
+  });
+  const size = unit?.creature?.size ? unit.creature.size : "middle";
+  const result: any = { canAttack: false };
+  for (let enemyUnit of ememyUnits) {
+    // if (result.canAttack) {
+    //   break;
+    // }
+    const grids = UnitSystem.getInstance().getUnitGrids(enemyUnit);
+    for (const grid of grids) {
+      // if (result.canAttack) {
+      //   break;
+      // }
+      const passable = AttackSystem.checkPassiableBySize(
+        size,
+        settingx,
+        settingy,
+        grid.x,
+        grid.y,
+      );
+      const dis = Math.max(
+        Math.abs(grid.x - settingx),
+        Math.abs(grid.y - settingy),
+      );
+      if (passable && dis <= range) {
+        result.canAttack = true;
+        result.target = enemyUnit;
+      }
+      console.log(
+        "在AI地图中寻找攻击目标:",
+        unit,
+        enemyUnit,
+        grid,
+        passable,
+        dis,
+      );
+    }
+  }
+
+  return result;
+}
+function findAttackTargetByUnit(
+  nx: number,
+  ny: number,
+  x: number,
+  y: number,
+  unit: Unit,
+  tiledMap: TiledMap,
+  result: any,
+): boolean {
+  let passiable = true;
+  if (tiledMap) {
+    passiable = UnitMoveSystem.checkPassiable(
+      unit,
+      x * tileSize,
+      y * tileSize,
+      nx * tileSize,
+      ny * tileSize,
+      tiledMap,
+    );
+  }
+  if (!passiable) {
+    return false; // 如果不可通行，直接返回
+  }
+  let noUnit = true;
+  //判断是否有单位阻止你站在这里
+  const moveEndGrids = UnitSystem.getInstance().getGridsBySize(
+    nx,
+    ny,
+    unit.creature?.size ?? "middle",
+  );
+
+  for (let grid of moveEndGrids) {
+    const findUnit = UnitSystem.getInstance().findUnitByGridxy(grid.x, grid.y);
+    if (findUnit && findUnit !== unit && findUnit.state !== "dead") {
+      noUnit = false;
+    }
+  }
+  console.log("noUnit:", noUnit, moveEndGrids, nx, ny, unit);
+  //获得攻击范围内格子
+
+  const unitSettingx = nx;
+  const unitSettingy = ny;
+  const range = unit.creature?.attacks[0].range ?? 1;
+  //遍历格子
+  for (let grid of moveEndGrids) {
+    const findR = findAttackTargetByUnitMap(unit, grid.x, grid.y, range);
+
+    const findUnitInThisPoint = findR.target;
+
+    if (findUnitInThisPoint) {
+      if (
+        findUnitInThisPoint === unit ||
+        findUnitInThisPoint.state === "dead"
+      ) {
+        continue;
+      }
+      if (findUnitInThisPoint.party === unit.party) {
+        continue;
+      }
+
+      // 找到了单位
+      if (noUnit) {
+        result.x = unitSettingx;
+        result.y = unitSettingy;
+        result.target = findUnitInThisPoint;
+        result.canAttack = true;
+      }
+
+      result.x = unitSettingx;
+      result.y = unitSettingy;
+      result.target = findUnitInThisPoint;
+
+      console.log(unit, "AI找到攻击目标:", result, findUnitInThisPoint, unit);
+      break;
+    }
+  }
+
+  return true;
 }
 
 function findAttackTarget(
@@ -314,13 +471,14 @@ function findAttackTarget(
       noUnit = false;
     }
   }
+  console.log("noUnit:", noUnit, moveEndGrids, x, y, unit);
   //获得攻击范围内格子
   const size = unit?.creature?.size ? unit.creature.size : "middle";
   const grids = UnitSystem.getInstance().getGridsBySize(x, y, size);
   const unitSettingx = x;
   const unitSettingy = y;
   const range = unit.creature?.attacks[0].range ?? 1;
-  
+
   const attakRangeWays = generateAttackRangeGrids(
     grids,
     range,
@@ -328,10 +486,17 @@ function findAttackTarget(
     unitSettingx,
     unitSettingy,
   );
-  
+  console.log(unit, "AI攻击范围格子:", attakRangeWays);
   Object.keys(attakRangeWays).forEach((key) => {
+    console.log("ATTACKTANGEWAY'", key);
     const [x, y] = key.split(",").map(Number);
     const findUnitInThisPoint = UnitSystem.getInstance().findUnitByGridxy(x, y);
+    console.log(
+      unit,
+      unit.name + "AI检查攻击目标格子:" + key,
+      findUnitInThisPoint,
+    );
+
     if (findUnitInThisPoint) {
       if (
         findUnitInThisPoint === unit ||
@@ -342,11 +507,19 @@ function findAttackTarget(
       if (findUnitInThisPoint.party === unit.party) {
         return;
       }
+      if (findUnitInThisPoint)
+        console.log(
+          unit,
+          unit.name + "找到攻击目标:" + key + "!!!",
+
+          findUnitInThisPoint,
+        );
       // 找到了单位
       if (noUnit) {
         continueFind = false;
         result.canAttack = true;
       }
+      console.log(unit, "AI找到攻击目标:", findUnitInThisPoint, unit);
       result.x = unitSettingx;
       result.y = unitSettingy;
       result.target = findUnitInThisPoint;

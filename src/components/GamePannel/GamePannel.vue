@@ -43,6 +43,10 @@ import { createDoorAnimSpriteFromDoor } from "@/core/anim/DoorAnimSprite";
 import { UnitAnimSpirite } from "@/core/anim/UnitAnimSprite";
 import type { TiledMap } from "@/core/MapClass";
 const appSetting = envSetting.appSetting;
+
+// 测试功能开关：控制是否显示格子行列号
+const showGridNumbers = ref(false);
+
 onMounted(async () => {
   const app = new PIXI.Application();
   await app.init(appSetting);
@@ -284,6 +288,7 @@ const loadGameState = async () => {
     // 初始化地图视觉元素
     console.log("[changemap4] d1.loadTmj initByMap 前:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
     await initByMap(golbalSetting.map);
+    drawGrid(golbalSetting.app, golbalSetting.rlayers);
     console.log("[changemap4]  d1.loadTmj initByMap 后:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
     
     console.log("初始化地图完成:", golbalSetting.map);
@@ -467,7 +472,28 @@ const drawGrid = (app: any, rlayers: any) => {
     line.stroke({ width: 1, color: 0x000000, alpha: 1 });
     lineContainer.addChild(line);
   }
-  app.stage.addChild(lineContainer);
+
+  // 在每个格子中心显示行列号（测试功能，由 showGridNumbers 变量控制）
+  if (showGridNumbers.value) {
+    for (let col = 0; col < cols; col++) {
+      for (let row = 0; row < rows; row++) {
+        const text = new PIXI.Text({
+          text: `${col},${row}`,
+          style: {
+            fontSize: 12,
+            fill: 0xff0000,
+            align: 'center'
+          }
+        });
+        text.anchor.set(0.5, 0.5);
+        text.x = col * gridSize + gridSize / 2;
+        text.y = row * gridSize + gridSize / 2;
+        lineContainer.addChild(text);
+      }
+    }
+  }
+  if (golbalSetting.rootContainer)
+  golbalSetting.rootContainer.addChild(lineContainer);
   rlayers.lineLayer.attach(lineContainer);
 };
 </script>

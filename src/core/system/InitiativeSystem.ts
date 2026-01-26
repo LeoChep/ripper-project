@@ -105,7 +105,6 @@ export async function startCombatTurn() {
         InitiativeSheet[cursor].ready &&
         InitiativeSheet[cursor].roundNumber <= initiativeCursor.roundCount
       ) {
-      
         allNotReady = false;
         if (InitiativeSheet[cursor].initativeValue > maxInitiative) {
           initiativeCursor.pointAt = InitiativeSheet[cursor];
@@ -163,15 +162,15 @@ export async function startCombatTurn() {
           initiativeCursor.pointAt.owner.ai?.autoAction &&
           initiativeCursor.map
         ) {
-
           lookOn(
             initiativeCursor.pointAt.owner.x,
             initiativeCursor.pointAt.owner.y,
           );
-          initiativeCursor.pointAt.owner.ai.autoAction(
+           initiativeCursor.pointAt.owner.ai.autoAction(
             initiativeCursor.pointAt.owner,
             initiativeCursor.map,
           );
+          //  endTurn(initiativeCursor.pointAt.owner);
         }
       } else {
         //提醒玩家

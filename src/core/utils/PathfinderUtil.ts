@@ -36,11 +36,12 @@ export async function generateWaysAsync(generaWaysOptions: GeneraWaysOptions) {
   const endCheckFunction =
     generaWaysOptions.endCheckFunction || defultEndCheckFunction;
   const checkFunction = generaWaysOptions.checkFunction || defultCheckFunction;
-  
+
   const visited = new Set<string>();
   const queue: { x: number; y: number; step: number }[] = [];
-  const path: { [key: string]: { x: number; y: number; step: number } | null } = {};
-  
+  const path: { [key: string]: { x: number; y: number; step: number } | null } =
+    {};
+
   // 初始化起点
   if (Array.isArray(generaWaysOptions.start)) {
     for (const start of generaWaysOptions.start) {
@@ -55,39 +56,41 @@ export async function generateWaysAsync(generaWaysOptions: GeneraWaysOptions) {
     visited.add(`${startX},${startY}`);
     path[`${startX},${startY}`] = null;
   }
-  
+
   let processedCount = 0;
   const YIELD_INTERVAL = 30; // 每处理50个节点让出控制权
-  
+
   while (queue.length > 0) {
     const { x, y, step } = queue.shift()!;
 
-    if (step >= range) continue;
-    if (endCheckFunction()) continue;
-    
+    if (step > range) continue;
+    if (endCheckFunction()) break;
+
     // 八方向扩展
     for (let i = 0; i < DIRECTIONS.length; i++) {
       const dir = DIRECTIONS[i];
       const nx = x + dir.dx;
       const ny = y + dir.dy;
       const key = `${nx},${ny}`;
-      
+
       if (!visited.has(key) && checkFunction(nx, ny, x, y)) {
-        queue.push({ x: nx, y: ny, step: step + 1 });
         visited.add(key);
         path[key] = { x, y, step: step + 1 };
+        if (endCheckFunction()) break;
+        queue.push({ x: nx, y: ny, step: step + 1 });
+        console.log("添加路径节点:", key, path[key]);
       }
     }
-    
+
     // 定期让出控制权给渲染引擎
     processedCount++;
     if (processedCount >= YIELD_INTERVAL) {
       processedCount = 0;
       // 等待下一帧，让浏览器有机会渲染
-      await new Promise(resolve => setTimeout(resolve, 20));
+      await new Promise((resolve) => setTimeout(resolve, 20));
     }
   }
-  
+
   return path;
 }
 
@@ -127,14 +130,14 @@ export function generateWays(generaWaysOptions: GeneraWaysOptions) {
 
     if (step >= range) continue;
     if (endCheckFunction()) continue;
-    
+
     // 八方向扩展
     for (let i = 0; i < DIRECTIONS.length; i++) {
       const dir = DIRECTIONS[i];
       const nx = x + dir.dx;
       const ny = y + dir.dy;
       const key = `${nx},${ny}`;
-      
+
       if (!visited.has(key) && checkFunction(nx, ny, x, y)) {
         queue.push({ x: nx, y: ny, step: step + 1 });
         visited.add(key);

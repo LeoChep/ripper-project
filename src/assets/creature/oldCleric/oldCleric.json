@@ -50,6 +50,19 @@
     }
   },
   "equipment": [],
+  "attacks": [
+    {
+      "name": "圣耀击",
+      "type": "Ranged",
+      "action": "武器",
+      "range": 20,
+      "attackBonus": 6,
+      "damage": "1d8",
+      "target": "AC",
+      "effect": null,
+      "missEffect": null
+    }
+  ],
   "weapons": [
     {
       "name": "长剑",
