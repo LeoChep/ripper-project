@@ -77,7 +77,7 @@ onMounted(async () => {
   // 单位状态机更新循环
   setInterval(() => {
     const units = golbalSetting.map?.sprites;
-    console.log("单位状态机更新循环", units,golbalSetting);
+    console.log("单位状态机更新循环", units, golbalSetting);
     if (!units) return;
     units.forEach((unit) => {
       unit.stateMachinePack.doAction();
@@ -118,16 +118,16 @@ const initByMap = async (mapPassiable: any) => {
     const promise = generateAnimSprite(unit, container, rlayers, mapPassiable);
     createEndPromise.push(promise);
   });
-  
+
   if (createEndPromise.length > 0) await Promise.all(createEndPromise);
   // mapPassiable.sprites = units;
- console.log("所有单位创建完成:", units);
+  console.log("所有单位创建完成:", units);
   const characterStore = useCharacterStore();
   characterStore.clearCharacters();
   units.forEach((unit: any) => {
     if (unit.party === "player") {
       characterStore.addCharacter(unit);
-      console.log('characterStore',characterStore)
+      console.log('characterStore', characterStore)
     }
   });
 };
@@ -206,10 +206,12 @@ const addAnimSpriteUnit = (unit: any, container: any, rlayers: any, mapPassiable
   rlayers.spriteLayer.attach(animSpriteUnit);
   animSpriteUnit.eventMode = "static";
 
-  animSpriteUnit.on("click", (event: any) => {
+  animSpriteUnit.on("rightclick", (event: any) => {
     if (unit.creature) {
       // 这里可以触发选择事件，但为了保持简洁，暂时移除选择逻辑
       console.log("Clicked on unit:", unit.unitTypeName);
+      selectedCreature.value = unit.creature;
+      selectedUnit.value = unit;
     }
   });
   if (golbalSetting.spriteContainer) {
@@ -276,26 +278,26 @@ const loadGameState = async () => {
     console.log("[changemap1] 读档前重置地图为空对象", golbalSetting.map);
     golbalSetting.map = {} as TiledMap;
     console.log("[changemap1] 重置后:", golbalSetting.map);
-    
+
     // setDramaUse 会在 d1.ts 中加载并创建新的地图对象
- 
+
     console.log("[changemap3] setDramaUse 后, loadGameState 前:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
-   
+
     // 从存档恢复游戏状态（可能会更新 golbalSetting.map）
     await Saver.loadGameState(gameState);
     console.log("[changemap3] loadGameState 后:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
-    
+
     // 初始化地图视觉元素
     console.log("[changemap4] d1.loadTmj initByMap 前:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
     await initByMap(golbalSetting.map);
     drawGrid(golbalSetting.app, golbalSetting.rlayers);
     console.log("[changemap4]  d1.loadTmj initByMap 后:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
-    
+
     console.log("初始化地图完成:", golbalSetting.map);
-    
+
     DramaSystem.getInstance().play();
     AreaSystem.getInstance().rebuildAreas();
-    
+
     if (InitiativeSystem.isInBattle()) {
       CharacterCombatController.getInstance().inUse = true;
       console.log("进入战斗状态", InitiativeSystem);
@@ -312,10 +314,10 @@ const loadGameState = async () => {
         console.log("进入非战斗状态");
         // 使用 JSON 序列化来快照当前状态，避免控制台延迟展开导致的不一致
         console.log("进入非战斗状态 - 地图:", golbalSetting.map);
-       
+
       }
     }
-    console.log("恢复的地图数据:", golbalSetting.map,golbalSetting);
+    console.log("恢复的地图数据:", golbalSetting.map, golbalSetting);
     console.log("游戏状态已读取", gameState);
 
     // console.log("恢复的角色数据:", characterStore.characters);
@@ -493,7 +495,7 @@ const drawGrid = (app: any, rlayers: any) => {
     }
   }
   if (golbalSetting.rootContainer)
-  golbalSetting.rootContainer.addChild(lineContainer);
+    golbalSetting.rootContainer.addChild(lineContainer);
   rlayers.lineLayer.attach(lineContainer);
 };
 </script>
