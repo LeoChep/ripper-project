@@ -385,4 +385,69 @@ onMounted(() => {
   white-space: pre-wrap;
   font-weight: normal;
 }
+
+/* 选项容器样式 */
+.portrait-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+  width: 100%;
+  align-items: center;
+  border-top: 2px solid rgba(26, 26, 26, 0.2);
+  padding-top: 20px;
+}
+
+/* 单个选项样式 */
+.portrait-option-item {
+  position: relative;
+  width: 85%;
+  padding: 10px 30px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.15);
+  transition: all 0.2s ease;
+  text-align: left;
+  pointer-events: auto;
+}
+
+.portrait-option-item:hover,
+.portrait-option-item.selected {
+  background: rgba(26, 26, 26, 0.03);
+  border-bottom-color: rgba(26, 26, 26, 0.3);
+}
+
+.portrait-option-item.selected::before {
+  content: "▶";
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #1a1a1a;
+  font-size: 18px;
+  font-weight: bold;
+  animation: blink 1s infinite;
+}
+
+/* 选项文本样式 */
+.option-text {
+  font-family: ipix_12pxregular;
+  font-size: 20px;
+  color: #1a1a1a;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+  font-weight: bold;
+  letter-spacing: 1px;
+  line-height: 1.5;
+}
+
+/* 闪烁动画 */
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
 </style>
