@@ -1083,6 +1083,11 @@
                  "name":"npc\u7267\u5e08",
                  "properties":[
                         {
+                         "name":"friendly",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
                          "name":"name",
                          "type":"string",
                          "value":"oldCleric"
@@ -1101,8 +1106,8 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":250.666666666667,
-                 "y":249.333333333333
+                 "x":250.667,
+                 "y":249.333
                 }],
          "offsetx":4,
          "offsety":0,

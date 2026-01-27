@@ -23,6 +23,7 @@ export interface UnitOptions {
   unitTypeName: string;
   gid?: number;
   direction: number; // 方向，0-3 分别表示上、右、下、左
+  friendly?: boolean; // 是否友好（用于NPC互动等）
   traits?: Trait[];
   powers?: Power[];
 }
@@ -40,6 +41,7 @@ export class Unit {
   width: number;
   height: number;
   effects: any[] = []; // 特效数组
+  friendly: boolean = false; // 是否友好
   traits: Trait[];
   powers: Power[];
 
@@ -60,6 +62,8 @@ export class Unit {
     this.direction = options.direction;
     this.unitTypeName = options.unitTypeName;
     this.gid = options.gid;
+    // 如果party是player，默认friendly为true；否则使用传入的值或false
+    this.friendly = options.party === "player" ? true : (options.friendly ?? false);
     this.traits = options.traits || [];
     this.powers = options.powers || [];
 
@@ -136,6 +140,9 @@ export function createUnitFromMapSprite(obj: any): Unit {
   const directionProp = obj.properties?.find(
     (p: any) => p.name === "direction",
   );
+  const friendlyProp = obj.properties?.find(
+    (p: any) => p.name === "friendly",
+  );
   const unitInfo = {
     id: obj.id,
     name: obj.name,
@@ -147,6 +154,7 @@ export function createUnitFromMapSprite(obj: any): Unit {
     unitTypeName: unitTypeNameProp ? unitTypeNameProp.value : "",
     gid: obj.gid,
     direction: directionProp ? directionProp.value : 2, // 默认方向为 0
+    friendly: friendlyProp ? friendlyProp.value : false, // 默认不友好
   };
   const unit = createUnitFromUnitInfo(unitInfo);
 
@@ -164,6 +172,7 @@ export function createUnitFromUnitInfo(obj: any): Unit {
     unitTypeName: obj.unitTypeName,
     gid: obj.gid,
     direction: obj.direction, // 默认方向为 0
+    friendly: obj.friendly ?? false, // 默认不友好
   });
   if (unit.party !== "player") {
     unit.ai = new NormalAI();

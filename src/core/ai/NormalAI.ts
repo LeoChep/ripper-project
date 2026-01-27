@@ -411,6 +411,10 @@ function findAttackTargetByUnit(
       if (findUnitInThisPoint.party === unit.party) {
         continue;
       }
+      if(findUnitInThisPoint.party==='player' && unit.friendly ==true)
+      {
+        continue;
+      }
 
       // 找到了单位
       if (noUnit) {

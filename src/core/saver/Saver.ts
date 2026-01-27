@@ -43,6 +43,7 @@ export class Saver {
         name: sprite.name,
         unitTypeName: sprite.unitTypeName,
         party: sprite.party,
+        friendly: sprite.friendly,
         creature: CreatureSerializer.serializeCreature(sprite.creature),
       };
     });
@@ -86,6 +87,7 @@ export class Saver {
       if (savedSprite && savedSprite.creature) {
         sprite.party = savedSprite.party; // 确保有 party 属性
         sprite.unitTypeName = savedSprite.unitTypeName;
+        sprite.friendly = savedSprite.friendly ?? false; // 恢复friendly属性
         sprite.creature = savedSprite.creature;
         if (sprite.creature) {
           console.log("恢复的角色数据:", sprite.creature.buffs);
