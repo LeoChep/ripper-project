@@ -141,7 +141,7 @@ export async function startCombatTurn() {
       const currentParty = initiativeCursor.pointAt.owner.party;
       const shouldPlayAnim = initiativeCursor.lastParty !== currentParty;
       if (shouldPlayAnim) {
-        if (initiativeCursor.pointAt.owner.party === "player") {
+        if (initiativeCursor.pointAt.owner.friendly === true) {
           for (const func of playPlayerTurnAnnouncementAnimHandles) {
             await func(initiativeCursor.pointAt.owner);
           }
