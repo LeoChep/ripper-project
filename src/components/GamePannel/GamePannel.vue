@@ -210,8 +210,14 @@ const addAnimSpriteUnit = (unit: any, container: any, rlayers: any, mapPassiable
     if (unit.creature) {
       // 这里可以触发选择事件，但为了保持简洁，暂时移除选择逻辑
       console.log("Clicked on unit:", unit.unitTypeName);
-      selectedCreature.value = unit.creature;
-      selectedUnit.value = unit;
+      if (unit.party === "player") {
+        console.log("这是玩家角色，打开角色面板");
+        selectedCreature.value = unit.creature;
+        selectedUnit.value = unit;
+      } else {
+        console.log("这是非玩家角色，打开生物信息面板");
+      }
+
     }
   });
   if (golbalSetting.spriteContainer) {

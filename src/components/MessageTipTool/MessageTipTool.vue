@@ -1,23 +1,15 @@
 <template>
   <!-- 顶部提示窗体 -->
-  <div 
-    v-if="messageStore.message" 
-    class="message-tip-tool top-tip"
-    :class="{ 'fade-in': messageStore.message }"
-    :style="tipPosition"
-  >
+  <div v-show="displayFlag" class="message-tip-tool top-tip" :class="{ 'fade-in': displayFlag }"
+    :style="tipPosition">
     <div class="tip-content">
-      {{ messageStore.message }}
+      {{ displayMessage }}
     </div>
   </div>
 
   <!-- 底部显示窗体 -->
-  <div 
-    v-if="messageStore.bottomMessage" 
-    class="message-tip-tool bottom-tip"
-    :class="{ 'fade-in': messageStore.bottomMessage }"
-    :style="bottomTipPosition"
-  >
+  <div v-if="messageStore.bottomMessage" class="message-tip-tool bottom-tip"
+    :class="{ 'fade-in': messageStore.bottomMessage }" :style="bottomTipPosition">
     <div class="bottom-content">
       {{ messageStore.bottomMessage }}
     </div>
@@ -25,23 +17,57 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useMessageStore } from '@/stores/message'
+import { useInitiativeStore } from '@/stores/initiativeStore'
 import { appSetting } from '@/core/envSetting'
 
+import * as InitSystem from "@/core/system/InitiativeSystem";
+import { UnitSystem } from '@/core/system/UnitSystem';
 const messageStore = useMessageStore()
 
+const displayFlag=ref(false);
+// 计算要显示的消息
+const displayMessage = ref("")
+onMounted(() => {
+  // 初始化时清除消息
+  messageStore.clearMessages()
+  setInterval(() => {
+    if (messageStore.message!="") {
+      displayMessage.value = messageStore.message
+    }
+    else {
+      displayMessage.value = ""
+      const unit = InitSystem.getPointAtUnit();
+      if (unit) {
+
+        if (unit.party !== 'player') {
+          displayMessage.value = unit.creature?.name + `正在行动中`;
+        }
+      }
+    }
+
+    if (displayMessage.value!="")
+    {
+      displayFlag.value=true;
+    }
+    else
+    {
+      displayFlag.value=false;
+    }
+  }, 100) // 每10秒清除一次消息
+})
 // 计算基于游戏窗体的位置 - 顶部提示
 const tipPosition = computed(() => {
   // 游戏窗体靠左显示，所以左边界从0开始
   const gameLeft = 0
   // 计算游戏窗体内的中心位置
   const gameCenterX = gameLeft + appSetting.width / 2  // 1600 / 2 = 800px
-  
+
   return {
     left: `${gameCenterX}px`,
     transform: 'translateX(-50%)',
-    top: '80px'
+    top: '120px'
   }
 })
 
@@ -50,7 +76,7 @@ const bottomTipPosition = computed(() => {
   const gameLeft = 0
   const gameCenterX = gameLeft + appSetting.width / 2  // 1600 / 2 = 800px
   const gameBottom = appSetting.height - 220  // 距离游戏窗体底部200
-  
+
   return {
     left: `${gameCenterX}px`,
     transform: 'translateX(-50%)',
@@ -111,6 +137,7 @@ const bottomTipPosition = computed(() => {
     opacity: 0;
     transform: translateX(-50%) translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
@@ -127,6 +154,7 @@ const bottomTipPosition = computed(() => {
     opacity: 0;
     transform: translateX(-50%) translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
@@ -135,6 +163,7 @@ const bottomTipPosition = computed(() => {
 
 /* 响应式设计 - 基于游戏窗体尺寸 */
 @media (max-width: 1600px) {
+
   .top-tip .tip-content,
   .bottom-tip .bottom-content {
     font-size: 14px;
