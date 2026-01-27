@@ -36,7 +36,8 @@ class D1 extends Drama {
       [
         { text: "你发现这种情况多久了？", value: "option1" },
         { text: "它们有什么弱点吗？", value: "option2" },
-        { text: "这座神殿原本是哪个神明的", value: "option3" },
+        { text: "这座神殿原本是哪个神明的？", value: "option3" },
+        { text: "你能提供什么帮助吗？", value: "option4" },
       ],
       "还有什么事吗",
     );
@@ -55,6 +56,11 @@ class D1 extends Drama {
       await unitSpeak(
         "npc牧师",
         "这座神殿原本时祭拜古拉姆的……但是你也知道，古拉姆已经不在了，各种意义上，因此神殿也废弃了。",
+      );
+          if (ch1 == "option4")
+      await unitSpeak(
+        "npc牧师",
+        "我能做的并不多，但是我会尽我所能使用神术法术来攻击它们。但是别指望太多，我毕竟不是战斗人员。",
       );
     CGEnd();
   };

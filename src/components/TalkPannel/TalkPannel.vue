@@ -4,18 +4,18 @@
     <div v-if="currentUnit" class="character-portrait">
       <div class="portrait-container">
         <img v-if="avatarUrl" :src="avatarUrl" :alt="currentUnit.name" class="portrait-image" />
-        <div class="portrait-name-box">
-          <span class="portrait-name">{{ currentUnit.creature?.name }}</span>
-        </div>
-
-
       </div>
     </div>
 
     <!-- 对话框（无角色时使用） -->
     <!-- 嵌入式选项 -->
     <!-- 对话框（位于角色头像下方） -->
-    <div v-if="showFlag || talkState.options.length > 0" class="talk-window-portrait">
+    <div v-if="showFlag || talkState.options.length > 0" 
+         ref="talkWindowRef"
+         class="talk-window-portrait">
+      <div v-if="currentUnit" class="dialog-character-name">
+        <span>{{ currentUnit.creature?.name || currentUnit.name }}</span>
+      </div>
       <div v-if="showFlag" class="talk-content-portrait">
         <p>{{ talkContent }}</p>
       </div>
@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed, ref, type Ref, type ComputedRef, watch } from 'vue'
+import { onMounted, computed, ref, type Ref, type ComputedRef, watch, nextTick } from 'vue'
 import { useTalkStateStore } from '@/stores/talkStateStore'
 import { useCharacterStore } from '@/stores/characterStore'
 import { DramaSystem } from '@/core/system/DramaSystem';
@@ -48,6 +48,8 @@ const showFlag: Ref<boolean> = ref(false);
 const count: Ref<number> = ref(0);
 const dramaSystem = DramaSystem.getInstance();
 const currentUnit: Ref<Unit | null> = ref(null);
+const talkWindowRef: Ref<HTMLElement | null> = ref(null);
+const talkWindowTop: Ref<number> = ref(appSetting.height / 2 + 170);
 
 const talkContent: ComputedRef<string> = computed(() => {
   return talkState.talkState.input;
@@ -58,6 +60,33 @@ watch(
     showFlag.value = newVal.length > 0;
   }
 );
+
+// 监听对话框内容变化，动态调整位置
+watch(
+  [() => talkState.talkState.input, () => talkState.options.length],
+  async () => {
+    await nextTick();
+    adjustTalkWindowPosition();
+  }
+);
+
+// 调整对话框位置，防止超出下边界
+const adjustTalkWindowPosition = (): void => {
+  if (!talkWindowRef.value) return;
+  
+  const windowHeight = talkWindowRef.value.offsetHeight;
+  const defaultTop = appSetting.height / 2 + 170;
+  const windowBottom = defaultTop + windowHeight;
+  
+  // 如果对话框底部超出屏幕，则向上移动
+  if (windowBottom > appSetting.height) {
+    const overflow = windowBottom - appSetting.height;
+    talkWindowTop.value = defaultTop - overflow - 10; // 额外留10px边距
+  } else {
+    talkWindowTop.value = defaultTop;
+  }
+};
+
 const avatarUrl: ComputedRef<string> = computed(() => {
   if (currentUnit.value && currentUnit.value.unitTypeName) {
     return getUnitAvatar(currentUnit.value.unitTypeName);
@@ -318,33 +347,28 @@ onMounted(() => {
   z-index: 1;
 }
 
-.portrait-name-box {
-  position: absolute;
-  bottom: 15px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(30, 30, 30, 0.9));
-  padding: 10px 30px;
-  border-radius: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
-  z-index: 3;
+/* 对话框内角色名称 */
+.dialog-character-name {
+  width: 100%;
   text-align: center;
+  padding: 0 40px;
+  margin-bottom: 10px;
 }
 
-.portrait-name {
+.dialog-character-name span {
   font-family: ipix_12pxregular;
-  font-size: 24px;
-  color: #ffffff;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
-  font-weight: bold;
+  font-size: 22px;
+  color: #1a1a1a;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+  /* font-weight: 600; */
+  font-style: italic;
   letter-spacing: 2px;
 }
 
 /* 对话框（位于角色头像下方） */
 .talk-window-portrait {
   position: absolute;
-  top: v-bind('appSetting.height / 2 + 170 + "px"');
+  top: v-bind('talkWindowTop + "px"');
   left: v-bind('appSetting.width / 2 + "px"');
   transform: translateX(-50%);
   width: auto;
@@ -356,11 +380,11 @@ onMounted(() => {
   pointer-events: auto;
   background-repeat: no-repeat;
   background-position: center center;
-  padding: 20px 40px 40px 40px;
-  z-index: 4;
+  padding: 20px 40px 60px 40px;
+  z-index: 10;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .talk-content-portrait {
@@ -370,6 +394,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   min-height: 40px;
+  flex: 1;
 }
 
 .talk-content-portrait p {
