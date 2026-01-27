@@ -156,8 +156,14 @@ export async function startCombatTurn() {
 
       //设置选中角色
       if (initiativeCursor.pointAt.owner.party !== "player") {
-        //如果是npc,则自动行动        // 显示敌方回合效果
-        TurnEffectAnim.showEnemyEffect(initiativeCursor.pointAt.owner);
+        //如果是npc,则自动行动
+        // 根据是否友军显示不同的回合效果
+        if (initiativeCursor.pointAt.owner.friendly) {
+          TurnEffectAnim.showFriendlyEffect(initiativeCursor.pointAt.owner);
+        } else {
+          TurnEffectAnim.showEnemyEffect(initiativeCursor.pointAt.owner);
+        }
+        
         if (
           initiativeCursor.pointAt.owner.ai?.autoAction &&
           initiativeCursor.map
@@ -203,9 +209,13 @@ export async function startCombatTurn() {
 
 export async function endTurn(unit: Unit, isDelay = false) {
   CharacterController.removeSelectEffect();
-  // 移除敌方回合效果
+  // 移除回合效果（根据单位类型移除对应效果）
   if (unit.party !== "player") {
-    TurnEffectAnim.removeEnemyEffect(unit);
+    if (unit.friendly) {
+      TurnEffectAnim.removeFriendlyEffect(unit);
+    } else {
+      TurnEffectAnim.removeEnemyEffect(unit);
+    }
   }
   if (unit.initiative && isDelay === false) {
     unit.initiative.ready = false;

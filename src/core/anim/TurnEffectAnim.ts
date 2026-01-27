@@ -1,15 +1,55 @@
 import * as PIXI from "pixi.js";
 import { Unit } from "../units/Unit";
 import { EnemyTurnUnitAnimSprite } from "./EnemyTurnUnitAnimSprite";
+import { FriendlyTurnUnitAnimSprite } from "./FriendlyTurnUnitAnimSprite";
 import { SelectAnimSprite } from "./SelectAnimSprite";
 import { zIndexSetting } from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 
 /**
  * 回合效果动画控制器
- * 负责管理回合时的视觉效果（敌方红色边框、我方选中箭头）
+ * 负责管理回合时的视觉效果（敌方红色边框、友军绿色边框、我方选中箭头）
  */
 export class TurnEffectAnim {
+  /**
+   * 显示友军回合效果（绿色友好边框）
+   * @param unit 要显示效果的单位
+   */
+  static showFriendlyEffect(unit: Unit) {
+    if (!this.validateUnit(unit)) return;
+
+    const effectContainer = this.getOrCreateEffectContainer(unit.animUnit!);
+
+    // 检查是否已经存在 friendlyTurn 效果
+    const existingEffect = this.findEffect<FriendlyTurnUnitAnimSprite>(
+      effectContainer,
+      "friendlyTurn"
+    );
+
+    if (existingEffect) {
+      existingEffect.activate();
+      return;
+    }
+
+    // 获取单位的实际尺寸
+    const size = unit.animUnit!.visisualSizeValue;
+    const friendlyTurnSprite = new FriendlyTurnUnitAnimSprite(size.width, size.height);
+    friendlyTurnSprite.label = "friendlyTurn";
+    friendlyTurnSprite.activate();
+
+    this.attachEffect(effectContainer, friendlyTurnSprite);
+  }
+
+  /**
+   * 移除友军回合效果
+   * @param unit 要移除效果的单位
+   */
+  static removeFriendlyEffect(unit: Unit) {
+    this.removeEffect(unit, "friendlyTurn", (sprite) => {
+      (sprite as FriendlyTurnUnitAnimSprite).deactivate();
+    });
+  }
+
   /**
    * 显示敌方回合效果（红色警示边框）
    * @param unit 要显示效果的单位
