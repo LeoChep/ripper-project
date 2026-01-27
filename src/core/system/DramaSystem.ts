@@ -1,5 +1,7 @@
+import type { Unit } from "@/core/units/Unit";
 import { d1 } from "@/drama/d1";
 import type { Drama } from "@/drama/drama";
+import { UnitSystem } from "./UnitSystem";
 interface DialogOption {
   text: string;
   value: any;
@@ -9,7 +11,7 @@ export class DramaSystem {
   static instance: DramaSystem;
   records = [] as { name: any; variables: unknown[] }[];
   interval = null as unknown as NodeJS.Timeout;
-  dramaUse: any;
+  dramaUse: Drama | null = null;
 
   static getInstance(): DramaSystem {
     if (!DramaSystem.instance) {
@@ -26,8 +28,8 @@ export class DramaSystem {
     this.dramaMap.set(name, drama);
   }
 
-  getDrama(name: string): Drama | undefined {
-    return this.dramaMap.get(name);
+  getDrama(name: string): Drama | null {
+    return this.dramaMap.get(name) || null;
   }
 
   async setDramaUse(dramaName: string): Promise<void> {
@@ -51,6 +53,8 @@ export class DramaSystem {
       }
     }, 100);
     this.interval = interval;
+
+    this.dramaUse?.loadInit();
   }
   stop(): void {
     clearInterval(this.interval);
@@ -192,6 +196,19 @@ export class DramaSystem {
       });
     });
     return { use: this.dramaUse?.name, recorders };
+  }
+  addInteractionHandle = (unit: string, event: (...args: any[]) => {}) => {};
+  addInteraction(unitname: string, event: (...args: any[]) => {}) {
+    this.addInteractionHandle(unitname, event);
+    console.log("为单位添加交互事件:", unitname);
+    const unit = UnitSystem.getInstance().getUnitByName(unitname);
+    if (unit) {
+      console.log("找到单位，添加事件监听器:", unit);
+      unit.animUnit?.on("click", (...args: any[]) => {
+        console.log("触发交互事件:", unitname);
+        event(...args);
+      });
+    }
   }
 }
 const initDramaMap = () => {

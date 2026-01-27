@@ -153,4 +153,9 @@ export class UnitSystem {
     if (!map) return [];
     return map.sprites;
   }
+  getUnitByName(name: string): Unit | null {
+    const map = golbalSetting.map;
+    if (!map) return null;
+    return map.sprites.find((sprite: Unit) => sprite.name === name) || null;
+  }
 }

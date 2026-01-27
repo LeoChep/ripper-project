@@ -27,5 +27,39 @@ export abstract class Drama {
     dramaSystem.setVariable(this, key, value);
   }
 
+  protected CGstart = (): void => {
+    const dramaSystem = DramaSystem.getInstance();
+    dramaSystem.CGstart();
+  }
+
+  protected CGEnd = (): void => {
+    const dramaSystem = DramaSystem.getInstance();
+    dramaSystem.CGEnd();
+  }
+
+  protected unitSpeak = async (unitName: string, text: string): Promise<void> => {
+    const dramaSystem = DramaSystem.getInstance();
+    await dramaSystem.unitSpeak(unitName, text);
+  }
+
+  protected speak = async (text: string): Promise<void> => {
+    const dramaSystem = DramaSystem.getInstance();
+    await dramaSystem.speak(text);
+  }
+
+  protected unitChoose = async (
+    unitName: string,
+    options: { text: string; value: string }[],
+    prompt?: string,
+  ): Promise<string> => {
+    const dramaSystem = DramaSystem.getInstance();
+    return await dramaSystem.unitChoose(unitName, options, prompt);
+  }
+  protected addInteraction=(unitName:string,event:(...args:any[])=>{})=>{
+    
+    const dramaSystem = DramaSystem.getInstance();
+    dramaSystem.addInteraction(unitName,event);
+  }
+  loadInit(): void {}
   abstract play(): void;
 }
