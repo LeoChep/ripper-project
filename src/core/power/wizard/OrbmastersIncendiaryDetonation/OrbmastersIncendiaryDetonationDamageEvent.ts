@@ -55,6 +55,7 @@ export class OrbmastersIncendiaryDetonationDamageEvent extends BasedAbstractEven
       if (grid.x === unitX && grid.y === unitY) {
         // 触发燃烧效果
         const damage = 2;
+          console.log("造成燃烧伤害触发:", this.area, handlerUnit);
         takeDamage(damage, handlerUnit);
         createDamageAnim(damage.toString(), handlerUnit);
         this.handledUnit.push(handlerUnit);

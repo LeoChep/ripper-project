@@ -152,7 +152,7 @@ setInterval(() => {
   for (const u of units.value) {
     if (u.state === 'dead') {
       // 找到当前单位，更新其信息
-      const unitElement = document.getElementById(`init-${lastUnitId.value}`);
+      const unitElement = document.getElementById(`init-${u.id}`);
       if (unitElement)
         unitElement.style.display = "none";
     }
