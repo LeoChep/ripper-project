@@ -11,9 +11,16 @@
   <!-- <FormationEditorButton /> -->
   <!-- 保存和读取按钮 -->
   <div class="game-controls">
-    <button class="save-button" @click="saveGameState">保存游戏</button>
-    <button class="load-button" @click="loadGameState">读取游戏</button>
+    <button class="save-button" @click="openSaveDialog">保存游戏</button>
+    <button class="load-button" @click="openLoadDialog">读取游戏</button>
   </div>
+  <!-- 存档对话框 -->
+  <SaveLoadDialog 
+    :mode="dialogMode" 
+    :isVisible="showDialog"
+    @close="closeDialog"
+    @select="handleSlotSelect"
+  />
 </template>
 
 <script setup lang="ts">
@@ -21,6 +28,7 @@ import FormationEditorButton from "@/components/TeamPannel/FormationEditorButton
 import MessageTipTool from "@/components/MessageTipTool/MessageTipTool.vue";
 import CreatureInfo from "../CharacterDetailPannel/CreatureInfo.vue";
 import TalkPannel from "../TalkPannel/TalkPannel.vue";
+import SaveLoadDialog from "../SaveLoadDialog/SaveLoadDialog.vue";
 import { ref, onMounted } from "vue";
 import { getAnimActionSpriteJsonFile, getAnimMetaJsonFile, getAnimSpriteImgUrl, getMapAssetFile } from "@/utils/utils";
 import * as PIXI from "pixi.js";
@@ -227,19 +235,54 @@ const addAnimSpriteUnit = (unit: any, container: any, rlayers: any, mapPassiable
 const selectedCreature = ref(null);
 const selectedUnit = ref(null);
 
-// 添加保存游戏状态的方法
-const saveGameState = () => {
+// 存档对话框相关状态
+const showDialog = ref(false);
+const dialogMode = ref<'save' | 'load'>('save');
+
+// 打开保存对话框
+const openSaveDialog = () => {
+  dialogMode.value = 'save';
+  showDialog.value = true;
+};
+
+// 打开读取对话框
+const openLoadDialog = () => {
+  dialogMode.value = 'load';
+  showDialog.value = true;
+};
+
+// 关闭对话框
+const closeDialog = () => {
+  showDialog.value = false;
+};
+
+// 处理栏位选择
+const handleSlotSelect = (slotId: number) => {
+  if (dialogMode.value === 'save') {
+    saveGameState(slotId);
+  } else {
+    loadGameState(slotId);
+  }
+  closeDialog();
+};
+
+// 添加保存游戏状态的方法（修改为支持栏位）
+const saveGameState = (slotId: number) => {
   try {
     Saver.saveGameState();
     const gameState = Saver.gameState;
-    // 下载 GameState 文件
+    
+    // 保存到指定栏位
+    localStorage.setItem(`gameState_slot_${slotId}`, JSON.stringify(gameState));
+    
+    // 可选：同时下载 GameState 文件作为备份
     const dataStr = JSON.stringify(gameState, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
 
     const downloadLink = document.createElement("a");
     downloadLink.href = url;
-    downloadLink.download = `gameState_${new Date()
+    downloadLink.download = `gameState_slot${slotId}_${new Date()
       .toISOString()
       .replace(/[:.]/g, "-")}.json`;
     document.body.appendChild(downloadLink);
@@ -250,27 +293,27 @@ const saveGameState = () => {
     URL.revokeObjectURL(url);
 
     // 显示保存成功消息
-    console.log("游戏状态已保存", gameState);
-    alert("游戏已保存并下载到本地!");
+    console.log(`游戏状态已保存到栏位 ${slotId}`, gameState);
+    alert(`游戏已保存到栏位 ${slotId}！`);
   } catch (error) {
     console.error("保存游戏状态失败:", error);
     alert("保存失败，请重试!");
   }
 };
 
-// 添加读取游戏状态的方法
-const loadGameState = async () => {
+// 添加读取游戏状态的方法（修改为支持栏位）
+const loadGameState = async (slotId: number) => {
   try {
-    const savedState = localStorage.getItem("gameState");
+    const savedState = localStorage.getItem(`gameState_slot_${slotId}`);
     if (!savedState) {
-      alert("没有找到存档文件!");
+      alert(`栏位 ${slotId} 没有存档文件！`);
       return;
     }
     const gameState = JSON.parse(savedState);
 
     // 确认是否要读取存档
     const confirmLoad = confirm(
-      `是否要读取存档?\n保存时间: ${new Date(gameState.timestamp).toLocaleString()}`
+      `是否要读取栏位 ${slotId} 的存档?\n保存时间: ${new Date(gameState.timestamp).toLocaleString()}`
     );
     if (!confirmLoad) {
       return;
@@ -324,10 +367,10 @@ const loadGameState = async () => {
       }
     }
     console.log("恢复的地图数据:", golbalSetting.map, golbalSetting);
-    console.log("游戏状态已读取", gameState);
+    console.log(`栏位 ${slotId} 游戏状态已读取`, gameState);
 
     // console.log("恢复的角色数据:", characterStore.characters);
-    alert("游戏已读取!");
+    alert(`栏位 ${slotId} 游戏已读取！`);
   } catch (error) {
     console.error("读取游戏状态失败:", error);
     alert("读取失败，存档文件可能已损坏!");
