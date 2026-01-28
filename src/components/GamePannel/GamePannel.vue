@@ -51,6 +51,7 @@ import { createDoorAnimSpriteFromDoor } from "@/core/anim/DoorAnimSprite";
 import { UnitAnimSpirite } from "@/core/anim/UnitAnimSprite";
 import type { TiledMap } from "@/core/MapClass";
 import type { Unit } from "@/core/units/Unit";
+import { g } from "vitest/dist/chunks/suite.d.FvehnV49.js";
 const appSetting = envSetting.appSetting;
 
 // 测试功能开关：控制是否显示格子行列号
@@ -357,10 +358,15 @@ const loadGameState = async (slotId: number) => {
       console.log("进入战斗状态", InitiativeSystem);
       const unit = InitiativeSystem.getPointAtUnit();
       if (unit) {
-        console.log("loadInitRecord selectCharacter", unit);
+        if (unit.party === "player") {
+           console.log("loadInitRecord selectCharacter", unit);
         CharacterController.selectCharacter(unit);
         CharacterCombatController.getInstance().selectedCharacter = unit;
         CharacterCombatController.getInstance().useMoveController();
+        }else{
+         unit.ai?.autoAction(unit,golbalSetting.map);
+        }
+    
       }
     } else {
       if (golbalSetting.rlayers && golbalSetting.rootContainer && golbalSetting.map) {
