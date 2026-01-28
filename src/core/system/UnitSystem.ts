@@ -29,6 +29,9 @@ export class UnitSystem {
     const gridy = y;
     // 在所有单位中查找与给定坐标匹配的单位
     const target = golbalSetting.map.sprites.find((sprite) => {
+      if (sprite.state === "dead") {
+        return false; // 跳过已死亡的单位
+      }
       const spriteX = Math.floor(sprite.x / 64);
       const spriteY = Math.floor(sprite.y / 64);
       const size = sprite.creature.size;
@@ -41,6 +44,7 @@ export class UnitSystem {
       );
 
       // 检查
+      
       return inrange;
     });
     return target;
