@@ -50,6 +50,7 @@ import { AnimMetaJson } from "@/core/anim/AnimMetaJson";
 import { createDoorAnimSpriteFromDoor } from "@/core/anim/DoorAnimSprite";
 import { UnitAnimSpirite } from "@/core/anim/UnitAnimSprite";
 import type { TiledMap } from "@/core/MapClass";
+import type { Unit } from "@/core/units/Unit";
 const appSetting = envSetting.appSetting;
 
 // 测试功能开关：控制是否显示格子行列号
@@ -122,7 +123,11 @@ const initByMap = async (mapPassiable: any) => {
 
   // 创建单位
   let createEndPromise: Promise<any>[] = [];
-  units.forEach((unit: any) => {
+  units.forEach((unit: Unit) => {
+    if (unit.state=="dead") {
+      alert("跳过已死亡单位的创建");
+      return;
+    }
     const promise = generateAnimSprite(unit, container, rlayers, mapPassiable);
     createEndPromise.push(promise);
   });
@@ -218,7 +223,7 @@ const addAnimSpriteUnit = (unit: any, container: any, rlayers: any, mapPassiable
     if (unit.creature) {
       // 这里可以触发选择事件，但为了保持简洁，暂时移除选择逻辑
       console.log("Clicked on unit:", unit.unitTypeName);
-      if (unit.party === "player") {
+      if (unit.party === "player"|| unit.party !== 'true') {
         console.log("这是玩家角色，打开角色面板");
         selectedCreature.value = unit.creature;
         selectedUnit.value = unit;

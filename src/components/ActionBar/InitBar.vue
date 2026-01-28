@@ -71,7 +71,7 @@ InitSystem.loadBattleUIhandles.push(() => {
   initiativeStore.initializeInitiative();
 });
 InitSystem.removeFromInitiativehandles.push(() => {
-  initiativeStore.initializeInitiative();
+  // initiativeStore.initializeInitiative();
 });
 // 假设 store 中有 sortedUnits，包含 { id, avatar, name } 按先攻顺序排列
 const units = computed(() => initiativeStore.sortedUnits);
@@ -149,6 +149,14 @@ setInterval(() => {
 
   const currentUnitId = InitSystem.getPointAtUnit()?.id || null;
   const unit = UnitSystem.getInstance().getUnitById(currentUnitId?.toString() || '');
+  for (const u of units.value) {
+    if (u.state === 'dead') {
+      // 找到当前单位，更新其信息
+      const unitElement = document.getElementById(`init-${lastUnitId.value}`);
+      if (unitElement)
+        unitElement.style.display = "none";
+    }
+  }
   if (isAllLoaded.value && currentUnitId && scrollContainer.value) {
     if (lastUnitId.value) {
       const lastUnitElement = document.getElementById(`init-${lastUnitId.value}`);
@@ -206,6 +214,16 @@ function onDelayStart(unit: any, event?: MouseEvent) {
   }
   isDragging.value = true;
   draggedUnitId.value = unit.id;
+  const unitIns = UnitSystem.getInstance().getUnitById(unit.id.toString());
+  if (!unitIns) {
+    return;
+  }
+  if (unitIns.party !== 'player') {
+    // 只能拖动玩家单位
+    isDragging.value = false;
+    draggedUnitId.value = null;
+    return;
+  }
   const currentIndex = units.value.findIndex((u) => u.id === unit.id);
   draggedFromIndex.value = currentIndex;
   dropTargetIndex.value = currentIndex; // 默认目标位置为当前位置
