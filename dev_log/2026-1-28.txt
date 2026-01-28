@@ -1,0 +1,43 @@
+1、修复友方NPC在路径判断和借机攻击上的错误处理 √
+   - 在NormalAI.ts中增加友方判断逻辑（6行新增代码）
+   - 在MoveSeletor.ts中修复路径判断错误
+   - 在UnitMoveSystem.ts中增加友方移动判断（11行新增代码）
+   - 在UnitSystem.ts中调整借机攻击判断
+   - 在GamePannel.vue中修复相关交互
+
+2、修复读档后死亡状态未保存的问题 √
+   - 在InitBar.vue中增加死亡状态检查和显示逻辑（20行新增代码）
+   - 在GamePannel.vue中增加死亡单位的过滤和处理（9行新增代码）
+   - 在Saver.ts中增加死亡状态的序列化支持（2行新增代码）
+
+3、增加死亡时移除机制 √
+   - 在InitBar.vue中增加死亡单位移除逻辑（5行新增代码）
+   - 在InitiativeSystem.ts中完善主动权系统的单位移除功能（14行新增代码）
+   - 在d1.ts剧情文件中增加相关处理（1行新增代码）
+
+4、修复图片路径的bug √
+   - 在InitBar.vue中修复头像路径问题
+   - 在CharacterPannel.vue中修复角色面板图片路径
+   - 在TalkPannel.vue中修复对话面板图片路径
+
+5、增加存档导入功能 √
+   - 在SaveLoadDialog.vue中实现存档导入/导出功能（140行新增代码）
+   - 支持将存档导出为文件
+   - 支持从文件导入存档
+
+6、存档使用栏位制度 √
+   - 在GamePannel.vue中重构存档加载逻辑（73行修改）
+   - 在SaveLoadDialog.vue中实现存档栏位管理系统（344行新增代码）
+   - 支持多个存档栏位的创建、保存、加载和删除
+
+7、压缩资源图片 √
+   - 新增图片压缩脚本（compress-images.js, compress-iceRay-images.js）
+   - 新增文件大小检查脚本（check-size.js）
+   - 压缩FireballExplosion特效帧图片（73帧，大幅减少文件体积）
+   - 压缩iceRay特效帧图片（78帧，大幅减少文件体积）
+   - 创建原始图片备份文件夹（FireballExplosion_backup, iceRay_backup）
+   - 新增sharp图片处理依赖包
+
+8、修复存档系统bug - unit的state状态未被持久化 √
+   - 在Saver.ts的saveGameState()方法中添加state字段保存
+   - 在Saver.ts的loadUnit()方法中添加state字段恢复，默认值为"idle"
