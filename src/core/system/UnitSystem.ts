@@ -142,7 +142,8 @@ export class UnitSystem {
   checkOverlapAt(unit: Unit, x: number, y: number) {
     const grids = this.getGridsBySize(x,y, unit.creature?.size);
     for (const grid of grids) {
-      if (this.findUnitByGridxy( grid.x, grid.y)) {
+      const targetUnit = this.findUnitByGridxy( grid.x, grid.y);
+      if (targetUnit && targetUnit.state !== 'dead') {
         return true;
       }
     }

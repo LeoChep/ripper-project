@@ -125,7 +125,7 @@ const initByMap = async (mapPassiable: any) => {
   let createEndPromise: Promise<any>[] = [];
   units.forEach((unit: Unit) => {
     if (unit.state=="dead") {
-      alert("跳过已死亡单位的创建");
+
       return;
     }
     const promise = generateAnimSprite(unit, container, rlayers, mapPassiable);

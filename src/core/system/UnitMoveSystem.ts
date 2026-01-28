@@ -96,9 +96,20 @@ export const checkPassiable = (
           point.x,
           point.y
         );
+        //TODO 需要专门抽象出函数方法来判断阵营是否友好
+        let isFriendlyNpc = false
+        if (checkUnit?.friendly&&unit.party==="player") {
+          isFriendlyNpc = true;
+        }
+        if (unit.friendly&& checkUnit?.party==="player") {
+          isFriendlyNpc = true;
+        }
+
+        
         if (
           checkUnit &&
           unit.party !== checkUnit.party &&
+          !isFriendlyNpc &&
           checkUnit.state !== "dead"
         ) {
           passiable = false; // 如果有敌人阻挡，则不可通行

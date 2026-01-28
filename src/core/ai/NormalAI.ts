@@ -236,6 +236,12 @@ export class NormalAI implements AIInterface {
       console.warn("AI owner has no attacks defined.");
       return;
     }
+    //TODO 需要专门抽象出函数方法来判断阵营是否友好
+    let isFriendlyNpc = false
+    if (targetUnit?.party=='player'&&this.owner.friendly) {
+      isFriendlyNpc = true;
+    }
+    if (isFriendlyNpc) return;
     const enemyX = Math.floor(targetUnit.x / tileSize);
     const enemyY = Math.floor(targetUnit.y / tileSize);
     console.log(`AI单位尝试攻击: (${enemyX}, ${enemyY})`);

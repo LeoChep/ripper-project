@@ -67,7 +67,7 @@ export class MoveSelector {
       if (!UnitSystem.getInstance().checkOverlapAt(unit, targetXY.x, targetXY.y)) {
         this.sizeGraphics = this.drawSizeGrids(targetXY, unit, "blue");
       } else {
-        this.sizeGraphics = this.drawSizeGrids(targetXY, unit, "red");
+        // this.sizeGraphics = this.drawSizeGrids(targetXY, unit, "red");
       }
     });
     // 点击其他地方移除移动范围
