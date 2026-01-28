@@ -2,7 +2,7 @@ import * as InitiativeController from "@/core/system/InitiativeSystem";
 import { CharacterOutCombatController } from "@/core/controller/CharacterOutCombatController";
 import { golbalSetting } from "@/core/golbalSetting";
 import { Drama } from "./drama";
-
+import * as InitSystem from "@/core/system/InitiativeSystem";
 class D1 extends Drama {
   constructor() {
     super("d1", "这是一个测试剧情");
@@ -30,6 +30,7 @@ class D1 extends Drama {
   }
   cricleTalk = async () => {
     const { CGstart, unitSpeak, speak, unitChoose, CGEnd } = this;
+    if (InitSystem.isInBattle()){return}
     CGstart();
     const ch1 = await unitChoose(
       "npc牧师",
