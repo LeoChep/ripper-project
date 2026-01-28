@@ -51,7 +51,7 @@ import { createDoorAnimSpriteFromDoor } from "@/core/anim/DoorAnimSprite";
 import { UnitAnimSpirite } from "@/core/anim/UnitAnimSprite";
 import type { TiledMap } from "@/core/MapClass";
 import type { Unit } from "@/core/units/Unit";
-import { g } from "vitest/dist/chunks/suite.d.FvehnV49.js";
+
 const appSetting = envSetting.appSetting;
 
 // 测试功能开关：控制是否显示格子行列号
