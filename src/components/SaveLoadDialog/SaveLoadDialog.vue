@@ -5,13 +5,29 @@
         <h2>{{ mode === 'save' ? '保存游戏' : '读取游戏' }}</h2>
         <button class="close-button" @click="close">✕</button>
       </div>
+      <div class="dialog-toolbar" v-if="mode === 'load'">
+        <button class="import-button" @click="triggerFileImport">
+          📁 导入存档文件
+        </button>
+        <input 
+          ref="fileInputRef" 
+          type="file" 
+          accept=".json" 
+          style="display: none" 
+          @change="handleFileImport"
+        />
+      </div>
       <div class="dialog-content">
         <div class="save-slots">
           <div 
             v-for="slot in slots" 
             :key="slot.id" 
             class="save-slot"
-            :class="{ 'has-save': slot.hasSave, 'empty': !slot.hasSave }"
+            :class="{ 
+              'has-save': slot.hasSave, 
+              'empty': !slot.hasSave,
+              'import-mode': importedGameState !== null && mode === 'load'
+            }"
             @click="selectSlot(slot.id)"
           >
             <div class="slot-header">
@@ -39,6 +55,9 @@
         </div>
       </div>
       <div class="dialog-footer">
+        <div v-if="importedGameState && mode === 'load'" class="import-hint">
+          📥 已加载外部存档，请选择要导入到的栏位
+        </div>
         <button class="cancel-button" @click="close">取消</button>
       </div>
     </div>
@@ -46,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 
 interface SaveSlot {
   id: number;
@@ -67,6 +86,8 @@ const emit = defineEmits<{
 }>();
 
 const slots = ref<SaveSlot[]>([]);
+const fileInputRef = ref<HTMLInputElement | null>(null);
+const importedGameState = ref<any>(null);
 
 const TOTAL_SLOTS = 10;
 
@@ -117,11 +138,23 @@ const selectSlot = (slotId: number) => {
       emit('select', slotId);
     }
   } else {
-    // 读取模式：只能选择有存档的栏位
-    if (slot?.hasSave) {
-      emit('select', slotId);
+    // 读取模式：可以选择有存档的栏位，或者导入到该栏位
+    if (importedGameState.value) {
+      // 导入模式：将外部文件保存到选中的栏位
+      if (slot?.hasSave) {
+        if (confirm(`栏位 ${slotId} 已有存档，是否覆盖为导入的存档？`)) {
+          saveImportedGameState(slotId);
+        }
+      } else {
+        saveImportedGameState(slotId);
+      }
     } else {
-      alert('该栏位没有存档！');
+      // 正常读取模式
+      if (slot?.hasSave) {
+        emit('select', slotId);
+      } else {
+        alert('该栏位没有存档！');
+      }
     }
   }
 };
@@ -147,14 +180,64 @@ const formatTime = (timestamp?: number) => {
 };
 
 const close = () => {
+  importedGameState.value = null; // 关闭时清除导入的数据
   emit('close');
 };
 
+// 触发文件选择
+const triggerFileImport = () => {
+  fileInputRef.value?.click();
+};
+
+// 处理文件导入
+const handleFileImport = async (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+  
+  if (!file) return;
+  
+  try {
+    const text = await file.text();
+    const gameState = JSON.parse(text);
+    
+    // 验证是否是有效的游戏存档
+    if (!gameState.timestamp) {
+      alert('无效的存档文件！');
+      return;
+    }
+    
+    importedGameState.value = gameState;
+    alert(`成功读取存档文件！\n保存时间: ${new Date(gameState.timestamp).toLocaleString()}\n\n请选择要导入到哪个栏位。`);
+    
+    // 重置文件输入，以便可以重复导入同一文件
+    target.value = '';
+  } catch (error) {
+    console.error('导入存档失败:', error);
+    alert('导入失败！文件格式可能不正确。');
+  }
+};
+
+// 保存导入的游戏状态到指定栏位
+const saveImportedGameState = (slotId: number) => {
+  if (!importedGameState.value) return;
+  
+  try {
+    localStorage.setItem(`gameState_slot_${slotId}`, JSON.stringify(importedGameState.value));
+    alert(`存档已导入到栏位 ${slotId}！`);
+    importedGameState.value = null;
+    loadSlotInfo(); // 刷新栏位信息
+    emit('close');
+  } catch (error) {
+    console.error('保存导入的存档失败:', error);
+    alert('保存失败！');
+  }
+};
+
 // 监听 isVisible 变化，重新加载栏位信息
-import { watch } from 'vue';
 watch(() => props.isVisible, (newVal) => {
   if (newVal) {
     loadSlotInfo();
+    importedGameState.value = null; // 打开时清除之前导入的数据
   }
 });
 </script>
@@ -220,6 +303,37 @@ watch(() => props.isVisible, (newVal) => {
   color: #fff;
 }
 
+.dialog-toolbar {
+  padding: 10px 20px;
+  border-bottom: 1px solid #444;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.import-button {
+  padding: 8px 20px;
+  background: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.import-button:hover {
+  background: #1976d2;
+  transform: translateY(-1px);
+}
+
+.import-button:active {
+  background: #1565c0;
+  transform: translateY(0);
+}
+
 .dialog-content {
   padding: 20px;
   overflow-y: auto;
@@ -240,6 +354,7 @@ watch(() => props.isVisible, (newVal) => {
   cursor: pointer;
   transition: all 0.2s;
   min-height: 100px;
+  position: relative;
 }
 
 .save-slot:hover {
@@ -247,6 +362,16 @@ watch(() => props.isVisible, (newVal) => {
   background: #404040;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.save-slot.import-mode {
+  border-color: #2196f3;
+  background: #404040;
+}
+
+.save-slot.import-mode:hover {
+  border-color: #42a5f5;
+  box-shadow: 0 4px 8px rgba(33, 150, 243, 0.5);
 }
 
 .save-slot.has-save {
@@ -314,7 +439,14 @@ watch(() => props.isVisible, (newVal) => {
   padding: 15px 20px;
   border-top: 2px solid #444;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.import-hint {
+  color: #2196f3;
+  font-size: 14px;
+  font-weight: bold;
 }
 
 .cancel-button {
