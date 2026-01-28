@@ -48,6 +48,7 @@ import { lookOn } from '@/core/anim/LookOnAnim'
 import { useTalkStateStore } from '@/stores/talkStateStore'
 import { CharacterCombatController } from "@/core/controller/CharacterCombatController";
 import * as InitiativeSystem from "@/core/system/InitiativeSystem";
+import test3Img from '@/assets/ui/test3.png';
 const characters = ref([])
 const hp = ref(0)
 const maxHp = ref(0)
@@ -216,7 +217,7 @@ function selectCharacter(character, index) {
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    background-image: url('@/assets/ui/test3.png');
+    background-image: v-bind('"url(" + test3Img + ")"');
     background-size: 800px 100%;
     background-repeat: no-repeat;
     background-position: center bottom;

@@ -582,7 +582,7 @@ function isDropTarget(originalIndex: number) {
   width: 60px;
   height: 30px;
   padding: 0;
-  background: url('@/assets/ui/delay-button.png') no-repeat;
+  background: v-bind('"url(" + delayButtonImg + ")"') no-repeat;
   background-size: 100% 100%;
   color: transparent;
   border: none;

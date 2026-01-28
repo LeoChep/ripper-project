@@ -41,6 +41,8 @@ import type { Unit } from '@/core/units/Unit';
 import { UnitSystem } from '@/core/system/UnitSystem';
 import { getUnitAvatar } from '@/utils/utils';
 import { appSetting } from '@/core/envSetting';
+import initAvatarBoxImg from '@/assets/ui/init-avtarbox2.png';
+import testTalkUIImg from '@/assets/ui/testtalkUI.png';
 
 const talkState = useTalkStateStore();
 const characterStore = useCharacterStore();
@@ -330,7 +332,7 @@ onMounted(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url("@/assets/ui/init-avtarbox2.png");
+  background-image: v-bind('"url(" + initAvatarBoxImg + ")"');
   background-size: 100% 100%;
   background-repeat: no-repeat;
   z-index: 2;
@@ -375,7 +377,7 @@ onMounted(() => {
   min-width: 800px;
   max-width: 1200px;
   min-height: 250px;
-  background-image: url("@/assets/ui/testtalkUI.png");
+  background-image: v-bind('"url(" + testTalkUIImg + ")"');
   background-size: 100% 100%;
   pointer-events: auto;
   background-repeat: no-repeat;
