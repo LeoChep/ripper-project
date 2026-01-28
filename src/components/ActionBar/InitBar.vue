@@ -70,6 +70,9 @@ cursorImg.src = initCursorImg;
 InitSystem.loadBattleUIhandles.push(() => {
   initiativeStore.initializeInitiative();
 });
+InitSystem.removeFromInitiativehandles.push(() => {
+  initiativeStore.initializeInitiative();
+});
 // 假设 store 中有 sortedUnits，包含 { id, avatar, name } 按先攻顺序排列
 const units = computed(() => initiativeStore.sortedUnits);
 const currentUnit = computed(() => initiativeStore.getOwner);
@@ -337,7 +340,7 @@ function onDelayEnd(e: MouseEvent) {
     return;
   }
   //使用delay控制器完成延迟操作
-  CharacterCombatDelayControlle.getInstence().resolve({ unitId: draggedUnitId.value, delayToNumber:delayToNumber });
+  CharacterCombatDelayControlle.getInstence().resolve({ unitId: draggedUnitId.value, delayToNumber: delayToNumber });
 
   // 重新初始化store中的数据
   initiativeStore.initializeInitiative();

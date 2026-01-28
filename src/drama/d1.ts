@@ -107,6 +107,7 @@ class D1 extends Drama {
     if (!this.map) {
       return;
     }
+    this.setVariable("inCombat1", true);
     InitiativeController.setMap(this.map);
     const initCombatPromise = InitiativeController.addUnitsToInitiativeSheet(
       this.map.sprites,

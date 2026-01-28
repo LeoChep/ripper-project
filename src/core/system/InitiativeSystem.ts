@@ -61,6 +61,7 @@ export async function addToInitiativeSheet(unit: Unit) {
   InitiativeSheet.push(initiative);
 }
 
+export const removeFromInitiativehandles = [] as any[];
 export function removeFromInitiativeSheet(unit: Unit) {
   const initiative = unit.initiative;
   //从Initiative中移除initiative
@@ -69,6 +70,9 @@ export function removeFromInitiativeSheet(unit: Unit) {
   const index = InitiativeSheet.indexOf(initiative);
   if (index !== -1) {
     InitiativeSheet.splice(index, 1);
+    removeFromInitiativehandles.forEach((func) => {
+      func(unit);
+    });
   }
   unit.initiative = undefined;
   initiative.owner = null;
@@ -78,7 +82,11 @@ export function removeFromInitiativeSheet(unit: Unit) {
   //遍历sheet
   let haveEnemy = false;
   InitiativeSheet.forEach((item) => {
-    if (item.owner?.party !== "player") {
+    if (
+      item.owner?.party !== "player" &&
+      item.owner?.state !== "dead" &&
+      item.owner?.friendly !== true
+    ) {
       haveEnemy = true;
     }
   });
@@ -163,7 +171,7 @@ export async function startCombatTurn() {
         } else {
           TurnEffectAnim.showEnemyEffect(initiativeCursor.pointAt.owner);
         }
-        
+
         if (
           initiativeCursor.pointAt.owner.ai?.autoAction &&
           initiativeCursor.map
@@ -172,7 +180,7 @@ export async function startCombatTurn() {
             initiativeCursor.pointAt.owner.x,
             initiativeCursor.pointAt.owner.y,
           );
-           initiativeCursor.pointAt.owner.ai.autoAction(
+          initiativeCursor.pointAt.owner.ai.autoAction(
             initiativeCursor.pointAt.owner,
             initiativeCursor.map,
           );
