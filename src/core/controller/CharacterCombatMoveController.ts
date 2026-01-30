@@ -1,6 +1,7 @@
 import { ModifierSystem } from './../system/ModifierSystem';
 import * as PIXI from "pixi.js";
 import { Unit } from "../units/Unit";
+import { MessageTipSystem } from "../system/MessageTipSystem";
 import * as UnitMoveSystem from "../system/UnitMoveSystem";
 
 import { generateWays } from "../utils/PathfinderUtil";
@@ -129,7 +130,7 @@ export class CharCombatMoveController {
         }
       }
     } else if (isCancel) {
-      const useConfirm = confirm("是否结束回合？");
+      const useConfirm = await MessageTipSystem.getInstance().confirm("是否结束回合？");
       if (!useConfirm) {
         
         return;

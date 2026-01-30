@@ -8,6 +8,16 @@ export class MessageTipSystem {
     const store = useMessageStore();
     this.store = store;
   }
+  confirm = (text: string) => {
+    const promise = new Promise<boolean>((resolve) => {
+      this.store.showConfirmDialog({
+        message: text,
+        onConfirm: () => resolve(true),
+        onCancel: () => resolve(false),
+      });
+    });
+    return promise;
+  };
 
   static getInstance() {
     if (!MessageTipSystem.instance) {
@@ -26,7 +36,7 @@ export class MessageTipSystem {
   }
   setBottomMessage(message: string): void {
     this.store.setBottomMessage(message);
-  } 
+  }
   clearBottomMessage(): void {
     this.store.clearBottomMessage();
   }

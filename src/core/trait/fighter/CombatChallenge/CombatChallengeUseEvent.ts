@@ -4,6 +4,7 @@ import { Marked } from "@/core/buff/Marked";
 import type { EventSerializeData } from "@/core/event/EventSerializeData";
 import { EventSerializer } from "@/core/event/EventSerializer";
 import { BasedAbstractEvent, BasedEventSerializer } from "@/core/event/BasedAbstractEvent";
+import { MessageTipSystem } from "@/core/system/MessageTipSystem";
 import { golbalSetting } from "@/core/golbalSetting";
 import { BattleEvenetSystem } from "@/core/system/BattleEventSystem";
 import {
@@ -69,7 +70,7 @@ export class CombatChallengeUseEvent extends BasedAbstractEvent {
         const dy = Math.abs(attackerY - unitT);
         if (dx <= 1 && dy <= 1) {
           if (this.owner.party === "player") {
-            const userChoice = confirm(
+            const userChoice = await MessageTipSystem.getInstance().confirm(
               `单位 ${this.owner.name} 可以使用一个即时中断对它进行一次近战基本攻击，是否执行？`
             );
             let chooseReolve: (value?: void) => void = () => {};

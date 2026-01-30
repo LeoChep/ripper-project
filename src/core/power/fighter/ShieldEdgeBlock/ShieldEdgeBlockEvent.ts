@@ -3,6 +3,7 @@ import { ShieldEdgeBlock } from "./ShieldEdgeBlock";
 
 import { attackMovementToUnit } from "@/core/action/UnitAttack";
 import { Marked } from "@/core/buff/Marked";
+import { MessageTipSystem } from "@/core/system/MessageTipSystem";
 import type { EventSerializeData } from "@/core/event/EventSerializeData";
 import { EventSerializer } from "@/core/event/EventSerializer";
 import {
@@ -72,13 +73,14 @@ export class ShieldEdgeBlockEvent extends BasedAbstractEvent {
           if (this.owner.party === "player") {
             let text;
             if (attackCheckResult.hit) {
-              text = attacker.name + "的攻击命中，";
+              text = attacker.creature?.name + "的攻击命中，";
             }
             if (!attackCheckResult.hit) {
-              text = attacker.name + "的攻击失手，";
+              text = attacker.creature?.name + "的攻击失手，";
             }
-            const userChoice = confirm(
-              text + `单位 ${this.owner.name} 可以使用盾缘反击对，是否执行？`
+   
+            const userChoice = await MessageTipSystem.getInstance().confirm(
+              text + `单位 ${this.owner.name} 可以使用盾缘反击，是否执行？`
             );
             let chooseReolve: (value?: unknown) => void = () => {};
             const choosePromise = new Promise((resolve) => {

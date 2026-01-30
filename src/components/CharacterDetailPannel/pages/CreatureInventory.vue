@@ -144,6 +144,7 @@ import type { Creature } from '@/core/units/Creature';
 import type { Unit } from '@/core/units/Unit';
 import type { Item } from '@/core/item/Item';
 import { ItemType, ItemRarity } from '@/core/item/ItemInterface';
+import { MessageTipSystem } from '@/core/system/MessageTipSystem';
 
 const props = defineProps<{
   unit: Unit | null;
@@ -258,12 +259,12 @@ const equipItem = (item: Item) => {
 };
 
 // 丢弃道具
-const dropItem = (item: Item) => {
+const dropItem = async (item: Item) => {
   if (!props.unit) {
     return;
   }
   
-  const confirmed = confirm(`确定要丢弃 ${item.name} (x${item.stackCount}) 吗？`);
+  const confirmed = await MessageTipSystem.getInstance().confirm(`确定要丢弃 ${item.name} (x${item.stackCount}) 吗？`);
   if (confirmed) {
     props.unit.removeItem(item.uid);
     console.log('丢弃道具:', item.name);

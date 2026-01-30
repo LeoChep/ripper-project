@@ -29,6 +29,7 @@ import MessageTipTool from "@/components/MessageTipTool/MessageTipTool.vue";
 import CreatureInfo from "../CharacterDetailPannel/CreatureInfo.vue";
 import TalkPannel from "../TalkPannel/TalkPannel.vue";
 import SaveLoadDialog from "../SaveLoadDialog/SaveLoadDialog.vue";
+import { MessageTipSystem } from "@/core/system/MessageTipSystem";
 import { ref, onMounted } from "vue";
 import { getAnimActionSpriteJsonFile, getAnimMetaJsonFile, getAnimSpriteImgUrl, getMapAssetFile } from "@/utils/utils";
 import * as PIXI from "pixi.js";
@@ -263,13 +264,16 @@ const closeDialog = () => {
 };
 
 // 处理栏位选择
-const handleSlotSelect = (slotId: number) => {
+const handleSlotSelect = async (slotId: number) => {
   if (dialogMode.value === 'save') {
     saveGameState(slotId);
+    closeDialog();
   } else {
-    loadGameState(slotId);
+    const success = await loadGameState(slotId);
+    if (success) {
+      closeDialog();
+    }
   }
-  closeDialog();
 };
 
 // 添加保存游戏状态的方法（修改为支持栏位）
@@ -308,21 +312,21 @@ const saveGameState = (slotId: number) => {
 };
 
 // 添加读取游戏状态的方法（修改为支持栏位）
-const loadGameState = async (slotId: number) => {
+const loadGameState = async (slotId: number): Promise<boolean> => {
   try {
     const savedState = localStorage.getItem(`gameState_slot_${slotId}`);
     if (!savedState) {
       alert(`栏位 ${slotId} 没有存档文件！`);
-      return;
+      return false;
     }
     const gameState = JSON.parse(savedState);
 
     // 确认是否要读取存档
-    const confirmLoad = confirm(
+    const confirmLoad = await MessageTipSystem.getInstance().confirm(
       `是否要读取栏位 ${slotId} 的存档?\n保存时间: ${new Date(gameState.timestamp).toLocaleString()}`
     );
     if (!confirmLoad) {
-      return;
+      return false;
     }
     //
     DramaSystem.getInstance().stop();
@@ -382,9 +386,11 @@ const loadGameState = async (slotId: number) => {
 
     // console.log("恢复的角色数据:", characterStore.characters);
     alert(`栏位 ${slotId} 游戏已读取！`);
+    return true;
   } catch (error) {
     console.error("读取游戏状态失败:", error);
     alert("读取失败，存档文件可能已损坏!");
+    return false;
   }
 };
 const clear = () => {

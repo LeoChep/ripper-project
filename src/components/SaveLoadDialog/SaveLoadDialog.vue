@@ -66,6 +66,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
+import { MessageTipSystem } from '@/core/system/MessageTipSystem';
 
 interface SaveSlot {
   id: number;
@@ -125,13 +126,13 @@ const loadSlotInfo = () => {
   slots.value = slotList;
 };
 
-const selectSlot = (slotId: number) => {
+const selectSlot = async (slotId: number) => {
   const slot = slots.value.find(s => s.id === slotId);
   
   if (props.mode === 'save') {
     // 保存模式：任何栏位都可以选择
     if (slot?.hasSave) {
-      if (confirm(`栏位 ${slotId} 已有存档，是否覆盖？`)) {
+      if (await MessageTipSystem.getInstance().confirm(`栏位 ${slotId} 已有存档，是否覆盖？`)) {
         emit('select', slotId);
       }
     } else {
@@ -142,7 +143,7 @@ const selectSlot = (slotId: number) => {
     if (importedGameState.value) {
       // 导入模式：将外部文件保存到选中的栏位
       if (slot?.hasSave) {
-        if (confirm(`栏位 ${slotId} 已有存档，是否覆盖为导入的存档？`)) {
+        if (await MessageTipSystem.getInstance().confirm(`栏位 ${slotId} 已有存档，是否覆盖为导入的存档？`)) {
           saveImportedGameState(slotId);
         }
       } else {
@@ -159,8 +160,8 @@ const selectSlot = (slotId: number) => {
   }
 };
 
-const deleteSlot = (slotId: number) => {
-  if (confirm(`确定要删除栏位 ${slotId} 的存档吗？此操作不可恢复！`)) {
+const deleteSlot = async (slotId: number) => {
+  if (await MessageTipSystem.getInstance().confirm(`确定要删除栏位 ${slotId} 的存档吗？此操作不可恢复！`)) {
     localStorage.removeItem(`gameState_slot_${slotId}`);
     loadSlotInfo();
   }

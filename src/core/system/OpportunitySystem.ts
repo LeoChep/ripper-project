@@ -2,6 +2,7 @@ import { tileSize } from "./../envSetting";
 import type { Unit } from "../units/Unit";
 import { checkPassiable } from "./AttackSystem";
 import { golbalSetting } from "../golbalSetting";
+import { MessageTipSystem } from "./MessageTipSystem";
 import { InitiativeSheet } from "./InitiativeSystem";
 import { attackMovementToUnit } from "../action/UnitAttack";
 import { WeaponSystem } from "./WeaponSystem";
@@ -14,7 +15,7 @@ export class OpportunitySystem {
   }
   static getOpportunityUnit(
     startMoveGrids: { x: number; y: number }[],
-    targetUnit: Unit
+    targetUnit: Unit,
   ): Unit[] {
     const opportunityUnits = [] as Unit[];
     InitiativeSheet.forEach((checkInit) => {
@@ -57,7 +58,7 @@ export class OpportunitySystem {
       let isInrange = false;
       console.log(
         `检查单位 ${checkUnit.name} 是否可以触发借机: `,
-        isInRangeFaze
+        isInRangeFaze,
       );
       const grids = startMoveGrids;
       if (isInRangeFaze) {
@@ -80,7 +81,7 @@ export class OpportunitySystem {
       for (let i = 0; i < opportunityUnits.length; i++) {
         await OpportunitySystem.opportunityHandle(
           targetUnit,
-          opportunityUnits[i]
+          opportunityUnits[i],
         );
       }
       resolve();
@@ -89,34 +90,37 @@ export class OpportunitySystem {
   }
   static opportunityHandle(
     targetUnit: Unit,
-    opportunityUnit: Unit
+    opportunityUnit: Unit,
   ): Promise<void> {
     if (opportunityUnit.party === "player") {
-      return new Promise<void>((resolve) => {
+      return new Promise<void>(async (resolve) => {
         const attack = WeaponSystem.getInstance().createWeaponAttack(
           opportunityUnit,
-          opportunityUnit.creature?.weapons?.[0] as Weapon
+          opportunityUnit.creature?.weapons?.[0] as Weapon,
         );
         if (attack) {
-          const userChoice = confirm(
-            `单位 ${opportunityUnit.name} 可以触发借机攻击，是否执行？`
+          // alert(`单位 ${opportunityUnit.name} 可以对 ${targetUnit.name} 触发借机攻击`);
+          const confirm = MessageTipSystem.getInstance().confirm(
+            `单位 ${opportunityUnit.name} 可以触发借机攻击，是否执行？`,
           );
-          if (userChoice) {
-            // 执行借机攻击
+          confirm.then((res) => {
+            if (res) {
+              // 执行借机攻击
 
-            attackMovementToUnit(
-              targetUnit,
-              opportunityUnit,
-              attack,
-              golbalSetting.map
-            ).then(() => {
+              attackMovementToUnit(
+                targetUnit,
+                opportunityUnit,
+                attack,
+                golbalSetting.map,
+              ).then(() => {
+                resolve();
+              });
+            } else {
+              // 用户选择不执行借机攻击
+              console.log(`单位 ${opportunityUnit.name} 未执行借机攻击`);
               resolve();
-            });
-          } else {
-            // 用户选择不执行借机攻击
-            console.log(`单位 ${opportunityUnit.name} 未执行借机攻击`);
-            resolve();
-          }
+            }
+          });
         } else {
           // 没有有效攻击动作，直接 resolve
           resolve();
@@ -125,7 +129,7 @@ export class OpportunitySystem {
     } else {
       if (opportunityUnit.ai === undefined) {
         console.warn(
-          `单位 ${opportunityUnit.name} 没有 AI 接口，无法执行借机攻击`
+          `单位 ${opportunityUnit.name} 没有 AI 接口，无法执行借机攻击`,
         );
         return Promise.resolve();
       }
