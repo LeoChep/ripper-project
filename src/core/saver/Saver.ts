@@ -22,6 +22,7 @@ import type { BasedAbstractEvent } from "../event/BasedAbstractEvent";
 import type { GameEvent } from "../event/Event";
 import { AreaSystem } from "../system/AreaSystem";
 import { EventSheet } from "../event/EventSheet";
+import { ItemSerializer } from "../item/ItemSerializer";
 
 export class Saver {
   static gameState: any;
@@ -46,6 +47,7 @@ export class Saver {
         friendly: sprite.friendly,
         state: sprite.state,
         creature: CreatureSerializer.serializeCreature(sprite.creature),
+        inventory: ItemSerializer.serializeArray(sprite.inventory || []),
       };
     });
     const dramaRecord = DramaSystem.getInstance().getRercords();
@@ -91,6 +93,20 @@ export class Saver {
         sprite.friendly = savedSprite.friendly ?? false; // 恢复friendly属性
         sprite.state = savedSprite.state ?? "idle"; // 恢复state属性，默认为idle
         sprite.creature = savedSprite.creature;
+        
+        // 恢复背包道具
+        if (savedSprite.inventory) {
+          console.log(`[Saver] 开始恢复单位 ${sprite.name} 的背包，原始数据:`, savedSprite.inventory);
+          try {
+            sprite.inventory = ItemSerializer.deserializeArray(savedSprite.inventory);
+            console.log(`[Saver] 成功恢复单位 ${sprite.name} 的背包，道具数量: ${sprite.inventory.length}`);
+            console.log(`[Saver] 恢复的道具:`, sprite.inventory);
+          } catch (error) {
+            console.error(`[Saver] 恢复单位 ${sprite.name} 的背包失败:`, error);
+            sprite.inventory = [];
+          }
+        }
+        
         if (sprite.creature) {
           console.log("恢复的角色数据:", sprite.creature.buffs);
           loadTraits(sprite, sprite.creature);

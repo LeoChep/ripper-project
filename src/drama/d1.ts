@@ -3,6 +3,9 @@ import { CharacterOutCombatController } from "@/core/controller/CharacterOutComb
 import { golbalSetting } from "@/core/golbalSetting";
 import { Drama } from "./drama";
 import * as InitSystem from "@/core/system/InitiativeSystem";
+import { Item, ItemRarity, ItemType, HolyWater } from "@/core/item";
+import { CharacterController } from "@/core/controller/CharacterController";
+import { UnitSystem } from "@/core/system/UnitSystem";
 class D1 extends Drama {
   constructor() {
     super("d1", "这是一个测试剧情");
@@ -30,7 +33,9 @@ class D1 extends Drama {
   }
   cricleTalk = async () => {
     const { CGstart, unitSpeak, speak, unitChoose, CGEnd } = this;
-    if (InitSystem.isInBattle()){return}
+    if (InitSystem.isInBattle()) {
+      return;
+    }
     CGstart();
     const ch1 = await unitChoose(
       "npc牧师",
@@ -48,17 +53,24 @@ class D1 extends Drama {
         "npc牧师",
         "大约一周前，我开始注意到这些异常现象。起初只是有鬼魂在废弃神殿中呢喃，但现在已经变得越来越严重了。",
       );
-    if (ch1 == "option2")
+    if (ch1 == "option2") {
       await unitSpeak(
         "npc牧师",
         "它们畏惧阳光，所以一直在神殿里没有出来。圣水对他们或许也有用……",
       );
+      const item = new HolyWater();
+      const unit = UnitSystem.getInstance().getUnitByName("牧师");
+      unit?.addItem(item);
+
+      await speak("你获得了道具：圣水");
+    }
+
     if (ch1 == "option3")
       await unitSpeak(
         "npc牧师",
         "这座神殿原本时祭拜古拉姆的……但是你也知道，古拉姆已经不在了，各种意义上，因此神殿也废弃了。",
       );
-          if (ch1 == "option4")
+    if (ch1 == "option4")
       await unitSpeak(
         "npc牧师",
         "我能做的并不多，但是我会尽我所能使用神术法术来攻击它们。但是别指望太多，我毕竟不是战斗人员。",

@@ -11,6 +11,7 @@ import type { Action } from "../type/Action";
 import { WalkStateMachine } from "../stateMachine/WalkStateMachine";
 import { TriatSystem } from "../system/TraitSystem";
 import { PowerSystem } from "../system/PowerSystem";
+import type { Item } from "../item/Item";
 
 export interface UnitOptions {
   id: number;
@@ -44,6 +45,7 @@ export class Unit {
   friendly: boolean = false; // 是否友好
   traits: Trait[];
   powers: Power[];
+  inventory: Item[] = []; // 背包系统
 
   animUnit: UnitAnimSpirite | undefined;
   initiative?: InitiativeClass;
@@ -69,6 +71,102 @@ export class Unit {
 
     this.stateMachinePack = new StateMachinePack(this); // 初始化状态机包
     this.stateMachinePack.addMachine("walk", new WalkStateMachine(this)); // 添加默认的 AI 状态机
+  }
+
+  /**
+   * 添加道具到背包
+   * @param item 要添加的道具
+   * @returns 是否成功添加
+   */
+  addItem(item: Item): boolean {
+    // 检查是否可以与现有道具堆叠
+    const existingItem = this.inventory.find(i => i.canStackWith(item));
+    if (existingItem) {
+      const addAmount = Math.min(item.stackCount, existingItem.maxStack - existingItem.stackCount);
+      console.log("addAmount", addAmount);
+      if (addAmount > 0) {
+        existingItem.addStack(addAmount);
+        item.removeStack(addAmount);
+        // 如果道具全部堆叠，返回true；否则继续添加剩余部分
+        if (item.stackCount === 0) {
+          return true;
+        }
+      }
+    }
+    
+    // 如果无法堆叠或堆叠后还有剩余，添加为新物品
+    if (item.stackCount > 0) {
+      this.inventory.push(item);
+    }
+    return true;
+  }
+
+  /**
+   * 从背包移除道具
+   * @param itemUid 道具的uid
+   * @param amount 移除数量（默认全部）
+   * @returns 移除的道具，如果失败返回null
+   */
+  removeItem(itemUid: string, amount?: number): Item | null {
+    const itemIndex = this.inventory.findIndex(i => i.uid === itemUid);
+    if (itemIndex === -1) {
+      return null;
+    }
+
+    const item = this.inventory[itemIndex];
+    const removeAmount = amount ?? item.stackCount;
+
+    if (removeAmount >= item.stackCount) {
+      // 移除整个道具
+      return this.inventory.splice(itemIndex, 1)[0];
+    } else {
+      // 只移除部分
+      const removedItem = item.clone();
+      removedItem.stackCount = removeAmount;
+      item.removeStack(removeAmount);
+      return removedItem;
+    }
+  }
+
+  /**
+   * 根据uid获取道具
+   * @param itemUid 道具uid
+   * @returns 道具实例或null
+   */
+  getItem(itemUid: string): Item | null {
+    return this.inventory.find(i => i.uid === itemUid) || null;
+  }
+
+  /**
+   * 根据名称查找道具
+   * @param itemName 道具名称
+   * @returns 道具数组
+   */
+  findItemsByName(itemName: string): Item[] {
+    return this.inventory.filter(i => i.name === itemName);
+  }
+
+  /**
+   * 获取背包总重量
+   * @returns 总重量
+   */
+  getInventoryWeight(): number {
+    return this.inventory.reduce((total, item) => total + item.getTotalWeight(), 0);
+  }
+
+  /**
+   * 获取背包总价值
+   * @returns 总价值
+   */
+  getInventoryValue(): number {
+    return this.inventory.reduce((total, item) => total + item.getTotalValue(), 0);
+  }
+
+  /**
+   * 清空背包
+   */
+  clearInventory(): void {
+    this.inventory = [];
   }
 }
 

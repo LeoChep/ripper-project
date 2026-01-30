@@ -96,6 +96,12 @@
         <CreatureTraits v-if="currentPage === 'traits'" :creature="creature" />
         <CreatureEquipment v-if="currentPage === 'equipment'" :creature="creature" />
         <CreatureFeats v-if="currentPage === 'feats'" :creature="creature" />
+        <CreatureInventory 
+          v-if="currentPage === 'inventory'" 
+          :unit="unit" 
+          :creature="creature"
+          @close="$emit('close')"
+        />
         <CreatureOther v-if="currentPage === 'other'" :creature="creature" />
       </div>
     </div>
@@ -115,6 +121,7 @@ import CreatureTraits from "./pages/CreatureTraits.vue";
 import CreatureEquipment from "./pages/CreatureEquipment.vue";
 import CreatureFeats from "./pages/CreatureFeats.vue";
 import CreatureOther from "./pages/CreatureOther.vue";
+import CreatureInventory from "./pages/CreatureInventory.vue";
 
 defineEmits(["close"]);
 
@@ -137,6 +144,7 @@ const tabs = ref([
   { id: "traits", label: "特性" },
   { id: "equipment", label: "装备" },
   { id: "feats", label: "专长" },
+  { id: "inventory", label: "背包" },
   { id: "other", label: "其他" },
 ]);
 
