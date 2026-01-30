@@ -1,4 +1,4 @@
-import * as envSetting from './../envSetting';
+import * as envSetting from '../envSetting';
 import type { TiledMap } from "../MapClass";
 import type { RLayers } from "../type/RLayersInterface";
 import * as PIXI from "pixi.js";
