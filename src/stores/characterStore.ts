@@ -1,3 +1,4 @@
+import { CharacterController } from "@/core/controller/CharacterController";
 import type { Unit } from "@/core/units/Unit";
 
 let characterStore = {
@@ -21,6 +22,7 @@ let characterStore = {
     console.log('selectCharacter中角色:', character);
     this.selectedCharacter = character;
     this.selectedCharacterId = character.id;
+    CharacterController.selectCharacter(character);
   },
 };
 

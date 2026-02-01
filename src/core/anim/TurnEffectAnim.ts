@@ -105,6 +105,7 @@ export class TurnEffectAnim {
     arrowSprite.select();
 
     this.attachEffect(effectContainer, arrowSprite);
+    unit.animUnit?.update(0)
   }
 
   /**
@@ -169,10 +170,11 @@ export class TurnEffectAnim {
     container.addChild(sprite);
     sprite.zIndex = zIndexSetting.spriteZIndex;
 
-    const lineLayer = golbalSetting.rlayers.lineLayer;
-    lineLayer?.attach(sprite);
+    // const lineLayer = golbalSetting.rlayers.lineLayer;
+    // lineLayer?.attach(sprite);
 
     this.addTickerUpdate(sprite);
+    
   }
 
   /**
@@ -188,6 +190,7 @@ export class TurnEffectAnim {
       golbalSetting.app.ticker.add(updateFn);
       (sprite as any)._tickerFn = updateFn;
     }
+ 
   }
 
   /**

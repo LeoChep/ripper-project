@@ -4,7 +4,6 @@ import { golbalSetting } from "@/core/golbalSetting";
 import { Drama } from "./drama";
 import * as InitSystem from "@/core/system/InitiativeSystem";
 import { Item, ItemRarity, ItemType, HolyWater } from "@/core/item";
-import { CharacterController } from "@/core/controller/CharacterController";
 import { UnitSystem } from "@/core/system/UnitSystem";
 class D1 extends Drama {
   mapName: string = "A";

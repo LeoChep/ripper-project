@@ -7,6 +7,7 @@ import { zIndexSetting } from "../envSetting";
 import { lookOn } from "../anim/LookOnAnim";
 import { golbalSetting } from "../golbalSetting";
 import { useCharacterStore } from "@/stores/characterStore";
+import { UnitSystem } from "../system/UnitSystem";
 
 export class CharacterController {
   public static curser: number = 0;
@@ -18,13 +19,27 @@ export class CharacterController {
   constructor(mapPassiable: TiledMap) {
     this.mapPassiable = mapPassiable;
   }
+  static selectCharacterById(id: string) {
+    const unit = UnitSystem.getInstance().getUnitById(id);
+    this.selectCharacter(unit!);
+  }
   static selectCharacter(unit: Unit) {
     CharacterController.selectedCharacter = unit;
     CharacterController.curser = unit.id;
     console.log("useCharacterStore().selectCharacter(unit):", unit);
-    useCharacterStore().selectCharacter(unit);
-    this.showSelectEffect();
-    this.lookOn();
+    UnitSystem.getInstance()
+      .getAllUnits()
+      .forEach((u) => {
+        TurnEffectAnim.removePlayerEffect(u);
+        if (u.id === unit.id) {
+          // TurnEffectAnim.showPlayerEffect(u);
+          CharacterController.showSelectEffect();
+          // console.log("选中单位，显示选中效果:", u===unit,u,unit);
+        }
+      });
+  
+
+    CharacterController.lookOn();
   }
   static lookOn() {
     // 只负责视角转移到选中单位
@@ -35,7 +50,7 @@ export class CharacterController {
     }
     lookOn(unit.x, unit.y);
   }
-  
+
   static showSelectEffect() {
     // 显示选中单位的视觉效果（箭头动画）
     const unit = CharacterController.selectedCharacter;

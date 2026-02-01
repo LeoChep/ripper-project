@@ -15,12 +15,7 @@
     <button class="load-button" @click="openLoadDialog">读取游戏</button>
   </div>
   <!-- 存档对话框 -->
-  <SaveLoadDialog 
-    :mode="dialogMode" 
-    :isVisible="showDialog"
-    @close="closeDialog"
-    @select="handleSlotSelect"
-  />
+  <SaveLoadDialog :mode="dialogMode" :isVisible="showDialog" @close="closeDialog" @select="handleSlotSelect" />
 </template>
 
 <script setup lang="ts">
@@ -31,6 +26,7 @@ import TalkPannel from "../TalkPannel/TalkPannel.vue";
 import SaveLoadDialog from "../SaveLoadDialog/SaveLoadDialog.vue";
 import { MessageTipSystem } from "@/core/system/MessageTipSystem";
 import { ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import { getAnimActionSpriteJsonFile, getAnimMetaJsonFile, getAnimSpriteImgUrl, getMapAssetFile } from "@/utils/utils";
 import * as PIXI from "pixi.js";
 import { setContainer, setLayer } from "@/stores/container";
@@ -52,8 +48,10 @@ import { createDoorAnimSpriteFromDoor } from "@/core/anim/DoorAnimSprite";
 import { UnitAnimSpirite } from "@/core/anim/UnitAnimSprite";
 import type { TiledMap } from "@/core/MapClass";
 import type { Unit } from "@/core/units/Unit";
+import { UnitSystem } from "@/core/system/UnitSystem";
 
 const appSetting = envSetting.appSetting;
+const route = useRoute();
 
 // 测试功能开关：控制是否显示格子行列号
 const showGridNumbers = ref(false);
@@ -83,7 +81,6 @@ onMounted(async () => {
   addListenKeyboard();
 
   //初始化玩家角色
-  const characterOutCombatController = CharacterOutCombatController.getInstance();
 
   // 单位状态机更新循环
   setInterval(() => {
@@ -95,13 +92,30 @@ onMounted(async () => {
     });
   }, 1000 / 30); // 每秒30帧
 
-  // 设置并启动剧情（会自动加载地图）
-  console.log("[changemap0] setDramaUse 前 golbalSetting.map:", golbalSetting.map);
-  await DramaSystem.getInstance().setDramaUse("d1");
-  console.log("[changemap0] setDramaUse 后 golbalSetting.map:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
-  await initByMap(golbalSetting.map);
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  DramaSystem.getInstance().play();
+  // 检查是否需要从存档加载
+  const loadSlot = route.query.loadSlot;
+  if (loadSlot) {
+    // 如果有存档栏位参数，先初始化基础系统，然后读取存档
+    console.log("[从主菜单读取存档] 栏位:", loadSlot);
+    // await DramaSystem.getInstance().setDramaUse("d1");
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await loadGameState(Number(loadSlot));
+    const characterOutCombatController = CharacterOutCombatController.getInstance();
+
+
+  } else {
+    // 设置并启动剧情（会自动加载地图）
+    console.log("[changemap0] setDramaUse 前 golbalSetting.map:", golbalSetting.map);
+    await DramaSystem.getInstance().setDramaUse("d1");
+    console.log("[changemap0] setDramaUse 后 golbalSetting.map:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
+    await initByMap(golbalSetting.map);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    DramaSystem.getInstance().play();
+    const characterOutCombatController = CharacterOutCombatController.getInstance();
+
+  }
+
+
 });
 // 辅助函数：根据地图初始化
 const initByMap = async (mapPassiable: any) => {
@@ -126,7 +140,7 @@ const initByMap = async (mapPassiable: any) => {
   // 创建单位
   let createEndPromise: Promise<any>[] = [];
   units.forEach((unit: Unit) => {
-    if (unit.state=="dead") {
+    if (unit.state == "dead") {
 
       return;
     }
@@ -225,7 +239,7 @@ const addAnimSpriteUnit = (unit: any, container: any, rlayers: any, mapPassiable
     if (unit.creature) {
       // 这里可以触发选择事件，但为了保持简洁，暂时移除选择逻辑
       console.log("Clicked on unit:", unit.unitTypeName);
-      if (unit.party === "player"|| unit.party !== 'true') {
+      if (unit.party === "player" || unit.party !== 'true') {
         console.log("这是玩家角色，打开角色面板");
         selectedCreature.value = unit.creature;
         selectedUnit.value = unit;
@@ -246,7 +260,7 @@ const creatureInfoPage = ref('basic'); // 添加页面状态
 // 监听打开背包事件
 onMounted(() => {
   // ... 其他onMounted代码
-  
+
   // 监听打开背包的全局事件
   const handleOpenInventory = (event: any) => {
     const unit = event.detail?.unit;
@@ -260,9 +274,9 @@ onMounted(() => {
       }, 100);
     }
   };
-  
+
   window.addEventListener('openCharacterInventory', handleOpenInventory);
-  
+
   // 清理事件监听
   return () => {
     window.removeEventListener('openCharacterInventory', handleOpenInventory);
@@ -308,10 +322,10 @@ const saveGameState = (slotId: number) => {
   try {
     Saver.saveGameState();
     const gameState = Saver.gameState;
-    
+
     // 保存到指定栏位
     localStorage.setItem(`gameState_slot_${slotId}`, JSON.stringify(gameState));
-    
+
     // 可选：同时下载 GameState 文件作为备份
     const dataStr = JSON.stringify(gameState, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
@@ -390,18 +404,22 @@ const loadGameState = async (slotId: number): Promise<boolean> => {
       const unit = InitiativeSystem.getPointAtUnit();
       if (unit) {
         if (unit.party === "player") {
-           console.log("loadInitRecord selectCharacter", unit);
-        CharacterController.selectCharacter(unit);
-        CharacterCombatController.getInstance().selectedCharacter = unit;
-        CharacterCombatController.getInstance().useMoveController();
-        }else{
-         unit.ai?.autoAction(unit,golbalSetting.map);
+          console.log("loadInitRecord selectCharacter", unit);
+          CharacterController.selectCharacter(unit);
+          CharacterCombatController.getInstance().selectedCharacter = unit;
+          CharacterCombatController.getInstance().useMoveController();
+        } else {
+          unit.ai?.autoAction(unit, golbalSetting.map);
         }
-    
+
       }
     } else {
       if (golbalSetting.rlayers && golbalSetting.rootContainer && golbalSetting.map) {
         new CharacterOutCombatController();
+        CharacterOutCombatController.isUse = true;
+        const units = UnitSystem.getInstance().getAllUnits();
+        const playerUnits = units.filter((u) => u.party === "player");
+        CharacterController.selectCharacter(playerUnits[0]);
         console.log("进入非战斗状态");
         // 使用 JSON 序列化来快照当前状态，避免控制台延迟展开导致的不一致
         console.log("进入非战斗状态 - 地图:", golbalSetting.map);

@@ -30,12 +30,8 @@
                 </div>
 
                 <!-- 动作选择面板 -->
-                <ActionPannel 
-                    :character="selectedCharacter" 
-                    @actionSelected="handleActionSelected"
-                    @openInventory="handleOpenInventory"
-                    ref="actionPanelRef" 
-                />
+                <ActionPannel :character="selectedCharacter" @actionSelected="handleActionSelected"
+                    @openInventory="handleOpenInventory" ref="actionPanelRef" />
             </div>
         </div>
     </div>
@@ -53,6 +49,7 @@ import { useTalkStateStore } from '@/stores/talkStateStore'
 import { CharacterCombatController } from "@/core/controller/CharacterCombatController";
 import * as InitiativeSystem from "@/core/system/InitiativeSystem";
 import test3Img from '@/assets/ui/test3.png';
+import { UnitSystem } from '@/core/system/UnitSystem'
 const characters = ref([])
 const hp = ref(0)
 const maxHp = ref(0)
@@ -90,8 +87,10 @@ onMounted(() => {
     const updataCharacters = () => {
         characters.value = []
         const nChartacters = characterStore.value.characters;
+        console.log('角色列表更新:', nChartacters)
         nChartacters.forEach(character => {
             characters.value.push(character);
+            
         });
     };
     setInterval(() => {
@@ -157,14 +156,14 @@ function selectCharacter(character, index) {
         return;
     }
     console.log('选中角色:', character);
-    CharacterController.curser = character.id;
-    characterStore.value.selectedCharacterId = character.id;
+
     selectedIndex.value = index;
     selectedCharacter.value = character;
     console.log('characterStore', characterStore.value);
-    // character.animUnit._state='slash'
-    CharacterCombatController.getInstance().selectedCharacter = character;
-    lookOn(character.x, character.y);
+
+    CharacterController.curser = character.id;
+    characterStore.value.selectedCharacterId = character.id;
+    CharacterController.selectCharacterById(character.id);
 }
 
 </script>

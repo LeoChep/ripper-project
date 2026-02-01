@@ -10,6 +10,11 @@ const router = createRouter({
       component: HomeView,
     },
     {
+      path: "/game",
+      name: "game",
+      component: () => import("../views/GameView.vue"),
+    },
+    {
       path: "/ttt",
       name: "ttt",
       component: HomeView,

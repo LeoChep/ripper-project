@@ -38,7 +38,7 @@ export class CharacterOutCombatController {
       ms.eventMode = "static";
       ms.on("pointerdown", (e: PIXI.FederatedPointerEvent) => {
         console.log("map click", );
-
+        console.log("CharacterOutCombatController.isUse", CharacterOutCombatController.isUse);
         if (!CharacterOutCombatController.isUse) {
           return;
         }
