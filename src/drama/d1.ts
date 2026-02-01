@@ -7,6 +7,7 @@ import { Item, ItemRarity, ItemType, HolyWater } from "@/core/item";
 import { CharacterController } from "@/core/controller/CharacterController";
 import { UnitSystem } from "@/core/system/UnitSystem";
 class D1 extends Drama {
+  mapName: string = "A";
   constructor() {
     super("d1", "这是一个测试剧情");
   }

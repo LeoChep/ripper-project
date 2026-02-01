@@ -151,7 +151,7 @@ export class DramaSystem {
     const { golbalSetting } = await import("@/core/golbalSetting");
 
     // 加载地图
-    const mapPassiable = await this.loadMap("A");
+    const mapPassiable = await this.loadMap(drama.mapName);
     const spritesOBJ = mapPassiable.sprites;
 
     // 创建单位

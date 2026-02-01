@@ -6,7 +6,7 @@ export abstract class Drama {
   description: string;
   map: TiledMap | null = null;
   variables: Map<string, any> = new Map();
-
+  mapName: string = "";
   constructor(name: string, description: string) {
     this.name = name;
     this.description = description;
