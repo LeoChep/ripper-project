@@ -3,6 +3,7 @@
         <!-- 顶部工具栏 -->
         <div class="toolbar">
             <div class="toolbar-section">
+                <button @click="newMap" class="btn btn-success" title="新建地图（清除自动保存）">新建地图</button>
                 <button @click="loadMapImage" class="btn btn-primary">加载地图图片</button>
                 <input ref="fileInput" type="file" accept="image/*" style="display: none" @change="handleFileSelect" />
                 <button @click="importTMJ" class="btn btn-primary">导入地图(TMJ)</button>
@@ -236,6 +237,98 @@ const objectCount = computed(() => {
     return placedUnits.value.length + wallObjects.value.length + doorObjects.value.length;
 });
 
+// 自动保存编辑状态到 localStorage
+const saveEditorState = () => {
+    try {
+        const state = {
+            placedUnits: placedUnits.value,
+            wallObjects: wallObjects.value,
+            doorObjects: doorObjects.value,
+            nextObjectId: nextObjectId,
+            mapName: mapName.value,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('mapEditorState', JSON.stringify(state));
+        console.log('编辑状态已自动保存');
+    } catch (error) {
+        console.error('保存编辑状态失败:', error);
+    }
+};
+
+// 从 localStorage 恢复编辑状态
+const loadEditorState = async () => {
+    try {
+        const savedState = localStorage.getItem('mapEditorState');
+        if (!savedState) return false;
+
+        const state = JSON.parse(savedState);
+        
+        // 恢复数据
+        placedUnits.value = state.placedUnits || [];
+        wallObjects.value = state.wallObjects || [];
+        doorObjects.value = state.doorObjects || [];
+        nextObjectId = state.nextObjectId || 1;
+        mapName.value = state.mapName || 'custom_map';
+
+        // 重建视觉元素
+        // 重建单位
+        for (const unit of placedUnits.value) {
+            const unitTypeProp = unit.properties?.find((p: any) => p.name === 'unitTypeName');
+            const unitTypeName = unitTypeProp?.value || 'skeleton';
+            await createUnitVisual(unit, unitTypeName);
+        }
+
+        // 重建墙体
+        for (const wall of wallObjects.value) {
+            createWallVisual(wall);
+        }
+
+        // 重建门
+        for (const door of doorObjects.value) {
+            createDoorVisual(door);
+        }
+
+        console.log('已恢复上次编辑状态');
+        return true;
+    } catch (error) {
+        console.error('恢复编辑状态失败:', error);
+        return false;
+    }
+};
+
+// 清除保存的编辑状态
+const clearEditorState = () => {
+    localStorage.removeItem('mapEditorState');
+    console.log('编辑状态已清除');
+};
+
+// 新建地图
+const newMap = () => {
+    if (confirm('确定要新建地图吗？当前编辑内容将被清除。')) {
+        // 清空所有内容
+        placedUnits.value = [];
+        wallObjects.value = [];
+        doorObjects.value = [];
+        objectsContainer.removeChildren();
+        if (mapSprite) {
+            mapSprite.destroy();
+            mapSprite = null;
+        }
+        nextObjectId = 1;
+        mapName.value = 'custom_map';
+        
+        // 清除自动保存的状态
+        clearEditorState();
+        
+        // 清空历史记录并保存初始状态
+        historyStack.value = [];
+        currentHistoryIndex.value = -1;
+        saveHistory();
+        
+        console.log('已新建地图');
+    }
+};
+
 onMounted(async () => {
     // 初始化PIXI应用
     app = new PIXI.Application();
@@ -274,11 +367,22 @@ onMounted(async () => {
     // 键盘事件
     window.addEventListener('keydown', handleKeyDown);
 
-    // 保存初始状态
-    saveHistory();
+    // 尝试恢复上次编辑状态
+    const restored = await loadEditorState();
+    
+    // 如果没有恢复状态，保存初始状态
+    if (!restored) {
+        saveHistory();
+    } else {
+        // 恢复后也保存到历史记录
+        saveHistory();
+    }
 });
 
 onBeforeUnmount(() => {
+    // 退出前保存当前状态
+    saveEditorState();
+    
     window.removeEventListener('keydown', handleKeyDown);
     if (app) {
         app.destroy(true);
@@ -952,6 +1056,8 @@ const deleteSelectedObject = () => {
 
     // 保存历史记录
     saveHistory();
+    // 自动保存编辑状态
+    saveEditorState();
 };
 
 // 清空画布
@@ -968,6 +1074,10 @@ const clearCanvas = () => {
 
         // 保存历史记录
         saveHistory();
+        // 自动保存编辑状态
+        saveEditorState();
+        // 清除保存的状态（因为已经清空了）
+        clearEditorState();
     }
 };
 
@@ -1100,6 +1210,9 @@ const saveHistory = () => {
     }
 
     console.log(`历史记录已保存 [${currentHistoryIndex.value + 1}/${historyStack.value.length}]`);
+    
+    // 自动保存编辑状态
+    saveEditorState();
 };
 
 // 从历史记录恢复状态
