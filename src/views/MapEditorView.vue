@@ -1372,36 +1372,63 @@ const createDoorVisual = (obj: any) => {
 // 导出地图数据
 const exportMapData = () => {
     // 转换单位坐标为 TMJ 格式（y 坐标需要加上高度，因为 TMJ 使用底部坐标）
-    const exportedUnits = placedUnits.value.map(unit => ({
-        ...unit,
-        y: unit.y + unit.height // TMJ 格式使用底部坐标
+    const exportedUnits = placedUnits.value.map(unit => {
+        // 确保所有必需字段存在
+        return {
+            height: unit.height || gridSize,
+            id: unit.id,
+            name: unit.name || '',
+            rotation: 0,
+            type: unit.type || '',
+            visible: true,
+            width: unit.width || gridSize,
+            x: unit.x,
+            y: unit.y + (unit.height || gridSize), // TMJ 格式使用底部坐标
+            properties: unit.properties || []
+        };
+    });
+
+    // 确保墙体对象格式完整
+    const exportedWalls = wallObjects.value.map(wall => ({
+        height: wall.height || 0,
+        id: wall.id,
+        name: wall.name || '',
+        polyline: wall.polyline || [],
+        properties: wall.properties || [],
+        rotation: wall.rotation || 0,
+        type: wall.type || '',
+        visible: wall.visible !== undefined ? wall.visible : true,
+        width: wall.width || 0,
+        x: wall.x || 0,
+        y: wall.y || 0
+    }));
+
+    // 确保门对象格式完整
+    const exportedDoors = doorObjects.value.map(door => ({
+        height: door.height || 0,
+        id: door.id,
+        name: door.name || '',
+        polyline: door.polyline || [],
+        properties: door.properties || [],
+        rotation: door.rotation || 0,
+        type: door.type || '',
+        visible: door.visible !== undefined ? door.visible : true,
+        width: door.width || 0,
+        x: door.x || 0,
+        y: door.y || 0
     }));
 
     const mapData = {
         compressionlevel: -1,
         height: Math.ceil(app.screen.height / gridSize),
-        width: Math.ceil(app.screen.width / gridSize),
         infinite: false,
         layers: [
-            // 瓦片层（如果需要）
-            {
-                data: [], // 这里可以根据实际需求生成瓦片数据
-                height: Math.ceil(app.screen.height / gridSize),
-                width: Math.ceil(app.screen.width / gridSize),
-                id: 1,
-                name: '图块层 1',
-                opacity: 1,
-                type: 'tilelayer',
-                visible: true,
-                x: 0,
-                y: 0
-            },
             // 墙体层
             {
                 draworder: 'topdown',
                 id: 2,
                 name: 'wall',
-                objects: wallObjects.value,
+                objects: exportedWalls,
                 opacity: 1,
                 type: 'objectgroup',
                 visible: true,
@@ -1413,7 +1440,7 @@ const exportMapData = () => {
                 draworder: 'topdown',
                 id: 3,
                 name: 'door',
-                objects: doorObjects.value,
+                objects: exportedDoors,
                 opacity: 1,
                 type: 'objectgroup',
                 visible: true,
@@ -1442,7 +1469,8 @@ const exportMapData = () => {
         tilesets: [],
         tilewidth: gridSize,
         type: 'map',
-        version: '1.10'
+        version: '1.10',
+        width: Math.ceil(app.screen.width / gridSize)
     };
 
     // 下载JSON文件
