@@ -372,14 +372,24 @@ const handlePointerMove = (event: PIXI.FederatedPointerEvent) => {
     mouseX.value = Math.round(pos.x);
     mouseY.value = Math.round(pos.y);
 
-    // 如果正在拖动单位
+    // 如果正在拖动对象
     if (isDragging.value && selectedContainer.value && selectedObject.value) {
-        const gridX = Math.floor((pos.x - dragOffset.x) / gridSize) * gridSize;
-        const gridY = Math.floor((pos.y - dragOffset.y) / gridSize) * gridSize;
+        // 单位对齐网格，墙体和门自由移动
+        let newX, newY;
+        
+        if (selectedObject.value.type === 'unit') {
+            // 单位：对齐到网格
+            newX = Math.floor((pos.x - dragOffset.x) / gridSize) * gridSize;
+            newY = Math.floor((pos.y - dragOffset.y) / gridSize) * gridSize;
+        } else {
+            // 墙体和门：自由移动
+            newX = pos.x - dragOffset.x;
+            newY = pos.y - dragOffset.y;
+        }
 
-        selectedContainer.value.position.set(gridX, gridY);
-        selectedObject.value.x = gridX;
-        selectedObject.value.y = gridY;
+        selectedContainer.value.position.set(newX, newY);
+        selectedObject.value.x = newX;
+        selectedObject.value.y = newY;
         return;
     }
 
@@ -599,9 +609,13 @@ const finishDrawing = () => {
 
     // 可视化显示
     const graphics = new PIXI.Graphics();
-    for (let i = 0; i < points.length - 1; i++) {
-        graphics.moveTo(points[i].x, points[i].y);
-        graphics.lineTo(points[i + 1].x, points[i + 1].y);
+    graphics.position.set(obj.x, obj.y); // 设置Graphics的位置
+    // 使用相对坐标绘制（polyline中的坐标）
+    for (let i = 0; i < obj.polyline.length - 1; i++) {
+        const p1 = obj.polyline[i];
+        const p2 = obj.polyline[i + 1];
+        graphics.moveTo(p1.x, p1.y);
+        graphics.lineTo(p2.x, p2.y);
     }
     graphics.stroke({
         color: currentMode.value === 'wall' ? 0xff0000 : 0x0000ff,
@@ -648,11 +662,12 @@ const pointToLineSegmentDistance = (px: number, py: number, x1: number, y1: numb
 };
 
 // 检查点击位置是否靠近折线
-const isNearPolyline = (x: number, y: number, obj: any, tolerance: number = 10): boolean => {
+const isNearPolyline = (x: number, y: number, obj: any, containerX: number = 0, containerY: number = 0, tolerance: number = 10): boolean => {
     if (!obj.polyline || obj.polyline.length < 2) return false;
     
-    const baseX = obj.x || 0;
-    const baseY = obj.y || 0;
+    // 使用容器的实际位置（如果移动过，位置会变化）
+    const baseX = containerX;
+    const baseY = containerY;
     
     // 检查每一条线段
     for (let i = 0; i < obj.polyline.length - 1; i++) {
@@ -714,8 +729,8 @@ const selectObject = (x: number, y: number): PIXI.Container | null => {
             const userData = (child as any).userData;
 
             if (userData && (userData.type === 'wall' || userData.type === 'door') && userData.data) {
-                // 精确检测：点击位置是否靠近折线
-                if (isNearPolyline(x, y, userData.data, tolerance)) {
+                // 精确检测：点击位置是否靠近折线（使用容器的实际位置）
+                if (isNearPolyline(x, y, userData.data, child.position.x, child.position.y, tolerance)) {
                     hitContainer = child;
                     break;
                 }
@@ -1323,11 +1338,13 @@ const createWallVisual = (obj: any) => {
     if (!obj.polyline || obj.polyline.length < 2) return;
 
     const graphics = new PIXI.Graphics();
+    graphics.position.set(obj.x || 0, obj.y || 0); // 设置Graphics的位置
+    // 使用相对坐标绘制
     for (let i = 0; i < obj.polyline.length - 1; i++) {
         const p1 = obj.polyline[i];
         const p2 = obj.polyline[i + 1];
-        graphics.moveTo(obj.x + p1.x, obj.y + p1.y);
-        graphics.lineTo(obj.x + p2.x, obj.y + p2.y);
+        graphics.moveTo(p1.x, p1.y);
+        graphics.lineTo(p2.x, p2.y);
     }
     graphics.stroke({ color: 0xff0000, width: 3 });
     (graphics as any).userData = { id: obj.id, type: 'wall', data: obj };
@@ -1339,11 +1356,13 @@ const createDoorVisual = (obj: any) => {
     if (!obj.polyline || obj.polyline.length < 2) return;
 
     const graphics = new PIXI.Graphics();
+    graphics.position.set(obj.x || 0, obj.y || 0); // 设置Graphics的位置
+    // 使用相对坐标绘制
     for (let i = 0; i < obj.polyline.length - 1; i++) {
         const p1 = obj.polyline[i];
         const p2 = obj.polyline[i + 1];
-        graphics.moveTo(obj.x + p1.x, obj.y + p1.y);
-        graphics.lineTo(obj.x + p2.x, obj.y + p2.y);
+        graphics.moveTo(p1.x, p1.y);
+        graphics.lineTo(p2.x, p2.y);
     }
     graphics.stroke({ color: 0x0000ff, width: 3 });
     (graphics as any).userData = { id: obj.id, type: 'door', data: obj };
