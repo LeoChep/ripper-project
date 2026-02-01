@@ -21,7 +21,9 @@ export class ItemSystem {
   /**
    * 添加控制器到缓存
    */
-  private async addController(itemName: string): Promise<ItemController | null> {
+  private async addController(
+    itemName: string,
+  ): Promise<ItemController | null> {
     const ControllerClass = await this.getItemControllerClass(itemName);
     if (!ControllerClass) {
       console.warn(`ItemController class not found for: ${itemName}`);
@@ -70,17 +72,27 @@ export class ItemSystem {
     if (target) {
       controller.setTarget(target);
     }
-    console.log("道具控制器参数已设置:", {
-      item: item,
-      user: user,
-      target: target,
-    },controller);
+    console.log(
+      "道具控制器参数已设置:",
+      {
+        item: item,
+        user: user,
+        target: target,
+      },
+      controller,
+    );
 
     // 执行使用逻辑
-    await controller.use();
-    if (item.type=== ItemType.CONSUMABLE) {
-        controller.consume();
+    const useResult = await controller.use();
+    console.log("道具使用结果:", useResult);
+    if (
+      item.type === ItemType.CONSUMABLE &&
+      useResult &&
+      useResult.cancel !== true
+    ) {
+      controller.consume();
     }
+    controller.cleanup();
   }
 
   /**
@@ -91,7 +103,7 @@ export class ItemSystem {
     switch (itemName) {
       case "圣水":
         return import("../item/consumables/HolyWater/HolyWaterController").then(
-          (module) => module.HolyWaterController
+          (module) => module.HolyWaterController,
         );
       // 在这里添加更多道具控制器的映射
       // case "治疗药水":

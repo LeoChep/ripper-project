@@ -22,7 +22,7 @@ export abstract class ItemController {
   /**
    * 使用道具的主逻辑
    */
-  abstract use(): Promise<void>;
+  abstract use(): Promise<any>;
 
   /**
    * 道具使用前的准备工作

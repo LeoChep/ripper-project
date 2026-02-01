@@ -138,6 +138,16 @@ export async function startCombatTurn() {
           "walk",
         ) as WalkStateMachine
       ).onDivideWalk = false;
+      
+      // 重置所有威能的回合标记（新回合开始）
+      if (initiativeCursor.pointAt.owner.creature?.powers) {
+        initiativeCursor.pointAt.owner.creature.powers.forEach((power: any) => {
+          if (power.resetTurnFlag) {
+            power.resetTurnFlag();
+          }
+        });
+      }
+      
       //设置Store
       if (initiativeCursor.pointAt.owner.initiative) {
         useInitiativeStore().setIniitiative(
@@ -225,6 +235,16 @@ export async function endTurn(unit: Unit, isDelay = false) {
       TurnEffectAnim.removeEnemyEffect(unit);
     }
   }
+  
+  // 减少所有威能的冷却时间（回合结束时）
+  if (unit.creature?.powers) {
+    unit.creature.powers.forEach((power: any) => {
+      if (power.tickCooldown) {
+        power.tickCooldown();
+      }
+    });
+  }
+  
   if (unit.initiative && isDelay === false) {
     unit.initiative.ready = false;
     unit.initiative.roundNumber++;

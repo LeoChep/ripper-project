@@ -241,6 +241,33 @@ const addAnimSpriteUnit = (unit: any, container: any, rlayers: any, mapPassiable
 };
 const selectedCreature = ref(null);
 const selectedUnit = ref(null);
+const creatureInfoPage = ref('basic'); // 添加页面状态
+
+// 监听打开背包事件
+onMounted(() => {
+  // ... 其他onMounted代码
+  
+  // 监听打开背包的全局事件
+  const handleOpenInventory = (event: any) => {
+    const unit = event.detail?.unit;
+    if (unit) {
+      selectedCreature.value = unit.creature;
+      selectedUnit.value = unit;
+      // 需要通知CreatureInfo切换到背包页
+      setTimeout(() => {
+        // 使用自定义事件通知CreatureInfo切换页面
+        window.dispatchEvent(new CustomEvent('switchToInventoryPage'));
+      }, 100);
+    }
+  };
+  
+  window.addEventListener('openCharacterInventory', handleOpenInventory);
+  
+  // 清理事件监听
+  return () => {
+    window.removeEventListener('openCharacterInventory', handleOpenInventory);
+  };
+});
 
 // 存档对话框相关状态
 const showDialog = ref(false);

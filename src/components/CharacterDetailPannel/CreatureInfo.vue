@@ -112,7 +112,7 @@
 import { ModifierSystem } from "@/core/system/ModifierSystem";
 import type { Creature } from "@/core/units/Creature";
 import type { Unit } from "@/core/units/Unit";
-import { onMounted, ref, computed, provide } from "vue";
+import { onMounted, onBeforeUnmount, ref, computed, provide } from "vue";
 import { getUnitAvatar } from "@/utils/utils";
 // 导入子组件
 import CreatureBasicInfo from "./pages/CreatureBasicInfo.vue";
@@ -196,6 +196,20 @@ onMounted(() => {
       reflex.value = getValue("reflex");
     }
   }, 100);
+  
+  // 监听切换到背包页的事件
+  const handleSwitchToInventory = () => {
+    currentPage.value = 'inventory';
+  };
+  
+  window.addEventListener('switchToInventoryPage', handleSwitchToInventory);
+  
+  // 清理事件监听器在组件卸载时
+  const cleanup = () => {
+    window.removeEventListener('switchToInventoryPage', handleSwitchToInventory);
+  };
+  
+  // Vue3中使用onBeforeUnmount替代return cleanup
 });
 </script>
 

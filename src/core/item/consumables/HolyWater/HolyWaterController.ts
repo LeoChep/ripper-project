@@ -31,7 +31,6 @@ export class HolyWaterController extends ItemController {
    */
   setUser(user: Unit): void {
     this.user = user;
-
   }
 
   /**
@@ -78,19 +77,18 @@ export class HolyWaterController extends ItemController {
     return this.canUse();
   }
 
-
   /**
    * 使用圣水
    */
-  async use(): Promise<void> {
+  async use(): Promise<any> {
     console.log("使用圣水逻辑开始");
     if (!this.preFix()) {
       console.warn("无法使用圣水");
-      return;
+      return { cancel: true };
     }
 
     // 选择目标
-    const selector=BasicAttackSelector.getInstance().selectBasic({
+    const selector = BasicAttackSelector.getInstance().selectBasic({
       unit: this.user!,
       range: 3, // 圣水使用范围
       color: "red",
@@ -98,7 +96,7 @@ export class HolyWaterController extends ItemController {
     const result = await selector.promise;
     if (result.cancel) {
       console.warn("取消使用圣水");
-      return;
+      return { cancel: true };
     }
 
     const holyWater = this.item as HolyWater;
@@ -127,17 +125,12 @@ export class HolyWaterController extends ItemController {
       console.log(`${this.user!.creature?.name} 将圣水洒在地面上`);
     }
 
-    // 消耗道具
-    this.consume();
-
     // 检查是否用完
- 
 
     // 清理
-    this.cleanup();
+
+    return { cancel: false };
   }
-
-
 
   /**
    * 清理资源
@@ -146,6 +139,5 @@ export class HolyWaterController extends ItemController {
     this.user = null;
     this.target = null;
     this.item = null;
-
   }
 }

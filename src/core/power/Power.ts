@@ -42,6 +42,7 @@ export class Power {
   maxUses: number = -1; // 最大使用次数（-1表示无限制）
   currentUses: number = 0; // 当前已使用次数
   resetType: "turn" | "encounter" | "daily" | "manual" = "turn"; // 重置类型
+  usedThisTurn: boolean = false; // 本回合是否使用过
 
   owner: any;
   hook = () => {};
@@ -49,9 +50,7 @@ export class Power {
   constructor(obj: any) {
     if (obj) {
       Object.assign(this, obj);
-      // 初始化时重置使用次数
-      this.currentUses = 0;
-      this.currentCooldown = 0;
+
     }
   }
 
@@ -90,14 +89,23 @@ export class Power {
 
     // 设置冷却时间
     this.currentCooldown = this.cooldown;
+    
+    // 标记本回合已使用
+    this.usedThisTurn = true;
 
     return true;
   }
 
   /**
-   * 减少冷却时间（通常在回合结束时调用）
+   * 减少冷却时间（在回合结束时调用）
+   * 如果本回合使用过该威能，则不减少冷却
    */
   tickCooldown(): void {
+    // 如果本回合使用过，不减少冷却
+    if (this.usedThisTurn) {
+      return;
+    }
+    
     if (this.currentCooldown > 0) {
       this.currentCooldown--;
     }
@@ -110,7 +118,15 @@ export class Power {
     if (this.resetType === type || type === "manual") {
       this.currentCooldown = 0;
       this.currentUses = 0;
+      this.usedThisTurn = false;
     }
+  }
+  
+  /**
+   * 重置回合标记（在新回合开始时调用）
+   */
+  resetTurnFlag(): void {
+    this.usedThisTurn = false;
   }
 
   /**
@@ -178,6 +194,7 @@ export class Power {
       requirement: power.requirement,
       hookTime: power.hookTime,
       cooldown: power.cooldown,
+      usedThisTurn: this.usedThisTurn,
     };
   }
 
@@ -187,8 +204,11 @@ export class Power {
   deserializeCooldownData(data: {
     currentCooldown: number;
     currentUses: number;
+    usedThisTurn?: boolean;
   }): void {
     this.currentCooldown = data.currentCooldown || 0;
     this.currentUses = data.currentUses || 0;
+    // 读档时默认为false，防止旧存档没有这个字段
+    this.usedThisTurn = data.usedThisTurn || false;
   }
 }

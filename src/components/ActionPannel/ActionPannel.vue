@@ -81,7 +81,7 @@ const props = defineProps({
 });
 
 // Emits
-const emit = defineEmits(["actionSelected"]);
+const emit = defineEmits(["actionSelected", "openInventory"]);
 
 // 响应式数据
 const activeActionTab = ref("standard");
@@ -164,6 +164,11 @@ const selectPowerTab = (tab) => {
   attackSelected.value = false;
   activePowerTab.value = tab;
   selectedAction.value = null; // 清除选中的动作
+  
+  // 如果选择道具标签，触发打开背包事件
+  if (tab === 'item') {
+    emit('openInventory');
+  }
 };
 
 const attackSelected = ref(false);

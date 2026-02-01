@@ -213,6 +213,8 @@ export async function loadPowers(unit: Unit, unitCreature: Creature) {
         powerName,
         unit,
       );
+      power?.deserializeCooldownData(unitCreature.powers[i]);
+      
       if (!power) {
         console.warn(`Power class not found for: ${powerName}`);
         continue;

@@ -30,8 +30,12 @@
                 </div>
 
                 <!-- 动作选择面板 -->
-                <ActionPannel :character="selectedCharacter" @actionSelected="handleActionSelected"
-                    ref="actionPanelRef" />
+                <ActionPannel 
+                    :character="selectedCharacter" 
+                    @actionSelected="handleActionSelected"
+                    @openInventory="handleOpenInventory"
+                    ref="actionPanelRef" 
+                />
             </div>
         </div>
     </div>
@@ -130,6 +134,17 @@ const getHpPercentage = (character) => {
 const handleActionSelected = (action) => {
     console.log('父组件接收到动作选择:', action);
     // 这里可以处理动作选择的逻辑
+}
+
+// 处理打开背包
+const handleOpenInventory = () => {
+    console.log('打开背包面板');
+    if (selectedCharacter.value) {
+        // 触发全局事件，通知GamePannel打开背包
+        window.dispatchEvent(new CustomEvent('openCharacterInventory', {
+            detail: { unit: selectedCharacter.value }
+        }));
+    }
 }
 
 function selectCharacter(character, index) {
