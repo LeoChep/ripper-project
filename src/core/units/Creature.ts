@@ -5,6 +5,7 @@ import { Trait } from '../trait/Trait';
 import { Weapon } from './Weapon';
 
 export interface CreatureAttack {
+    anim?: string;
     name: string;
     type: string; // e.g. "Melee", "Ranged", "Burst"
     action: string; // e.g. "Standard Action; At-will", "Standard Action; Recharge 5,6"
@@ -14,6 +15,7 @@ export interface CreatureAttack {
     damage: string;
     effect?: string;
     missEffect?: string;
+    throwItem?: string;
 }
 
 export interface CreatureSkill {

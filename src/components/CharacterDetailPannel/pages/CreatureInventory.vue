@@ -79,6 +79,13 @@
               装备
             </button>
             <button
+              class="action-btn give-btn"
+              @click.stop="giveItem(item)"
+              title="给予"
+            >
+              给予
+            </button>
+            <button
               class="action-btn drop-btn"
               @click.stop="dropItem(item)"
               title="丢弃"
@@ -135,6 +142,56 @@
         </div>
       </div>
     </div>
+
+    <!-- 选择目标单位弹窗 -->
+    <div v-if="giveTargetItem" class="item-detail-modal" @click="giveTargetItem = null">
+      <div class="give-target-content" @click.stop>
+        <div class="detail-header">
+          <h3>选择给予对象</h3>
+          <button class="close-detail" @click="giveTargetItem = null">✕</button>
+        </div>
+        
+        <div class="give-info">
+          <p>将 <span class="item-highlight">{{ giveTargetItem.name }} x{{ giveStackAmount }}</span> 给予:</p>
+          <div v-if="giveTargetItem.maxStack > 1" class="stack-control">
+            <label>给予数量:</label>
+            <input 
+              type="number" 
+              v-model.number="giveStackAmount" 
+              :min="1" 
+              :max="giveTargetItem.stackCount"
+              class="stack-input"
+            />
+            <span class="stack-max">/ {{ giveTargetItem.stackCount }}</span>
+          </div>
+        </div>
+
+        <div class="target-list">
+          <div 
+            v-for="target in availableTargets" 
+            :key="target.id"
+            class="target-card"
+            @click="confirmGive(target)"
+          >
+            <div class="target-avatar">
+              <img v-if="target.creature?.avatar" :src="getUnitAvatar(target.unitTypeName)" :alt="target.name" />
+              <div v-else class="default-avatar">👤</div>
+            </div>
+            <div class="target-info">
+              <h4>{{ target.name }}</h4>
+              <p class="target-stats">
+                <span>背包: {{ target.inventory.length }} 种道具</span>
+              </p>
+            </div>
+          </div>
+
+          <div v-if="availableTargets.length === 0" class="no-targets">
+            <p>没有可用的目标单位</p>
+            <p class="hint">（只能给予队伍中的其他角色）</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -145,6 +202,8 @@ import type { Unit } from '@/core/units/Unit';
 import type { Item } from '@/core/item/Item';
 import { ItemType, ItemRarity } from '@/core/item/ItemInterface';
 import { MessageTipSystem } from '@/core/system/MessageTipSystem';
+import { golbalSetting } from '@/core/golbalSetting';
+import { getUnitAvatar } from '@/utils/utils';
 
 const props = defineProps<{
   unit: Unit | null;
@@ -156,6 +215,8 @@ const emit = defineEmits<{
 }>();
 
 const selectedItem = ref<Item | null>(null);
+const giveTargetItem = ref<Item | null>(null);
+const giveStackAmount = ref<number>(1);
 
 // 获取背包
 const inventory = computed(() => {
@@ -227,9 +288,67 @@ const getRarityLabel = (rarity: ItemRarity): string => {
   return labels[rarity] || '未知';
 };
 
+// 获取可用的目标单位（队伍中的其他玩家角色）
+const availableTargets = computed(() => {
+  if (!props.unit) return [];
+  
+  const map = golbalSetting.map;
+  if (!map || !map.sprites) return [];
+  
+  // 获取所有玩家单位，排除自己
+  return map.sprites.filter((unit: Unit) => 
+    unit.party === 'player' && 
+    unit.id !== props.unit?.id &&
+    unit.state !== 'dead'
+  );
+});
+
 // 选择道具
 const selectItem = (item: Item) => {
   selectedItem.value = item;
+};
+
+// 开始给予道具
+const giveItem = (item: Item) => {
+  giveTargetItem.value = item;
+  giveStackAmount.value = item.stackCount;
+};
+
+// 确认给予道具
+const confirmGive = async (target: Unit) => {
+  if (!giveTargetItem.value || !props.unit) return;
+  
+  const item = giveTargetItem.value;
+  const amount = item.maxStack > 1 ? giveStackAmount.value : item.stackCount;
+  
+  // 验证数量
+  if (amount <= 0 || amount > item.stackCount) {
+    MessageTipSystem.getInstance().setMessageQuickly('给予数量无效');
+    return;
+  }
+  
+  // 从当前单位移除道具
+  const removedItem = props.unit.removeItem(item.uid, amount);
+  if (!removedItem) {
+    MessageTipSystem.getInstance().setMessageQuickly('移除道具失败');
+    return;
+  }
+  
+  // 添加到目标单位
+  const success = target.addItem(removedItem);
+  if (success) {
+    MessageTipSystem.getInstance().setMessageQuickly(
+      `已将 ${item.name} x${amount} 给予 ${target.name}`
+    );
+    console.log(`道具转移: ${item.name} x${amount} 从 ${props.unit.name} 到 ${target.name}`);
+  } else {
+    // 如果添加失败，把道具还回去
+    props.unit.addItem(removedItem);
+    MessageTipSystem.getInstance().setMessageQuickly('目标背包已满或添加失败');
+  }
+  
+  // 关闭弹窗
+  giveTargetItem.value = null;
 };
 
 // 使用道具
@@ -505,6 +624,14 @@ const dropItem = async (item: Item) => {
   background: #2196f3;
 }
 
+.give-btn {
+  border-color: #ff9800;
+}
+
+.give-btn:hover {
+  background: #ff9800;
+}
+
 .drop-btn {
   border-color: #f44336;
 }
@@ -645,5 +772,144 @@ const dropItem = async (item: Item) => {
 .inventory-content::-webkit-scrollbar-thumb:hover,
 .item-detail-content::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 215, 0, 0.5);
+}
+
+/* 给予目标选择弹窗 */
+.give-target-content {
+  background: linear-gradient(135deg, #2d1b4e 0%, #1a0f2e 100%);
+  border: 2px solid #ff9800;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 0 30px rgba(255, 152, 0, 0.3);
+}
+
+.give-info {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.give-info p {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.item-highlight {
+  color: #ff9800;
+  font-weight: bold;
+}
+
+.stack-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.stack-control label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}
+
+.stack-input {
+  width: 80px;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 152, 0, 0.5);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  font-size: 14px;
+}
+
+.stack-input:focus {
+  outline: none;
+  border-color: #ff9800;
+}
+
+.stack-max {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+}
+
+.target-list {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.target-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 152, 0, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.target-card:hover {
+  background: rgba(255, 152, 0, 0.1);
+  border-color: #ff9800;
+  transform: translateX(5px);
+}
+
+.target-avatar {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(255, 152, 0, 0.5);
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.target-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.default-avatar {
+  font-size: 32px;
+}
+
+.target-info {
+  flex: 1;
+}
+
+.target-info h4 {
+  margin: 0 0 5px 0;
+  color: #ffd700;
+  font-size: 18px;
+}
+
+.target-stats {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.no-targets {
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.no-targets p {
+  margin: 10px 0;
+}
+
+.no-targets .hint {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.3);
 }
 </style>

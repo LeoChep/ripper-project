@@ -22,6 +22,8 @@ export interface CreateAttackParams {
   keyWords: string[];
   unit: Unit;
   weapon?: Weapon;
+  throwItem?: string;
+  anim?: string;
   implement?: any; // 添加法器支持
 }
 export const checkPassiable = (unit: Unit, x: number, y: number) => {
@@ -164,7 +166,7 @@ export const checkPassiableBySize = (
 };
 
 export const createAttack = (params: CreateAttackParams) => {
-  const { attackFormula, damageFormula, keyWords, unit, weapon, implement } =
+  const { attackFormula, damageFormula, keyWords, unit, weapon, implement,throwItem ,anim} =
     params;
 
   // 解析攻击公式
@@ -201,6 +203,14 @@ export const createAttack = (params: CreateAttackParams) => {
 
   attack.attackBonus = abValue;
   attack.damage = damageText;
+  if (throwItem){
+    attack.throwItem = throwItem;
+  }
+  if (anim){
+    attack.anim = anim;
+  }else{
+    attack.anim = "slash";
+  }
   return attack;
 };
 const getDamageFormula = (

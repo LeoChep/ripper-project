@@ -9,7 +9,13 @@ import { BasicAttackSelector } from "@/core/selector/BasicAttackSelector";
 import type { Unit } from "@/core/units/Unit";
 import type { Item } from "../../Item";
 import { ItemController } from "../../base/ItemController";
-
+import { createAttack } from "@/core/system/AttackSystem";
+import {
+  attackMovementToXY,
+  playerSelectAttackMovement,
+} from "@/core/action/UnitAttack";
+import thorwItemAnim from "@/assets/anim/throw_item/holy_water.png";
+import { Assets } from "pixi.js";
 /**
  * 圣水控制器
  * 继承攻击控制器，复用范围选择逻辑
@@ -19,6 +25,20 @@ export class HolyWaterController extends ItemController {
   user: Unit | null = null;
   target: Unit | null = null;
 
+  getAttack = (unit: Unit, num: number) => {
+    const attackParams = {
+      attackFormula: "[DEX]",
+      damageFormula: "2d8",
+      keyWords: [],
+      unit: unit,
+      range: 5,
+      throwItem: thorwItemAnim,
+      anim: "none",
+    };
+    const attack = createAttack(attackParams);
+
+    return attack;
+  };
   /**
    * 设置道具实例
    */
@@ -100,7 +120,14 @@ export class HolyWaterController extends ItemController {
     }
 
     const holyWater = this.item as HolyWater;
-
+    const attack = this.getAttack(this.user!, 1);
+    await Assets.load(thorwItemAnim);
+    await playerSelectAttackMovement(
+      result.event,
+      this.user!,
+      attack,
+      golbalSetting.map,
+    );
     if (this.target) {
       // 对目标造成伤害
       const targetCreature = this.target.creature;

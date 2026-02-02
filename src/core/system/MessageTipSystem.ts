@@ -27,15 +27,17 @@ export class MessageTipSystem {
     return MessageTipSystem.instance;
   }
 
-  setMessage(message: string): void {
-    this.store.setMessage(message);
+  setMessage(message: string, duration?: number): void {
+    this.store.setMessage(message, duration ?? 0);
   }
-
+  setMessageQuickly(message: string): void {
+    this.store.setMessage(message, 2000); // 快速消息，持续2秒
+  }
   clearMessage(): void {
     this.store.clearMessages();
   }
-  setBottomMessage(message: string): void {
-    this.store.setBottomMessage(message);
+  setBottomMessage(message: string, duration?: number): void {
+    this.store.setBottomMessage(message, duration ?? 0);
   }
   clearBottomMessage(): void {
     this.store.clearBottomMessage();

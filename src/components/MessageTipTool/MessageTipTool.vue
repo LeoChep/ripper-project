@@ -170,7 +170,7 @@ const handleOverlayClick = () => {
 <style scoped>
 .message-tip-tool {
   position: fixed;
-  z-index: 1000;
+  z-index: 10000;
   pointer-events: none;
   transition: opacity 0.3s ease-in-out;
   width: fit-content;
@@ -262,7 +262,7 @@ const handleOverlayClick = () => {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.6);
-  z-index: 3000;
+  z-index: 9000;
   pointer-events: auto;
   display: flex;
   align-items: center;
@@ -281,7 +281,7 @@ const handleOverlayClick = () => {
 
 .dialog-container {
   position: fixed;
-  z-index: 3001;
+  z-index: 9001;
   animation: dialogSlideIn 0.3s ease-out;
 }
 

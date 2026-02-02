@@ -38,10 +38,30 @@ export async function createDamageAnim(
   function animateDamageText(ts: number) {
     if (startTime === null) startTime = ts;
     const elapsed = ts - startTime;
-    const t = Math.min(elapsed / duration, 1.2);
-    damageText.y = startY + (endY - startY) * t;
-    damageText.alpha = startAlpha + (endAlpha - startAlpha) * t;
-    if (t < 1.2) {
+    const t = Math.min(elapsed / duration, 1);
+    
+    // 使用 easeOutBack 缓动函数，让数字弹出时更有动感
+    // c1 = 1.70158
+    const c1 = 1.70158;
+    const c3 = c1 + 1;
+    const easeOutBack = 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+    
+    // 或者简单的 easeOutCubic
+    // const easeOutCubic = 1 - Math.pow(1 - t, 3);
+
+    const easing = easeOutBack;
+
+    damageText.y = startY + (endY - startY) * easing;
+    
+    // 淡出效果: 前 70% 时间不透明，后 30% 时间淡出
+    if (t > 0.7) {
+        const fadeProgress = (t - 0.7) / 0.3;
+        damageText.alpha = 1 - fadeProgress;
+    } else {
+        damageText.alpha = 1;
+    }
+
+    if (t < 1) {
       requestAnimationFrame(animateDamageText);
     } else {
       if (container && container.children.includes(damageText)) {
