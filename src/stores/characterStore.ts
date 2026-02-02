@@ -1,7 +1,7 @@
 import { CharacterController } from "@/core/controller/CharacterController";
 import type { Unit } from "@/core/units/Unit";
 
-let characterStore = {
+const characterStore = {
   characters: [] as Unit[],
   show:true,
   selectedCharacterId: 0,
@@ -20,9 +20,8 @@ let characterStore = {
   },
   selectCharacter(character: Unit) {
     console.log('selectCharacter中角色:', character);
-    this.selectedCharacter = character;
-    this.selectedCharacterId = character.id;
-    CharacterController.selectCharacter(character);
+    characterStore.selectedCharacter = character;
+    characterStore.selectedCharacterId = character.id;
   },
 };
 

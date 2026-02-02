@@ -203,6 +203,7 @@ export async function startCombatTurn() {
         }
         const unit = initiativeCursor.pointAt.owner;
         CharacterController.selectCharacter(unit);
+        console.log("选中单位，等待玩家操作:", unit);
         CharacterCombatController.getInstance().selectedCharacter = unit;
         initiativeCursor.pointAt.canDelay = true;
         CharacterCombatController.instance?.useMoveController();

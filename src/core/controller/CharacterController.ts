@@ -23,10 +23,11 @@ export class CharacterController {
     const unit = UnitSystem.getInstance().getUnitById(id);
     this.selectCharacter(unit!);
   }
+  static selectCharacterHandlers = [] as ((...arg: any) => {})[];
   static selectCharacter(unit: Unit) {
     CharacterController.selectedCharacter = unit;
     CharacterController.curser = unit.id;
-    console.log("useCharacterStore().selectCharacter(unit):", unit);
+
     UnitSystem.getInstance()
       .getAllUnits()
       .forEach((u) => {
@@ -37,9 +38,19 @@ export class CharacterController {
           // console.log("选中单位，显示选中效果:", u===unit,u,unit);
         }
       });
-  
 
     CharacterController.lookOn();
+    console.log(
+      "CharacterController selectCharacter:",
+      this.selectCharacterHandlers,
+    );
+    for (let handle of this.selectCharacterHandlers) {
+      handle(unit);
+    }
+        console.log(
+      "CharacterController selectCharacter:after",
+      this.selectCharacterHandlers,
+    );
   }
   static lookOn() {
     // 只负责视角转移到选中单位

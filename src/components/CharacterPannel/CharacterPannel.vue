@@ -83,7 +83,9 @@ onMounted(() => {
     setInterval(() => {
         checkUsePowerHandler()
     }, 100);
+
     characterStore.value = useCharacterStore();
+    CharacterController.selectCharacterHandlers.push(useCharacterStore().selectCharacter)
     const updataCharacters = () => {
         characters.value = []
         const nChartacters = characterStore.value.characters;
@@ -158,11 +160,8 @@ function selectCharacter(character, index) {
     console.log('选中角色:', character);
 
     selectedIndex.value = index;
-    selectedCharacter.value = character;
-    console.log('characterStore', characterStore.value);
-
+    characterStore.value.selectCharacter(character)
     CharacterController.curser = character.id;
-    characterStore.value.selectedCharacterId = character.id;
     CharacterController.selectCharacterById(character.id);
 }
 

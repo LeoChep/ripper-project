@@ -223,6 +223,7 @@ const selectStep = () => {
   selectedAction.value = null; // 清除选中的动作
 };
 const endTurn = () => {
+console.log("尝试结束回合", CharacterCombatController.instance);
   if (CharacterCombatController.instance.selectedCharacter.state !== "idle") {
     console.warn("当前角色状态不允许结束");
     return;
