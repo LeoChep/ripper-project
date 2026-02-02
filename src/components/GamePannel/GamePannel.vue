@@ -99,7 +99,7 @@ onMounted(async () => {
     console.log("[从主菜单读取存档] 栏位:", loadSlot);
     // await DramaSystem.getInstance().setDramaUse("d1");
     await new Promise((resolve) => setTimeout(resolve, 500));
-    await loadGameState(Number(loadSlot));
+    await loadGameState(Number(loadSlot), false);
     const characterOutCombatController = CharacterOutCombatController.getInstance();
 
 
@@ -353,7 +353,7 @@ const saveGameState = (slotId: number) => {
 };
 
 // 添加读取游戏状态的方法（修改为支持栏位）
-const loadGameState = async (slotId: number): Promise<boolean> => {
+const loadGameState = async (slotId: number, needConfirm: boolean = true): Promise<boolean> => {
   try {
     const savedState = localStorage.getItem(`gameState_slot_${slotId}`);
     if (!savedState) {
@@ -363,12 +363,15 @@ const loadGameState = async (slotId: number): Promise<boolean> => {
     const gameState = JSON.parse(savedState);
 
     // 确认是否要读取存档
-    const confirmLoad = await MessageTipSystem.getInstance().confirm(
-      `是否要读取栏位 ${slotId} 的存档?\n保存时间: ${new Date(gameState.timestamp).toLocaleString()}`
-    );
-    if (!confirmLoad) {
-      return false;
+    if (needConfirm) {
+      const confirmLoad = await MessageTipSystem.getInstance().confirm(
+        `是否要读取栏位 ${slotId} 的存档?\n保存时间: ${new Date(gameState.timestamp).toLocaleString()}`
+      );
+      if (!confirmLoad) {
+        return false;
+      }
     }
+
     //
     DramaSystem.getInstance().stop();
     clear();
