@@ -8,7 +8,7 @@ import { lookOn } from "../anim/LookOnAnim";
 import { golbalSetting } from "../golbalSetting";
 import { useCharacterStore } from "@/stores/characterStore";
 import { UnitSystem } from "../system/UnitSystem";
-
+import * as InitSystem from "@/core/system/InitiativeSystem";
 export class CharacterController {
   public static curser: number = 0;
   public static isUse: boolean = false;
@@ -31,26 +31,26 @@ export class CharacterController {
     UnitSystem.getInstance()
       .getAllUnits()
       .forEach((u) => {
-        TurnEffectAnim.removePlayerEffect(u);
+        if (u.party === "player") TurnEffectAnim.removePlayerEffect(u);
         if (u.id === unit.id) {
           // TurnEffectAnim.showPlayerEffect(u);
-          CharacterController.showSelectEffect();
+          if (
+            InitSystem.isInBattle() == true &&
+            InitSystem.getPointAtUnit()?.party !== "player"
+          ) {
+          } else {
+            CharacterController.showSelectEffect();
+          }
+
           // console.log("选中单位，显示选中效果:", u===unit,u,unit);
         }
       });
 
     CharacterController.lookOn();
-    console.log(
-      "CharacterController selectCharacter:",
-      this.selectCharacterHandlers,
-    );
+
     for (let handle of this.selectCharacterHandlers) {
       handle(unit);
     }
-        console.log(
-      "CharacterController selectCharacter:after",
-      this.selectCharacterHandlers,
-    );
   }
   static lookOn() {
     // 只负责视角转移到选中单位
