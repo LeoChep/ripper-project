@@ -266,6 +266,26 @@ const handleOptionHover = (index: number): void => {
   talkState.selectedOption = index;
 };
 
+// 全局点击处理（推进对话）
+const handleGlobalClick = (): void => {
+  // 如果有选项显示，则不处理全局点击
+  if (talkState.options.length > 0) {
+    return;
+  }
+  // 没有选项时，点击推进对话（与 Enter 键效果相同）
+  enterEnd();
+};
+
+// 添加全局点击监听
+const addGlobalClickListener = (): void => {
+  window.addEventListener('click', handleGlobalClick);
+};
+
+// 移除全局点击监听
+const removeGlobalClickListener = (): void => {
+  window.removeEventListener('click', handleGlobalClick);
+};
+
 // 键盘事件处理
 const handleKeyDown = (event: KeyboardEvent): void => {
   // 如果有选项显示，处理选项选择
@@ -292,6 +312,20 @@ defineExpose({
   unitChoose,
   showOptions: talkState.showOptions
 });
+
+// 监听对话模式状态，动态管理全局点击事件
+watch(
+  () => showFlag.value || talkState.options.length > 0,
+  (isInTalkMode) => {
+    if (isInTalkMode) {
+      // 进入对话模式，添加全局点击监听
+      addGlobalClickListener();
+    } else {
+      // 退出对话模式，移除全局点击监听
+      removeGlobalClickListener();
+    }
+  }
+);
 
 onMounted(() => {
   // 监听 Enter 键，触发对话流程控制
