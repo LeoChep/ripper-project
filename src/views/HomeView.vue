@@ -47,12 +47,12 @@ const handleSlotSelect = async (slotId: number) => {
     
     <div class="menu-container">
       <button class="menu-button new-game-button" @click="startNewGame">
-        <span class="button-icon">🎮</span>
+
         <span class="button-text">开始新游戏</span>
       </button>
       
       <button class="menu-button load-game-button" @click="openLoadDialog">
-        <span class="button-icon">📂</span>
+       
         <span class="button-text">读取存档</span>
       </button>
     </div>
@@ -75,9 +75,7 @@ const handleSlotSelect = async (slotId: number) => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: 
-    linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-    url('/book.jpg') center/cover no-repeat;
+  background: url('/book.jpg') center/cover no-repeat;
   overflow: hidden;
   position: relative;
 }
@@ -103,33 +101,41 @@ const handleSlotSelect = async (slotId: number) => {
 }
 
 .game-title {
-  font-size: 72px;
+  font-size: 80px;
   font-weight: 900;
   color: #fff;
   margin: 0;
-  font-family: 'STKaiti', 'KaiTi', '华文行楷', 'STXingkai', 'Microsoft YaHei', serif;
+  font-family: 'STXingkai', 'KaiTi', '华文行楷', 'STKaiti', 'Microsoft YaHei', serif;
   text-shadow: 
-    0 0 15px rgba(200, 230, 255, 0.9),
-    0 0 25px rgba(200, 230, 255, 0.7),
-    0 0 35px rgba(180, 220, 255, 0.5),
-    1px 1px 2px rgba(0, 0, 0, 0.9),
-    2px 2px 4px rgba(0, 0, 0, 0.8),
-    3px 3px 6px rgba(0, 0, 0, 0.7);
-  letter-spacing: 12px;
-  -webkit-text-stroke: 2px rgba(50, 50, 80, 0.8);
-  text-stroke: 2px rgba(50, 50, 80, 0.8);
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.7)) contrast(1.2) brightness(1.1);
-  background: linear-gradient(180deg, #ffffff 0%, #e8f4ff 30%, #b8d8f5 70%, #a0c8e8 100%);
+    0 0 20px rgba(255, 200, 100, 0.9),
+    0 0 40px rgba(255, 180, 80, 0.7),
+    0 0 60px rgba(255, 150, 60, 0.5),
+    2px 2px 4px rgba(0, 0, 0, 0.9),
+    4px 4px 8px rgba(0, 0, 0, 0.8),
+    6px 6px 12px rgba(0, 0, 0, 0.7);
+  letter-spacing: 16px;
+  -webkit-text-stroke: 2px rgba(80, 50, 20, 0.8);
+  text-stroke: 2px rgba(80, 50, 20, 0.8);
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.9)) contrast(1.3) brightness(1.15);
+  background: linear-gradient(180deg, #fffbf0 0%, #ffd700 20%, #ffb347 50%, #d4af37 80%, #b8860b 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .game-subtitle {
-  font-size: 20px;
-  color: rgba(255, 255, 255, 0.9);
-  margin: 10px 0 0 0;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  font-size: 22px;
+  color: rgba(255, 230, 200, 0.95);
+  margin: 15px 0 0 0;
+  text-shadow: 
+    0 0 15px rgba(255, 200, 100, 0.7),
+    0 0 25px rgba(255, 180, 80, 0.5),
+    0 3px 10px rgba(0, 0, 0, 0.6),
+    2px 2px 4px rgba(0, 0, 0, 0.9);
+  letter-spacing: 6px;
+  font-weight: 500;
+  font-family: 'STKaiti', 'KaiTi', 'Microsoft YaHei', '微软雅黑', serif;
+  font-style: italic;
 }
 
 .menu-container {
@@ -145,38 +151,42 @@ const handleSlotSelect = async (slotId: number) => {
   align-items: center;
   justify-content: center;
   gap: 15px;
-  padding: 20px 60px;
-  font-size: 24px;
-  font-weight: 600;
-  color: white;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-radius: 15px;
+  padding: 25px 80px;
+  font-size: 26px;
+  font-weight: 700;
+  color: #f5e6d3;
+  border: none;
+  border-radius: 0;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  min-width: 350px;
+  background: url('/button-start.png') center/contain no-repeat;
+  min-width: 500px;
+  min-height: 120px;
+  position: relative;
+  text-shadow: 
+    0 0 8px rgba(255, 200, 100, 0.6),
+    0 2px 4px rgba(0, 0, 0, 0.8),
+    0 -1px 2px rgba(255, 255, 255, 0.2),
+    2px 2px 6px rgba(0, 0, 0, 0.9);
+  font-family: 'STKaiti', 'KaiTi', 'Microsoft YaHei', serif;
+  letter-spacing: 3px;
 }
 
 .menu-button:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.05);
+  filter: brightness(1.1);
 }
 
 .menu-button:active {
-  transform: translateY(-2px);
+  transform: scale(0.98);
 }
 
 .new-game-button:hover {
-  background: rgba(76, 175, 80, 0.3);
-  border-color: #4caf50;
+  filter: brightness(1.15) drop-shadow(0 0 15px rgba(76, 175, 80, 0.5));
 }
 
 .load-game-button:hover {
-  background: rgba(33, 150, 243, 0.3);
-  border-color: #2196f3;
+  filter: brightness(1.15) drop-shadow(0 0 15px rgba(33, 150, 243, 0.5));
 }
 
 .button-icon {
@@ -185,7 +195,8 @@ const handleSlotSelect = async (slotId: number) => {
 }
 
 .button-text {
-  letter-spacing: 2px;
+  letter-spacing: 4px;
+  font-weight: 700;
 }
 
 @keyframes fadeInDown {
