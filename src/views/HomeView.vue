@@ -41,7 +41,7 @@ const handleSlotSelect = async (slotId: number) => {
 <template>
   <div class="home-view">
     <div class="title-container">
-      <h1 class="game-title">冒险游戏</h1>
+      <h1 class="game-title">浪漫奇想</h1>
       <p class="game-subtitle">开启你的冒险之旅</p>
     </div>
     
@@ -75,7 +75,9 @@ const handleSlotSelect = async (slotId: number) => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: 
+    linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+    url('/book.jpg') center/cover no-repeat;
   overflow: hidden;
   position: relative;
 }
@@ -101,12 +103,26 @@ const handleSlotSelect = async (slotId: number) => {
 }
 
 .game-title {
-  font-size: 64px;
-  font-weight: bold;
-  color: white;
+  font-size: 72px;
+  font-weight: 900;
+  color: #fff;
   margin: 0;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  letter-spacing: 4px;
+  font-family: 'STKaiti', 'KaiTi', '华文行楷', 'STXingkai', 'Microsoft YaHei', serif;
+  text-shadow: 
+    0 0 15px rgba(200, 230, 255, 0.9),
+    0 0 25px rgba(200, 230, 255, 0.7),
+    0 0 35px rgba(180, 220, 255, 0.5),
+    1px 1px 2px rgba(0, 0, 0, 0.9),
+    2px 2px 4px rgba(0, 0, 0, 0.8),
+    3px 3px 6px rgba(0, 0, 0, 0.7);
+  letter-spacing: 12px;
+  -webkit-text-stroke: 2px rgba(50, 50, 80, 0.8);
+  text-stroke: 2px rgba(50, 50, 80, 0.8);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.7)) contrast(1.2) brightness(1.1);
+  background: linear-gradient(180deg, #ffffff 0%, #e8f4ff 30%, #b8d8f5 70%, #a0c8e8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .game-subtitle {
