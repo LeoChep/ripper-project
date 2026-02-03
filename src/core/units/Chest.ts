@@ -1,4 +1,6 @@
 import * as PIXI from "pixi.js";
+import { ItemSystem } from "../item";
+import { ChestSystem } from "../system/ChestSystem";
 
 export class Chest {
   public id: number;
@@ -13,7 +15,13 @@ export class Chest {
   // 宝箱内容物（可以存储物品ID或其他数据）
   public contents: any[] = [];
 
-  constructor(id: number, x: number, y: number, width: number = 64, height: number = 64) {
+  constructor(
+    id: number,
+    x: number,
+    y: number,
+    width: number = 64,
+    height: number = 64,
+  ) {
     this.id = id;
     this.chestSprite = null;
     this.x = x;
@@ -27,22 +35,14 @@ export class Chest {
   /**
    * 打开宝箱
    */
-  open() {
+  open = () => {
     if (!this.isOpen) {
       this.isOpen = true;
-      console.log("Chest opened:", this.id);
       // 这里可以添加打开动画或其他逻辑
-      return this.contents;
+   
     }
-    return [];
-  }
-
-  /**
-   * 添加物品到宝箱
-   */
-  addItem(item: any) {
-    this.contents.push(item);
-  }
+    return this.contents;
+  };
 
   /**
    * 清空宝箱内容
@@ -57,18 +57,18 @@ export class Chest {
  * @param obj Tiled 地图中的 box 对象
  * @returns Chest 实例
  */
-export function createChestFromBoxObj(obj: any): Chest {
+export async function createChestFromBoxObj(obj: any): Promise<Chest> {
   const x = obj.x;
   // Tiled 中带 gid 的对象 y 坐标是底部位置，需要减去高度转换为顶部位置
   const height = obj.height || 64;
   const y = obj.y - height;
   const width = obj.width || 64;
-  
+
   const chest = new Chest(obj.id, x, y, width, height);
-  
+
   // 解析自定义属性
   if (obj.properties) {
-    obj.properties.forEach((prop: any) => {
+    obj.properties.forEach(async (prop: any) => {
       switch (prop.name) {
         case "isOpen":
           chest.isOpen = prop.value === true;
@@ -77,10 +77,16 @@ export function createChestFromBoxObj(obj: any): Chest {
           // 如果有预设的内容物，可以在这里解析
           // 假设 contents 是一个 JSON 字符串
           try {
+            console.log("Parsing chest contents property:", prop);
             if (typeof prop.value === "string") {
-              chest.contents = JSON.parse(prop.value);
-            } else if (Array.isArray(prop.value)) {
-              chest.contents = prop.value;
+              const contensStr = prop.value as String;
+              console.log("Parsing chest contents1:", contensStr);
+              const contens = contensStr.split("\n");
+              const chestSystem = ChestSystem.getInstance();
+              for (const itemStr of contens) {
+                await chestSystem.addItemByName(chest, itemStr.trim());
+              }
+              console.log("Parsed chest contents item:", chest);
             }
           } catch (e) {
             console.warn("Failed to parse chest contents:", e);
@@ -89,6 +95,6 @@ export function createChestFromBoxObj(obj: any): Chest {
       }
     });
   }
-  
+
   return chest;
 }

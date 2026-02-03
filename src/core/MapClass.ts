@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
 import { createDoorFromDoorObj, Door } from "./units/Door";
 import { Chest, createChestFromBoxObj } from "./units/Chest";
+import { ChestSystem } from "./system/ChestSystem";
 
 // 单个区块（chunk）
 export interface TiledMapChunk {
@@ -131,7 +132,8 @@ export class TiledMap {
       (l) => l.type === "objectgroup" && l.name === "box"
     );
     if (boxLayer && boxLayer.objects) {
-      this.chests = boxLayer.objects.map((obj) => createChestFromBoxObj(obj));
+      this.chests=boxLayer.objects as any;
+
       console.log("Initialized chests:", this.chests);
     }
   }

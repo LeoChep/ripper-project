@@ -769,14 +769,14 @@
                  "name":"\u5b9d\u7bb1",
                  "properties":[
                         {
+                         "name":"contents",
+                         "type":"string",
+                         "value":"Holy_Water\nLight_Sword"
+                        }, 
+                        {
                          "name":"img",
                          "type":"string",
                          "value":""
-                        }, 
-                        {
-                         "name":"items",
-                         "type":"string",
-                         "value":"Holy_Water\nLight_Sword"
                         }],
                  "rotation":0,
                  "type":"",
@@ -1140,8 +1140,8 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":573.557065400187,
-                 "y":223.02343911554
+                 "x":315.245013080037,
+                 "y":194.322099968857
                 }],
          "offsetx":4,
          "offsety":0,

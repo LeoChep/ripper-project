@@ -16,6 +16,8 @@
   </div>
   <!-- 存档对话框 -->
   <SaveLoadDialog :mode="dialogMode" :isVisible="showDialog" @close="closeDialog" @select="handleSlotSelect" />
+  <!-- 宝箱内容对话框 -->
+  <ChestLootDialog />
 </template>
 
 <script setup lang="ts">
@@ -24,6 +26,7 @@ import MessageTipTool from "@/components/MessageTipTool/MessageTipTool.vue";
 import CreatureInfo from "../CharacterDetailPannel/CreatureInfo.vue";
 import TalkPannel from "../TalkPannel/TalkPannel.vue";
 import SaveLoadDialog from "../SaveLoadDialog/SaveLoadDialog.vue";
+import ChestLootDialog from "../ChestLootDialog/ChestLootDialog.vue";
 import { MessageTipSystem } from "@/core/system/MessageTipSystem";
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";

@@ -2,6 +2,7 @@ import type { Unit } from "@/core/units/Unit";
 import { d1 } from "@/drama/d1";
 import type { Drama } from "@/drama/drama";
 import { UnitSystem } from "./UnitSystem";
+import { createChestFromBoxObj } from "../units/Chest";
 interface DialogOption {
   text: string;
   value: any;
@@ -153,10 +154,20 @@ export class DramaSystem {
     // 加载地图
     const mapPassiable = await this.loadMap(drama.mapName);
     const spritesOBJ = mapPassiable.sprites;
-
+    const boxOBJ=mapPassiable.chests;
     // 创建单位
     const units = createUnitsFromMapSprites(spritesOBJ);
-
+    console.log("Loaded boxOBJ from map:", boxOBJ);
+    const  chests = await Promise.all(boxOBJ.map((obj) => createChestFromBoxObj(obj)));
+    console.log("Created chests from boxOBJ:", chests);
+    
+    // 注册宝箱到 ChestSystem
+    const { ChestSystem } = await import("./ChestSystem");
+    const chestSystem = ChestSystem.getInstance();
+    chests.forEach((chest) => {
+      chestSystem.registerChest(chest);
+    });
+    
     // 使用 map 而不是 forEach，避免冗余的 Promise 包装
     const createCreatureEndPromise = units.map(async (unit) => {
       // Tiled 中带 gid 的对象 y 坐标是底部位置，需要减去高度转换为顶部位置
@@ -180,7 +191,7 @@ export class DramaSystem {
     await Promise.all(createCreatureEndPromise);
     await new Promise((resolve) => setTimeout(resolve, 1000)); // 确保所有异步操作完成
     mapPassiable.sprites = units;
-    
+    mapPassiable.chests = chests; 
     // 处理宝箱
     console.log("Loaded chests from map:", mapPassiable.chests);
     

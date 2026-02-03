@@ -116,6 +116,48 @@ export class ItemSystem {
   }
 
   /**
+   * 根据道具名称获取对应的 Item 类
+   * 使用动态导入来按需加载道具类
+   */
+  getItemClass(itemName: string): Promise<typeof Item | null> {
+    switch (itemName) {
+      case "Holy_Water":
+        // case "圣水":
+        return import("../item/consumables/HolyWater/HolyWater").then(
+          (module) => module.HolyWater,
+        );
+      // case "Light_Sword":
+      // case "光明之剑":
+      //   return import("../item/weapons/LightSword/LightSword").then(
+      //     (module) => module.LightSword,
+      //   );
+      // 在这里添加更多道具类的映射
+      // case "HealingPotion":
+      // case "治疗药水":
+      //   return import("../item/consumables/HealingPotion/HealingPotion").then(
+      //     (module) => module.HealingPotion,
+      //   );
+      default:
+        console.warn(`未找到道具类: ${itemName}`);
+        return Promise.resolve(null);
+    }
+  }
+
+  /**
+   * 根据道具名称创建道具实例
+   * @param itemName 道具名称
+   * @returns 道具实例或 null
+   */
+  async createItem(itemName: string): Promise<Item | null> {
+    const ItemClass = await this.getItemClass(itemName);
+    if (!ItemClass) {
+      console.warn(`无法创建道具: ${itemName}`);
+      return null;
+    }
+    return new ItemClass({} as any);
+  }
+
+  /**
    * 清理控制器缓存
    */
   clearCache(): void {

@@ -91,7 +91,7 @@ export class ChestAnimSprite extends Container {
       borderWidth,
       borderWidth,
       width + padding * 2 - borderWidth * 2,
-      height + padding * 2 - borderWidth * 2
+      height + padding * 2 - borderWidth * 2,
     );
     this.tooltipBg.endFill();
   }
@@ -100,7 +100,7 @@ export class ChestAnimSprite extends Container {
     if (this.tooltip) {
       // 根据宝箱状态显示不同的文本
       this.tooltip.text = this._isOpen ? "✧ 已打开的宝箱 ✧" : "✧ 打开宝箱 ✧";
-      
+
       // 如果宝箱未打开，检查动作和距离
       if (!this._isOpen) {
         if (InitiativeSystem.isInBattle()) {
@@ -134,13 +134,13 @@ export class ChestAnimSprite extends Container {
     this.updateTooltipText();
 
     const padding = 6;
-    
+
     // 将提示词放置在宝箱正上方
     const tooltipHeight = this.tooltip.height + padding * 2;
     const tooltipWidth = this.tooltip.width + padding * 2;
     this.tooltipContainer.position.set(
       (64 - tooltipWidth) / 2, // 水平居中
-      -tooltipHeight - 5 // 在宝箱上方，留 5 像素间距
+      -tooltipHeight - 5, // 在宝箱上方，留 5 像素间距
     );
 
     this.tooltipContainer.visible = true;
@@ -192,18 +192,18 @@ const outBattleChestAction = (chest: Chest) => {
     return { info: "地图未加载", useful: false };
   }
   const selectedCharacter = map.sprites.find(
-    (sprite) => sprite.id === CharacterController.curser
+    (sprite) => sprite.id === CharacterController.curser,
   );
   if (!selectedCharacter) {
     return { info: "未选择角色", useful: false };
   }
-  
+
   const chestX = chest.x + 32; // 宝箱中心点（考虑偏移）
   const chestY = chest.y + 32;
   const unitX = selectedCharacter.x + 32;
   const unitY = selectedCharacter.y + 32;
   const dis = Math.max(Math.abs(chestX - unitX), Math.abs(chestY - unitY));
-  
+
   if (dis > 64) {
     return { info: "距离过远", useful: false };
   }
@@ -217,14 +217,14 @@ const inBattleChestAction = (chest: Chest) => {
   if (!selectedCharacter) {
     return { info: "未选择角色", useful: false };
   }
-  
+
   let actionUseful = false;
   const chestX = chest.x + 32; // 宝箱中心点（考虑偏移）
   const chestY = chest.y + 32;
   const unitX = selectedCharacter.x + 32;
   const unitY = selectedCharacter.y + 32;
   const dis = Math.max(Math.abs(chestX - unitX), Math.abs(chestY - unitY));
-  
+
   if (dis > 64) {
     return { info: "距离过远", useful: false };
   }
@@ -243,11 +243,8 @@ const inBattleChestAction = (chest: Chest) => {
 export const createChestAnimSpriteFromChest = async (chest: Chest) => {
   // 使用 box1.png 图集（根据 A.tmj 中的配置）
   console.log("Loading chest textures...");
-  const boxTextureUrl = new URL(
-    "@/assets/map/box1.png",
-    import.meta.url
-  ).href;
-  
+  const boxTextureUrl = new URL("@/assets/map/box1.png", import.meta.url).href;
+
   const boxTexture = await Assets.load(boxTextureUrl);
   console.log("Chest texture loaded:", boxTextureUrl);
   // box1.png 是 4 帧的图集，每帧 64x64，间距 10
@@ -263,7 +260,7 @@ export const createChestAnimSpriteFromChest = async (chest: Chest) => {
   });
   const closedChestSprite = new Sprite(closedTexture);
   closedChestSprite.anchor.set(0, 0); // 设置锚点为左上角，与 unit 一致
-  
+
   // 设置宝箱尺寸为 50x50
   const targetSize = 50;
   const scale = targetSize / frameWidth;
@@ -274,7 +271,12 @@ export const createChestAnimSpriteFromChest = async (chest: Chest) => {
   console.log("Creating opened chest texture...");
   const openedTexture = new PIXI.Texture({
     source: boxTexture.source,
-    frame: new PIXI.Rectangle((frameWidth + spacing) * 0, 0, frameWidth, frameHeight),
+    frame: new PIXI.Rectangle(
+      (frameWidth + spacing) * 0,
+      0,
+      frameWidth,
+      frameHeight,
+    ),
   });
   const openedChestSprite = new Sprite(openedTexture);
   openedChestSprite.anchor.set(0, 0); // 设置锚点为左上角，与 unit 一致
@@ -297,12 +299,11 @@ export const createChestAnimSpriteFromChest = async (chest: Chest) => {
   closedChestSprite.zIndex = 20;
   openedChestSprite.zIndex = 20;
 
-
   chestAnimSprite.eventMode = "static";
   chestAnimSprite.cursor = "pointer";
   chestAnimSprite.hookPointEvent();
   console.log("Hooked point event for chest:", chest.id);
-  
+
   // 添加点击事件
   chestAnimSprite.on("pointerdown", () => {
     const talkStore = useTalkStateStore();
@@ -310,10 +311,10 @@ export const createChestAnimSpriteFromChest = async (chest: Chest) => {
       return;
     }
 
-    if (chestAnimSprite.isOpen) {
-      MessageTipSystem.getInstance().setMessageQuickly("这个宝箱已经被打开了");
-      return;
-    }
+    // if (chestAnimSprite.isOpen) {
+    //   MessageTipSystem.getInstance().setMessageQuickly("这个宝箱已经被打开了");
+    //   return;
+    // }
 
     // 战斗中和非战斗状态的距离和动作检定
     if (InitiativeSystem.isInBattle()) {
@@ -334,20 +335,27 @@ export const createChestAnimSpriteFromChest = async (chest: Chest) => {
     }
 
     // 打开宝箱
-    chestAnimSprite.isOpen = true;
-    chest.isOpen = true;
 
-    // 显示宝箱内容
-    const contents = chest.open();
-    if (contents.length > 0) {
-      MessageTipSystem.getInstance().setMessageQuickly(
-        `你打开了宝箱，获得了: ${contents.map((item: any) => item.name || item).join(", ")}`
-      );
+    // 获取宝箱内容
+    chest.open();
+    chestAnimSprite.isOpen = true;
+    const contents = chest.contents;
+    // 调用全局对话框显示宝箱内容
+    if (typeof window !== "undefined" && (window as any).openChestLootDialog) {
+      console.log("Opening chest loot dialog with contents:", contents);
+      (window as any).openChestLootDialog(contents, chest.id);
     } else {
-      MessageTipSystem.getInstance().setMessageQuickly("宝箱是空的");
+      // 降级处理：如果对话框不可用，显示消息
+      if (contents.length > 0) {
+        MessageTipSystem.getInstance().setMessageQuickly(
+          `你打开了宝箱，获得了: ${contents.map((item: any) => item.name || item).join(", ")}`,
+        );
+      } else {
+        MessageTipSystem.getInstance().setMessageQuickly("宝箱是空的");
+      }
     }
 
-    console.log("Chest opened:", chest.id, "Contents:", contents);
+    // console.log("Chest opened:", chest.id, "Contents:", contents);
   });
   console.log("Created chest anim sprite:", chest.id, "at", chest.x, chest.y);
   chest.chestSprite = chestAnimSprite;
