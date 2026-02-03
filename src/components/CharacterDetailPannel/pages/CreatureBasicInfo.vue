@@ -43,7 +43,7 @@
         </div>
         <div class="defense-item fort">
           <div class="defense-label">强韧</div>
-          <div class="defense-value">{{ creature.fortitude }}</div>
+          <div class="defense-value">{{ fortitude }}</div>
         </div>
         <div class="defense-item reflex-def">
           <div class="defense-label">反射</div>
@@ -146,6 +146,7 @@ const props = defineProps<{
   creature: Creature | null;
   unit: Unit | null;
   reflex: string;
+  fortitude: string;
   will: string;
 }>();
 

@@ -90,6 +90,7 @@
           :unit="unit"
           :creature="creature"
           :reflex="reflex"
+          :fortitude="fortitude"
           :will="will"
         />
         <CreaturePowers v-if="currentPage === 'powers'" :creature="creature" />
@@ -136,6 +137,7 @@ const currentPage = ref<string>("basic");
 // 豁免值
 const will = ref("");
 const reflex = ref("");
+const fortitude = ref("");
 
 // 分页配置
 const tabs = ref([
@@ -194,6 +196,7 @@ onMounted(() => {
     if (props.unit) {
       will.value = getValue("will");
       reflex.value = getValue("reflex");
+      fortitude.value = getValue("fortitude");
     }
   }, 100);
   

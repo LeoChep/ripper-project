@@ -58,11 +58,17 @@ class D1 extends Drama {
         "npc牧师",
         "它们畏惧阳光，所以一直在神殿里没有出来。圣水对他们或许也有用……",
       );
-      const item = new HolyWater();
-      const unit = UnitSystem.getInstance().getUnitByName("牧师");
-      unit?.addItem(item);
 
-      await speak("你获得了道具：圣水");
+      const hasHolyWater = this.getVariable("hasHolyWater");
+      if (!hasHolyWater) {
+        const item = new HolyWater();
+        const unit = UnitSystem.getInstance().getUnitByName("牧师");
+
+        unit?.addItem(item);
+
+        await speak("你获得了道具：圣水");
+        this.setVariable("hasHolyWater", true);
+      }
     }
 
     if (ch1 == "option3")
