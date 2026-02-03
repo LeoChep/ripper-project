@@ -23,6 +23,8 @@ import type { GameEvent } from "../event/Event";
 import { AreaSystem } from "../system/AreaSystem";
 import { EventSheet } from "../event/EventSheet";
 import { ItemSerializer } from "../item/ItemSerializer";
+import { ChestSerializer } from "../units/ChestSerializer";
+import { ChestSystem } from "../system/ChestSystem";
 
 export class Saver {
   static gameState: any;
@@ -54,12 +56,18 @@ export class Saver {
     const initRecord = InitiativeSystem.getInitRecord();
     const eventRecord = BattleEvenetSystem.getInstance().serializeEvents();
     const areasRecord = AreaSystem.getInstance().getSaver();
+    
+    // 从ChestSystem获取宝箱数据以确保是最新状态
+    const chestSystem = ChestSystem.getInstance();
+    const chestsRecord = ChestSerializer.serializeArray(chestSystem.getAllChests());
+    
     // 收集需要保存的游戏数据
     const gameState = {
       // 保存完整的地图数据
       doors: doors,
       edges: edges,
       sprites: sprites,
+      chests: chestsRecord,
       dramaRecord: dramaRecord,
       initiativeRecord: initRecord,
       eventRecord: eventRecord,
@@ -68,6 +76,10 @@ export class Saver {
     };
     localStorage.setItem("gameState", JSON.stringify(gameState));
     Saver.gameState = gameState;
+    
+    // 同步map.chests以保持一致性
+    map.chests = chestSystem.getAllChests();
+    
     return true;
   }
   static async loadUnit(): Promise<boolean> {
@@ -144,6 +156,31 @@ export class Saver {
       map.doors = [];
     }
     map.edges = gameState.edges || [];
+    
+    return true;
+  }
+  
+  static loadChest(): boolean {
+    const map = golbalSetting.map;
+    if (!map) {
+      return false;
+    }
+    const gameState = Saver.gameState;
+    
+    // 反序列化宝箱
+    if (gameState.chests && gameState.chests.length > 0) {
+      map.chests = ChestSerializer.deserializeArray(gameState.chests);
+      // 重新注册宝箱到系统
+      const chestSystem = ChestSystem.getInstance();
+      chestSystem.clearAll(); // 清空之前的注册
+      map.chests.forEach(chest => {
+        chestSystem.registerChest(chest);
+      });
+      console.log("恢复的宝箱数据:", map.chests);
+    } else {
+      map.chests = [];
+    }
+    
     return true;
   }
   static async loadDrama() {
@@ -165,8 +202,17 @@ export class Saver {
     // golbalSetting.map = map;
 
     Saver.gameState = gameState;
+    
+    // 先加载drama，这会创建基础地图结构
     await Saver.loadDrama();
+    
+    // 然后覆盖门和墙数据（从存档恢复）
     Saver.loadWallAndDoor();
+    
+    // 恢复宝箱数据
+    Saver.loadChest();
+    
+    // 恢复单位数据
     await Saver.loadUnit();
 
     Saver.loadArea();

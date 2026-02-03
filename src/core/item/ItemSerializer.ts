@@ -131,6 +131,7 @@ export class ItemSerializer {
    * 从 Item 对象序列化
    */
   static serialize(item: Item): ItemSerializer {
+    console.log('ItemSerializer.serialize', item);
     return new ItemSerializer({
       uid: item.uid,
       name: item.name,

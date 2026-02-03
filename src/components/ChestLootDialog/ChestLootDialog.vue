@@ -6,18 +6,18 @@
                 <button class="close-button" @click="close">✕</button>
             </div>
             <div class="chest-loot-content">
-                <div v-if="chestLootItems.length > 0" class="items-grid">
-                    <div v-for="(item, index) in chestLootItems" :key="index" 
-                         class="item-slot" 
-                         :class="{ 'empty-slot': !item }"
-                         :title="item ? getItemTooltip(item) : '空栏位'"
-                         @click="item && pickupItem(item, index)">
-                        <template v-if="item">
+                <div v-if="displaySlots.length > 0" class="items-grid">
+                    <div v-for="(slot, index) in displaySlots" :key="index" 
+                         class="item-slot"
+                         :class="{ 'empty-slot': slot.picked }"
+                         :title="slot.picked ? '已拾取' : getItemTooltip(slot.item)"
+                         @click="pickupItem(slot, index)">
+                        <template v-if="!slot.picked">
                             <div class="item-icon">
-                                <img v-if="item.icon" :src="getItemIconUrl(item)" :alt="item.name || item" />
+                                <img v-if="slot.item.icon" :src="getItemIconUrl(slot.item)" :alt="slot.item.name || slot.item" />
                                 <span v-else class="item-placeholder">📦</span>
                             </div>
-                            <div class="item-name">{{ getItemName(item) }}</div>
+                            <div class="item-name">{{ getItemName(slot.item) }}</div>
                             <div class="pickup-hint">点击拾取</div>
                         </template>
                         <template v-else>
@@ -33,7 +33,7 @@
                 </div>
             </div>
             <div class="chest-loot-footer">
-                <button class="take-all-button" @click="takeAll" v-if="chestLootItems.length > 0">
+                <button class="take-all-button" @click="takeAll" v-if="displaySlots.some(slot => !slot.picked)">
                     全部拾取
                 </button>
                 <button class="close-footer-button" @click="close">
@@ -52,12 +52,16 @@ import { ref, onMounted } from 'vue';
 
 // 组件内部管理状态
 const isVisible = ref(false);
-const chestLootItems = ref<any[]>([]);
+const displaySlots = ref<Array<{item: any, picked: boolean}>>([]);
 const selectedChestId = ref<number | null>(null);
 
 // 打开宝箱战利品对话框
 const openChestLoot = (items: any[], chestId: number) => {
-    chestLootItems.value = items;
+    // 创建显示层数组，每个物品包装为一个slot对象
+    displaySlots.value = items.map(item => ({
+        item: item,
+        picked: false
+    }));
     selectedChestId.value = chestId;
     console.log("打开宝箱战利品对话框，物品:", items);
     isVisible.value = true;
@@ -66,7 +70,7 @@ const openChestLoot = (items: any[], chestId: number) => {
 // 关闭宝箱战利品对话框
 const close = () => {
     isVisible.value = false;
-    chestLootItems.value = [];
+    displaySlots.value = [];
     selectedChestId.value = null;
 };
 
@@ -77,56 +81,50 @@ const takeAll = async () => {
     const unitId = CharacterController.curser;
     const chestId = selectedChestId.value;
     
-    // 只拾取非空物品
-    const itemsToPickup = chestLootItems.value.filter(item => item !== null);
-    console.log('拾取所有物品:', itemsToPickup);
+    // 只拾取未被拾取的物品
+    const unpickedSlots = displaySlots.value.filter(slot => !slot.picked);
+    console.log('拾取所有物品:', unpickedSlots.map(s => s.item));
     
-    let successCount = 0;
-    // 逐个拾取物品
-    for (let i = 0; i < chestLootItems.value.length; i++) {
-        const item = chestLootItems.value[i];
-        if (item && item.uid) {
-            const success = await ChestSystem.getInstance().transferItemByIds(chestId, item.uid, unitId);
-            if (success) {
-                chestLootItems.value[i] = null;
-                successCount++;
-            }
-        }
-    }
+    // 执行物品转移
+    const count = await ChestSystem.getInstance().transferAllItemsByIds(chestId, unitId);
+    
+    // 标记所有栏位为已拾取
+    displaySlots.value.forEach(slot => {
+        slot.picked = true;
+    });
     
     MessageTipSystem.getInstance().setMessageQuickly(
-        `获得了 ${successCount} 件物品！`
+        `获得了 ${count} 件物品！`
     );
-    
     
 
 };
 
 // 处理单个物品拾取
-const pickupItem = async (item: any, index: number) => {
-    if (!selectedChestId.value) return;
+const pickupItem = async (slot: {item: any, picked: boolean}, index: number) => {
+    if (!selectedChestId.value || slot.picked) return;
     
     const unitId = CharacterController.curser;
     const chestId = selectedChestId.value;
-    const itemUid = item.uid;
+    const itemUid = slot.item.uid;
     
-    console.log('拾取物品:', item);
+    console.log('拾取物品:', slot.item);
     
     // 执行物品转移
     const success = await ChestSystem.getInstance().transferItemByIds(chestId, itemUid, unitId);
     
     if (success) {
-        // 将该位置设置为 null，显示为空栏位
-        chestLootItems.value[index] = null;
+        // 标记该栏位为已拾取
+        slot.picked = true;
         
         MessageTipSystem.getInstance().setMessageQuickly(
-            `获得了 ${getItemName(item)}！`
+            `获得了 ${getItemName(slot.item)}！`
         );
         
-   
+
     } else {
         MessageTipSystem.getInstance().setMessageQuickly(
-            `无法拾取 ${getItemName(item)}`
+            `无法拾取 ${getItemName(slot.item)}`
         );
     }
 };
@@ -336,12 +334,17 @@ const getItemTooltip = (item: any): string => {
     box-shadow: none;
 }
 
+.empty-slot:hover .pickup-hint {
+    opacity: 0;
+}
+
 .empty-slot-content {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100%;
+    padding: 20px 0;
     gap: 4px;
 }
 
