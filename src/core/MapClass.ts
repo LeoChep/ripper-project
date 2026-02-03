@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
 import { createDoorFromDoorObj, Door } from "./units/Door";
+import { Chest, createChestFromBoxObj } from "./units/Chest";
 
 // 单个区块（chunk）
 export interface TiledMapChunk {
@@ -96,6 +97,7 @@ export class TiledMap {
   textures?: PIXI.Sprite;
   sprites: any[] = [];
   doors: Door[] = [];
+  chests: Chest[] = [];
   constructor(data: any, textures: any) {
     this.compressionlevel = data.compressionlevel;
     this.height = data.height;
@@ -122,6 +124,15 @@ export class TiledMap {
     );
     if (spriteLayer && spriteLayer.objects) {
       this.sprites = spriteLayer.objects;
+    }
+    
+    // 初始化宝箱
+    const boxLayer = this.layers.find(
+      (l) => l.type === "objectgroup" && l.name === "box"
+    );
+    if (boxLayer && boxLayer.objects) {
+      this.chests = boxLayer.objects.map((obj) => createChestFromBoxObj(obj));
+      console.log("Initialized chests:", this.chests);
     }
   }
   initEdges() {

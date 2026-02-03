@@ -45,6 +45,7 @@ import TurnAnnouncement from "../TurnAnnouncement/TurnAnnouncement.vue";
 import { CharacterController } from "@/core/controller/CharacterController";
 import { AnimMetaJson } from "@/core/anim/AnimMetaJson";
 import { createDoorAnimSpriteFromDoor } from "@/core/anim/DoorAnimSprite";
+import { createChestAnimSpriteFromChest } from "@/core/anim/ChestAnimSprite";
 import { UnitAnimSpirite } from "@/core/anim/UnitAnimSprite";
 import type { TiledMap } from "@/core/MapClass";
 import type { Unit } from "@/core/units/Unit";
@@ -137,6 +138,18 @@ const initByMap = async (mapPassiable: any) => {
     if (rlayers.controllerLayer) rlayers.controllerLayer.attach(doorSprite);
   });
 
+  // 创建宝箱
+  const chests = mapPassiable.chests;
+ 
+  if (chests && chests.length > 0) {
+    chests.forEach(async (chest: any) => {
+      const chestSprite = await createChestAnimSpriteFromChest(chest);
+      if (container) container.addChild(chestSprite);
+      if (rlayers.controllerLayer) rlayers.controllerLayer.attach(chestSprite);
+      console.log("Created chest sprite:", chest.id, "at", chest.x, chest.y);
+    });
+  }
+ console.log("创建宝箱:", chests);
   // 创建单位
   let createEndPromise: Promise<any>[] = [];
   units.forEach((unit: Unit) => {

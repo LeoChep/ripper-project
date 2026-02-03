@@ -159,7 +159,11 @@ export class DramaSystem {
 
     // 使用 map 而不是 forEach，避免冗余的 Promise 包装
     const createCreatureEndPromise = units.map(async (unit) => {
-      unit.y -= unit.height;
+      // Tiled 中带 gid 的对象 y 坐标是底部位置，需要减去高度转换为顶部位置
+      // 没有 gid 的对象 y 坐标已经是顶部位置，不需要调整
+      if (unit.gid) {
+        unit.y -= unit.height;
+      }
       try {
         const unitCreature = await this.createUnitCreature(
           unit.unitTypeName,
@@ -176,6 +180,10 @@ export class DramaSystem {
     await Promise.all(createCreatureEndPromise);
     await new Promise((resolve) => setTimeout(resolve, 1000)); // 确保所有异步操作完成
     mapPassiable.sprites = units;
+    
+    // 处理宝箱
+    console.log("Loaded chests from map:", mapPassiable.chests);
+    
     // 设置全局地图
     drama.map = mapPassiable;
     golbalSetting.map = mapPassiable;
