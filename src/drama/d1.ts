@@ -5,6 +5,7 @@ import { Drama } from "./drama";
 import * as InitSystem from "@/core/system/InitiativeSystem";
 import { Item, ItemRarity, ItemType, HolyWater } from "@/core/item";
 import { UnitSystem } from "@/core/system/UnitSystem";
+import { CharacterController } from "@/core/controller/CharacterController";
 class D1 extends Drama {
   mapName: string = "A";
   constructor() {
@@ -62,8 +63,8 @@ class D1 extends Drama {
       const hasHolyWater = this.getVariable("hasHolyWater");
       if (!hasHolyWater) {
         const item = new HolyWater();
-        const unit = UnitSystem.getInstance().getUnitByName("牧师");
-
+        const unit = CharacterController.selectedCharacter;
+        
         unit?.addItem(item);
 
         await speak("你获得了道具：圣水");

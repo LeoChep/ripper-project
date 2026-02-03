@@ -92,7 +92,7 @@ onMounted(() => {
         console.log('角色列表更新:', nChartacters)
         nChartacters.forEach(character => {
             characters.value.push(character);
-            
+
         });
     };
     setInterval(() => {
@@ -104,6 +104,7 @@ onMounted(() => {
                 characterStore.value.selectedCharacterId = characters.value[0].id;
                 selectedCharacter.value = characters.value[0];
                 selectedIndex.value = 0;
+                CharacterController.selectCharacterById(characterStore.value.selectedCharacterId)
             }
             characters.value.forEach((character, index) => {
                 if (character.id === characterStore.value.selectedCharacterId) {
