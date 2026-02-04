@@ -17,6 +17,7 @@
     "maths.ts": "^0.0.8",
     "pinia": "^3.0.1",
     "pixi.js": "^8.9.2",
+    "polygon-clipping": "^0.15.7",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },
