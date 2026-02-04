@@ -69,19 +69,8 @@ onMounted(() => {
   // 初始化时清除消息
   messageStore.clearMessages()
   setInterval(() => {
-    if (messageStore.message!="") {
-      displayMessage.value = messageStore.message
-    }
-    else {
-      displayMessage.value = ""
-      const unit = InitSystem.getPointAtUnit();
-      if (unit) {
+    displayMessage.value = messageStore.message
 
-        if (unit.party !== 'player') {
-          displayMessage.value = unit.creature?.name + `正在行动中`;
-        }
-      }
-    }
 
     if (displayMessage.value!="")
     {

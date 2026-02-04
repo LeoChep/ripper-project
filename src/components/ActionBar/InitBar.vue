@@ -70,6 +70,9 @@ cursorImg.src = initCursorImg;
 InitSystem.loadBattleUIhandles.push(() => {
   initiativeStore.initializeInitiative();
 });
+InitSystem.clearBattleUIhandles.push(() => {
+  initiativeStore.initializeInitiative();
+});
 InitSystem.removeFromInitiativehandles.push(() => {
   // initiativeStore.initializeInitiative();
 });

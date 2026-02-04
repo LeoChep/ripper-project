@@ -1,5 +1,5 @@
 <template>
-  <div class="action-bar-container" v-if="character && character.initiative">
+  <div class="action-bar-container" v-if="isInBattle">
     <div class="fantasy-bar">
       <!-- 装饰性边框 -->
       <div class="bar-ornament left"></div>
@@ -7,39 +7,29 @@
 
       <!-- 背景分段区域 -->
       <div class="background-segments">
-        <div
-          :class="[
-            'bg-segment',
-            'standard-bg',
-            { disabled: remainingStandardActions === 0 },
-          ]"
-        ></div>
-        <div
-          :class="['bg-segment', 'move-bg', { disabled: remainingMoveActions <= 0 }]"
-        ></div>
-        <div
-          :class="['bg-segment', 'minor-bg', { disabled: remainingMinorActions === 0 }]"
-        ></div>
-        <div
-          :class="[
-            'bg-segment',
-            'reaction-bg',
-            { disabled: remainingReactionActions === 0 },
-          ]"
-        ></div>
+        <div :class="[
+          'bg-segment',
+          'standard-bg',
+          { disabled: remainingStandardActions === 0 },
+        ]"></div>
+        <div :class="['bg-segment', 'move-bg', { disabled: remainingMoveActions <= 0 }]"></div>
+        <div :class="['bg-segment', 'minor-bg', { disabled: remainingMinorActions === 0 }]"></div>
+        <div :class="[
+          'bg-segment',
+          'reaction-bg',
+          { disabled: remainingReactionActions === 0 },
+        ]"></div>
       </div>
 
       <!-- 动作指示器 - 横向排列 -->
       <div class="action-indicators">
         <!-- 标准动作 -->
-        <div
-          :class="[
-            'action-indicator',
-            'standard',
-            { disabled: remainingStandardActions === 0 },
-            { 'about-to-use': pendingAction === 'standard' },
-          ]"
-        >
+        <div :class="[
+          'action-indicator',
+          'standard',
+          { disabled: remainingStandardActions === 0 },
+          { 'about-to-use': pendingAction === 'standard' },
+        ]">
           <div class="action-icon">⚔️</div>
           <div class="action-label">标准</div>
         </div>
@@ -48,14 +38,12 @@
         <div class="action-separator"></div>
 
         <!-- 移动动作 -->
-        <div
-          :class="[
-            'action-indicator',
-            'move',
-            { disabled: remainingMoveActions <= 0 },
-            { 'about-to-use': pendingAction === 'move' },
-          ]"
-        >
+        <div :class="[
+          'action-indicator',
+          'move',
+          { disabled: remainingMoveActions <= 0 },
+          { 'about-to-use': pendingAction === 'move' },
+        ]">
           <!-- {{ currentMoveActions }} -->
           <div class="action-icon">🏃</div>
           <div class="action-label">移动</div>
@@ -65,14 +53,12 @@
         <div class="action-separator"></div>
 
         <!-- 次要动作 -->
-        <div
-          :class="[
-            'action-indicator',
-            'minor',
-            { disabled: remainingMinorActions === 0 },
-            { 'about-to-use': pendingAction === 'minor' },
-          ]"
-        >
+        <div :class="[
+          'action-indicator',
+          'minor',
+          { disabled: remainingMinorActions === 0 },
+          { 'about-to-use': pendingAction === 'minor' },
+        ]">
           <div class="action-icon">🛡️</div>
           <div class="action-label">次要</div>
         </div>
@@ -81,14 +67,12 @@
         <div class="action-separator"></div>
 
         <!-- 反应动作 -->
-        <div
-          :class="[
-            'action-indicator',
-            'reaction',
-            { disabled: remainingReactionActions === 0 },
-            { 'about-to-use': pendingAction === 'reaction' },
-          ]"
-        >
+        <div :class="[
+          'action-indicator',
+          'reaction',
+          { disabled: remainingReactionActions === 0 },
+          { 'about-to-use': pendingAction === 'reaction' },
+        ]">
           <div class="action-icon">⚡</div>
           <div class="action-label">反应</div>
         </div>
@@ -99,7 +83,7 @@
 
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from "vue";
-
+import * as InitSystem from "@/core/system/InitiativeSystem";
 // Props
 const props = defineProps({
   character: {
@@ -120,7 +104,7 @@ const currentStandardActions = ref(0);
 const currentMoveActions = ref(0);
 const currentMinorActions = ref(0);
 const currentReactionActions = ref(0);
-
+const isInBattle = ref(false);
 // 轮询定时器
 let pollingTimer = null;
 
@@ -139,9 +123,12 @@ const pollActionNumbers = () => {
 onMounted(() => {
   // 立即执行一次
   pollActionNumbers();
+  const checkIsInBattle = () => {
 
+    isInBattle.value = props.character && props.character.initiative && InitSystem.initiativeCursor.inBattle;
+  };
   // 每100ms轮询一次
-  pollingTimer = setInterval(pollActionNumbers, 100);
+  pollingTimer = setInterval(() => { pollActionNumbers(); checkIsInBattle(); }, 100);
 });
 
 // 组件卸载时清理定时器
@@ -179,14 +166,18 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
 .fantasy-bar {
   position: relative;
   height: 50px;
-  background: linear-gradient(
-    90deg,
-    rgba(160, 100, 50, 0.95) 0%,
-    /* 中等褐色 */ rgba(180, 120, 80, 0.95) 25%,
-    /* 温暖中褐色 */ rgba(170, 110, 60, 0.95) 50%,
-    /* 平衡褐色 */ rgba(180, 120, 80, 0.95) 75%,
-    /* 温暖中褐色 */ rgba(160, 100, 50, 0.95) 100% /* 中等褐色 */
-  );
+  background: linear-gradient(90deg,
+      rgba(160, 100, 50, 0.95) 0%,
+      /* 中等褐色 */
+      rgba(180, 120, 80, 0.95) 25%,
+      /* 温暖中褐色 */
+      rgba(170, 110, 60, 0.95) 50%,
+      /* 平衡褐色 */
+      rgba(180, 120, 80, 0.95) 75%,
+      /* 温暖中褐色 */
+      rgba(160, 100, 50, 0.95) 100%
+      /* 中等褐色 */
+    );
   border: 2px solid #d4af37;
   border-radius: 25px;
   padding: 5px 20px 5px 5px;
@@ -269,39 +260,44 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
 }
 
 .bg-segment.disabled {
-  background: linear-gradient(
-    180deg,
-    rgba(60, 20, 20, 0.95) 0%,
-    /* 暗深红 */ rgba(80, 30, 30, 0.95) 20%,
-    /* 稍亮深红 */ rgba(40, 15, 15, 0.95) 50%,
-    /* 非常暗的深红 */ rgba(80, 30, 30, 0.95) 80%,
-    /* 稍亮深红 */ rgba(60, 20, 20, 0.95) 100% /* 暗深红 */
-  );
+  background: linear-gradient(180deg,
+      rgba(60, 20, 20, 0.95) 0%,
+      /* 暗深红 */
+      rgba(80, 30, 30, 0.95) 20%,
+      /* 稍亮深红 */
+      rgba(40, 15, 15, 0.95) 50%,
+      /* 非常暗的深红 */
+      rgba(80, 30, 30, 0.95) 80%,
+      /* 稍亮深红 */
+      rgba(60, 20, 20, 0.95) 100%
+      /* 暗深红 */
+    );
   /* 添加更明显的破损纹理 */
-  background-image: repeating-linear-gradient(
-      45deg,
+  background-image: repeating-linear-gradient(45deg,
       transparent 0px,
       rgba(139, 0, 0, 0.3) 1px,
-      /* 更明显的深红色 */ rgba(139, 0, 0, 0.3) 2px,
-      transparent 3px
-    ),
-    repeating-linear-gradient(
-      -45deg,
+      /* 更明显的深红色 */
+      rgba(139, 0, 0, 0.3) 2px,
+      transparent 3px),
+    repeating-linear-gradient(-45deg,
       transparent 0px,
       rgba(160, 20, 20, 0.2) 2px,
-      /* 更明显的红色 */ rgba(160, 20, 20, 0.2) 4px,
-      transparent 6px
-    );
-  border: 1px solid #5a0000; /* 更深的红色边框 */
+      /* 更明显的红色 */
+      rgba(160, 20, 20, 0.2) 4px,
+      transparent 6px);
+  border: 1px solid #5a0000;
+  /* 更深的红色边框 */
   border-style: dashed;
   animation: fadeInOut 3s infinite;
 }
 
 @keyframes fadeInOut {
+
   0%,
   100% {
     opacity: 0.8;
   }
+
   50% {
     opacity: 0.95;
   }
@@ -361,15 +357,20 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
 
 /* 将要被使用的状态 - 高亮提示效果 */
 .action-indicator.about-to-use {
-  background: linear-gradient(
-    145deg,
-    #ffd700 0%,
-    /* 金黄色 */ #ffa500 20%,
-    /* 橙色 */ #ffd700 40%,
-    /* 金黄色 */ #ff8c00 60%,
-    /* 深橙色 */ #ffd700 80%,
-    /* 金黄色 */ #ffa500 100% /* 橙色 */
-  );
+  background: linear-gradient(145deg,
+      #ffd700 0%,
+      /* 金黄色 */
+      #ffa500 20%,
+      /* 橙色 */
+      #ffd700 40%,
+      /* 金黄色 */
+      #ff8c00 60%,
+      /* 深橙色 */
+      #ffd700 80%,
+      /* 金黄色 */
+      #ffa500 100%
+      /* 橙色 */
+    );
   /* 使用相同尺寸的边框，只改变颜色和样式 */
   border-color: #ffd700;
   border-style: solid;
@@ -385,6 +386,7 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
     box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3),
       0 0 30px rgba(255, 215, 0, 0.6);
   }
+
   100% {
     box-shadow: 0 0 30px rgba(255, 215, 0, 1), inset 0 0 15px rgba(255, 255, 255, 0.5),
       0 0 40px rgba(255, 215, 0, 0.8);
@@ -393,8 +395,7 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
 
 /* 将要被使用状态的图标效果 */
 .action-indicator.about-to-use .action-icon {
-  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 1))
-    drop-shadow(0 0 15px rgba(255, 140, 0, 0.8));
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 1)) drop-shadow(0 0 15px rgba(255, 140, 0, 0.8));
   transform: scale(1.2);
   animation: iconPulse 1s ease-in-out infinite alternate;
 }
@@ -403,6 +404,7 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
   0% {
     transform: scale(1.2);
   }
+
   100% {
     transform: scale(1.3);
   }
@@ -420,6 +422,7 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
   0% {
     text-shadow: 0 0 8px rgba(255, 215, 0, 0.8), 0 0 12px rgba(255, 140, 0, 0.6);
   }
+
   100% {
     text-shadow: 0 0 12px rgba(255, 215, 0, 1), 0 0 18px rgba(255, 140, 0, 0.8),
       0 0 24px rgba(255, 215, 0, 0.6);
@@ -441,10 +444,12 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
 }
 
 @keyframes arrowBounce {
+
   0%,
   100% {
     transform: translateX(-50%) translateY(0);
   }
+
   50% {
     transform: translateX(-50%) translateY(-5px);
   }
@@ -458,35 +463,37 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
   position: relative;
 
   /* 深红破损木块效果 */
-  background: linear-gradient(
-    145deg,
-    #4a1a1a 0%,
-    /* 深红色 */ #3d1010 20%,
-    /* 更深红色 */ #5a2020 40%,
-    /* 中红色 */ #6a2a2a 60%,
-    /* 稍亮红色 */ #3d1010 80%,
-    /* 更深红色 */ #4a1a1a 100% /* 深红色 */
-  );
+  background: linear-gradient(145deg,
+      #4a1a1a 0%,
+      /* 深红色 */
+      #3d1010 20%,
+      /* 更深红色 */
+      #5a2020 40%,
+      /* 中红色 */
+      #6a2a2a 60%,
+      /* 稍亮红色 */
+      #3d1010 80%,
+      /* 更深红色 */
+      #4a1a1a 100%
+      /* 深红色 */
+    );
   /* 使用相同尺寸的边框，深红色调 */
   border-color: #2a0808;
-  border-style: dashed; /* 虚线边框暗示破损 */
+  border-style: dashed;
+  /* 虚线边框暗示破损 */
   box-shadow: inset 0 0 10px rgba(80, 0, 0, 0.8), 0 1px 1px rgba(139, 69, 19, 0.1);
 
   /* 添加深红裂痕效果 */
-  background-image: linear-gradient(
-      45deg,
+  background-image: linear-gradient(45deg,
       transparent 40%,
       rgba(80, 20, 20, 0.5) 41%,
       rgba(80, 20, 20, 0.5) 43%,
-      transparent 44%
-    ),
-    linear-gradient(
-      135deg,
+      transparent 44%),
+    linear-gradient(135deg,
       transparent 60%,
       rgba(100, 30, 30, 0.4) 61%,
       rgba(100, 30, 30, 0.4) 62%,
-      transparent 63%
-    );
+      transparent 63%);
 }
 
 /* 添加禁用图标叠加效果 */
@@ -503,11 +510,13 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
 }
 
 @keyframes pulse {
+
   0%,
   100% {
     opacity: 0.6;
     transform: scale(0.9);
   }
+
   50% {
     opacity: 1;
     transform: scale(1.1);
@@ -515,8 +524,7 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
 }
 
 .action-indicator.disabled .action-icon {
-  filter: grayscale(100%) brightness(0.3) contrast(0.5)
-    drop-shadow(0 0 2px rgba(0, 0, 0, 0.9));
+  filter: grayscale(100%) brightness(0.3) contrast(0.5) drop-shadow(0 0 2px rgba(0, 0, 0, 0.9));
   opacity: 0.5;
   /* 添加禁用标记 */
   position: relative;
@@ -568,13 +576,11 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
 .action-separator {
   width: 2px;
   height: 30px;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    #d4af37 20%,
-    #d4af37 80%,
-    transparent 100%
-  );
+  background: linear-gradient(180deg,
+      transparent 0%,
+      #d4af37 20%,
+      #d4af37 80%,
+      transparent 100%);
   border-radius: 1px;
   box-shadow: 0 0 4px rgba(212, 175, 55, 0.5);
   margin: 0 10px;

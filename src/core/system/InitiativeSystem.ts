@@ -20,6 +20,7 @@ import {
 } from "../type/InitiativeSerializer";
 import { lookOn } from "../anim/LookOnAnim";
 import { DramaSystem } from "./DramaSystem";
+import { MessageTipSystem } from "./MessageTipSystem";
 
 export const InitiativeSheet = [] as InitiativeClass[];
 const initiativeCursor = {
@@ -139,7 +140,7 @@ export async function startCombatTurn() {
           "walk",
         ) as WalkStateMachine
       ).onDivideWalk = false;
-      
+
       // 重置所有威能的回合标记（新回合开始）
       if (initiativeCursor.pointAt.owner.creature?.powers) {
         initiativeCursor.pointAt.owner.creature.powers.forEach((power: any) => {
@@ -148,7 +149,7 @@ export async function startCombatTurn() {
           }
         });
       }
-      
+
       //设置Store
       if (initiativeCursor.pointAt.owner.initiative) {
         useInitiativeStore().setIniitiative(
@@ -177,6 +178,9 @@ export async function startCombatTurn() {
       if (initiativeCursor.pointAt.owner.party !== "player") {
         //如果是npc,则自动行动
         // 根据是否友军显示不同的回合效果
+        MessageTipSystem.getInstance().setMessage(
+          `${initiativeCursor.pointAt.owner.creature?.name}正在行动中`,
+        );
         if (initiativeCursor.pointAt.owner.friendly) {
           TurnEffectAnim.showFriendlyEffect(initiativeCursor.pointAt.owner);
         } else {
@@ -199,6 +203,7 @@ export async function startCombatTurn() {
         }
       } else {
         //提醒玩家
+        MessageTipSystem.getInstance().clearMessage();
         if (CharacterCombatController.instance) {
           CharacterCombatController.instance.inUse = true;
         }
@@ -230,6 +235,7 @@ export async function startCombatTurn() {
 export async function endTurn(unit: Unit, isDelay = false) {
   CharacterController.removeSelectEffect();
   // 移除回合效果（根据单位类型移除对应效果）
+
   if (unit.party !== "player") {
     if (unit.friendly) {
       TurnEffectAnim.removeFriendlyEffect(unit);
@@ -237,7 +243,7 @@ export async function endTurn(unit: Unit, isDelay = false) {
       TurnEffectAnim.removeEnemyEffect(unit);
     }
   }
-  
+
   // 减少所有威能的冷却时间（回合结束时）
   if (unit.creature?.powers) {
     unit.creature.powers.forEach((power: any) => {
@@ -246,7 +252,7 @@ export async function endTurn(unit: Unit, isDelay = false) {
       }
     });
   }
-  
+
   if (unit.initiative && isDelay === false) {
     unit.initiative.ready = false;
     unit.initiative.roundNumber++;
@@ -259,7 +265,9 @@ export async function endTurn(unit: Unit, isDelay = false) {
       resolve();
     }, 500); // 延时1秒
   });
+
   await stayPromisee;
+  MessageTipSystem.getInstance().clearMessage();
   if (initiativeCursor.inBattle === false) {
     return;
   }
@@ -452,6 +460,13 @@ export async function playStartAnim() {
   });
   return animPromise;
 }
+export const clearBattleUIhandles = [] as any[];
+export function clearBattleUI() {
+  clearBattleUIhandles.forEach((func) => {
+    func();
+  });
+  console.log("clearBattleUIhandles", clearBattleUIhandles);
+}
 export const loadBattleUI = () => {
   loadBattleUIhandles.forEach((func) => {
     func();
@@ -591,8 +606,12 @@ export async function playEndAnim() {
       }
       graphics.destroy();
       text.destroy();
+      MessageTipSystem.getInstance().clearMessage();
       resolve();
       DramaSystem.getInstance().battleEndHandle();
+      initiativeCursor.inBattle = false;
+      while (InitiativeSheet.length > 0) InitiativeSheet.pop();
+      clearBattleUI();
     }, 1500);
   });
   return animPromise;
