@@ -11,7 +11,14 @@ class D1 extends Drama {
   constructor() {
     super("d1", "这是一个测试剧情");
   }
-
+  loadInit() {
+    const { CGstart, unitSpeak, speak, unitChoose, CGEnd, addInteraction } =
+      this;
+    const cricleTalkUse = this.getVariable("cricleTalkUse");
+    if (cricleTalkUse) {
+      addInteraction("npc牧师", this.cricleTalk);
+    }
+  }
   play(): void {
     const startFlag = this.getVariable("startFlag");
     if (!startFlag) {
@@ -24,14 +31,37 @@ class D1 extends Drama {
       this.door1Event();
     }
   }
-  loadInit() {
-    const { CGstart, unitSpeak, speak, unitChoose, CGEnd, addInteraction } =
-      this;
-    const cricleTalkUse = this.getVariable("cricleTalkUse");
-    if (cricleTalkUse) {
-      addInteraction("npc牧师", this.cricleTalk);
+  public battleEndHandle(): void {
+    const inCombat1 = this.getVariable("inCombat1");
+    const combat1EndCgUsed = this.getVariable("combat1EndCgUsed");
+    if (inCombat1 && combat1EndCgUsed !== true) {
+      this.setVariable("combat1EndCgUsed", true);
+      this.setVariable("inCombat1", false);
+      this.combat1EndCG();
     }
   }
+  combat1EndCG = async () => {
+    const { CGstart, unitSpeak, speak, unitChoose, CGEnd, addInteraction } =
+      this;
+    CGstart();
+    await unitSpeak(
+      "npc牧师",
+      "谢谢你们！那些骷髅终于被消灭了。");
+    await unitSpeak(
+      "npc牧师",
+      "不过我担心这只是个开始，神殿里可能还有更多的亡灵在徘徊。我们需要继续前进，彻底清理这里的邪恶力量。",
+    );
+    await unitChoose(
+      "npc牧师",
+      [
+        { text: "我们准备好了，继续前进吧。", value: "option1" },
+        { text: "我们需要休息一下，恢复体力……", value: "option2" },
+      ]
+    );
+    await speak("突然……传来一阵响动，有什么东西正在接近……");
+
+    CGEnd();
+  };
   cricleTalk = async () => {
     const { CGstart, unitSpeak, speak, unitChoose, CGEnd } = this;
     if (InitSystem.isInBattle()) {
@@ -64,7 +94,7 @@ class D1 extends Drama {
       if (!hasHolyWater) {
         const item = new HolyWater();
         const unit = CharacterController.selectedCharacter;
-        
+
         unit?.addItem(item);
 
         await speak("你获得了道具：圣水");

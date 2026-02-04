@@ -11,7 +11,7 @@ export abstract class Drama {
     this.name = name;
     this.description = description;
   }
-
+  public battleEndHandle(): void {}
   async load(variables: { name: string; value: any }[]): Promise<void> {
     const dramaSystem = DramaSystem.getInstance();
     await dramaSystem.load(this, variables);
@@ -30,22 +30,25 @@ export abstract class Drama {
   protected CGstart = (): void => {
     const dramaSystem = DramaSystem.getInstance();
     dramaSystem.CGstart();
-  }
+  };
 
   protected CGEnd = (): void => {
     const dramaSystem = DramaSystem.getInstance();
     dramaSystem.CGEnd();
-  }
+  };
 
-  protected unitSpeak = async (unitName: string, text: string): Promise<void> => {
+  protected unitSpeak = async (
+    unitName: string,
+    text: string,
+  ): Promise<void> => {
     const dramaSystem = DramaSystem.getInstance();
     await dramaSystem.unitSpeak(unitName, text);
-  }
+  };
 
   protected speak = async (text: string): Promise<void> => {
     const dramaSystem = DramaSystem.getInstance();
     await dramaSystem.speak(text);
-  }
+  };
 
   protected unitChoose = async (
     unitName: string,
@@ -54,12 +57,14 @@ export abstract class Drama {
   ): Promise<string> => {
     const dramaSystem = DramaSystem.getInstance();
     return await dramaSystem.unitChoose(unitName, options, prompt);
-  }
-  protected addInteraction=(unitName:string,event:(...args:any[])=>{})=>{
-    
+  };
+  protected addInteraction = (
+    unitName: string,
+    event: (...args: any[]) => {},
+  ) => {
     const dramaSystem = DramaSystem.getInstance();
-    dramaSystem.addInteraction(unitName,event);
-  }
+    dramaSystem.addInteraction(unitName, event);
+  };
   loadInit(): void {}
   abstract play(): void;
 }

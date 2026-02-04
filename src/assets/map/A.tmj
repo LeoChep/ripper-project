@@ -215,7 +215,7 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":-0.333333,
+                 "x":-7.50866778667087,
                  "y":-54
                 }, 
                 {
@@ -782,8 +782,8 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":68.4546782622236,
-                 "y":309.446778262224
+                 "x":68.4547,
+                 "y":309.447
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -796,39 +796,6 @@
          "id":3,
          "name":"sprite",
          "objects":[
-                {
-                 "gid":768,
-                 "height":64,
-                 "id":20,
-                 "name":"skeleton",
-                 "properties":[
-                        {
-                         "name":"direction",
-                         "type":"int",
-                         "value":0
-                        }, 
-                        {
-                         "name":"name",
-                         "type":"string",
-                         "value":"skeleton"
-                        }, 
-                        {
-                         "name":"party",
-                         "type":"string",
-                         "value":"skeletons"
-                        }, 
-                        {
-                         "name":"unitTypeName",
-                         "type":"string",
-                         "value":"skeleton"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":64,
-                 "x":568.667,
-                 "y":884
-                }, 
                 {
                  "gid":739,
                  "height":64,
@@ -854,8 +821,8 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":382.567113048894,
-                 "y":189.391778262224
+                 "x":382.567,
+                 "y":189.392
                 }, 
                 {
                  "gid":795,
@@ -882,7 +849,7 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":447.608221737776,
+                 "x":447.608,
                  "y":190
                 }, 
                 {
@@ -919,171 +886,6 @@
                  "y":895
                 }, 
                 {
-                 "gid":797,
-                 "height":64,
-                 "id":57,
-                 "name":"skeletonArcher4",
-                 "properties":[
-                        {
-                         "name":"direction",
-                         "type":"int",
-                         "value":0
-                        }, 
-                        {
-                         "name":"name",
-                         "type":"string",
-                         "value":"skeleton"
-                        }, 
-                        {
-                         "name":"party",
-                         "type":"string",
-                         "value":"skeletons"
-                        }, 
-                        {
-                         "name":"unitTypeName",
-                         "type":"string",
-                         "value":"skeletonArcher"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":64,
-                 "x":321.333,
-                 "y":1085.33
-                }, 
-                {
-                 "gid":797,
-                 "height":64,
-                 "id":58,
-                 "name":"skeletonArcher3",
-                 "properties":[
-                        {
-                         "name":"direction",
-                         "type":"int",
-                         "value":0
-                        }, 
-                        {
-                         "name":"name",
-                         "type":"string",
-                         "value":"skeleton"
-                        }, 
-                        {
-                         "name":"party",
-                         "type":"string",
-                         "value":"skeletons"
-                        }, 
-                        {
-                         "name":"unitTypeName",
-                         "type":"string",
-                         "value":"skeletonArcher"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":64,
-                 "x":506.667,
-                 "y":1088
-                }, 
-                {
-                 "gid":797,
-                 "height":64,
-                 "id":59,
-                 "name":"skeletonArcher2",
-                 "properties":[
-                        {
-                         "name":"direction",
-                         "type":"int",
-                         "value":0
-                        }, 
-                        {
-                         "name":"name",
-                         "type":"string",
-                         "value":"skeleton"
-                        }, 
-                        {
-                         "name":"party",
-                         "type":"string",
-                         "value":"skeletons"
-                        }, 
-                        {
-                         "name":"unitTypeName",
-                         "type":"string",
-                         "value":"skeletonArcher"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":64,
-                 "x":633.333,
-                 "y":1084
-                }, 
-                {
-                 "gid":797,
-                 "height":64,
-                 "id":60,
-                 "name":"skeletonArcher",
-                 "properties":[
-                        {
-                         "name":"direction",
-                         "type":"int",
-                         "value":0
-                        }, 
-                        {
-                         "name":"name",
-                         "type":"string",
-                         "value":"skeleton"
-                        }, 
-                        {
-                         "name":"party",
-                         "type":"string",
-                         "value":"skeletons"
-                        }, 
-                        {
-                         "name":"unitTypeName",
-                         "type":"string",
-                         "value":"skeletonArcher"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":64,
-                 "x":637.333,
-                 "y":956
-                }, 
-                {
-                 "gid":775,
-                 "height":132,
-                 "id":62,
-                 "name":"bigSkeleton",
-                 "properties":[
-                        {
-                         "name":"direction",
-                         "type":"int",
-                         "value":0
-                        }, 
-                        {
-                         "name":"name",
-                         "type":"string",
-                         "value":"skeleton"
-                        }, 
-                        {
-                         "name":"party",
-                         "type":"string",
-                         "value":"skeletons"
-                        }, 
-                        {
-                         "name":"unitTypeName",
-                         "type":"string",
-                         "value":"bigSkeleton"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":138.667,
-                 "x":378.667,
-                 "y":1022.67
-                }, 
-                {
                  "gid":816,
                  "height":64,
                  "id":63,
@@ -1108,7 +910,7 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":503.765886951106,
+                 "x":503.766,
                  "y":190.667
                 }, 
                 {
@@ -1140,8 +942,8 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":315.245013080037,
-                 "y":194.322099968857
+                 "x":315.245,
+                 "y":194.322
                 }],
          "offsetx":4,
          "offsety":0,

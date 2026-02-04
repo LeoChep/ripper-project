@@ -133,7 +133,7 @@ export class ItemSerializer {
   static serialize(item: Item): ItemSerializer {
     console.log('ItemSerializer.serialize', item);
     return new ItemSerializer({
-      uid: item.uid,
+      uid: item.uid, 
       name: item.name,
       description: item.description,
       type: item.type,

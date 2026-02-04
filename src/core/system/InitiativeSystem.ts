@@ -19,6 +19,7 @@ import {
   type SerializedInitiativeData,
 } from "../type/InitiativeSerializer";
 import { lookOn } from "../anim/LookOnAnim";
+import { DramaSystem } from "./DramaSystem";
 
 export const InitiativeSheet = [] as InitiativeClass[];
 const initiativeCursor = {
@@ -591,6 +592,7 @@ export async function playEndAnim() {
       graphics.destroy();
       text.destroy();
       resolve();
+      DramaSystem.getInstance().battleEndHandle();
     }, 1500);
   });
   return animPromise;

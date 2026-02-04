@@ -199,6 +199,9 @@ export class DramaSystem {
     drama.map = mapPassiable;
     golbalSetting.map = mapPassiable;
   }
+  battleEndHandle=()=>{
+    this.dramaUse?.battleEndHandle();
+  }
   getRercords() {
     const recorders: { name: any; variables: unknown[] }[] = [];
     this.dramaMap.forEach((drama, name) => {
