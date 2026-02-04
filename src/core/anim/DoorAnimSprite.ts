@@ -7,7 +7,7 @@ import * as InitiativeSystem from "@/core/system/InitiativeSystem";
 import { CharacterCombatController } from "../controller/CharacterCombatController";
 import { CharacterOutCombatController } from "../controller/CharacterOutCombatController";
 import { CharacterController } from "../controller/CharacterController";
-import { FogSystem } from "../system/FogSystem_unuse";
+import { FogSystem } from "../system/FogSystem";
 export class DoorAnimSprite extends Container {
   // 门的状态，true 表示打开，false 表示关闭
   private _isOpen: boolean = false;
@@ -292,8 +292,9 @@ export const createDoorAnimSpriteFromDoor = async (door: Door) => {
       console.warn("未找到对应的墙体，无法更新墙体状态");
       return;
     }
+      
     wall.useable = !doorAnimSprite.isOpen;
-    FogSystem.instanse.refreshSpatialGrid();
+  FogSystem.instanse.refreshSpatialGrid();
     console.log("门状态切换为:", doorAnimSprite);
   });
   return doorAnimSprite;

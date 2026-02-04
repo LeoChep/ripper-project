@@ -1,4 +1,4 @@
-import { checkPassiable } from "../system/FogSystem";
+
 import { tileSize } from "../envSetting";
 import { generateWays } from "../utils/PathfinderUtil";
 import * as PIXI from "pixi.js";

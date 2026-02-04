@@ -53,7 +53,7 @@ import { UnitAnimSpirite } from "@/core/anim/UnitAnimSprite";
 import type { TiledMap } from "@/core/MapClass";
 import type { Unit } from "@/core/units/Unit";
 import { UnitSystem } from "@/core/system/UnitSystem";
-import { FogSystem } from "@/core/system/FogSystem_unuse";
+import { FogSystem } from "@/core/system/FogSystem";
 
 const appSetting = envSetting.appSetting;
 const route = useRoute();
