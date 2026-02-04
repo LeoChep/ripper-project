@@ -189,6 +189,7 @@ const initByMap = async (mapPassiable: any) => {
       console.log('characterStore', characterStore)
     }
   });
+
 };
 
 // 辅助函数：绘制地图
@@ -199,22 +200,22 @@ const drawMap = async (mapView: any, container: any, rlayers: any) => {
       child.destroy();
     });
   }
-  
+
   // 先初始化战争迷雾系统并绘制初始遮罩
   if (golbalSetting.map && golbalSetting.rootContainer && golbalSetting.app) {
     FogSystem.initFog(golbalSetting.map, golbalSetting.rootContainer, golbalSetting.app);
-    
+
     // 立即计算并绘制一次迷雾，确保在地图显示前遮罩已经存在
     const visibilityData = FogSystem.instanse.caculteVersionByPlayers();
     if (visibilityData) {
       FogSystem.instanse.makeFogOfWar(visibilityData);
     }
   }
-    // 启动自动绘制循环
-  
+  // 启动自动绘制循环
+
   // 等待一帧，确保遮罩已经渲染
   await new Promise((resolve) => FogSystem.instanse.autoDraw(resolve));
-  
+
   // 再绘制地图
   const ms = new PIXI.Sprite(mapView);
   ms.zIndex = envSetting.zIndexSetting.mapZindex;
@@ -222,7 +223,7 @@ const drawMap = async (mapView: any, container: any, rlayers: any) => {
   if (golbalSetting.mapContainer) {
     golbalSetting.mapContainer.addChild(ms);
   }
-  
+
 
 };
 
@@ -441,9 +442,15 @@ const loadGameState = async (slotId: number, needConfirm: boolean = true): Promi
 
     // 初始化地图视觉元素
     console.log("[changemap4] d1.loadTmj initByMap 前:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
+
     await initByMap(golbalSetting.map);
     drawGrid(golbalSetting.app, golbalSetting.rlayers);
     console.log("[changemap4]  d1.loadTmj initByMap 后:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
+
+    // 立即更新一次战争迷雾，确保门和宝箱立即显示
+    // 强制刷新迷雾系统，清空缓存并重新计算可见性
+    FogSystem.instanse.refreshSpatialGrid(true);
+    console.log("[读档] 强制刷新战争迷雾完成，门和宝箱可见性已更新");
 
     console.log("初始化地图完成:", golbalSetting.map);
 
@@ -617,23 +624,30 @@ const drawGrid = (app: any, rlayers: any) => {
   //格子
   const lineContainer = new PIXI.Container();
   const gridSize = 64;
-  const cols = Math.floor(appSetting.width / gridSize);
-  const rows = Math.floor(appSetting.height / gridSize);
+  
+  // 使用地图的实际大小而不是视口大小
+  const map = golbalSetting.map;
+  if (!map) return;
+  
+  const mapWidth = map.width * map.tilewidth;
+  const mapHeight = map.height * map.tileheight;
+  const cols = map.width;
+  const rows = map.height;
+  
   // 画竖线
   for (let i = 1; i < cols; i++) {
     const line = new PIXI.Graphics();
     line.moveTo(i * gridSize, 0);
-    line.lineTo(i * gridSize, appSetting.height);
+    line.lineTo(i * gridSize, mapHeight);
     line.stroke({ width: 1, color: 0x444444, alpha: 0.5 });
     lineContainer.addChild(line);
   }
 
   // 画横线
-
   for (let j = 1; j < rows; j++) {
     const line = new PIXI.Graphics();
     line.moveTo(0, j * gridSize);
-    line.lineTo(appSetting.width, j * gridSize);
+    line.lineTo(mapWidth, j * gridSize);
     line.stroke({ width: 1, color: 0x000000, alpha: 1 });
     lineContainer.addChild(line);
   }

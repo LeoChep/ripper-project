@@ -516,18 +516,21 @@ export class FogSystem {
         if (door) {
           let isVisible = false;
 
-          // 检查门的中心位置是否可见
-          const centerX = door.x + (door.doorSprite?.width || 0) / 2;
-          const centerY = door.y + (door.doorSprite?.height || 0) / 2;
-          isVisible = this.isPositionVisible(centerX, centerY);
-
-  
+          // 检查门的四角
+          const corners = [
+            [door.x, door.y],
+            [door.x + (door.doorSprite?.width || 0), door.y],
+            [door.x, door.y + (door.doorSprite?.height || 0)],
+            [door.x + (door.doorSprite?.width || 0), door.y + (door.doorSprite?.height || 0)],
+          ];
+          isVisible = corners.some(([x, y]) => this.isPositionVisible(x, y));
 
           if (door.doorSprite) {
             console.log("[FogSystem] 更新门可见性:", door, "可见:", isVisible);
             door.doorSprite.visible = isVisible;
           }
         }
+       
       });
     }
 

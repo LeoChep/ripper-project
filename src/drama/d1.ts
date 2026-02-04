@@ -139,10 +139,12 @@ class D1 extends Drama {
   private async door1Event(): Promise<void> {
     const { CGstart, speak, unitSpeak, CGEnd } = this;
 
-    const door1 = golbalSetting.map?.edges?.find(
-      (edge: { id: number }) => edge.id === 44,
+    const door1 = golbalSetting.map?.doors?.find(
+      (door: { id: number }) => door.id === 86,
     );
-    if (door1?.useable === true) {
+    if (!door1)
+      return;
+    if (door1?.isOpen === false) {
       return;
     }
 

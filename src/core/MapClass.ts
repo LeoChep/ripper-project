@@ -115,34 +115,43 @@ export class TiledMap {
     this.type = data.type;
     this.version = data.version;
     this.width = data.width;
-    this.initEdges();
+    this.initEdges()
+    this.initDoors();
     if (textures) {
       this.textures = new PIXI.Sprite(textures);
     }
     // 初始化 sprites 属性
     const spriteLayer = this.layers.find(
-      (l) => l.type === "objectgroup" && l.name === "sprite"
+      (l) => l.type === "objectgroup" && l.name === "sprite",
     );
     if (spriteLayer && spriteLayer.objects) {
       this.sprites = spriteLayer.objects;
     }
-    
+
     // 初始化宝箱
     const boxLayer = this.layers.find(
-      (l) => l.type === "objectgroup" && l.name === "box"
+      (l) => l.type === "objectgroup" && l.name === "box",
     );
     if (boxLayer && boxLayer.objects) {
-      this.chests=boxLayer.objects as any;
+      this.chests = boxLayer.objects as any;
 
       console.log("Initialized chests:", this.chests);
+    }
+  }
+  initDoors() {
+    const doorLayer = this.layers.find(
+      (l) => l.type === "objectgroup" && l.name === "door",
+    );
+    if (doorLayer && doorLayer.objects) {
+      this.doors = doorLayer.objects.map((obj) =>
+        createDoorFromDoorObj(obj),
+      );
     }
   }
   initEdges() {
     const layers = this.layers;
     const objectsGroups = layers.filter(
-      (layer) =>
-        layer.type === "objectgroup" &&
-        (layer.name === "wall" || layer.name === "door")
+      (layer) => layer.type === "objectgroup" && layer.name === "wall",
     );
     const edges: {
       x1: number;
@@ -158,20 +167,18 @@ export class TiledMap {
       if (objectsGroup && objectsGroup.objects) {
         objectsGroup.objects.forEach((object) => {
           const onlyVisitionProp = object.properties?.find(
-            (p: any) => p.name === "onlyVisition"
+            (p: any) => p.name === "onlyVisition",
           );
           const onlyBlockProp = object.properties?.find(
-            (p: any) => p.name === "onlyBlock"
+            (p: any) => p.name === "onlyBlock",
           );
           console.log(
             "objectFOwal",
             onlyVisitionProp && onlyVisitionProp.value === "true"
               ? true
               : false,
-            onlyBlockProp && onlyBlockProp.value === "true"
-                    ? true
-                    : false,
-            object
+            onlyBlockProp && onlyBlockProp.value === "true" ? true : false,
+            object,
           );
 
           // 检查对象是否有polygon属性
@@ -211,10 +218,6 @@ export class TiledMap {
                     : false,
               };
               edges.push(edge);
-              if (objectsGroup.name === "door") {
-                // edge.onlyBlock=true;
-                this.doors.push(createDoorFromDoorObj(edge));
-              }
             }
             // 处理最后一个点与第一个点的连线
             if (

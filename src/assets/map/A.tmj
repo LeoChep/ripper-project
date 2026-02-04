@@ -629,6 +629,66 @@
                  "width":0,
                  "x":898,
                  "y":1209
+                }, 
+                {
+                 "height":0,
+                 "id":82,
+                 "name":"",
+                 "polyline":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":1.33333333333334,
+                         "y":104.666666666667
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":253.333333333333,
+                 "y":232.666666666667
+                }, 
+                {
+                 "height":0,
+                 "id":83,
+                 "name":"",
+                 "polyline":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":150,
+                         "y":0.666666666666629
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":371.333333333333,
+                 "y":574.666666666667
+                }, 
+                {
+                 "height":0,
+                 "id":84,
+                 "name":"",
+                 "polyline":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":149.333333333333,
+                         "y":0
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":370.666666666667,
+                 "y":700.666666666667
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -642,64 +702,55 @@
          "name":"door",
          "objects":[
                 {
-                 "height":0,
-                 "id":10,
+                 "height":74,
+                 "id":81,
                  "name":"",
-                 "polyline":[
+                 "properties":[
                         {
-                         "x":214.167,
-                         "y":37.6667
-                        }, 
-                        {
-                         "x":215.667,
-                         "y":129.167
+                         "name":"linkId",
+                         "type":"string",
+                         "value":"82"
                         }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":0,
-                 "x":39,
-                 "y":200.333
+                 "width":64,
+                 "x":216,
+                 "y":254
                 }, 
                 {
-                 "height":0,
-                 "id":22,
+                 "height":64,
+                 "id":85,
                  "name":"",
-                 "polyline":[
+                 "properties":[
                         {
-                         "x":-16,
-                         "y":-1
-                        }, 
-                        {
-                         "x":142,
-                         "y":1
+                         "name":"linkId",
+                         "type":"string",
+                         "value":"83"
                         }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":0,
-                 "x":380,
-                 "y":576
+                 "width":64,
+                 "x":414,
+                 "y":546
                 }, 
                 {
-                 "height":0,
-                 "id":44,
+                 "height":64,
+                 "id":86,
                  "name":"",
-                 "polyline":[
+                 "properties":[
                         {
-                         "x":0,
-                         "y":0
-                        }, 
-                        {
-                         "x":198,
-                         "y":-1
+                         "name":"linkId",
+                         "type":"string",
+                         "value":"84"
                         }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":0,
-                 "x":347.333333333333,
-                 "y":709.333333333333
+                 "width":64,
+                 "x":413.333333333333,
+                 "y":670
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1102,7 +1153,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":81,
+ "nextobjectid":87,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

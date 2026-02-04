@@ -157,6 +157,16 @@ export class Saver {
     }
     map.edges = gameState.edges || [];
     
+    // 同步门和墙体的状态
+    map.doors.forEach((door) => {
+      const wall = map.edges.find((edge) => edge.id === door.linkedId);
+      if (wall) {
+        // 门打开时，墙不可用（可以通过）；门关闭时，墙可用（阻挡）
+        wall.useable = !door.isOpen;
+        console.log(`同步门状态: 门ID=${door.linkedId}, 门状态=${door.isOpen ? '打开' : '关闭'}, 墙体可用=${wall.useable}`);
+      }
+    });
+    
     return true;
   }
   

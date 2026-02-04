@@ -39,7 +39,7 @@ export class DoorAnimSprite extends Container {
     super();
     this.owner = door;
     this._linkedId = door.linkedId;
-
+    console.log('DoorAnimSprite created for door:', door)
     // 创建提示文本
     this.createTooltip();
 
@@ -240,6 +240,7 @@ export class DoorAnimSprite extends Container {
 }
 
 export const createDoorAnimSpriteFromDoor = async (door: Door) => {
+  console.log("创建门动画精灵:", door);
   const closedUrl = getDoorSvg("closed");
   const closedDoorTexture = await Assets.load(closedUrl);
   const closedDoorSprite = new Sprite(closedDoorTexture);
@@ -251,8 +252,12 @@ export const createDoorAnimSpriteFromDoor = async (door: Door) => {
   doorAnimSprite.openedDoor = openedDoorSprite;
   doorAnimSprite.addChild(closedDoorSprite);
   doorAnimSprite.addChild(openedDoorSprite);
-  doorAnimSprite.x = door.x - 16;
-  doorAnimSprite.y = door.y - 16;
+  // 将门的坐标设置为64*64矩形的中点
+  doorAnimSprite.x = door.x + 32;
+  doorAnimSprite.y = door.y + 32;
+  // 设置锚点为中心，使门精灵围绕中心点渲染
+  closedDoorSprite.anchor.set(0.5, 0.5);
+  openedDoorSprite.anchor.set(0.5, 0.5);
   closedDoorSprite.scale.set(0.08, 0.08);
   openedDoorSprite.scale.set(0.08, 0.08);
   doorAnimSprite.isOpen = door.isOpen;
@@ -289,7 +294,7 @@ export const createDoorAnimSpriteFromDoor = async (door: Door) => {
       return edge.id === doorAnimSprite.linkedId;
     });
     if (!wall) {
-      console.warn("未找到对应的墙体，无法更新墙体状态");
+      console.warn("未找到对应的墙体，无法更新墙体状态", doorAnimSprite);
       return;
     }
       
@@ -297,6 +302,7 @@ export const createDoorAnimSpriteFromDoor = async (door: Door) => {
   FogSystem.instanse.refreshSpatialGrid();
     console.log("门状态切换为:", doorAnimSprite);
   });
+  console.log("创建的门动画精灵:", doorAnimSprite);
   return doorAnimSprite;
 };
 const outBattleAction = (door: Door) => {

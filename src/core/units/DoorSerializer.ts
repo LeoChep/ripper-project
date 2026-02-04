@@ -5,6 +5,7 @@ import { golbalSetting } from "../golbalSetting";
  * Door 序列化数据接口
  */
 export interface SerializedDoorData {
+  id: number;
   linkedId: number;
   isOpen: boolean;
   x: number;
@@ -20,6 +21,7 @@ export class DoorSerializer {
 
   constructor(data?: Partial<SerializedDoorData>) {
     this._data = {
+      id: data?.id ?? 0,
       linkedId: data?.linkedId ?? 0,
       isOpen: data?.isOpen ?? false,
       x: data?.x ?? 0,
@@ -67,6 +69,7 @@ export class DoorSerializer {
    */
   static serialize(door: Door): DoorSerializer {
     return new DoorSerializer({
+      id: door.id,
       linkedId: door.linkedId,
       isOpen: door.isOpen,
       x: door.x,
@@ -78,7 +81,7 @@ export class DoorSerializer {
    * 反序列化为 Door 对象
    */
   deserialize(): Door {
-    const door = new Door(this._data.linkedId, this._data.x, this._data.y);
+    const door = new Door(this._data.id, this._data.x, this._data.y,this._data.linkedId);
 
     // 恢复门的状态
     door.isOpen = this._data.isOpen;
