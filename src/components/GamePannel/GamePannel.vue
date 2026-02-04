@@ -130,29 +130,41 @@ const initByMap = async (mapPassiable: any) => {
   const units = mapPassiable.sprites;
   const mapView = mapPassiable.textures;
 
-  // 绘制地图
-
-  drawMap(mapView, container, rlayers);
+  // 绘制地图（现在是异步的，会先绘制遮罩）
+  await drawMap(mapView, container, rlayers);
   console.log(units);
+
+  // 等待一帧，确保战争迷雾遮罩已经完全渲染
+  await new Promise(resolve => requestAnimationFrame(resolve));
 
   // 创建门
   const doors = mapPassiable.doors;
-  doors.forEach(async (door: any) => {
-    const doorSprite = await createDoorAnimSpriteFromDoor(door);
-    if (container) container.addChild(doorSprite);
-    if (rlayers.controllerLayer) rlayers.controllerLayer.attach(doorSprite);
+  const doorPromises: Promise<any>[] = [];
+  doors.forEach((door: any) => {
+    const promise = createDoorAnimSpriteFromDoor(door).then(doorSprite => {
+      doorSprite.visible = false; // 默认不可见，由战争迷雾系统控制
+      if (container) container.addChild(doorSprite);
+      if (rlayers.controllerLayer) rlayers.controllerLayer.attach(doorSprite);
+      door.doorSprite = doorSprite;
+    });
+    doorPromises.push(promise);
   });
+  await Promise.all(doorPromises);
 
   // 创建宝箱
   const chests = mapPassiable.chests;
-
   if (chests && chests.length > 0) {
-    chests.forEach(async (chest: any) => {
-      const chestSprite = await createChestAnimSpriteFromChest(chest);
-      if (container) container.addChild(chestSprite);
-      if (rlayers.controllerLayer) rlayers.controllerLayer.attach(chestSprite);
-      console.log("Created chest sprite:", chest.id, "at", chest.x, chest.y);
+    const chestPromises: Promise<any>[] = [];
+    chests.forEach((chest: any) => {
+      const promise = createChestAnimSpriteFromChest(chest).then(chestSprite => {
+        chestSprite.visible = false; // 默认不可见，由战争迷雾系统控制
+        if (container) container.addChild(chestSprite);
+        if (rlayers.spriteLayer) rlayers.spriteLayer.attach(chestSprite);
+        console.log("Created chest sprite:", chest.id, "at", chest.x, chest.y);
+      });
+      chestPromises.push(promise);
     });
+    await Promise.all(chestPromises);
   }
   console.log("创建宝箱:", chests);
   // 创建单位
@@ -180,22 +192,38 @@ const initByMap = async (mapPassiable: any) => {
 };
 
 // 辅助函数：绘制地图
-const drawMap = (mapView: any, container: any, rlayers: any) => {
+const drawMap = async (mapView: any, container: any, rlayers: any) => {
   if (golbalSetting.mapContainer) {
     golbalSetting.mapContainer.children.forEach((child: any) => {
       golbalSetting.mapContainer!.removeChild(child);
       child.destroy();
     });
   }
-  if (golbalSetting.map && golbalSetting.rootContainer && golbalSetting.app)
+  
+  // 先初始化战争迷雾系统并绘制初始遮罩
+  if (golbalSetting.map && golbalSetting.rootContainer && golbalSetting.app) {
     FogSystem.initFog(golbalSetting.map, golbalSetting.rootContainer, golbalSetting.app);
+    
+    // 立即计算并绘制一次迷雾，确保在地图显示前遮罩已经存在
+    const visibilityData = FogSystem.instanse.caculteVersionByPlayers();
+    if (visibilityData) {
+      FogSystem.instanse.makeFogOfWar(visibilityData);
+    }
+  }
+    // 启动自动绘制循环
+  
+  // 等待一帧，确保遮罩已经渲染
+  await new Promise((resolve) => FogSystem.instanse.autoDraw(resolve));
+  
+  // 再绘制地图
   const ms = new PIXI.Sprite(mapView);
   ms.zIndex = envSetting.zIndexSetting.mapZindex;
   ms.label = "map";
   if (golbalSetting.mapContainer) {
     golbalSetting.mapContainer.addChild(ms);
   }
-  FogSystem.instanse.autoDraw()
+  
+
 };
 
 // 辅助函数：生成动画精灵
@@ -507,8 +535,8 @@ const createRenderLayers = (app: any) => {
   app.stage.addChildAt(rlayers.basicLayer, 0);
   app.stage.addChildAt(rlayers.spriteLayer, 1);
   app.stage.addChildAt(rlayers.selectLayer, 2);
-  app.stage.addChildAt(rlayers.lineLayer, 3);
-  app.stage.addChildAt(rlayers.fogLayer, 4);
+  app.stage.addChildAt(rlayers.fogLayer, 3);
+  app.stage.addChildAt(rlayers.lineLayer, 4);
   app.stage.addChildAt(rlayers.controllerLayer, 5);
   rlayers.basicLayer.label = "basicLayer";
   rlayers.spriteLayer.label = "spriteLayer";
