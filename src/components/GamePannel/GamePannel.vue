@@ -53,6 +53,7 @@ import { UnitAnimSpirite } from "@/core/anim/UnitAnimSprite";
 import type { TiledMap } from "@/core/MapClass";
 import type { Unit } from "@/core/units/Unit";
 import { UnitSystem } from "@/core/system/UnitSystem";
+import { FogSystem } from "@/core/system/FogSystem_unuse";
 
 const appSetting = envSetting.appSetting;
 const route = useRoute();
@@ -130,6 +131,7 @@ const initByMap = async (mapPassiable: any) => {
   const mapView = mapPassiable.textures;
 
   // 绘制地图
+
   drawMap(mapView, container, rlayers);
   console.log(units);
 
@@ -143,7 +145,7 @@ const initByMap = async (mapPassiable: any) => {
 
   // 创建宝箱
   const chests = mapPassiable.chests;
- 
+
   if (chests && chests.length > 0) {
     chests.forEach(async (chest: any) => {
       const chestSprite = await createChestAnimSpriteFromChest(chest);
@@ -152,7 +154,7 @@ const initByMap = async (mapPassiable: any) => {
       console.log("Created chest sprite:", chest.id, "at", chest.x, chest.y);
     });
   }
- console.log("创建宝箱:", chests);
+  console.log("创建宝箱:", chests);
   // 创建单位
   let createEndPromise: Promise<any>[] = [];
   units.forEach((unit: Unit) => {
@@ -185,12 +187,15 @@ const drawMap = (mapView: any, container: any, rlayers: any) => {
       child.destroy();
     });
   }
+  if (golbalSetting.map && golbalSetting.rootContainer && golbalSetting.app)
+    FogSystem.initFog(golbalSetting.map, golbalSetting.rootContainer, golbalSetting.app);
   const ms = new PIXI.Sprite(mapView);
   ms.zIndex = envSetting.zIndexSetting.mapZindex;
   ms.label = "map";
   if (golbalSetting.mapContainer) {
     golbalSetting.mapContainer.addChild(ms);
   }
+  FogSystem.instanse.autoDraw()
 };
 
 // 辅助函数：生成动画精灵
