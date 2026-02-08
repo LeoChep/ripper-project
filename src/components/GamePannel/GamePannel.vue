@@ -79,9 +79,6 @@ onMounted(async () => {
   setContainer(container);
   setLayer(rlayers);
 
-  //绘制格子
-  drawGrid(app, rlayers);
-
   //增加键盘监听
   addListenKeyboard();
 
@@ -189,6 +186,9 @@ const initByMap = async (mapPassiable: any) => {
       console.log('characterStore', characterStore)
     }
   });
+
+  // 绘制格子（在地图加载完成后绘制）
+ // drawGrid(golbalSetting.app, rlayers);
 
 };
 
@@ -444,7 +444,6 @@ const loadGameState = async (slotId: number, needConfirm: boolean = true): Promi
     console.log("[changemap4] d1.loadTmj initByMap 前:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
 
     await initByMap(golbalSetting.map);
-    drawGrid(golbalSetting.app, golbalSetting.rlayers);
     console.log("[changemap4]  d1.loadTmj initByMap 后:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
 
     // 立即更新一次战争迷雾，确保门和宝箱立即显示
@@ -561,8 +560,8 @@ const createContainer = (app: any, rlayers: any) => {
   const container = new PIXI.Container();
   // 创建一个 800x600 的矩形图形作为底盘
   const rect = new PIXI.Graphics();
-  rect.rect(0, 0, 20000, 20000);
-  rect.fill({ color: "black" }); // 黑色填充
+  // rect.rect(0, 0, 20000, 20000);
+  // rect.fill({ color: "black" }); // 黑色填充
   container.addChild(rect);
   container.eventMode = "static";
   rlayers.basicLayer.attach(container);
@@ -639,7 +638,7 @@ const drawGrid = (app: any, rlayers: any) => {
     const line = new PIXI.Graphics();
     line.moveTo(i * gridSize, 0);
     line.lineTo(i * gridSize, mapHeight);
-    line.stroke({ width: 1, color: 0x444444, alpha: 0.5 });
+    line.stroke({ width: 1, color: 0x444444, alpha: 1 });
     lineContainer.addChild(line);
   }
 
@@ -648,7 +647,7 @@ const drawGrid = (app: any, rlayers: any) => {
     const line = new PIXI.Graphics();
     line.moveTo(0, j * gridSize);
     line.lineTo(mapWidth, j * gridSize);
-    line.stroke({ width: 1, color: 0x000000, alpha: 1 });
+    line.stroke({ width: 1, color: 0x444444, alpha: 1 });
     lineContainer.addChild(line);
   }
 

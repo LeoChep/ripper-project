@@ -8,6 +8,7 @@ import { CharacterCombatController } from "../controller/CharacterCombatControll
 import { CharacterOutCombatController } from "../controller/CharacterOutCombatController";
 import { CharacterController } from "../controller/CharacterController";
 import { FogSystem } from "../system/FogSystem";
+import { interactionSetting } from "../envSetting";
 export class DoorAnimSprite extends Container {
   // 门的状态，true 表示打开，false 表示关闭
   private _isOpen: boolean = false;
@@ -25,6 +26,8 @@ export class DoorAnimSprite extends Container {
   private tooltipContainer: Container | null = null;
   private tooltip: Text | null = null;
   private tooltipBg: Graphics | null = null;
+
+  public lastClickAtMs: number = 0;
 
   private callback: any;
   public get animationCallback(): any {
@@ -287,6 +290,11 @@ export const createDoorAnimSpriteFromDoor = async (door: Door) => {
         return;
       }
     }
+    const now = Date.now();
+    if (now - doorAnimSprite.lastClickAtMs < interactionSetting.doorClickIntervalMs) {
+      return;
+    }
+    doorAnimSprite.lastClickAtMs = now;
     console.log("门被点击了，切换状态");
     doorAnimSprite.isOpen = !doorAnimSprite.isOpen;
     doorAnimSprite.owner.isOpen = doorAnimSprite.isOpen;

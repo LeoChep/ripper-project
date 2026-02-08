@@ -15,3 +15,7 @@ export const appSetting = {
     resolution: 1,
     // transparent: false, // backgroundAlpha 已控制透明度
 };
+
+export const interactionSetting = {
+    doorClickIntervalMs: 250
+};

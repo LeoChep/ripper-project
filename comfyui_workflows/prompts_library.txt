@@ -1,0 +1,330 @@
+# ComfyUI提示词库 - 骷髅战士精灵图专用
+
+## ======================
+## 9帧行走动画 - 逐帧提示词
+## ======================
+
+### 方向：LEFT (A) - 面向左侧
+
+---FRAME 0---
+pixel art, chibi skeleton warrior, standing idle, side view facing left,
+left leg straight down touching ground, right leg straight down,
+left arm holding round golden shield close to chest,
+right arm holding sword at side pointing slightly down,
+body upright centered, white skull facing left profile,
+brown leather armor, tattered cape, skeletal hands,
+64x64 pixel style, clean linework, limited palette, sharp edges,
+transparent background, single character
+
+---FRAME 1---
+[SAME BASE] + walking animation frame 1,
+left leg slightly lifted 5 pixels off ground, knee bending 15 degrees,
+right leg straight firmly planted supporting weight,
+shield moving 3 pixels forward, sword moving 2 pixels back,
+body leaning 2 pixels forward, slight tilt
+
+---FRAME 2---
+[SAME BASE] + walking animation peak frame,
+left leg lifted maximum height 15 pixels, knee bent 90 degrees, thigh horizontal,
+right leg straight locked, heel pressed down,
+shield extended 8 pixels forward, sword pulled 6 pixels back,
+body tilted 4 pixels forward, weight on right leg
+
+---FRAME 3---
+[SAME BASE] + walking leg extending,
+left leg extending forward, knee straightening to 150 degrees, foot reaching,
+right leg still planted, ankle beginning to flex,
+shield steady at forward position, sword swinging forward,
+body moving forward with slight upward bounce
+
+---FRAME 4---
+[SAME BASE] + walking transition lowest point,
+left leg landing, knee bent 20 degrees absorbing impact, foot flat,
+right leg toe touching, heel lifted preparing to lift,
+shield pulling back 3 pixels, sword at neutral center,
+body compressed 3 pixels down lowest in cycle, weight shifting 60% left
+
+---FRAME 5---
+[SAME BASE] + walking mirror frame 1,
+left leg straight supporting weight,
+right leg lifted 5 pixels, knee bending 15 degrees,
+shield close to body, sword moving 3 pixels forward,
+body leaning forward 2 pixels
+
+---FRAME 6---
+[SAME BASE] + walking mirror peak,
+left leg straight locked planted,
+right leg lifted 15 pixels maximum, knee 90 degrees, thigh horizontal,
+shield extended forward, sword at highest arc,
+body tilted 4 pixels forward, full weight on left leg
+
+---FRAME 7---
+[SAME BASE] + walking mirror extending,
+left leg planted preparing to push,
+right leg extending forward, knee straightening,
+shield steady, sword swinging forward and down,
+body moving forward with bounce
+
+---FRAME 8---
+[SAME BASE] + walking return to idle,
+left leg toe touching preparing to plant,
+right leg landing, knee slightly bent,
+shield returning to center, sword at side,
+body rising to standing height, weight evening 50-50
+
+
+## ======================
+## 4个视角方向的修改
+## ======================
+
+### DIRECTION: W (向上/背面)
+Add to prompt: "back view, walking away from camera, back of skull visible, cape flowing, shield visible on left side from behind, sword on right side"
+
+### DIRECTION: S (向下/正面)  
+Add to prompt: "front view, walking toward camera, skull front face visible, black eye sockets prominent, shield in left hand visible, sword in right hand"
+
+### DIRECTION: A (向左)
+Add to prompt: "left side view, facing left, left profile of skull, shield on left blocking body, sword behind on right side"
+
+### DIRECTION: D (向右)
+Add to prompt: "right side view, facing right, right profile of skull, sword visible in front on right, shield behind on left side"
+
+
+## ======================
+## 风格控制关键词
+## ======================
+
+### 像素艺术基础
+pixel art, 2d game sprite, clean pixel art, sharp pixel edges, retro game art
+
+### 分辨率控制
+64x64 pixel style / 32x32 low res style / 128x128 detailed pixel art
+
+### 色彩控制
+- limited palette（有限色板）
+- 8 colors only（8色）
+- 16-bit color palette（16位色）
+- monochrome with highlights（单色+高光）
+- warm brown palette（暖棕色调）
+- desaturated colors（低饱和度）
+
+### 风格年代
+- 8-bit NES style（8位红白机）
+- 16-bit SNES style（16位超任）
+- Game Boy style（GameBoy）
+- GBA style advanced（GBA高级）
+- modern pixel art（现代像素）
+
+### 细节层级
+- minimal detail（极简）
+- medium detail（中等细节）
+- highly detailed pixel art（高细节）
+
+
+## ======================
+## 装备变体提示词
+## ======================
+
+### 盾牌变体
+- round wooden shield（木盾）
+- golden kite shield（金风筝盾）
+- small buckler（小圆盾）
+- tower shield large（塔盾）
+- no shield（无盾）
+
+### 武器变体
+- longsword两手剑
+- short dagger匕首
+- battle axe战斧
+- spear长矛
+- bow and arrow弓箭
+- empty hands空手
+
+### 护甲变体
+- brown leather armor（皮甲）
+- silver plate armor（板甲）
+- golden royal armor（金甲）
+- torn ragged cloth（破布）
+- hooded dark robe（黑袍）
+
+
+## ======================
+## 角色动作变体
+## ======================
+
+### 战斗动作
+attacking slash（挥砍攻击）
+shield block defensive（盾牌格挡）
+casting spell magic（施法）
+shooting bow（射箭）
+jumping leap（跳跃）
+rolling dodge（翻滚）
+
+### 特殊状态
+hurt stagger（受伤后仰）
+death falling（死亡倒下）
+victory pose champion（胜利姿势）
+idle breathing（待机呼吸）
+running sprint（冲刺）
+
+
+## ======================
+## 特效增强
+## ======================
+
+### 火焰效果
+fire aura surrounding（火焰灵气）
+flaming sword blade（燃烧剑刃）
+fire particles floating（火星粒子）
+
+### 魔法效果
+glowing runes on armor（盔甲符文发光）
+purple magic aura（紫色魔法光环）
+sparkles around weapon（武器闪光）
+
+### 暗黑风格
+dark shadowy smoke（黑暗烟雾）
+red glowing eyes（红色发光眼）
+cursed green aura（诅咒绿光）
+
+
+## ======================
+## 反向提示词（通用）
+## ======================
+
+### 必加的排除项
+realistic, photo, photograph, 3d render, 3d model,
+blurry, blur, smooth, gradient, soft edges,
+anti-aliasing, smooth shading, ambient occlusion,
+
+### 构图排除
+multiple characters, crowd, group,
+background, scenery, landscape, environment,
+complex background, detailed background,
+
+### 标记排除
+text, words, letters, numbers,
+watermark, signature, artist name, logo, copyright,
+UI elements, health bar, game interface,
+
+### 风格排除
+modern art, abstract, impressionist,
+anime, manga, cartoon (if not wanted),
+realistic proportions, anatomically correct,
+high resolution, 4k, detailed textures,
+cinematic, epic, dramatic lighting,
+
+
+## ======================
+## 组合使用示例
+## ======================
+
+### 示例1：标准行走帧2（左腿抬高）
+pixel art, chibi skeleton warrior, walking animation peak frame,
+side view facing left, left leg lifted maximum 15 pixels,
+knee bent 90 degrees, thigh horizontal, right leg straight planted,
+left arm holding round golden shield extended forward,
+right arm holding sword pulled back, white skull left profile,
+brown leather armor, tattered cape, 64x64 pixel style,
+clean pixel linework, limited 16-bit palette, sharp edges,
+transparent background, single character, retro RPG game sprite
+
+Negative: realistic, photo, 3d, blurry, smooth, anti-aliasing, gradient, multiple characters, background, text, watermark, modern style
+
+### 示例2：火焰效果骷髅（帧4）
+pixel art, chibi skeleton warrior, walking transition frame,
+front view, body compressed lowest point, both legs bent slightly,
+flaming skull with fire particles, red glowing eye sockets,
+golden shield with fire aura, flaming sword blade,
+dark cursed armor with glowing runes, tattered burning cape,
+fire particles floating around character, orange flame effects,
+64x64 pixel style, clean linework, warm palette with fire colors,
+sharp edges, transparent background, single character
+
+Negative: realistic, 3d, smooth, gradient, complex background, text
+
+### 示例3：简约复古风（帧0）
+pixel art, 8-bit NES style, simple skeleton warrior,
+standing idle, side view, minimal detail, limited 8 colors only,
+basic round shield, simple sword, blocky armor shapes,
+chunky pixels, retro 80s game aesthetic, 32x32 low resolution,
+very simple character design, classic game sprite,
+transparent background, single color outline
+
+Negative: detailed, complex, modern, smooth, gradient, 3d, realistic
+
+
+## ======================
+## ControlNet专用描述
+## ======================
+
+当使用OpenPose ControlNet时，在基础prompt后添加：
+"matching the exact pose from control image, following bone structure precisely, limb positions accurate to reference"
+
+当使用Depth ControlNet时：
+"matching depth layers of reference, foreground shield, mid-ground body, background cape layers"
+
+当使用Canny边缘时：
+"following edge lines exactly, sharp contours matching reference, clean outlines"
+
+
+## ======================
+## 批量生成变体seed推荐
+## ======================
+
+风格一致性seeds（测试通过）：
+- Seed 42: 经典平衡风格
+- Seed 123456: 稍暗重金属感
+- Seed 999: 明亮卡通风
+- Seed 777: 复古8位风
+- Seed 2024: 现代高清像素
+
+每个方向用同一个seed，保持角色一致！
+
+
+## ======================
+## 快速替换模板
+## ======================
+
+复制这个基础模板，只改 [POSE] 部分：
+
+BASE_TEMPLATE = """
+pixel art, chibi skeleton warrior, [POSE],
+side view facing left, white skull left profile,
+left arm holding round golden shield, right arm holding sword,
+brown leather armor, tattered cape, skeletal hands,
+64x64 pixel style, clean pixel linework, 
+limited 16-bit color palette, sharp edges,
+transparent background, single character,
+retro 16-bit RPG game sprite, top-down view style
+"""
+
+NEGATIVE = """
+realistic, photo, 3d render, blurry, smooth, gradient,
+anti-aliasing, multiple characters, background,
+text, watermark, modern art, high resolution
+"""
+
+[POSE] 替换为：
+- "standing idle pose"
+- "walking left leg forward mid-stride"
+- "attacking slash motion"
+- "shield blocking defensive"
+- etc...
+
+
+## ======================
+## 最终检查清单
+## ======================
+
+生成前确认：
+✅ 视角方向正确（W/A/S/D）
+✅ Seed固定（同一角色用同一seed）
+✅ 分辨率合适（512x512生成，后期缩放）
+✅ 姿势描述准确（参考9帧动画说明）
+✅ 装备一致（同一动画序列装备不变）
+✅ 背景透明（prompt包含transparent background）
+✅ 反向提示词完整
+✅ 如用ControlNet，参考图已加载
+
+---END---

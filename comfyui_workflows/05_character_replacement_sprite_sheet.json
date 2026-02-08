@@ -1,0 +1,110 @@
+{
+  "workflow_name": "Character Replacement for Sprite Sheets",
+  "description": "Replace character in sprite sheet while preserving poses and layout",
+  "nodes": {
+    "1_load_original_sprite": {
+      "type": "LoadImage",
+      "description": "Load the original sprite sheet with animations"
+    },
+    "2_load_reference_character": {
+      "type": "LoadImage", 
+      "description": "Load the new character reference image"
+    },
+    "3_openpose_detector": {
+      "type": "OpenposePreprocessor",
+      "description": "Extract pose skeleton from original sprite",
+      "inputs": {
+        "image": "1_load_original_sprite",
+        "detect_hand": "enable",
+        "detect_body": "enable",
+        "detect_face": "enable"
+      }
+    },
+    "4_ipadapter_encode": {
+      "type": "IPAdapterEncoder",
+      "description": "Encode new character features",
+      "inputs": {
+        "image": "2_load_reference_character",
+        "weight": 0.8,
+        "start_at": 0.0,
+        "end_at": 1.0
+      }
+    },
+    "5_checkpoint_loader": {
+      "type": "CheckpointLoaderSimple",
+      "checkpoint_name": "dreamshaper_8.safetensors"
+    },
+    "6_clip_text_encode_positive": {
+      "type": "CLIPTextEncode",
+      "text": "full body sprite sheet, pixel art, multiple poses, character standing idle walk attack, front view, transparent background, consistent character design, same character throughout, clear outlines, high quality pixel art"
+    },
+    "7_clip_text_encode_negative": {
+      "type": "CLIPTextEncode",
+      "text": "different characters, inconsistent style, blurry, low quality, background, multiple characters, deformed"
+    },
+    "8_controlnet_loader": {
+      "type": "ControlNetLoader",
+      "control_net_name": "control_v11p_sd15_openpose.pth"
+    },
+    "9_apply_controlnet": {
+      "type": "ControlNetApply",
+      "inputs": {
+        "conditioning": "6_clip_text_encode_positive",
+        "control_net": "8_controlnet_loader",
+        "image": "3_openpose_detector",
+        "strength": 1.0
+      }
+    },
+    "10_ksampler": {
+      "type": "KSampler",
+      "inputs": {
+        "model": "5_checkpoint_loader",
+        "positive": "9_apply_controlnet",
+        "negative": "7_clip_text_encode_negative",
+        "seed": "random",
+        "steps": 30,
+        "cfg": 7.5,
+        "sampler_name": "euler_a",
+        "scheduler": "normal",
+        "denoise": 0.85
+      }
+    },
+    "11_vae_decode": {
+      "type": "VAEDecode",
+      "inputs": {
+        "samples": "10_ksampler",
+        "vae": "5_checkpoint_loader"
+      }
+    },
+    "12_save_image": {
+      "type": "SaveImage",
+      "inputs": {
+        "images": "11_vae_decode",
+        "filename_prefix": "replaced_sprite_"
+      }
+    }
+  },
+  "tips": [
+    "调整 IP-Adapter weight (0.6-0.9) 来控制新角色的相似度",
+    "调整 ControlNet strength (0.8-1.0) 来控制姿势的严格程度",
+    "调整 denoise 值来平衡保留原图和生成新内容",
+    "如果是像素风格，在提示词中强调 'pixel art' 和 'crisp outlines'",
+    "使用 'same character design throughout' 确保序列帧一致性"
+  ],
+  "parameters_guide": {
+    "for_precise_pose_preservation": {
+      "controlnet_strength": 1.0,
+      "denoise": 0.75
+    },
+    "for_more_creative_interpretation": {
+      "controlnet_strength": 0.7,
+      "denoise": 0.9
+    },
+    "for_strong_character_similarity": {
+      "ipadapter_weight": 0.9
+    },
+    "for_loose_character_reference": {
+      "ipadapter_weight": 0.6
+    }
+  }
+}
