@@ -112,6 +112,7 @@ export const checkPassiable = (
           !isFriendlyNpc &&
           checkUnit.state !== "dead"
         ) {
+          console.log(`路径被单位 ${checkUnit.name} 阻挡: (${prex}, ${prey}) -> (${x}, ${y})`)
           passiable = false; // 如果有敌人阻挡，则不可通行
         }
       }

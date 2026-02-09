@@ -9,16 +9,18 @@ import { BattleEvenetSystem } from "../system/BattleEventSystem";
 import { createDamageAnim } from "../anim/DamageAnim";
 import { createMissOrHitAnimation } from "../anim/MissOrHitAnim";
 import { playAttackAnim } from "../anim/PlayAttackAnim";
+import { playThrowItemAnim } from "../anim/ThrowItemAnim";
 import { checkHit, getDamage } from "../system/AttackSystem";
 import { tileSize } from "../envSetting";
 import { UnitSystem } from "../system/UnitSystem";
-import { golbalSetting } from "../golbalSetting";
+import { playAirBurst, playShootItemAnim } from "../anim/ShootItemAnim";
+import { lookOn } from "../anim/LookOnAnim";
 
 export function playerSelectAttackMovement(
   e: PIXI.FederatedPointerEvent,
   unit: Unit,
   attack: CreatureAttack,
-  mapPassiable: TiledMap | null,
+  mapPassiable: TiledMap | null
 ) {
   e.stopPropagation();
   const pos = e.data.global;
@@ -40,7 +42,7 @@ export async function attackMovementToUnit(
   attack: CreatureAttack,
   mapPassiable: TiledMap | null,
   targetX: number = 0,
-  targetY: number = 0,
+  targetY: number = 0
 ) {
   const unit = attacker;
   unit.state = "attack";
@@ -79,13 +81,61 @@ export async function attackMovementToUnit(
         "hitCheckEvent",
         unit,
         target,
-        hitCheckResult,
+        hitCheckResult
       );
       if (attacker.state === "dead") {
         console.warn("单位已死亡，无法执行攻击");
         return {};
       }
       hitFlag = hitCheckResult.hit;
+      if (!attack.isRanged) {
+        if (container && lineLayer) {
+          await createMissOrHitAnimation(target, hitFlag);
+        }
+        if (hitFlag) {
+          damage = await getDamage(unit, target, attack);
+          if (container && lineLayer) {
+            createDamageAnim(damage.toString(), target);
+          }
+        }
+      }
+    }
+    //播放攻击动画
+    if (target) {
+      targetX = Math.floor(target.x / tileSize);
+      targetY = Math.floor(target.y / tileSize);
+    }
+    if (attack.anim !== "none") {
+      if (!attack.isRanged) {
+        await playAttackAnim(unit, targetX, targetY);
+      }
+    }
+    if (attack.throwItem) {
+      await playThrowItemAnim(unit, targetX, targetY, attack.throwItem);
+    }
+    if (attack.shootItem) {
+    
+     
+       await playAttackAnim(unit, targetX, targetY);
+      
+      // await new Promise((resolve) => setTimeout(resolve, 50));
+      //  playAirBurst(
+      //   unit.x + tileSize / 2,
+      //   unit.y + tileSize / 2,
+      //   targetX * tileSize,
+      //   targetY * tileSize,
+      //   getLayers().spriteLayer
+      // );
+      // await new Promise((resolve) => setTimeout(resolve, 150));
+      if (target) {
+        lookOn(target.x, target.y);
+      }
+      await playShootItemAnim(unit, targetX, targetY, attack.shootItem);
+   
+
+    }
+    if (attack.isRanged && target) {
+      lookOn(target.x, target.y);
       if (container && lineLayer) {
         await createMissOrHitAnimation(target, hitFlag);
       }
@@ -96,19 +146,6 @@ export async function attackMovementToUnit(
         }
       }
     }
-    //播放攻击动画
-    if (target) {
-      targetX = Math.floor(target.x / tileSize);
-      targetY = Math.floor(target.y / tileSize);
-    }
-    if (attack.throwItem) {
-      await playThrowItemAnim(unit, targetX, targetY, attack.throwItem);
-    }
-    if (attack.anim!== "none") {
-      await playAttackAnim(unit, targetX, targetY);
-    }
-  
-
     //结算
     if (target) {
       if (hitFlag) {
@@ -133,7 +170,7 @@ export function attackMovementToXY(
   targetY: number,
   attacker: Unit,
   attack: CreatureAttack,
-  mapPassiable: TiledMap | null,
+  mapPassiable: TiledMap | null
 ) {
   const unit = attacker;
   unit.state = "attack";
@@ -145,9 +182,10 @@ export function attackMovementToXY(
   // 检查目标位置是否在地图范围内
   const targetUnit = UnitSystem.getInstance().findUnitByGridxy(
     targetX,
-    targetY,
+    targetY
   );
   // 执行攻击逻辑
+  console.log('执行攻击逻辑，目标',targetUnit);
   // if (targetUnit){
   return attackMovementToUnit(
     targetUnit,
@@ -155,86 +193,9 @@ export function attackMovementToXY(
     attack,
     mapPassiable,
     targetX,
-    targetY,
+    targetY
   );
   // }
   unit.state = "idle";
   return Promise.resolve({});
-}
-
-async function playThrowItemAnim(
-  unit: Unit,
-  targetX: number,
-  targetY: number,
-  throwItem: string,
-): Promise<void> {
-  const container = getContainer();
-  if (!container) {
-    console.error("container 不存在");
-    return;
-  }
-  if (!golbalSetting.spriteContainer) {
-    console.error("spriteContainer 不存在");
-    return;
-  }
-
-  const startX = Math.floor(unit.x / tileSize) * tileSize + tileSize / 2;
-  const startY = Math.floor(unit.y / tileSize) * tileSize + tileSize / 2;
-  const endX = targetX * tileSize + tileSize / 2;
-  const endY = targetY * tileSize + tileSize / 2;
-
-  // 创建投掷物精灵
-  const throwItemSprite = await PIXI.Assets.load(throwItem);
-  const throwSprite = new PIXI.Sprite(throwItemSprite);
-
-  console.log("throwItem", throwItem, throwSprite, startX, startY);
-  throwSprite.anchor.set(0.5);
-  throwSprite.x = startX;
-  throwSprite.y = startY;
-
-  const layers = getLayers();
-  const animLayer = layers.spriteLayer;
-
-  golbalSetting.spriteContainer.addChild(throwSprite);
-  animLayer?.attach(throwSprite);
-  // 计算飞行时间和距离
-  const distance = Math.sqrt(
-    Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2),
-  );
-  const baseSpeed = 1; // px / ms
-  const duration = Math.max(300, distance / baseSpeed); // 根据距离调整持续时间，至少300ms
-
-  return new Promise<void>((resolve) => {
-    let startTime: number | null = null;
-
-    const animate = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const elapsed = timestamp - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-
-      // 加速运动 (EaseInQuad: t * t)
-      const easedProgress = progress * progress;
-
-      const currentX = startX + (endX - startX) * easedProgress;
-      const currentY = startY + (endY - startY) * easedProgress;
-
-      throwSprite.x = currentX;
-      throwSprite.y = currentY;
-
-      // 添加旋转效果
-      throwSprite.rotation = progress * Math.PI * 4;
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        if (golbalSetting.spriteContainer) {
-          golbalSetting.spriteContainer.removeChild(throwSprite);
-        }
-        throwSprite.destroy();
-        resolve();
-      }
-    };
-
-    requestAnimationFrame(animate);
-  });
 }

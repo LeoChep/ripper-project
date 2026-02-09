@@ -5,6 +5,8 @@ import { Trait } from '../trait/Trait';
 import { Weapon } from './Weapon';
 
 export interface CreatureAttack {
+    isRanged?: boolean;
+    shootItem?: any;
     anim?: string;
     name: string;
     type: string; // e.g. "Melee", "Ranged", "Burst"

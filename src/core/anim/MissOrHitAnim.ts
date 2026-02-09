@@ -54,6 +54,21 @@ export async function createMissOrHitAnimation(
   // alert(sprite.width)
   container.addChild(sprite);
   lineLayer.attach(sprite);
+  if (!hitFlag) {
+    const baseY = sprite.y;
+    const start = performance.now();
+    const durationMs = 700;
+    const bounceHeight = 18;
+    const animate = (now: number) => {
+      const t = Math.min((now - start) / durationMs, 1);
+      const bounce = Math.sin(t * Math.PI * 2) * (1 - t) * bounceHeight;
+      sprite.y = baseY - bounce;
+      if (t < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+    requestAnimationFrame(animate);
+  }
   setTimeout(() => {
     container.removeChild(sprite);
   }, 1000);

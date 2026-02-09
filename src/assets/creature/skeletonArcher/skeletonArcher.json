@@ -71,7 +71,9 @@
       "damage": "1d8",
       "target": "AC",
       "effect": null,
-      "missEffect": null
+      "missEffect": null,
+      "shootItem": "arrow",
+      "isRanged": true
     }
   ],
   "traits": [],

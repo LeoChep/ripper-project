@@ -38,6 +38,7 @@ export class NormalAI implements AIInterface {
 
     // 使用异步版本，真正不阻塞渲染
     //先检查原地
+    console.log("AI检查原地攻击:", unitX, unitY, result);
     const findAttackTargetByUnitResult = findAttackTargetByUnit(
       unitX,
       unitY,
@@ -45,11 +46,13 @@ export class NormalAI implements AIInterface {
       unitY,
       unit,
       map,
-      result,
+      result
     );
+    console.log("AI检查原地攻击:", unitX, unitY, result);
     let path: any = {};
     if (result.canAttack) {
       path[`${result.x},${result.y}`] = null;
+      console.log("AI原地就能攻击，攻击目标:", result.target);
     } else {
       path = await generateWaysAsync({
         start: { x: unitX, y: unitY },
@@ -70,7 +73,7 @@ export class NormalAI implements AIInterface {
       "AI路径计算结果:",
       path,
       path[`${result.x},${result.y}`],
-      result,
+      result
     );
 
     if (result.target && path) {
@@ -100,7 +103,7 @@ export class NormalAI implements AIInterface {
 
           let speed = ModifierSystem.getInstance().getValueStack(
             unit,
-            "speed",
+            "speed"
           ).finalValue;
 
           if (isCantAttack) {
@@ -110,7 +113,7 @@ export class NormalAI implements AIInterface {
               rc,
               unitX,
               unitY,
-              unit,
+              unit
             );
             let noUnit = false;
             while (!noUnit && rc) {
@@ -118,14 +121,14 @@ export class NormalAI implements AIInterface {
               const moveEndGrids = UnitSystem.getInstance().getGridsBySize(
                 rc.x,
                 rc.y,
-                unit.creature?.size ?? "middle",
+                unit.creature?.size ?? "middle"
               );
               noUnit = true;
 
               for (let grid of moveEndGrids) {
                 const findUnit = UnitSystem.getInstance().findUnitByGridxy(
                   grid.x,
-                  grid.y,
+                  grid.y
                 );
                 if (
                   rc &&
@@ -142,7 +145,7 @@ export class NormalAI implements AIInterface {
                 rc,
                 unitX,
                 unitY,
-                unit,
+                unit
               );
               if (rc && !noUnit) {
                 // testDraw(rc.x, rc.y, "red");
@@ -150,7 +153,7 @@ export class NormalAI implements AIInterface {
                   `AI单位 ${unit.name} ${unit.id} 在 `,
                   rc,
                   ` 位置拥堵，继续寻找`,
-                  rc.step,
+                  rc.step
                 );
                 rc = path[`${rc.x},${rc.y}`] as unknown as {
                   x: number;
@@ -160,35 +163,57 @@ export class NormalAI implements AIInterface {
               }
             }
           }
+
+          const range = unit.creature?.attacks[0].range ?? 1;
+          console.log(
+            unit.creature?.name,
+            "AI最终移动位置:",
+            rc,
+            "是否能攻击:",
+            range
+          );
           if (rc && rc.step > speed) {
+            console.log(
+              `AI单位 ${unit.name} 的步数 ${rc.step} 超过速度 ${speed} + 攻击范围 ${range}，无法攻击，寻找可攻击位置`,
+              rc
+            );
             isCantAttack = true; //如果步数大于速度，就不能攻击
+            console.log(
+              `AI单位 ${unit.name} 的步数 ${rc.step} 超过速度 ${speed} + 攻击范围 ${range}，无法攻击`
+            );
           }
           if (rc) {
             result.x = rc.x;
             result.y = rc.y;
             console.log(
-              `AI单位 ${unit.name} 的步数 ${rc.step} 超过速度 ${speed}`,
+              `AI单位 ${unit.name} 的步数 ${rc.step} 超过速度 ${speed}`
             );
 
             let least = rc.step - speed;
-
+            //需要修改为从可以开始攻击的位置开始回退，而不是从攻击目标位置
+            //TODO 最好加上一个保护，least太多使得rc到null
             while (least > 0) {
               rc = path[`${result.x},${result.y}`] as unknown as {
                 x: number;
                 y: number;
                 step: number;
               };
+
               least--;
               result.x = rc.x;
               result.y = rc.y;
+              console.log(
+                `AI单位 ${unit.name} 由于速度限制，向前调整一步，`,
+                rc
+              );
               if (least === 0) {
                 //移动力使用殆尽，使用标准动作继续移动
-                if (InitiativeController.useMoveAction(unit)) {
-                  least = ModifierSystem.getInstance().getValueStack(
-                    unit,
-                    "speed",
-                  ).finalValue;
-                }
+                // if (InitiativeController.useMoveAction(unit)) {
+                //   least = ModifierSystem.getInstance().getValueStack(
+                //     unit,
+                //     "speed",
+                //   ).finalValue;
+                // }
               }
             }
           }
@@ -196,28 +221,50 @@ export class NormalAI implements AIInterface {
             "AI停止路径:",
             path[`${result.x},${result.y}`],
             result,
-            path,
+            path
           );
-          if (rc) {
-            await UnitMove.moveMovement(result.x, result.y, unit, path);
-          }
         }
-
+      if (rc) {
+        await UnitMove.moveMovement(result.x, result.y, unit, path);
+      }
       console.log("aiUnit state", unit);
+      console.log("AI攻击目标:", result.target);
       if (!InitiativeSysteam.useStandAction(unit)) {
         isCantAttack = true;
       }
+      console.log(
+        "AI攻击检查 - 是否能攻击:",
+        !isCantAttack,
+        "攻击结果:",
+        result,
+        unit
+      );
       if (!isCantAttack) {
         const attack = unit.creature?.attacks[0];
         const enemyX = Math.floor(result.target.x / tileSize);
         const enemyY = Math.floor(result.target.y / tileSize);
+        console.log(
+          `AI单位 ${unit.name} 准备攻击:`,
+          attack,
+          "目标坐标:",
+          enemyX,
+          enemyY,
+          attack
+        );
         if (attack) {
+          console.log(
+            `AI单位 ${unit.name} 执行攻击:`,
+            attack,
+            "目标坐标:",
+            enemyX,
+            enemyY
+          );
           await UnitAttack.attackMovementToXY(
             enemyX,
             enemyY,
             unit,
             attack,
-            map,
+            map
           );
         }
       }
@@ -237,8 +284,8 @@ export class NormalAI implements AIInterface {
       return;
     }
     //TODO 需要专门抽象出函数方法来判断阵营是否友好
-    let isFriendlyNpc = false
-    if (targetUnit?.party=='player'&&this.owner.friendly) {
+    let isFriendlyNpc = false;
+    if (targetUnit?.party == "player" && this.owner.friendly) {
       isFriendlyNpc = true;
     }
     if (isFriendlyNpc) return;
@@ -250,7 +297,7 @@ export class NormalAI implements AIInterface {
       targetUnit,
       this.owner,
       this.owner.creature?.attacks[0],
-      golbalSetting.map,
+      golbalSetting.map
     );
   }
 }
@@ -273,7 +320,7 @@ function generateAttackRangeGrids(
   range: number,
   size: string,
   unitSettingx: number,
-  unitSettingy: number,
+  unitSettingy: number
 ): { [key: string]: boolean } {
   const attakRangeWays: { [key: string]: boolean } = {};
 
@@ -295,7 +342,7 @@ function generateAttackRangeGrids(
             unitSettingx,
             unitSettingy,
             targetX,
-            targetY,
+            targetY
           )
         ) {
           attakRangeWays[key] = true;
@@ -310,12 +357,21 @@ function findAttackTargetByUnitMap(
   unit: Unit,
   settingx: number,
   settingy: number,
-  range: number,
+  range: number
 ) {
   const units = UnitSystem.getInstance().getAllUnits();
   const ememyUnits: Unit[] = [];
   units.forEach((checkUnit) => {
-    if (checkUnit.party !== unit.party && checkUnit.state !== "dead") {
+    //TODO 需要专门抽象出函数方法来判断阵营是否友好
+    let isFriendlyNpcCheckPlayer = false;
+    if (checkUnit.party === "player" && unit.friendly) {
+      isFriendlyNpcCheckPlayer = true;
+    }
+    if (
+      checkUnit.party !== unit.party &&
+      checkUnit.state !== "dead" &&
+      !isFriendlyNpcCheckPlayer
+    ) {
       ememyUnits.push(checkUnit);
     }
   });
@@ -335,11 +391,11 @@ function findAttackTargetByUnitMap(
         settingx,
         settingy,
         grid.x,
-        grid.y,
+        grid.y
       );
       const dis = Math.max(
         Math.abs(grid.x - settingx),
-        Math.abs(grid.y - settingy),
+        Math.abs(grid.y - settingy)
       );
       if (passable && dis <= range) {
         result.canAttack = true;
@@ -351,7 +407,7 @@ function findAttackTargetByUnitMap(
         enemyUnit,
         grid,
         passable,
-        dis,
+        dis
       );
     }
   }
@@ -365,7 +421,7 @@ function findAttackTargetByUnit(
   y: number,
   unit: Unit,
   tiledMap: TiledMap,
-  result: any,
+  result: any
 ): boolean {
   let passiable = true;
   if (tiledMap) {
@@ -375,10 +431,14 @@ function findAttackTargetByUnit(
       y * tileSize,
       nx * tileSize,
       ny * tileSize,
-      tiledMap,
+      tiledMap
     );
   }
+  console.log("AI检查攻击目标格子1:", nx, ny, "通行性:", passiable);
   if (!passiable) {
+    console.log(
+      `AI单位 ${unit.name} 检测攻击目标时，路径不可通行: (${x}, ${y}) -> (${nx}, ${ny})`
+    );
     return false; // 如果不可通行，直接返回
   }
   let noUnit = true;
@@ -386,9 +446,9 @@ function findAttackTargetByUnit(
   const moveEndGrids = UnitSystem.getInstance().getGridsBySize(
     nx,
     ny,
-    unit.creature?.size ?? "middle",
+    unit.creature?.size ?? "middle"
   );
-
+  console.log("AI单位", unit.name, "移动结束格子:", moveEndGrids);
   for (let grid of moveEndGrids) {
     const findUnit = UnitSystem.getInstance().findUnitByGridxy(grid.x, grid.y);
     if (findUnit && findUnit !== unit && findUnit.state !== "dead") {
@@ -401,10 +461,11 @@ function findAttackTargetByUnit(
   const unitSettingx = nx;
   const unitSettingy = ny;
   const range = unit.creature?.attacks[0].range ?? 1;
+  console.log(unit, "AI检查攻击目标格子:", nx, ny, "攻击范围:", range);
   //遍历格子
   for (let grid of moveEndGrids) {
     const findR = findAttackTargetByUnitMap(unit, grid.x, grid.y, range);
-
+    console.log(nx, ny, "AI检查攻击目标格子428:", grid.x, grid.y, findR);
     const findUnitInThisPoint = findR.target;
 
     if (findUnitInThisPoint) {
@@ -417,8 +478,7 @@ function findAttackTargetByUnit(
       if (findUnitInThisPoint.party === unit.party) {
         continue;
       }
-      if(findUnitInThisPoint.party==='player' && unit.friendly ==true)
-      {
+      if (findUnitInThisPoint.party === "player" && unit.friendly == true) {
         continue;
       }
 
@@ -449,7 +509,7 @@ function findAttackTarget(
   y: number,
   unit: Unit,
   tiledMap: TiledMap,
-  result: any,
+  result: any
 ) {
   //没找到敌人就继续寻找
   let continueFind = true;
@@ -461,7 +521,7 @@ function findAttackTarget(
       y * tileSize,
       nx * tileSize,
       ny * tileSize,
-      tiledMap,
+      tiledMap
     );
   }
   if (!passiable) {
@@ -472,7 +532,7 @@ function findAttackTarget(
   const moveEndGrids = UnitSystem.getInstance().getGridsBySize(
     x,
     y,
-    unit.creature?.size ?? "middle",
+    unit.creature?.size ?? "middle"
   );
 
   for (let grid of moveEndGrids) {
@@ -494,7 +554,7 @@ function findAttackTarget(
     range,
     size,
     unitSettingx,
-    unitSettingy,
+    unitSettingy
   );
   console.log(unit, "AI攻击范围格子:", attakRangeWays);
   Object.keys(attakRangeWays).forEach((key) => {
@@ -504,7 +564,7 @@ function findAttackTarget(
     console.log(
       unit,
       unit.name + "AI检查攻击目标格子:" + key,
-      findUnitInThisPoint,
+      findUnitInThisPoint
     );
 
     if (findUnitInThisPoint) {
@@ -522,7 +582,7 @@ function findAttackTarget(
           unit,
           unit.name + "找到攻击目标:" + key + "!!!",
 
-          findUnitInThisPoint,
+          findUnitInThisPoint
         );
       // 找到了单位
       if (noUnit) {
@@ -544,7 +604,7 @@ function checkEdges(
   x1: number,
   y1: number,
   x2: number,
-  y2: number,
+  y2: number
 ) {
   let passiable = true; // 默认可通行
   if (tiledMap) {
@@ -568,7 +628,7 @@ function checkEdges(
             edge.x1,
             edge.y1,
             edge.x2,
-            edge.y2,
+            edge.y2
           )
         ) {
           passiable = false; // 如果中点的连线与边相交，则不可通行
