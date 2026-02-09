@@ -29,7 +29,7 @@
     ],
     "failed": []
   },
-  "frameSize": 64,
+  "frameSize": 180,
   "frameCounts": {
     "spellcast": 7,
     "thrust": 8,
