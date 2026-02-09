@@ -28,251 +28,12 @@ export class NormalAI implements AIInterface {
     // 这里可以实现AI的目标选择逻辑
     //用于存放结果
     console.log("AI行动:", unit);
-    //检测倒立起立
-    standAI(unit);
-    const initiative = unit.initiative;
-
-    const result: any = { canAttack: false };
-    const unitX = Math.floor(unit.x / tileSize);
-    const unitY = Math.floor(unit.y / tileSize);
-
-    // 使用异步版本，真正不阻塞渲染
-    //先检查原地
-    console.log("AI检查原地攻击:", unitX, unitY, result);
-    const findAttackTargetByUnitResult = findAttackTargetByUnit(
-      unitX,
-      unitY,
-      unitX,
-      unitY,
-      unit,
-      map,
-      result
-    );
-    console.log("AI检查原地攻击:", unitX, unitY, result);
-    let path: any = {};
-    if (result.canAttack) {
-      path[`${result.x},${result.y}`] = null;
-      console.log("AI原地就能攻击，攻击目标:", result.target);
-    } else {
-      path = await generateWaysAsync({
-        start: { x: unitX, y: unitY },
-        range: 20,
-        checkFunction: (nx: number, ny: number, x: number, y: number) => {
-          return findAttackTargetByUnit(nx, ny, x, y, unit, map, result);
-        },
-        endCheckFunction: () => {
-          if (result.target && result.canAttack) {
-            return true;
-          } else {
-            return false;
-          }
-        },
-      });
-    }
-    console.log(
-      "AI路径计算结果:",
-      path,
-      path[`${result.x},${result.y}`],
-      result
-    );
-
-    if (result.target && path) {
-      let lastStep = path[`${result.x},${result.y}`] as unknown as {
-        x: number;
-        y: number;
-        step: number;
-      };
-      let stepnum = 0;
-      if (lastStep?.step) stepnum = lastStep.step;
-      let rc = { x: result.x, y: result.y, step: stepnum };
-      console.log("AI最终路径点:", rc);
-      //移动
-      //计算可以移动到的格子
-      //  rc = path[`${result.x},${result.y}`] as unknown as {
-      //   x: number;
-      //   y: number;
-      //   step: number;
-      // };
-      let isCantAttack = !result.canAttack;
-      //粗暴的用于跳出
-      for (let num = 1; num < 2; num++)
-        if (rc) {
-          if (!InitiativeSysteam.useMoveAction(unit)) {
-            break;
-          }
-
-          let speed = ModifierSystem.getInstance().getValueStack(
-            unit,
-            "speed"
-          ).finalValue;
-
-          if (isCantAttack) {
-            //如果不能攻击,检查是否为拥堵情况
-            console.log(
-              "不能攻击，检测是否为拥堵情况:",
-              rc,
-              unitX,
-              unitY,
-              unit
-            );
-            let noUnit = false;
-            while (!noUnit && rc) {
-              //如果是拥堵情况，往前找到不拥堵位置为止
-              const moveEndGrids = UnitSystem.getInstance().getGridsBySize(
-                rc.x,
-                rc.y,
-                unit.creature?.size ?? "middle"
-              );
-              noUnit = true;
-
-              for (let grid of moveEndGrids) {
-                const findUnit = UnitSystem.getInstance().findUnitByGridxy(
-                  grid.x,
-                  grid.y
-                );
-                if (
-                  rc &&
-                  findUnit &&
-                  findUnit !== unit &&
-                  findUnit.state !== "dead"
-                ) {
-                  noUnit = false;
-                }
-              }
-              console.log(
-                "检测拥堵位置的格子:",
-                moveEndGrids,
-                rc,
-                unitX,
-                unitY,
-                unit
-              );
-              if (rc && !noUnit) {
-                // testDraw(rc.x, rc.y, "red");
-                console.log(
-                  `AI单位 ${unit.name} ${unit.id} 在 `,
-                  rc,
-                  ` 位置拥堵，继续寻找`,
-                  rc.step
-                );
-                rc = path[`${rc.x},${rc.y}`] as unknown as {
-                  x: number;
-                  y: number;
-                  step: number;
-                };
-              }
-            }
-          }
-
-          const range = unit.creature?.attacks[0].range ?? 1;
-          console.log(
-            unit.creature?.name,
-            "AI最终移动位置:",
-            rc,
-            "是否能攻击:",
-            range
-          );
-          if (rc && rc.step > speed) {
-            console.log(
-              `AI单位 ${unit.name} 的步数 ${rc.step} 超过速度 ${speed} + 攻击范围 ${range}，无法攻击，寻找可攻击位置`,
-              rc
-            );
-            isCantAttack = true; //如果步数大于速度，就不能攻击
-            console.log(
-              `AI单位 ${unit.name} 的步数 ${rc.step} 超过速度 ${speed} + 攻击范围 ${range}，无法攻击`
-            );
-          }
-          if (rc) {
-            result.x = rc.x;
-            result.y = rc.y;
-            console.log(
-              `AI单位 ${unit.name} 的步数 ${rc.step} 超过速度 ${speed}`
-            );
-
-            let least = rc.step - speed;
-            //需要修改为从可以开始攻击的位置开始回退，而不是从攻击目标位置
-            //TODO 最好加上一个保护，least太多使得rc到null
-            while (least > 0) {
-              rc = path[`${result.x},${result.y}`] as unknown as {
-                x: number;
-                y: number;
-                step: number;
-              };
-
-              least--;
-              result.x = rc.x;
-              result.y = rc.y;
-              console.log(
-                `AI单位 ${unit.name} 由于速度限制，向前调整一步，`,
-                rc
-              );
-              if (least === 0) {
-                //移动力使用殆尽，使用标准动作继续移动
-                // if (InitiativeController.useMoveAction(unit)) {
-                //   least = ModifierSystem.getInstance().getValueStack(
-                //     unit,
-                //     "speed",
-                //   ).finalValue;
-                // }
-              }
-            }
-          }
-          console.log(
-            "AI停止路径:",
-            path[`${result.x},${result.y}`],
-            result,
-            path
-          );
-        }
-      if (rc) {
-        await UnitMove.moveMovement(result.x, result.y, unit, path);
-      }
-      console.log("aiUnit state", unit);
-      console.log("AI攻击目标:", result.target);
-      if (!InitiativeSysteam.useStandAction(unit)) {
-        isCantAttack = true;
-      }
-      console.log(
-        "AI攻击检查 - 是否能攻击:",
-        !isCantAttack,
-        "攻击结果:",
-        result,
-        unit
-      );
-      if (!isCantAttack) {
-        const attack = unit.creature?.attacks[0];
-        const enemyX = Math.floor(result.target.x / tileSize);
-        const enemyY = Math.floor(result.target.y / tileSize);
-        console.log(
-          `AI单位 ${unit.name} 准备攻击:`,
-          attack,
-          "目标坐标:",
-          enemyX,
-          enemyY,
-          attack
-        );
-        if (attack) {
-          console.log(
-            `AI单位 ${unit.name} 执行攻击:`,
-            attack,
-            "目标坐标:",
-            enemyX,
-            enemyY
-          );
-          await UnitAttack.attackMovementToXY(
-            enemyX,
-            enemyY,
-            unit,
-            attack,
-            map
-          );
-        }
-      }
-    }
-
+    const result = await moveMovementAI(unit);
+    await standardMovementAI(unit, result);
     InitiativeController.endTurn(unit);
     // Implement the logic for the AI to automatically take actions
   }
+
   async opportunityAttack(targetUnit: Unit) {
     //  alert(`单位 ${targetUnit.name} 触发了借机攻击！`);
     if (!this.owner) {
@@ -312,6 +73,231 @@ function standAI(unit: Unit) {
     if (InitiativeSysteam.useMoveAction(unit)) {
       BuffSystem.getInstance().removeBuff(pronedBuff, unit);
     }
+  }
+}
+async function standardMovementAI(unit: Unit, result: any) {
+  const map = golbalSetting.map;
+  let isCantAttack = true;
+  if (result?.canAttack && result?.target) {
+    isCantAttack = false;
+  }
+  if (!isCantAttack && result?.target) {
+    const attack = unit.creature?.attacks[0];
+    const enemyX = Math.floor(result.target.x / tileSize);
+    const enemyY = Math.floor(result.target.y / tileSize);
+    console.log(
+      `AI单位 ${unit.name} 准备攻击:`,
+      attack,
+      "目标坐标:",
+      enemyX,
+      enemyY,
+      attack
+    );
+    if (attack) {
+      console.log(
+        `AI单位 ${unit.name} 执行攻击:`,
+        attack,
+        "目标坐标:",
+        enemyX,
+        enemyY
+      );
+      await UnitAttack.attackMovementToXY(enemyX, enemyY, unit, attack, map);
+    }
+  }
+  return result;
+}
+async function moveMovementAI(unit: Unit) {
+  //检测倒立起立
+  standAI(unit);
+
+  const result: any = { canAttack: false };
+  const unitX = Math.floor(unit.x / tileSize);
+  const unitY = Math.floor(unit.y / tileSize);
+  const map = golbalSetting.map;
+  if (!map) {
+    console.error("地图数据未加载，无法执行AI移动");
+    return;
+  }
+  const findAttackTargetByUnitResult = findAttackTargetByUnit(
+    unitX,
+    unitY,
+    unitX,
+    unitY,
+    unit,
+    map,
+    result
+  );
+  console.log("AI检查原地攻击:", unitX, unitY, result);
+  let path: any = {};
+  if (result.canAttack) {
+    path[`${result.x},${result.y}`] = null;
+    console.log("AI原地就能攻击，攻击目标:", result.target);
+  } else {
+    path = await generateWaysAsync({
+      start: { x: unitX, y: unitY },
+      range: 20,
+      checkFunction: (nx: number, ny: number, x: number, y: number) => {
+        return findAttackTargetByUnit(nx, ny, x, y, unit, map, result);
+      },
+      endCheckFunction: () => {
+        if (result.target && result.canAttack) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+    });
+  }
+  console.log("AI路径计算结果:", path, path[`${result.x},${result.y}`], result);
+
+  if (result.target && path) {
+    let lastStep = path[`${result.x},${result.y}`] as unknown as {
+      x: number;
+      y: number;
+      step: number;
+    };
+    let stepnum = 0;
+    if (lastStep?.step) stepnum = lastStep.step;
+    let rc = { x: result.x, y: result.y, step: stepnum };
+    console.log("AI最终路径点:", rc);
+    //移动
+    //计算可以移动到的格子
+    //  rc = path[`${result.x},${result.y}`] as unknown as {
+    //   x: number;
+    //   y: number;
+    //   step: number;
+    // };
+    let isCantAttack = !result.canAttack;
+    //粗暴的用于跳出
+    for (let num = 1; num < 2; num++)
+      if (rc) {
+        if (!InitiativeSysteam.useMoveAction(unit)) {
+          break;
+        }
+
+        let speed = ModifierSystem.getInstance().getValueStack(
+          unit,
+          "speed"
+        ).finalValue;
+
+        if (isCantAttack) {
+          //如果不能攻击,检查是否为拥堵情况
+          console.log("不能攻击，检测是否为拥堵情况:", rc, unitX, unitY, unit);
+          let noUnit = false;
+          while (!noUnit && rc) {
+            //如果是拥堵情况，往前找到不拥堵位置为止
+            const moveEndGrids = UnitSystem.getInstance().getGridsBySize(
+              rc.x,
+              rc.y,
+              unit.creature?.size ?? "middle"
+            );
+            noUnit = true;
+
+            for (let grid of moveEndGrids) {
+              const findUnit = UnitSystem.getInstance().findUnitByGridxy(
+                grid.x,
+                grid.y
+              );
+              if (
+                rc &&
+                findUnit &&
+                findUnit !== unit &&
+                findUnit.state !== "dead"
+              ) {
+                noUnit = false;
+              }
+            }
+            console.log(
+              "检测拥堵位置的格子:",
+              moveEndGrids,
+              rc,
+              unitX,
+              unitY,
+              unit
+            );
+            if (rc && !noUnit) {
+              // testDraw(rc.x, rc.y, "red");
+              console.log(
+                `AI单位 ${unit.name} ${unit.id} 在 `,
+                rc,
+                ` 位置拥堵，继续寻找`,
+                rc.step
+              );
+              rc = path[`${rc.x},${rc.y}`] as unknown as {
+                x: number;
+                y: number;
+                step: number;
+              };
+            }
+          }
+        }
+
+        const range = unit.creature?.attacks[0].range ?? 1;
+        console.log(
+          unit.creature?.name,
+          "AI最终移动位置:",
+          rc,
+          "是否能攻击:",
+          range
+        );
+        if (rc && rc.step > speed) {
+          console.log(
+            `AI单位 ${unit.name} 的步数 ${rc.step} 超过速度 ${speed} + 攻击范围 ${range}，无法攻击，寻找可攻击位置`,
+            rc
+          );
+          isCantAttack = true; //如果步数大于速度，就不能攻击
+          console.log(
+            `AI单位 ${unit.name} 的步数 ${rc.step} 超过速度 ${speed} + 攻击范围 ${range}，无法攻击`
+          );
+        }
+        if (rc) {
+          result.x = rc.x;
+          result.y = rc.y;
+          console.log(
+            `AI单位 ${unit.name} 的步数 ${rc.step} 超过速度 ${speed}`
+          );
+
+          let least = rc.step - speed;
+          if (least > 0 && InitiativeSysteam.useStandAction(unit)) {
+            least = least - speed;
+          }
+          //需要修改为从可以开始攻击的位置开始回退，而不是从攻击目标位置
+          //TODO 最好加上一个保护，least太多使得rc到null
+          while (least > 0) {
+            rc = path[`${result.x},${result.y}`] as unknown as {
+              x: number;
+              y: number;
+              step: number;
+            };
+
+            least--;
+            result.x = rc.x;
+            result.y = rc.y;
+            console.log(`AI单位 ${unit.name} 由于速度限制，向前调整一步，`, rc);
+            if (least === 0) {
+              //移动力使用殆尽，使用标准动作继续移动
+              // if (InitiativeController.useMoveAction(unit)) {
+              //   least = ModifierSystem.getInstance().getValueStack(
+              //     unit,
+              //     "speed",
+              //   ).finalValue;
+              // }
+            }
+          }
+        }
+        console.log(
+          "AI停止路径:",
+          path[`${result.x},${result.y}`],
+          result,
+          path
+        );
+      }
+    if (rc) {
+      await UnitMove.moveMovement(result.x, result.y, unit, path);
+    }
+    console.log("aiUnit state", unit);
+    console.log("AI攻击目标:", result.target);
+    return { target: result.target, canAttack: !isCantAttack };
   }
 }
 
@@ -502,142 +488,3 @@ function findAttackTargetByUnit(
   return true;
 }
 
-function findAttackTarget(
-  nx: number,
-  ny: number,
-  x: number,
-  y: number,
-  unit: Unit,
-  tiledMap: TiledMap,
-  result: any
-) {
-  //没找到敌人就继续寻找
-  let continueFind = true;
-  let passiable = true;
-  if (tiledMap) {
-    passiable = UnitMoveSystem.checkPassiable(
-      unit,
-      x * tileSize,
-      y * tileSize,
-      nx * tileSize,
-      ny * tileSize,
-      tiledMap
-    );
-  }
-  if (!passiable) {
-    return false; // 如果不可通行，直接返回
-  }
-  let noUnit = true;
-  //判断是否有单位阻止你站在这里
-  const moveEndGrids = UnitSystem.getInstance().getGridsBySize(
-    x,
-    y,
-    unit.creature?.size ?? "middle"
-  );
-
-  for (let grid of moveEndGrids) {
-    const findUnit = UnitSystem.getInstance().findUnitByGridxy(grid.x, grid.y);
-    if (findUnit && findUnit !== unit && findUnit.state !== "dead") {
-      noUnit = false;
-    }
-  }
-  console.log("noUnit:", noUnit, moveEndGrids, x, y, unit);
-  //获得攻击范围内格子
-  const size = unit?.creature?.size ? unit.creature.size : "middle";
-  const grids = UnitSystem.getInstance().getGridsBySize(x, y, size);
-  const unitSettingx = x;
-  const unitSettingy = y;
-  const range = unit.creature?.attacks[0].range ?? 1;
-
-  const attakRangeWays = generateAttackRangeGrids(
-    grids,
-    range,
-    size,
-    unitSettingx,
-    unitSettingy
-  );
-  console.log(unit, "AI攻击范围格子:", attakRangeWays);
-  Object.keys(attakRangeWays).forEach((key) => {
-    console.log("ATTACKTANGEWAY'", key);
-    const [x, y] = key.split(",").map(Number);
-    const findUnitInThisPoint = UnitSystem.getInstance().findUnitByGridxy(x, y);
-    console.log(
-      unit,
-      unit.name + "AI检查攻击目标格子:" + key,
-      findUnitInThisPoint
-    );
-
-    if (findUnitInThisPoint) {
-      if (
-        findUnitInThisPoint === unit ||
-        findUnitInThisPoint.state === "dead"
-      ) {
-        return; // 如果是自己就跳过
-      }
-      if (findUnitInThisPoint.party === unit.party) {
-        return;
-      }
-      if (findUnitInThisPoint)
-        console.log(
-          unit,
-          unit.name + "找到攻击目标:" + key + "!!!",
-
-          findUnitInThisPoint
-        );
-      // 找到了单位
-      if (noUnit) {
-        continueFind = false;
-        result.canAttack = true;
-      }
-      console.log(unit, "AI找到攻击目标:", findUnitInThisPoint, unit);
-      result.x = unitSettingx;
-      result.y = unitSettingy;
-      result.target = findUnitInThisPoint;
-    }
-  });
-
-  return continueFind;
-}
-
-function checkEdges(
-  tiledMap: TiledMap,
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number
-) {
-  let passiable = true; // 默认可通行
-  if (tiledMap) {
-    const edges = tiledMap.edges;
-    // 检查是否穿过边
-    if (edges) {
-      // console.log(edges)
-      // 检查是否有对象在指定位置
-      // 遍历对象组中的所有对象
-      edges.forEach((edge) => {
-        if (edge.useable === false) {
-          return; // 如果边不可用，则跳过
-        }
-        // 检查中点的连线
-        if (
-          segmentsIntersect(
-            x1 * tileSize + 32,
-            y1 * tileSize + 32,
-            x2 * tileSize + 32,
-            y2 * tileSize + 32,
-            edge.x1,
-            edge.y1,
-            edge.x2,
-            edge.y2
-          )
-        ) {
-          passiable = false; // 如果中点的连线与边相交，则不可通行
-          return; // 如果不可通行，则跳出循环
-        }
-      });
-    }
-  } else {
-    return false;
-  }
-  return passiable;
-}
