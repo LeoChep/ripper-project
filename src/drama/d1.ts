@@ -44,20 +44,15 @@ class D1 extends Drama {
     const { CGstart, unitSpeak, speak, unitChoose, CGEnd, addInteraction } =
       this;
     CGstart();
+    await unitSpeak("npc牧师", "谢谢你们！那些骷髅终于被消灭了。");
     await unitSpeak(
       "npc牧师",
-      "谢谢你们！那些骷髅终于被消灭了。");
-    await unitSpeak(
-      "npc牧师",
-      "不过我担心这只是个开始，神殿里可能还有更多的亡灵在徘徊。我们需要继续前进，彻底清理这里的邪恶力量。",
+      "不过我担心这只是个开始，神殿里可能还有更多的亡灵在徘徊。我们需要继续前进，彻底清理这里的邪恶力量。"
     );
-    await unitChoose(
-      "npc牧师",
-      [
-        { text: "我们准备好了，继续前进吧。", value: "option1" },
-        { text: "我们需要休息一下，恢复体力……", value: "option2" },
-      ]
-    );
+    await unitChoose("npc牧师", [
+      { text: "我们准备好了，继续前进吧。", value: "option1" },
+      { text: "我们需要休息一下，恢复体力……", value: "option2" },
+    ]);
     await speak("突然……传来一阵响动……");
     await speak("你们发现更多的骷髅从神殿的深处涌了出来。");
     CGEnd();
@@ -76,18 +71,18 @@ class D1 extends Drama {
         { text: "这座神殿原本是哪个神明的？", value: "option3" },
         { text: "你能提供什么帮助吗？", value: "option4" },
       ],
-      "还有什么事吗",
+      "还有什么事吗"
     );
 
     if (ch1 == "option1")
       await unitSpeak(
         "npc牧师",
-        "大约一周前，我开始注意到这些异常现象。起初只是有鬼魂在废弃神殿中呢喃，但现在已经变得越来越严重了。",
+        "大约一周前，我开始注意到这些异常现象。起初只是有鬼魂在废弃神殿中呢喃，但现在已经变得越来越严重了。"
       );
     if (ch1 == "option2") {
       await unitSpeak(
         "npc牧师",
-        "它们畏惧阳光，所以一直在神殿里没有出来。圣水对他们或许也有用……",
+        "它们畏惧阳光，所以一直在神殿里没有出来。圣水对他们或许也有用……"
       );
 
       const hasHolyWater = this.getVariable("hasHolyWater");
@@ -105,12 +100,12 @@ class D1 extends Drama {
     if (ch1 == "option3")
       await unitSpeak(
         "npc牧师",
-        "这座神殿原本时祭拜古拉姆的……但是你也知道，古拉姆已经不在了，各种意义上，因此神殿也废弃了。",
+        "这座神殿原本时祭拜古拉姆的……但是你也知道，古拉姆已经不在了，各种意义上，因此神殿也废弃了。"
       );
     if (ch1 == "option4")
       await unitSpeak(
         "npc牧师",
-        "我能做的并不多，但是我会尽我所能使用神术法术来攻击它们。但是别指望太多，我毕竟不是战斗人员。",
+        "我能做的并不多，但是我会尽我所能使用神术法术来攻击它们。但是别指望太多，我毕竟不是战斗人员。"
       );
     CGEnd();
   };
@@ -122,12 +117,12 @@ class D1 extends Drama {
     CGstart();
     await unitSpeak(
       "npc牧师",
-      "你们终于来了……这里的亡灵作祟越来越可怕了，我们需要你们的帮助来消灭它们。",
+      "你们终于来了……这里的亡灵作祟越来越可怕了，我们需要你们的帮助来消灭它们。"
     );
     await speak("你们能听见神殿里传来骨头摩擦的声音，似乎有骷髅在里面徘徊。");
     await unitSpeak(
       "npc牧师",
-      "培罗在上，我感觉它们简直随时都可能冲出来攻击我们。  还请你们小心行事。",
+      "培罗在上，我感觉它们简直随时都可能冲出来攻击我们。  还请你们小心行事。"
     );
 
     addInteraction("npc牧师", this.cricleTalk);
@@ -140,10 +135,9 @@ class D1 extends Drama {
     const { CGstart, speak, unitSpeak, CGEnd } = this;
 
     const door1 = golbalSetting.map?.doors?.find(
-      (door: { id: number }) => door.id === 86,
+      (door: { id: number }) => door.id === 86
     );
-    if (!door1)
-      return;
+    if (!door1) return;
     if (door1?.isOpen === false) {
       return;
     }
@@ -151,7 +145,7 @@ class D1 extends Drama {
     CGstart();
     this.setVariable("door1", true);
     await speak(
-      "你走近废弃的房屋,发现门口有一扇破旧的门。你试图推开门,但它似乎被什么东西卡住了。你决定用力推开它。",
+      "你走近废弃的房屋,发现门口有一扇破旧的门。你试图推开门,但它似乎被什么东西卡住了。你决定用力推开它。"
     );
     await unitSpeak("skeleton", "骷髅:咯吱吱……咯吱吱");
     CGEnd();
@@ -161,9 +155,14 @@ class D1 extends Drama {
     }
     this.setVariable("inCombat1", true);
     InitiativeController.setMap(this.map);
-    const initCombatPromise = InitiativeController.addUnitsToInitiativeSheet(
-      this.map.sprites,
-    );
+    const units = UnitSystem.getInstance().getUnitBySelectionGroup("battle1");
+    const players = UnitSystem.getInstance().getUnitBySelectionGroup("player");
+    players.forEach((player) => {
+      units.push(player);
+    });
+    const initCombatPromise =
+      InitiativeController.addUnitsToInitiativeSheet(units);
+
     initCombatPromise.then(async () => {
       await InitiativeController.startBattle();
       InitiativeController.startCombatTurn();

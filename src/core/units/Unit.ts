@@ -22,8 +22,9 @@ export interface UnitOptions {
   height: number;
   party: string;
   unitTypeName: string;
+  selectionGroup?: string;
   gid?: number;
-  direction: number; // 方向，0-3 分别表示上、右、下、左
+  direction?: number; // 方向，0-3 分别表示上、右、下、左
   friendly?: boolean; // 是否友好（用于NPC互动等）
   isSceneHidden?: boolean; // 是否在场景中隐藏（不参与渲染和碰撞）
   traits?: Trait[];
@@ -45,6 +46,7 @@ export class Unit {
   effects: any[] = []; // 特效数组
   friendly: boolean = false; // 是否友好
   isSceneHidden?: boolean; // 是否在场景中隐藏（不参与渲染和碰撞）
+  selectionGroup?: string; // 选择组，用于单位选择和分组
   traits: Trait[];
   powers: Power[];
   inventory: Item[] = []; // 背包系统
@@ -63,13 +65,14 @@ export class Unit {
     this.width = options.width;
     this.height = options.height;
     this.party = options.party;
-    this.direction = options.direction;
+    this.direction = options.direction ?? 0;
     this.unitTypeName = options.unitTypeName;
     this.gid = options.gid;
     // 如果party是player，默认friendly为true；否则使用传入的值或false
     this.friendly =
       options.party === "player" ? true : options.friendly ?? false;
     this.isSceneHidden = options.isSceneHidden ?? false;
+    this.selectionGroup = options.selectionGroup;
     this.traits = options.traits || [];
     this.powers = options.powers || [];
 
@@ -256,6 +259,9 @@ export function createUnitFromMapSprite(obj: any): Unit {
   const isHiddenProp = obj.properties?.find(
     (p: any) => p.name === "isSceneHidden"
   );
+  const selectionGroupProp = obj.properties?.find(
+    (p: any) => p.name === "selectionGroup"
+  );
   const friendlyProp = obj.properties?.find((p: any) => p.name === "friendly");
   const unitInfo = {
     id: obj.id,
@@ -270,6 +276,7 @@ export function createUnitFromMapSprite(obj: any): Unit {
     direction: directionProp ? directionProp.value : 2, // 默认方向为 0
     friendly: friendlyProp ? friendlyProp.value : false, // 默认不友好
     isSceneHidden: isHiddenProp ? isHiddenProp.value : false, // 默认不隐藏
+    selectionGroup: selectionGroupProp ? selectionGroupProp.value : undefined,
   };
   const unit = createUnitFromUnitInfo(unitInfo);
 
@@ -289,6 +296,7 @@ export function createUnitFromUnitInfo(obj: any): Unit {
     direction: obj.direction, // 默认方向为 0
     friendly: obj.friendly ?? false, // 默认不友好
     isSceneHidden: obj.isSceneHidden ?? false, // 默认不隐藏
+    selectionGroup: obj.selectionGroup,
   });
   if (unit.party !== "player") {
     unit.ai = new NormalAI();

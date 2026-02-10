@@ -895,6 +895,11 @@
                          "value":"player"
                         }, 
                         {
+                         "name":"selectionGroup",
+                         "type":"string",
+                         "value":"player"
+                        }, 
+                        {
                          "name":"unitTypeName",
                          "type":"string",
                          "value":"wolf"
@@ -919,6 +924,11 @@
                         }, 
                         {
                          "name":"party",
+                         "type":"string",
+                         "value":"player"
+                        }, 
+                        {
+                         "name":"selectionGroup",
                          "type":"string",
                          "value":"player"
                         }, 
@@ -1174,6 +1184,11 @@
                          "value":"player"
                         }, 
                         {
+                         "name":"selectionGroup",
+                         "type":"string",
+                         "value":"player"
+                        }, 
+                        {
                          "name":"unitTypeName",
                          "type":"string",
                          "value":"dragonCleric"
@@ -1240,7 +1255,7 @@
                         {
                          "name":"selectionGroup",
                          "type":"string",
-                         "value":"battle1"
+                         "value":"battle2"
                         }, 
                         {
                          "name":"unitTypeName",

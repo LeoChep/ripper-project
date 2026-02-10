@@ -158,6 +158,12 @@ export class UnitSystem {
     if (!map) return [];
     return map.sprites;
   }
+  getUnitBySelectionGroup(selectionGroup: string): Unit[]  {
+    const map = golbalSetting.map;
+    if  (!map) return [];
+    const units= map.sprites.filter((sprite: Unit) => sprite.selectionGroup === selectionGroup) || [];
+    return units;
+  }
   getUnitByName(name: string): Unit | null {
     const map = golbalSetting.map;
     if (!map) return null;
