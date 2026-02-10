@@ -93,7 +93,10 @@ onMounted(async () => {
       unit.stateMachinePack.doAction();
     });
   }, 1000 / 30); // 每秒30帧
-
+  //暴露创建动画方法，给drama系统使用，让他可以在显示隐藏单位是创建销毁动画精灵
+  DramaSystem.getInstance().createSpriteAnim =  async (unit: Unit) => {
+    await generateAnimSprite(unit);
+   };
   // 检查是否需要从存档加载
   const loadSlot = route.query.loadSlot;
   if (loadSlot) {
@@ -168,10 +171,9 @@ const initByMap = async (mapPassiable: any) => {
   let createEndPromise: Promise<any>[] = [];
   units.forEach((unit: Unit) => {
     if (unit.state == "dead") {
-
       return;
     }
-    const promise = generateAnimSprite(unit, container, rlayers, mapPassiable);
+    const promise = generateAnimSprite(unit);
     createEndPromise.push(promise);
   });
 
@@ -228,15 +230,18 @@ const drawMap = async (mapView: any, container: any, rlayers: any) => {
 };
 
 // 辅助函数：生成动画精灵
-const generateAnimSprite = async (unit: any, container: any, rlayers: any, mapPassiable: any) => {
+const generateAnimSprite = async (unit: any) => {
   console.log("generateAnimSprite", unit);
-  const animSpriteUnit = await createAnimSpriteUnits(unit.unitTypeName, unit);
+  const container = golbalSetting.rootContainer;
+  const rlayers = golbalSetting.rlayers;
+  const mapPassiable = golbalSetting.map;
+  const animSpriteUnit = await createAnimSpriteUnits( unit);
 
   unit.animUnit = animSpriteUnit;
   animSpriteUnit.zIndex = envSetting.zIndexSetting.spriteZIndex;
 
   console.log("generateAnimSprite", unit, animSpriteUnit);
-  addAnimSpriteUnit(unit, container, rlayers, mapPassiable);
+  addAnimSpriteUnit(unit);
   animSpriteUnit.x = Math.round(unit.x / 64) * 64;
   animSpriteUnit.y = Math.round(unit.y / 64) * 64;
   unit.x = animSpriteUnit.x;
@@ -245,7 +250,8 @@ const generateAnimSprite = async (unit: any, container: any, rlayers: any, mapPa
 };
 
 // 辅助函数：创建动画精灵单位
-const createAnimSpriteUnits = async (unitTypeName: string, unit: any) => {
+const createAnimSpriteUnits = async ( unit: any) => {
+  const unitTypeName = unit.unitTypeName;
   console.log("创建动画精灵单位:", unitTypeName, unit);
   const testJsonFetchPromise = getAnimMetaJsonFile(unitTypeName);
   const animMetaJson = new AnimMetaJson((await testJsonFetchPromise) as any);
@@ -279,9 +285,14 @@ const createAnimSpriteUnits = async (unitTypeName: string, unit: any) => {
 };
 
 // 辅助函数：添加动画精灵单位
-const addAnimSpriteUnit = (unit: any, container: any, rlayers: any, mapPassiable: any) => {
+const addAnimSpriteUnit = (unit: any ) => {
   const animSpriteUnit = unit.animUnit;
   console.log("addAnimSpriteUnit", unit);
+  const rlayers = golbalSetting.rlayers;
+  if (!rlayers || !golbalSetting.spriteContainer|| !rlayers.spriteLayer) {
+    console.error("渲染层或精灵容器未初始化，无法添加动画精灵单位");
+    return;
+  }
   rlayers.spriteLayer.attach(animSpriteUnit);
   animSpriteUnit.eventMode = "static";
 

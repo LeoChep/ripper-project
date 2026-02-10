@@ -1235,7 +1235,7 @@
                 {
                  "height":132,
                  "id":92,
-                 "name":"bigSkeleton",
+                 "name":"bigSkeleton2",
                  "properties":[
                         {
                          "name":"isSceneHidden",
@@ -1245,7 +1245,7 @@
                         {
                          "name":"name",
                          "type":"string",
-                         "value":"skeleton"
+                         "value":"bigSkeleton2"
                         }, 
                         {
                          "name":"party",

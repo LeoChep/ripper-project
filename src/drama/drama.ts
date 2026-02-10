@@ -31,7 +31,10 @@ export abstract class Drama {
     const dramaSystem = DramaSystem.getInstance();
     dramaSystem.CGstart();
   };
-
+  protected unHiddenUnit = async (unitName: string): Promise<void> => {
+    const dramaSystem = DramaSystem.getInstance();
+    await dramaSystem.unHiddenUnit(unitName);
+  }
   protected CGEnd = (): void => {
     const dramaSystem = DramaSystem.getInstance();
     dramaSystem.CGEnd();

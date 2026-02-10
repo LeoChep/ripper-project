@@ -3,6 +3,7 @@ import { d1 } from "@/drama/d1";
 import type { Drama } from "@/drama/drama";
 import { UnitSystem } from "./UnitSystem";
 import { createChestFromBoxObj } from "../units/Chest";
+import { golbalSetting } from "@/core/golbalSetting";
 interface DialogOption {
   text: string;
   value: any;
@@ -72,7 +73,7 @@ export class DramaSystem {
   unitChoose = async (
     unitName: string,
     options: DialogOption[],
-    dialogText?: string,
+    dialogText?: string
   ): Promise<any> => {};
 
   CGstart = () => {};
@@ -93,12 +94,17 @@ export class DramaSystem {
     return mapPassiable;
   }
 
+  //提供注入口
+  //todo以后需要由专门模块负责
+  createSpriteAnim = async (unit: Unit):Promise<any> => {} ;
   // 辅助函数：创建单位生物
   async createUnitCreature(unitTypeName: string, unit: any) {
     const { getUnitTypeJsonFile } = await import("@/utils/utils");
     const { createCreature } = await import("@/core/units/Creature");
     const { loadTraits, loadPowers } = await import("@/core/units/Unit");
-
+    if (unit.gid) {
+      unit.y -= unit.height;
+    }
     const json: any = await getUnitTypeJsonFile(unitTypeName);
     if (!json) {
       console.error(`Creature JSON file for ${unitTypeName} not found.`);
@@ -117,7 +123,7 @@ export class DramaSystem {
   // 加载剧情
   async load(
     drama: any,
-    variables: { name: string; value: any }[],
+    variables: { name: string; value: any }[]
   ): Promise<void> {
     drama.variables.clear();
     if (!variables) {
@@ -153,46 +159,46 @@ export class DramaSystem {
 
     // 加载地图
     const mapPassiable = await this.loadMap(drama.mapName);
-    
+
     const spritesOBJ = mapPassiable.sprites;
-    const boxOBJ=mapPassiable.chests;
+    const boxOBJ = mapPassiable.chests;
     // 创建单位
     //从tmj中的sprites创造单位，只有tmj（tiledmap）中的简要信息，没有生物信息，生物信息需要从json文件中加载
     const allUnits = createUnitsFromMapSprites(spritesOBJ);
     const hidenUnits = allUnits.filter((unit) => unit.isSceneHidden);
     mapPassiable.hiddenUnits = hidenUnits; // 将隐藏单位存储在地图对象中，后续需要时可以从这里获取
-    const units= allUnits.filter((unit) => !unit.isSceneHidden); // 过滤掉隐藏单位，先不添加到地图中，等需要的时候再添加
+    const units = allUnits.filter((unit) => !unit.isSceneHidden); // 过滤掉隐藏单位，先不添加到地图中，等需要的时候再添加
     // 处理隐藏单位，暂时先不添加到地图中，等需要的时候再添加
     //从units中去掉隐藏单位，先不添加到地图中，等需要的时候再添加
 
     console.log("Loaded boxOBJ from map:", boxOBJ);
-    const  chests = await Promise.all(boxOBJ.map((obj) => createChestFromBoxObj(obj)));
+    const chests = await Promise.all(
+      boxOBJ.map((obj) => createChestFromBoxObj(obj))
+    );
     console.log("Created chests from boxOBJ:", chests);
-    
+
     // 注册宝箱到 ChestSystem
     const { ChestSystem } = await import("./ChestSystem");
     const chestSystem = ChestSystem.getInstance();
     chests.forEach((chest) => {
       chestSystem.registerChest(chest);
     });
-    
+
     // 使用 map 而不是 forEach，避免冗余的 Promise 包装
-    // 读取对应的生物类别，创建完整的单位对象 
+    // 读取对应的生物类别，创建完整的单位对象
     const createCreatureEndPromise = units.map(async (unit) => {
       // Tiled 中带 gid 的对象 y 坐标是底部位置，需要减去高度转换为顶部位置
       // 没有 gid 的对象 y 坐标已经是顶部位置，不需要调整
-      if (unit.gid) {
-        unit.y -= unit.height;
-      }
+
       try {
         const unitCreature = await this.createUnitCreature(
           unit.unitTypeName,
-          unit,
+          unit
         );
       } catch (error) {
         console.error(
           `[DramaSystem.loadTmj] 创建生物失败: ${unit.unitTypeName}`,
-          error,
+          error
         );
       }
     });
@@ -200,17 +206,17 @@ export class DramaSystem {
     await Promise.all(createCreatureEndPromise);
     await new Promise((resolve) => setTimeout(resolve, 1000)); // 确保所有异步操作完成
     mapPassiable.sprites = units;
-    mapPassiable.chests = chests; 
+    mapPassiable.chests = chests;
     // 处理宝箱
     console.log("Loaded chests from map:", mapPassiable.chests);
-    
+
     // 设置全局地图
     drama.map = mapPassiable;
     golbalSetting.map = mapPassiable;
   }
-  battleEndHandle=()=>{
+  battleEndHandle = () => {
     this.dramaUse?.battleEndHandle();
-  }
+  };
   getRercords() {
     const recorders: { name: any; variables: unknown[] }[] = [];
     this.dramaMap.forEach((drama, name) => {
@@ -241,6 +247,36 @@ export class DramaSystem {
       });
     }
   }
+  unHiddenUnit = async (unitName: string) => {
+    
+    const map = golbalSetting.map;
+    if (!map) {
+      console.error("地图未加载，无法显示单位:", unitName);
+      return;
+    }
+    const hiddenUnitIndex = map.hiddenUnits.findIndex(
+      (unit: { name: string }) => unit.name === unitName
+    );
+    if (hiddenUnitIndex !== -1) {
+      const [unit] = map.hiddenUnits.splice(hiddenUnitIndex, 1);
+      try {
+        const unitCreature = await this.createUnitCreature(
+          unit.unitTypeName,
+          unit
+        );
+        console.log("创建生物成功:", unitCreature);
+        await this.createSpriteAnim(unit);
+      } catch (error) {
+        console.error(
+          `[DramaSystem.loadTmj] 创建生物失败: ${unit.unitTypeName}`,
+          error
+        );
+      }
+
+      map.sprites.push(unit);
+      console.log(`单位 ${unitName} 已从隐藏状态中移除并添加到地图上。`);
+    }
+  };
 }
 const initDramaMap = () => {
   const dramaSystem = DramaSystem.getInstance();
