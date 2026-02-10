@@ -32,6 +32,7 @@ class D1 extends Drama {
     }
   }
   public battleEndHandle(): void {
+    const { CGstart, unitSpeak, speak, unitChoose, CGEnd } = this;
     const inCombat1 = this.getVariable("inCombat1");
     const combat1EndCgUsed = this.getVariable("combat1EndCgUsed");
     if (inCombat1 && combat1EndCgUsed !== true) {
@@ -41,8 +42,15 @@ class D1 extends Drama {
     }
   }
   combat1EndCG = async () => {
-    const { CGstart, unitSpeak, speak, unitChoose, CGEnd, addInteraction } =
-      this;
+    const {
+      CGstart,
+      unitSpeak,
+      speak,
+      unitChoose,
+      CGEnd,
+      addInteraction,
+      unHiddenUnit,
+    } = this;
     CGstart();
 
     await unitSpeak("npc牧师", "谢谢你们！那些骷髅终于被消灭了。");
@@ -56,6 +64,24 @@ class D1 extends Drama {
     ]);
     await speak("突然……传来一阵响动……");
     await speak("你们发现更多的骷髅从神殿的深处涌了出来。");
+    await unitSpeak("npc牧师", "看起来我们还有更多的敌人要面对！准备战斗吧！");
+    const hiddenUnits =
+      UnitSystem.getInstance().getSceneHiddenUnitsBySelectionGroup("battle2");
+    for (const unit of hiddenUnits) {
+      await unHiddenUnit(unit.name);
+    }
+      const units = UnitSystem.getInstance().getUnitBySelectionGroup("battle2");
+    const players = UnitSystem.getInstance().getUnitBySelectionGroup("player");
+    players.forEach((player) => {
+      units.push(player);
+    });
+    const initCombatPromise =
+      InitiativeController.addUnitsToInitiativeSheet(units);
+
+    initCombatPromise.then(async () => {
+      await InitiativeController.startBattle();
+      InitiativeController.startCombatTurn();
+    });
     CGEnd();
   };
   cricleTalk = async () => {
@@ -124,11 +150,7 @@ class D1 extends Drama {
 
     CGstart();
     // await unHiddenUnit("bigSkeleton2");
-    const hiddenUnits =
-      UnitSystem.getInstance().getSceneHiddenUnitsBySelectionGroup("battle2");
-    for (const unit of hiddenUnits) {
-      await unHiddenUnit(unit.name);
-    }
+
     await unitSpeak(
       "npc牧师",
       "你们终于来了……这里的亡灵作祟越来越可怕了，我们需要你们的帮助来消灭它们。"

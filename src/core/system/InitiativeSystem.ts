@@ -23,7 +23,7 @@ import { DramaSystem } from "./DramaSystem";
 import { MessageTipSystem } from "./MessageTipSystem";
 
 export const InitiativeSheet = [] as InitiativeClass[];
-const initiativeCursor = {
+export const initiativeCursor = {
   pointAt: null as null | InitiativeClass,
   map: null as null | TiledMap,
   inBattle: false,

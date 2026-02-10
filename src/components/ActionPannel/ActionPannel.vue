@@ -4,14 +4,30 @@
     <div class="tab-container">
       <div class="tab-row">
         <div class="tab-group">
-          <button :class="['action-btn', { selected: attackSelected === true }]" @click="selectAttack()">
+          <button
+            :class="['action-btn', { selected: attackSelected === true }]"
+            @click="selectAttack()"
+          >
             攻击
           </button>
-          <button :class="['action-btn', { selected: moveSelected === true }]" @click="selectMove()">
+          <button
+            :class="['action-btn', { selected: moveSelected === true }]"
+            @click="selectMove()"
+          >
             移动
           </button>
-          <button :class="['action-btn', { selected: stepSelected === true }]" @click="selectStep()">
+          <button
+            :class="['action-btn', { selected: stepSelected === true }]"
+            @click="selectStep()"
+          >
             快步
+          </button>
+          <button
+            v-if="proned"
+            :class="['action-btn', { selected: standSelected === true }]"
+            @click="selectStand()"
+          >
+            起身
           </button>
           <button :class="['action-btn']" @click="endTurn()">结束回合</button>
           <!-- <button :class="['tab-btn', { active: activeActionTab === 'standard' }]" 
@@ -23,19 +39,34 @@
         </div>
         <div class="tab-separator"></div>
         <div class="tab-group">
-          <button :class="['tab-btn', { active: activePowerTab === 'atwill' }]" @click="selectPowerTab('atwill')">
+          <button
+            :class="['tab-btn', { active: activePowerTab === 'atwill' }]"
+            @click="selectPowerTab('atwill')"
+          >
             随意
           </button>
-          <button :class="['tab-btn', { active: activePowerTab === 'encounter' }]" @click="selectPowerTab('encounter')">
+          <button
+            :class="['tab-btn', { active: activePowerTab === 'encounter' }]"
+            @click="selectPowerTab('encounter')"
+          >
             遭遇
           </button>
-          <button :class="['tab-btn', { active: activePowerTab === 'utility' }]" @click="selectPowerTab('utility')">
+          <button
+            :class="['tab-btn', { active: activePowerTab === 'utility' }]"
+            @click="selectPowerTab('utility')"
+          >
             辅助
           </button>
-          <button :class="['tab-btn', { active: activePowerTab === 'daily' }]" @click="selectPowerTab('daily')">
+          <button
+            :class="['tab-btn', { active: activePowerTab === 'daily' }]"
+            @click="selectPowerTab('daily')"
+          >
             每日
           </button>
-          <button :class="['tab-btn', { active: activePowerTab === 'item' }]" @click="selectPowerTab('item')">
+          <button
+            :class="['tab-btn', { active: activePowerTab === 'item' }]"
+            @click="selectPowerTab('item')"
+          >
             道具
           </button>
         </div>
@@ -44,15 +75,26 @@
 
     <!-- 动作按钮区域 -->
     <div class="action-buttons">
-      <button v-for="action in filteredActions" :key="action.id"
-        :class="['action-btn', { selected: selectedAction?.id === action.id }]" @click="selectAction(action)"
-        @mouseenter="showTooltip(action, $event)" @mouseleave="hideTooltip" @mousemove="updateTooltipPosition($event)">
+      <button
+        v-for="action in filteredActions"
+        :key="action.id"
+        :class="['action-btn', { selected: selectedAction?.id === action.id }]"
+        @click="selectAction(action)"
+        @mouseenter="showTooltip(action, $event)"
+        @mouseleave="hideTooltip"
+        @mousemove="updateTooltipPosition($event)"
+      >
         {{ action.displayName }}
       </button>
     </div>
 
     <!-- 威能详情悬浮窗 -->
-    <PowerTooltip :power="tooltipPower" :visible="tooltipVisible" :mouseX="mouseX" :mouseY="mouseY" />
+    <PowerTooltip
+      :power="tooltipPower"
+      :visible="tooltipVisible"
+      :mouseX="mouseX"
+      :mouseY="mouseY"
+    />
 
     <!-- 状态提示栏 -->
     <div class="status-bar">
@@ -71,6 +113,7 @@
 import { CharacterCombatController } from "@/core/controller/CharacterCombatController";
 import { computed, onMounted, ref, watch } from "vue";
 import PowerTooltip from "@/components/PowerTooltip/PowerTooltip.vue";
+
 
 // Props
 const props = defineProps({
@@ -100,6 +143,7 @@ const actions = computed(() => {
   if (!character || !character.powers) {
     return [];
   }
+
   // console.log('获取威能数据:', character.powers)
   const actions = character.powers.map((power, index) => ({
     id: `power_${index}`,
@@ -164,10 +208,10 @@ const selectPowerTab = (tab) => {
   attackSelected.value = false;
   activePowerTab.value = tab;
   selectedAction.value = null; // 清除选中的动作
-  
+
   // 如果选择道具标签，触发打开背包事件
-  if (tab === 'item') {
-    emit('openInventory');
+  if (tab === "item") {
+    emit("openInventory");
   }
 };
 
@@ -205,6 +249,25 @@ const selectMove = () => {
   moveSelected.value = true;
   selectedAction.value = null; // 清除选中的动作
 };
+const proned = ref(false);
+const checkProned = () => {
+  let pronedBuff;
+  props.character.creature?.buffs.forEach((buff) => {
+    if (buff.name === "Proned") {
+      pronedBuff = buff;
+    }
+  });
+  if (pronedBuff) {
+    proned.value = true;
+  } else {
+    proned.value = false;
+  }
+};
+onMounted(() => {
+  setInterval(() => {
+    checkProned();
+  }, 200);
+});
 const stepSelected = ref(false);
 const selectStep = () => {
   if (!CharacterCombatController.instance.inUse) {
@@ -222,8 +285,26 @@ const selectStep = () => {
   stepSelected.value = true;
   selectedAction.value = null; // 清除选中的动作
 };
+const standSelected = ref(false);
+const selectStand = () => {
+  if (!CharacterCombatController.instance.inUse) {
+    console.warn("当前无法使用起身控制器");
+    return;
+  }
+  if (CharacterCombatController.instance.selectedCharacter.state !== "idle") {
+    console.warn("当前角色状态不允许起身");
+    return;
+  }
+  CharacterCombatController.instance.useStandController();
+  activePowerTab.value = null;
+  attackSelected.value = false;
+  moveSelected.value = false;
+  stepSelected.value = false;
+  standSelected.value = true;
+  selectedAction.value = null; // 清除选中的动作
+};
 const endTurn = () => {
-console.log("尝试结束回合", CharacterCombatController.instance);
+  console.log("尝试结束回合", CharacterCombatController.instance);
   if (CharacterCombatController.instance.selectedCharacter.state !== "idle") {
     console.warn("当前角色状态不允许结束");
     return;
@@ -251,7 +332,6 @@ const updateTooltipPosition = (event) => {
   mouseX.value = event.clientX;
   mouseY.value = event.clientY;
 };
-
 
 // 暴露给父组件的方法
 defineExpose({

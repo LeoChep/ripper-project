@@ -14,6 +14,7 @@ import { ModifierSystem } from "../system/ModifierSystem";
 import { UnitSystem } from "../system/UnitSystem";
 import { BuffSystem } from "../system/BuffSystem";
 import { testDraw } from "../anim/DrawTest";
+import { standMovement } from "../action/UnitStand";
 
 const tileSize = 64; // 假设每个格子的大小为64像素
 export class NormalAI implements AIInterface {
@@ -62,7 +63,7 @@ export class NormalAI implements AIInterface {
     );
   }
 }
-function standAI(unit: Unit) {
+async function standAI(unit: Unit) {
   let pronedBuff;
   unit.creature?.buffs.forEach((buff) => {
     if (buff.name === "Proned") {
@@ -70,8 +71,8 @@ function standAI(unit: Unit) {
     }
   });
   if (pronedBuff) {
-    if (InitiativeSysteam.useMoveAction(unit)) {
-      BuffSystem.getInstance().removeBuff(pronedBuff, unit);
+    if (InitiativeSysteam.checkActionUseful(unit, "move")) {
+      await standMovement(unit);
     }
   }
 }
@@ -108,7 +109,7 @@ async function standardMovementAI(unit: Unit, result: any) {
 }
 async function moveMovementAI(unit: Unit) {
   //检测倒立起立
-  standAI(unit);
+  await standAI(unit);
 
   const result: any = { canAttack: false };
   const unitX = Math.floor(unit.x / tileSize);

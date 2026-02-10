@@ -84,6 +84,7 @@
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from "vue";
 import * as InitSystem from "@/core/system/InitiativeSystem";
+import { initiativeCursor } from "@/core/system/InitiativeSystem";
 // Props
 const props = defineProps({
   character: {
@@ -124,8 +125,12 @@ onMounted(() => {
   // 立即执行一次
   pollActionNumbers();
   const checkIsInBattle = () => {
-
-    isInBattle.value = props.character && props.character.initiative && InitSystem.initiativeCursor.inBattle;
+    console.log("ActionBar检查战斗状态...",initiativeCursor);
+    if (InitSystem?.initiativeCursor?.inBattle) {
+    isInBattle.value = initiativeCursor.inBattle;
+    console.log("ActionBar检测到战斗状态:", isInBattle.value);
+    }
+1
   };
   // 每100ms轮询一次
   pollingTimer = setInterval(() => { pollActionNumbers(); checkIsInBattle(); }, 100);

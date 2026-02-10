@@ -14,6 +14,7 @@ import { PowerSystem } from "../system/PowerSystem";
 import { WeaponSystem } from "../system/WeaponSystem";
 import { CharCombatStepController } from "./CharacterCombatStepController";
 import { CharacterCombatDelayControlle } from "./CharacterCombatDelayControlle";
+import { CharacterCombatStandController } from "./CharacterCombatStandController";
 export class CharacterCombatController {
   public inUse: boolean = false;
   public static instance: CharacterCombatController | null = null;
@@ -34,7 +35,7 @@ export class CharacterCombatController {
       return;
     }
     const walkMachine = this.selectedCharacter?.stateMachinePack.getMachine(
-      "walk",
+      "walk"
     ) as WalkStateMachine;
     if (
       !InitiativeSystem.checkActionUseful(this.selectedCharacter, "move") &&
@@ -84,7 +85,7 @@ export class CharacterCombatController {
     console.log("preCheck selectedCharacter", this.selectedCharacter);
     if (!InitiativeSystem.checkIsTurn(this.selectedCharacter)) return false;
     this.selectedCharacter = golbalSetting.map.sprites.find(
-      (sprite) => sprite.id === CharacterController.curser,
+      (sprite) => sprite.id === CharacterController.curser
     );
     if (!(this.selectedCharacter?.state === "idle")) return false;
 
@@ -95,6 +96,37 @@ export class CharacterCombatController {
 
     return true;
   }
+  //起身控制器
+  //todo 之后要有统一的动作控制器
+  async useStandController() {
+    console.log("useStandController", this.selectedCharacter);
+    if (!this.preCheck() || !this.selectedCharacter) {
+      return;
+    }
+    console.log("useStandController", this.selectedCharacter);
+    if (!InitiativeSystem.checkActionUseful(this.selectedCharacter, "move")) {
+      return;
+    }
+    const cancelInfo = {
+      from: "standController",
+      cancel: true,
+    };
+    console.log("useStandController cancelInfo", cancelInfo);
+    CharCombatAttackController.instense?.removeFunction(cancelInfo);
+    CharCombatStepController.instense?.removeFunction(cancelInfo);
+    this.powerController?.removeFunction(cancelInfo);
+    let standController = CharacterCombatStandController.getInstance();
+    standController.selectedCharacter = this.selectedCharacter;
+    console.log("useStandController selectedCharacter", this.selectedCharacter);
+    const result = await standController.doSelect();
+    InitiativeSystem.useMoveAction(this.selectedCharacter);
+    setTimeout(() => {
+      if (!result.from && InitiativeSystem.isInBattle()) {
+        this.useMoveController();
+      }
+    }, 90);
+  }
+
   async usePowerController(power: Power) {
     if (!this.preCheck() || !this.selectedCharacter) {
       return;
@@ -103,7 +135,7 @@ export class CharacterCombatController {
     if (
       !InitiativeSystem.checkActionUseful(
         this.selectedCharacter,
-        power.actionType,
+        power.actionType
       )
     ) {
       return;
@@ -116,7 +148,7 @@ export class CharacterCombatController {
     CharCombatMoveController.instense?.removeFunction(cancelInfo);
     this.powerController?.removeFunction(cancelInfo);
     const powerController = await PowerSystem.getInstance().getController(
-      power.name,
+      power.name
     );
     this.powerController = powerController;
     if (!powerController) {
@@ -284,7 +316,7 @@ export class CharacterCombatController {
   }
   resetDivideWalk() {
     const walkMachine = this.selectedCharacter?.stateMachinePack.getMachine(
-      "walk",
+      "walk"
     ) as WalkStateMachine;
     if (walkMachine.onDivideWalk === true) {
       walkMachine.onDivideWalk = false;
