@@ -28,7 +28,7 @@ export class DoorAnimSprite extends Container {
   private tooltipBg: Graphics | null = null;
 
   public lastClickAtMs: number = 0;
-
+  public inOpenAnimation: boolean = false; // 是否正在播放开门动画
   private callback: any;
   public get animationCallback(): any {
     return this.callback;
@@ -42,7 +42,7 @@ export class DoorAnimSprite extends Container {
     super();
     this.owner = door;
     this._linkedId = door.linkedId;
-    console.log('DoorAnimSprite created for door:', door)
+    console.log("DoorAnimSprite created for door:", door);
     // 创建提示文本
     this.createTooltip();
 
@@ -270,6 +270,14 @@ export const createDoorAnimSpriteFromDoor = async (door: Door) => {
   doorAnimSprite.cursor = "pointer";
   doorAnimSprite.hookPointEvent();
   doorAnimSprite.on("pointerdown", () => {
+      const now = Date.now();
+    if (
+      now - doorAnimSprite.lastClickAtMs <
+      interactionSetting.doorClickIntervalMs
+    ) {
+      // doorAnimSprite.lastClickAtMs = now;
+      return;
+    }
     const talkStore = useTalkStateStore();
     if (talkStore.talkState.onCg) {
       return;
@@ -290,10 +298,9 @@ export const createDoorAnimSpriteFromDoor = async (door: Door) => {
         return;
       }
     }
-    const now = Date.now();
-    if (now - doorAnimSprite.lastClickAtMs < interactionSetting.doorClickIntervalMs) {
-      return;
-    }
+  
+
+
     doorAnimSprite.lastClickAtMs = now;
     console.log("门被点击了，切换状态");
     doorAnimSprite.isOpen = !doorAnimSprite.isOpen;
@@ -305,9 +312,9 @@ export const createDoorAnimSpriteFromDoor = async (door: Door) => {
       console.warn("未找到对应的墙体，无法更新墙体状态", doorAnimSprite);
       return;
     }
-      
+
     wall.useable = !doorAnimSprite.isOpen;
-  FogSystem.instanse.refreshSpatialGrid();
+    FogSystem.instanse.refreshSpatialGrid();
     console.log("门状态切换为:", doorAnimSprite);
   });
   console.log("创建的门动画精灵:", doorAnimSprite);

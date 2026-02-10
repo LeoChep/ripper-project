@@ -129,7 +129,7 @@ export class FogSystem {
   private allSegments: Segment[] = [];
   private brokenSegments: Segment[] = [];
   private edgesHash: string = "";
-
+  
   // 渐变配置
   private gradientLayers: number = 5; // 渐变层数
   private gradientStepSize: number = 10; // 每层的宽度（像素）
