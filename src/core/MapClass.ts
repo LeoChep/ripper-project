@@ -97,6 +97,7 @@ export class TiledMap {
   }> = [];
   textures?: PIXI.Sprite;
   sprites: any[] = [];
+  hiddenUnits: any[] = [];
   doors: Door[] = [];
   chests: Chest[] = [];
   constructor(data: any, textures: any) {

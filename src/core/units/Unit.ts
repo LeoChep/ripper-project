@@ -25,6 +25,7 @@ export interface UnitOptions {
   gid?: number;
   direction: number; // 方向，0-3 分别表示上、右、下、左
   friendly?: boolean; // 是否友好（用于NPC互动等）
+  isSceneHidden?: boolean; // 是否在场景中隐藏（不参与渲染和碰撞）
   traits?: Trait[];
   powers?: Power[];
 }
@@ -43,6 +44,7 @@ export class Unit {
   height: number;
   effects: any[] = []; // 特效数组
   friendly: boolean = false; // 是否友好
+  isSceneHidden?: boolean; // 是否在场景中隐藏（不参与渲染和碰撞）
   traits: Trait[];
   powers: Power[];
   inventory: Item[] = []; // 背包系统
@@ -65,7 +67,9 @@ export class Unit {
     this.unitTypeName = options.unitTypeName;
     this.gid = options.gid;
     // 如果party是player，默认friendly为true；否则使用传入的值或false
-    this.friendly = options.party === "player" ? true : (options.friendly ?? false);
+    this.friendly =
+      options.party === "player" ? true : options.friendly ?? false;
+    this.isSceneHidden = options.isSceneHidden ?? false;
     this.traits = options.traits || [];
     this.powers = options.powers || [];
 
@@ -80,9 +84,12 @@ export class Unit {
    */
   addItem(item: Item): boolean {
     // 检查是否可以与现有道具堆叠
-    const existingItem = this.inventory.find(i => i.canStackWith(item));
+    const existingItem = this.inventory.find((i) => i.canStackWith(item));
     if (existingItem) {
-      const addAmount = Math.min(item.stackCount, existingItem.maxStack - existingItem.stackCount);
+      const addAmount = Math.min(
+        item.stackCount,
+        existingItem.maxStack - existingItem.stackCount
+      );
       console.log("addAmount", addAmount);
       if (addAmount > 0) {
         existingItem.addStack(addAmount);
@@ -93,7 +100,7 @@ export class Unit {
         }
       }
     }
-    
+
     // 如果无法堆叠或堆叠后还有剩余，添加为新物品
     if (item.stackCount > 0) {
       this.inventory.push(item);
@@ -108,7 +115,7 @@ export class Unit {
    * @returns 移除的道具，如果失败返回null
    */
   removeItem(itemUid: string, amount?: number): Item | null {
-    const itemIndex = this.inventory.findIndex(i => i.uid === itemUid);
+    const itemIndex = this.inventory.findIndex((i) => i.uid === itemUid);
     if (itemIndex === -1) {
       return null;
     }
@@ -134,7 +141,7 @@ export class Unit {
    * @returns 道具实例或null
    */
   getItem(itemUid: string): Item | null {
-    return this.inventory.find(i => i.uid === itemUid) || null;
+    return this.inventory.find((i) => i.uid === itemUid) || null;
   }
 
   /**
@@ -143,7 +150,7 @@ export class Unit {
    * @returns 道具数组
    */
   findItemsByName(itemName: string): Item[] {
-    return this.inventory.filter(i => i.name === itemName);
+    return this.inventory.filter((i) => i.name === itemName);
   }
 
   /**
@@ -151,7 +158,10 @@ export class Unit {
    * @returns 总重量
    */
   getInventoryWeight(): number {
-    return this.inventory.reduce((total, item) => total + item.getTotalWeight(), 0);
+    return this.inventory.reduce(
+      (total, item) => total + item.getTotalWeight(),
+      0
+    );
   }
 
   /**
@@ -159,7 +169,10 @@ export class Unit {
    * @returns 总价值
    */
   getInventoryValue(): number {
-    return this.inventory.reduce((total, item) => total + item.getTotalValue(), 0);
+    return this.inventory.reduce(
+      (total, item) => total + item.getTotalValue(),
+      0
+    );
   }
 
   /**
@@ -175,7 +188,7 @@ export async function loadTraits(unit: Unit, unitCreature: Creature) {
     for (let i = 0; i < unitCreature.traits.length; i++) {
       const loadTrait = await TriatSystem.getInstance().createTrait(
         unitCreature.traits[i],
-        unit,
+        unit
       );
       if (loadTrait) {
         unitCreature.traits[i] = loadTrait; // 替换为加载后的 Trait 实例
@@ -189,13 +202,13 @@ export async function loadTraits(unit: Unit, unitCreature: Creature) {
       const loadTrait = await TriatSystem.getInstance().createTrait(
         unitCreature.feats[i],
         unit,
-        "feat",
+        "feat"
       );
       if (loadTrait) {
         unitCreature.feats[i] = loadTrait; // 替换为加载后的 Trait 实例
       } else {
         console.warn(
-          `Trait ${unitCreature.feats[i].name} could not be loaded.`,
+          `Trait ${unitCreature.feats[i].name} could not be loaded.`
         );
       }
     }
@@ -211,10 +224,10 @@ export async function loadPowers(unit: Unit, unitCreature: Creature) {
       }
       const power = await PowerSystem.getInstance().createPower(
         powerName,
-        unit,
+        unit
       );
       power?.deserializeCooldownData(unitCreature.powers[i]);
-      
+
       if (!power) {
         console.warn(`Power class not found for: ${powerName}`);
         continue;
@@ -235,14 +248,15 @@ export function createUnitsFromMapSprites(sprites: any[]): Unit[] {
 export function createUnitFromMapSprite(obj: any): Unit {
   const partyProp = obj.properties?.find((p: any) => p.name === "party");
   const unitTypeNameProp = obj.properties?.find(
-    (p: any) => p.name === "unitTypeName",
+    (p: any) => p.name === "unitTypeName"
   );
   const directionProp = obj.properties?.find(
-    (p: any) => p.name === "direction",
+    (p: any) => p.name === "direction"
   );
-  const friendlyProp = obj.properties?.find(
-    (p: any) => p.name === "friendly",
+  const isHiddenProp = obj.properties?.find(
+    (p: any) => p.name === "isSceneHidden"
   );
+  const friendlyProp = obj.properties?.find((p: any) => p.name === "friendly");
   const unitInfo = {
     id: obj.id,
     name: obj.name,
@@ -255,6 +269,7 @@ export function createUnitFromMapSprite(obj: any): Unit {
     gid: obj.gid,
     direction: directionProp ? directionProp.value : 2, // 默认方向为 0
     friendly: friendlyProp ? friendlyProp.value : false, // 默认不友好
+    isSceneHidden: isHiddenProp ? isHiddenProp.value : false, // 默认不隐藏
   };
   const unit = createUnitFromUnitInfo(unitInfo);
 
@@ -273,6 +288,7 @@ export function createUnitFromUnitInfo(obj: any): Unit {
     gid: obj.gid,
     direction: obj.direction, // 默认方向为 0
     friendly: obj.friendly ?? false, // 默认不友好
+    isSceneHidden: obj.isSceneHidden ?? false, // 默认不隐藏
   });
   if (unit.party !== "player") {
     unit.ai = new NormalAI();

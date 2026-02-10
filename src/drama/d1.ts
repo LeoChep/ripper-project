@@ -58,8 +58,8 @@ class D1 extends Drama {
         { text: "我们需要休息一下，恢复体力……", value: "option2" },
       ]
     );
-    await speak("突然……传来一阵响动，有什么东西正在接近……");
-
+    await speak("突然……传来一阵响动……");
+    await speak("你们发现更多的骷髅从神殿的深处涌了出来。");
     CGEnd();
   };
   cricleTalk = async () => {

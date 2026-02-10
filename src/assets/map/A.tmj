@@ -689,6 +689,49 @@
                  "width":0,
                  "x":370.667,
                  "y":700.667
+                },
+            
+                {
+                 "height":0,
+                 "id":87,
+                 "name":"",
+                 "polyline":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":-1.5,
+                         "y":-129.5
+                        }, 
+                        {
+                         "x":-205,
+                         "y":-128
+                        }, 
+                        {
+                         "x":-204,
+                         "y":140.5
+                        }, 
+                        {
+                         "x":1,
+                         "y":140.5
+                        }, 
+                        {
+                         "x":0.5,
+                         "y":79.5
+                        }],
+                 "properties":[
+                        {
+                         "name":"onlyBlock",
+                         "type":"string",
+                         "value":"true"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":262,
+                 "y":248
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -819,6 +862,11 @@
                          "value":"skeletons"
                         }, 
                         {
+                         "name":"selectionGroup",
+                         "type":"string",
+                         "value":"battle1"
+                        }, 
+                        {
                          "name":"unitTypeName",
                          "type":"string",
                          "value":"skeleton"
@@ -908,6 +956,11 @@
                          "value":"skeletons"
                         }, 
                         {
+                         "name":"selectionGroup",
+                         "type":"string",
+                         "value":"battle1"
+                        }, 
+                        {
                          "name":"unitTypeName",
                          "type":"string",
                          "value":"skeleton"
@@ -939,6 +992,11 @@
                          "name":"party",
                          "type":"string",
                          "value":"skeletons"
+                        }, 
+                        {
+                         "name":"selectionGroup",
+                         "type":"string",
+                         "value":"battle1"
                         }, 
                         {
                          "name":"unitTypeName",
@@ -974,6 +1032,11 @@
                          "value":"skeletons"
                         }, 
                         {
+                         "name":"selectionGroup",
+                         "type":"string",
+                         "value":"battle1"
+                        }, 
+                        {
                          "name":"unitTypeName",
                          "type":"string",
                          "value":"skeletonArcher"
@@ -1005,6 +1068,11 @@
                          "name":"party",
                          "type":"string",
                          "value":"skeletons"
+                        }, 
+                        {
+                         "name":"selectionGroup",
+                         "type":"string",
+                         "value":"battle1"
                         }, 
                         {
                          "name":"unitTypeName",
@@ -1040,6 +1108,11 @@
                          "value":"skeletons"
                         }, 
                         {
+                         "name":"selectionGroup",
+                         "type":"string",
+                         "value":"battle1"
+                        }, 
+                        {
                          "name":"unitTypeName",
                          "type":"string",
                          "value":"skeletonArcher"
@@ -1066,6 +1139,11 @@
                          "name":"party",
                          "type":"string",
                          "value":"skeletons"
+                        }, 
+                        {
+                         "name":"selectionGroup",
+                         "type":"string",
+                         "value":"battle1"
                         }, 
                         {
                          "name":"unitTypeName",
@@ -1138,6 +1216,43 @@
                  "width":64,
                  "x":315.245,
                  "y":194.322
+                }, 
+                {
+                 "height":132,
+                 "id":92,
+                 "name":"bigSkeleton",
+                 "properties":[
+                        {
+                         "name":"isSceneHidden",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"skeleton"
+                        }, 
+                        {
+                         "name":"party",
+                         "type":"string",
+                         "value":"skeletons"
+                        }, 
+                        {
+                         "name":"selectionGroup",
+                         "type":"string",
+                         "value":"battle1"
+                        }, 
+                        {
+                         "name":"unitTypeName",
+                         "type":"string",
+                         "value":"bigSkeleton"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":138.667,
+                 "x":401.333333333333,
+                 "y":324.666333333333
                 }],
          "offsetx":4,
          "offsety":0,
@@ -1148,7 +1263,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":87,
+ "nextobjectid":93,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
@@ -1157,7 +1272,7 @@
         {
          "columns":24,
          "firstgid":1,
-         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/map\/A.png",
+         "image":"A.png",
          "imageheight":1920,
          "imagewidth":1536,
          "margin":0,
@@ -1170,7 +1285,7 @@
         {
          "columns":9,
          "firstgid":721,
-         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/wolf\/anim\/standard\/walk.png",
+         "image":"..\/wolf\/anim\/standard\/walk.png",
          "imageheight":256,
          "imagewidth":576,
          "margin":0,
@@ -1183,7 +1298,7 @@
         {
          "columns":9,
          "firstgid":740,
-         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/skeleton\/anim\/standard\/walk.png",
+         "image":"..\/skeleton\/anim\/standard\/walk.png",
          "imageheight":256,
          "imagewidth":576,
          "margin":0,
@@ -1196,7 +1311,7 @@
         {
          "columns":9,
          "firstgid":776,
-         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/manFighter\/anim\/standard\/walk.png",
+         "image":"..\/manFighter\/anim\/standard\/walk.png",
          "imageheight":256,
          "imagewidth":576,
          "margin":0,
@@ -1209,7 +1324,7 @@
         {
          "columns":13,
          "firstgid":796,
-         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/skeletonArcher\/anim\/standard\/slash.png",
+         "image":"..\/skeletonArcher\/anim\/standard\/slash.png",
          "imageheight":256,
          "imagewidth":832,
          "margin":0,
@@ -1222,7 +1337,7 @@
         {
          "columns":8,
          "firstgid":798,
-         "image":"..\/..\/..\/workplace\/gameDemo\/ripper-project\/src\/assets\/dragonCleric\/anim\/standard\/walk.png",
+         "image":"..\/dragonCleric\/anim\/standard\/walk.png",
          "imageheight":256,
          "imagewidth":569,
          "margin":0,
@@ -1235,7 +1350,7 @@
         {
          "columns":4,
          "firstgid":817,
-         "image":"box1.png",
+         "image":"..\/..\/..\/..\/..\/..\/tool\/Tiled\/examples\/box1.png",
          "imageheight":71,
          "imagewidth":287,
          "margin":0,

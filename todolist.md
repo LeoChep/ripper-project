@@ -1,0 +1,3 @@
+1、为单位增加isSceneVisible，用于设置可见性
+2、为单位增加selectionGroup属性用于快速选取
+3、为单位增加isUsedInGame属性，用于标识是否已经在游戏重使用，只有使用过才需要保存

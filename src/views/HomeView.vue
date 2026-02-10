@@ -115,12 +115,13 @@ const handleSlotSelect = async (slotId: number) => {
     6px 6px 12px rgba(0, 0, 0, 0.7);
   letter-spacing: 16px;
   -webkit-text-stroke: 2px rgba(80, 50, 20, 0.8);
-  text-stroke: 2px rgba(80, 50, 20, 0.8);
   filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.9)) contrast(1.3) brightness(1.15);
   background: linear-gradient(180deg, #fffbf0 0%, #ffd700 20%, #ffb347 50%, #d4af37 80%, #b8860b 100%);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent; /* Fallback for browsers that don't support background-clip */
+  display: inline-block; /* Required for background-clip to work in some browsers */
 }
 
 .game-subtitle {
@@ -135,7 +136,6 @@ const handleSlotSelect = async (slotId: number) => {
   letter-spacing: 6px;
   font-weight: 500;
   font-family: 'STKaiti', 'KaiTi', 'Microsoft YaHei', '微软雅黑', serif;
-  font-style: italic;
 }
 
 .menu-container {
