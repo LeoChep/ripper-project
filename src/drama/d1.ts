@@ -40,7 +40,24 @@ class D1 extends Drama {
       this.setVariable("inCombat1", false);
       this.combat1EndCG();
     }
+    if (this.getVariable("inCombat2")&& this.getVariable("combat2EndCgUsed") !== true) {
+      this.setVariable("combat2EndCgUsed", true);
+      this.setVariable("inCombat2", false);
+      this.combat2EndCG();
+    }
   }
+  combat2EndCG = async () => {
+    const { CGstart, unitSpeak, speak, unitChoose, CGEnd } = this;
+    CGstart();
+    await speak("你们成功击败了那些骷髅，神殿里暂时恢复了平静。");
+    await speak("咯吱……神殿的灰尘似乎还在震动……地上散落的骨头在微微颤抖……");
+    await unitSpeak("npc牧师", "看起来仅靠武力是无法根绝这里的邪恶力量的……");
+    await unitSpeak(
+      "npc牧师",
+      "我们需要从长计议，先回到镇子里吧。看起来他们还不会离开这个神殿，镇子暂时还是安全的。"
+    );
+    CGEnd();
+  };
   combat1EndCG = async () => {
     const {
       CGstart,
@@ -70,7 +87,7 @@ class D1 extends Drama {
     for (const unit of hiddenUnits) {
       await unHiddenUnit(unit.name);
     }
-      const units = UnitSystem.getInstance().getUnitBySelectionGroup("battle2");
+    const units = UnitSystem.getInstance().getUnitBySelectionGroup("battle2");
     const players = UnitSystem.getInstance().getUnitBySelectionGroup("player");
     players.forEach((player) => {
       units.push(player);
@@ -80,10 +97,12 @@ class D1 extends Drama {
 
     initCombatPromise.then(async () => {
       await InitiativeController.startBattle();
+      this.setVariable("inCombat2", true);
       InitiativeController.startCombatTurn();
     });
     CGEnd();
   };
+
   cricleTalk = async () => {
     const { CGstart, unitSpeak, speak, unitChoose, CGEnd } = this;
     if (InitSystem.isInBattle()) {
