@@ -44,6 +44,7 @@ class D1 extends Drama {
     const { CGstart, unitSpeak, speak, unitChoose, CGEnd, addInteraction } =
       this;
     CGstart();
+
     await unitSpeak("npc牧师", "谢谢你们！那些骷髅终于被消灭了。");
     await unitSpeak(
       "npc牧师",
@@ -111,11 +112,23 @@ class D1 extends Drama {
   };
 
   private async startEvent(): Promise<void> {
-    const { CGstart, unitSpeak, speak, unitChoose, CGEnd, addInteraction ,unHiddenUnit} =
-      this;
+    const {
+      CGstart,
+      unitSpeak,
+      speak,
+      unitChoose,
+      CGEnd,
+      addInteraction,
+      unHiddenUnit,
+    } = this;
 
     CGstart();
     // await unHiddenUnit("bigSkeleton2");
+    const hiddenUnits =
+      UnitSystem.getInstance().getSceneHiddenUnitsBySelectionGroup("battle2");
+    for (const unit of hiddenUnits) {
+      await unHiddenUnit(unit.name);
+    }
     await unitSpeak(
       "npc牧师",
       "你们终于来了……这里的亡灵作祟越来越可怕了，我们需要你们的帮助来消灭它们。"

@@ -164,6 +164,18 @@ export class UnitSystem {
     const units= map.sprites.filter((sprite: Unit) => sprite.selectionGroup === selectionGroup) || [];
     return units;
   }
+  getSceneHiddenUnits(): Unit[] {
+    const map = golbalSetting.map;
+    if (!map) return [];
+    const hiddenUnits = map.hiddenUnits
+    return hiddenUnits;
+  }
+  getSceneHiddenUnitsBySelectionGroup(selectionGroup: string): Unit[] {
+    const map = golbalSetting.map;
+    if (!map) return [];
+    const hiddenUnits = map.hiddenUnits.filter((unit: Unit) => unit.selectionGroup === selectionGroup) || [];
+    return hiddenUnits;
+  }
   getUnitByName(name: string): Unit | null {
     const map = golbalSetting.map;
     if (!map) return null;
