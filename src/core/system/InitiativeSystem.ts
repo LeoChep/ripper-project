@@ -562,6 +562,9 @@ export async function endBattle() {
   CharacterController.removeSelectEffect();
 
   await playEndAnim();
+        DramaSystem.getInstance().battleEndHandle();
+      initiativeCursor.inBattle = false;
+      while (InitiativeSheet.length > 0) InitiativeSheet.pop();
   CharacterOutCombatController.isUse = true;
   if (CharacterCombatController.instance) {
     CharacterCombatController.instance.inUse = false;
@@ -608,9 +611,7 @@ export async function playEndAnim() {
       text.destroy();
       MessageTipSystem.getInstance().clearMessage();
       resolve();
-      DramaSystem.getInstance().battleEndHandle();
-      initiativeCursor.inBattle = false;
-      while (InitiativeSheet.length > 0) InitiativeSheet.pop();
+
       clearBattleUI();
     }, 1500);
   });
