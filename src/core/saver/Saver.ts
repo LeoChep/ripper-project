@@ -48,6 +48,7 @@ export class Saver {
         party: sprite.party,
         friendly: sprite.friendly,
         state: sprite.state,
+        selectionGroup: sprite.selectionGroup,
         creature: CreatureSerializer.serializeCreature(sprite.creature),
         inventory: ItemSerializer.serializeArray(sprite.inventory || []),
       };
@@ -100,7 +101,9 @@ export class Saver {
     map.sprites.forEach((sprite: Unit, index: string | number) => {
       const savedSprite = gameState.sprites[index];
       if (savedSprite && savedSprite.creature) {
+        sprite.name = savedSprite.name; // 恢复名称
         sprite.party = savedSprite.party; // 确保有 party 属性
+        sprite.selectionGroup = savedSprite.selectionGroup; // 恢复选择组
         sprite.unitTypeName = savedSprite.unitTypeName;
         sprite.friendly = savedSprite.friendly ?? false; // 恢复friendly属性
         sprite.state = savedSprite.state ?? "idle"; // 恢复state属性，默认为idle
