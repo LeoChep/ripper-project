@@ -270,7 +270,7 @@ export const createDoorAnimSpriteFromDoor = async (door: Door) => {
   doorAnimSprite.cursor = "pointer";
   doorAnimSprite.hookPointEvent();
   doorAnimSprite.on("pointerdown", () => {
-      const now = Date.now();
+    const now = Date.now();
     if (
       now - doorAnimSprite.lastClickAtMs <
       interactionSetting.doorClickIntervalMs
@@ -298,8 +298,6 @@ export const createDoorAnimSpriteFromDoor = async (door: Door) => {
         return;
       }
     }
-  
-
 
     doorAnimSprite.lastClickAtMs = now;
     console.log("门被点击了，切换状态");
