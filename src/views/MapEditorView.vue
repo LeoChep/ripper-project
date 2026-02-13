@@ -41,6 +41,14 @@
                 <button @click="exportMapData" class="btn btn-success">导出地图(TMJ)</button>
                 <input v-model="mapName" placeholder="地图名称" class="input-text" />
             </div>
+
+            <div class="toolbar-section zoom-controls">
+                <span class="toolbar-label">缩放:</span>
+                <button @click="zoomOut" class="btn btn-sm">-</button>
+                <span class="zoom-display">{{ zoomPercent }}%</span>
+                <button @click="zoomIn" class="btn btn-sm">+</button>
+                <button @click="resetZoom" class="btn btn-sm">重置</button>
+            </div>
         </div>
 
         <!-- 左侧单位选择面板 -->
@@ -72,6 +80,14 @@
                     <input v-model="unitFriendly" type="checkbox" />
                     友好
                 </label>
+                <label>
+                    选择组:
+                    <input v-model="unitSelectionGroup" type="text" class="input-text" placeholder="如: bossWave" />
+                </label>
+                <label>
+                    <input v-model="unitIsSceneHidden" type="checkbox" />
+                    隐藏在场景 (isSceneHidden)
+                </label>
             </div>
         </div>
 
@@ -98,6 +114,14 @@
                 <label>
                     <input v-model="editingUnitFriendly" type="checkbox" />
                     友好
+                </label>
+                <label>
+                    选择组:
+                    <input v-model="editingUnitSelectionGroup" type="text" class="input-text" placeholder="如: bossWave" />
+                </label>
+                <label>
+                    <input v-model="editingUnitHidden" type="checkbox" />
+                    隐藏在场景 (isSceneHidden)
                 </label>
                 <button @click="applyUnitPropertyChanges" class="btn btn-primary"
                     style="margin-top: 10px; width: 100%;">应用更改</button>
@@ -170,16 +194,24 @@ import * as envSetting from '@/core/envSetting';
 
 // 配置
 const gridSize = 64;
+const defaultCanvasWidth = 1536;
+const defaultCanvasHeight = 1920;
 const showGrid = ref(true);
 const mapName = ref('custom_map');
 const currentMode = ref<'unit' | 'wall' | 'door' | 'select'>('unit');
+const zoomLevel = ref(1);
+const minZoom = 0.25;
+const maxZoom = 3;
+const zoomStep = 0.1;
 
 // PIXI应用相关
 let app: PIXI.Application;
 let mapSprite: PIXI.Sprite | null = null;
+let worldContainer: PIXI.Container;
 let gridContainer: PIXI.Container;
 let objectsContainer: PIXI.Container;
 let previewGraphics: PIXI.Graphics;
+let wheelListener: ((event: WheelEvent) => void) | null = null;
 
 // 单位相关
 const unitTypes = ['skeleton', 'wolf', 'manFighter', 'skeletonArcher', 'oldCleric', 'dragonCleric', 'bigSkeleton'];
@@ -188,12 +220,16 @@ const unitName = ref('');
 const unitParty = ref('player');
 const unitDirection = ref(2);
 const unitFriendly = ref(false);
+const unitSelectionGroup = ref('');
+const unitIsSceneHidden = ref(false);
 
 // 编辑选中单位的属性
 const editingUnitName = ref('');
 const editingUnitParty = ref('player');
 const editingUnitDirection = ref(2);
 const editingUnitFriendly = ref(false);
+const editingUnitSelectionGroup = ref('');
+const editingUnitHidden = ref(false);
 
 // 编辑选中墙体/门的属性
 const editingOnlyVisition = ref(false);
@@ -236,6 +272,22 @@ const canvasContainer = ref<HTMLDivElement | null>(null);
 const objectCount = computed(() => {
     return placedUnits.value.length + wallObjects.value.length + doorObjects.value.length;
 });
+
+const zoomPercent = computed(() => Math.round(zoomLevel.value * 100));
+
+const zoomIn = () => {
+    const center = getViewportCenter();
+    applyZoom(zoomLevel.value + zoomStep, center?.x, center?.y);
+};
+
+const zoomOut = () => {
+    const center = getViewportCenter();
+    applyZoom(zoomLevel.value - zoomStep, center?.x, center?.y);
+};
+
+const resetZoom = () => {
+    resetViewTransform();
+};
 
 // 自动保存编辑状态到 localStorage
 const saveEditorState = () => {
@@ -314,6 +366,8 @@ const newMap = () => {
             mapSprite.destroy();
             mapSprite = null;
         }
+        syncCanvasSizeWithMap();
+        resetViewTransform();
         nextObjectId = 1;
         mapName.value = 'custom_map';
         
@@ -333,24 +387,31 @@ onMounted(async () => {
     // 初始化PIXI应用
     app = new PIXI.Application();
     await app.init({
-        width: 1536,
-        height: 1920,
+        width: defaultCanvasWidth,
+        height: defaultCanvasHeight,
         backgroundColor: 0x1a1a1a,
         antialias: true,
     });
 
+    const canvasElement = app.canvas as HTMLCanvasElement;
     if (canvasContainer.value) {
-        canvasContainer.value.appendChild(app.canvas as HTMLCanvasElement);
+        canvasContainer.value.appendChild(canvasElement);
     }
+    wheelListener = handleWheelZoom;
+    canvasElement.addEventListener('wheel', wheelListener, { passive: false });
 
     // 创建容器
+    worldContainer = new PIXI.Container();
+    worldContainer.sortableChildren = true;
     gridContainer = new PIXI.Container();
     objectsContainer = new PIXI.Container();
+    objectsContainer.sortableChildren = true;
     previewGraphics = new PIXI.Graphics();
 
-    app.stage.addChild(gridContainer);
-    app.stage.addChild(objectsContainer);
-    app.stage.addChild(previewGraphics);
+    worldContainer.addChild(gridContainer);
+    worldContainer.addChild(objectsContainer);
+    worldContainer.addChild(previewGraphics);
+    app.stage.addChild(worldContainer);
 
     // 绘制初始网格
     drawGrid();
@@ -384,6 +445,11 @@ onBeforeUnmount(() => {
     saveEditorState();
     
     window.removeEventListener('keydown', handleKeyDown);
+    const canvasElement = app?.canvas as HTMLCanvasElement | undefined;
+    if (canvasElement && wheelListener) {
+        canvasElement.removeEventListener('wheel', wheelListener);
+        wheelListener = null;
+    }
     if (app) {
         app.destroy(true);
     }
@@ -419,6 +485,108 @@ const drawGrid = () => {
     gridContainer.addChild(grid);
 };
 
+// 根据内容尺寸调整画布，保证大地图图片可以完整显示
+const resizeCanvas = (width: number, height: number) => {
+    if (!app) return;
+    app.renderer.resize(width, height);
+    app.stage.hitArea = new PIXI.Rectangle(0, 0, width, height);
+
+    const canvasElement = app.canvas as HTMLCanvasElement | undefined;
+    if (canvasElement) {
+        canvasElement.style.width = `${width}px`;
+        canvasElement.style.height = `${height}px`;
+    }
+
+    drawGrid();
+};
+
+const syncCanvasSizeWithMap = () => {
+    if (!app) return;
+    const targetWidth = Math.max(mapSprite?.width ?? defaultCanvasWidth, defaultCanvasWidth);
+    const targetHeight = Math.max(mapSprite?.height ?? defaultCanvasHeight, defaultCanvasHeight);
+
+    if (app.screen.width === targetWidth && app.screen.height === targetHeight) {
+        drawGrid();
+        return;
+    }
+
+    resizeCanvas(targetWidth, targetHeight);
+};
+
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+
+const resetViewTransform = () => {
+    zoomLevel.value = 1;
+    if (worldContainer) {
+        worldContainer.scale.set(1);
+        worldContainer.position.set(0, 0);
+    }
+};
+
+const toWorldCoordinates = (screenX: number, screenY: number) => {
+    if (!worldContainer) return { x: screenX, y: screenY };
+    const scale = worldContainer.scale.x || 1;
+    const pos = worldContainer.position;
+    return {
+        x: (screenX - pos.x) / scale,
+        y: (screenY - pos.y) / scale
+    };
+};
+
+const toWorldPoint = (point: PIXI.PointData) => toWorldCoordinates(point.x, point.y);
+
+const applyZoom = (newZoom: number, anchorScreenX?: number, anchorScreenY?: number) => {
+    if (!worldContainer) return;
+    const clamped = clamp(newZoom, minZoom, maxZoom);
+    if (clamped === zoomLevel.value) return;
+
+    const anchorWorld = (anchorScreenX !== undefined && anchorScreenY !== undefined)
+        ? toWorldCoordinates(anchorScreenX, anchorScreenY)
+        : null;
+
+    zoomLevel.value = clamped;
+    worldContainer.scale.set(clamped);
+
+    if (anchorWorld && anchorScreenX !== undefined && anchorScreenY !== undefined) {
+        const newPosX = anchorScreenX - anchorWorld.x * clamped;
+        const newPosY = anchorScreenY - anchorWorld.y * clamped;
+        worldContainer.position.set(newPosX, newPosY);
+    }
+};
+
+const handleWheelZoom = (event: WheelEvent) => {
+    if (!app) return;
+    if (!event.ctrlKey && !event.metaKey) {
+        return;
+    }
+    const canvas = app.canvas as HTMLCanvasElement;
+    const rect = canvas.getBoundingClientRect();
+    const screenX = event.clientX - rect.left;
+    const screenY = event.clientY - rect.top;
+    const deltaDirection = event.deltaY > 0 ? -1 : 1;
+    const newZoom = zoomLevel.value + zoomStep * deltaDirection;
+
+    event.preventDefault();
+    applyZoom(newZoom, screenX, screenY);
+};
+
+const getViewportCenter = () => {
+    const containerEl = canvasContainer.value;
+    if (containerEl) {
+        return {
+            x: containerEl.scrollLeft + containerEl.clientWidth / 2,
+            y: containerEl.scrollTop + containerEl.clientHeight / 2
+        };
+    }
+    if (app) {
+        return {
+            x: app.screen.width / 2,
+            y: app.screen.height / 2
+        };
+    }
+    return null;
+};
+
 // 切换网格显示
 const toggleGrid = () => {
     showGrid.value = !showGrid.value;
@@ -451,6 +619,8 @@ const handleFileSelect = async (event: Event) => {
         mapSprite.zIndex = -1;
         objectsContainer.addChild(mapSprite);
         objectsContainer.sortChildren();
+        syncCanvasSizeWithMap();
+        resetViewTransform();
     };
 
     reader.readAsDataURL(file);
@@ -472,7 +642,7 @@ const selectUnitType = (type: string) => {
 
 // 鼠标移动处理
 const handlePointerMove = (event: PIXI.FederatedPointerEvent) => {
-    const pos = event.global;
+    const pos = toWorldPoint(event.global);
     mouseX.value = Math.round(pos.x);
     mouseY.value = Math.round(pos.y);
 
@@ -549,7 +719,7 @@ const updatePreview = (x: number, y: number) => {
 
 // 鼠标点击处理
 const handlePointerDown = (event: PIXI.FederatedPointerEvent) => {
-    const pos = event.global;
+    const pos = toWorldPoint(event.global);
 
     if (currentMode.value === 'unit') {
         placeUnit(pos.x, pos.y);
@@ -580,6 +750,19 @@ const placeUnit = async (x: number, y: number) => {
     const gridX = Math.floor(x / gridSize) * gridSize;
     const gridY = Math.floor(y / gridSize) * gridSize;
 
+    const unitProperties: any[] = [
+        { name: 'unitTypeName', type: 'string', value: selectedUnitType.value },
+        { name: 'party', type: 'string', value: unitParty.value },
+        { name: 'direction', type: 'int', value: unitDirection.value },
+        { name: 'friendly', type: 'bool', value: unitFriendly.value },
+        { name: 'isSceneHidden', type: 'bool', value: unitIsSceneHidden.value }
+    ];
+
+    const selectionGroupValue = unitSelectionGroup.value.trim();
+    if (selectionGroupValue) {
+        unitProperties.push({ name: 'selectionGroup', type: 'string', value: selectionGroupValue });
+    }
+
     const unit = {
         id: nextObjectId++,
         name: unitName.value || selectedUnitType.value,
@@ -588,12 +771,7 @@ const placeUnit = async (x: number, y: number) => {
         width: gridSize,
         height: gridSize,
         type: 'unit',
-        properties: [
-            { name: 'unitTypeName', type: 'string', value: selectedUnitType.value },
-            { name: 'party', type: 'string', value: unitParty.value },
-            { name: 'direction', type: 'int', value: unitDirection.value },
-            { name: 'friendly', type: 'bool', value: unitFriendly.value }
-        ]
+        properties: unitProperties
     };
 
     placedUnits.value.push(unit);
@@ -814,10 +992,13 @@ const selectObject = (x: number, y: number): PIXI.Container | null => {
         const userData = (child as any).userData;
 
         if (userData && userData.type === 'unit') {
-            const bounds = child.getBounds();
-            // 单位：精确边界检测
-            if (x >= bounds.x && x <= bounds.x + bounds.width &&
-                y >= bounds.y && y <= bounds.y + bounds.height) {
+            const localBounds = child.getLocalBounds();
+            const left = child.position.x + localBounds.x;
+            const top = child.position.y + localBounds.y;
+            const right = left + localBounds.width;
+            const bottom = top + localBounds.height;
+
+            if (x >= left && x <= right && y >= top && y <= bottom) {
                 hitContainer = child;
                 break;
             }
@@ -826,7 +1007,7 @@ const selectObject = (x: number, y: number): PIXI.Container | null => {
 
     // 如果没找到单位，第二遍：查找墙体/门
     if (!hitContainer) {
-        const tolerance = 10; // 点击容差：10像素
+        const tolerance = 10; // 点击容差：10像素（世界坐标）
         
         for (let i = objectsContainer.children.length - 1; i >= 0; i--) {
             const child = objectsContainer.children[i] as PIXI.Container;
@@ -852,19 +1033,23 @@ const selectObject = (x: number, y: number): PIXI.Container | null => {
 
         if (userData.type === 'unit') {
             // 单位：矩形边框
-            selectionBorder.rect(0, 0, gridSize, gridSize);
+            const localBounds = hitContainer.getLocalBounds();
+            const width = localBounds.width || gridSize;
+            const height = localBounds.height || gridSize;
+            selectionBorder.rect(localBounds.x, localBounds.y, width, height);
             selectionBorder.stroke({ color: 0xffff00, width: 3 });
         } else if (userData.type === 'wall' || userData.type === 'door') {
-            // 墙体/门：高亮描边
-            const bounds = hitContainer.getBounds();
-            const color = userData.type === 'wall' ? 0xff0000 : 0x0000ff;
-            selectionBorder.rect(
-                bounds.x - hitContainer.x - 5,
-                bounds.y - hitContainer.y - 5,
-                bounds.width + 10,
-                bounds.height + 10
-            );
-            selectionBorder.stroke({ color: 0xffff00, width: 5, alpha: 0.8 });
+            // 墙体/门：沿折线高亮
+            const polyline = userData.data?.polyline;
+            if (polyline?.length > 1) {
+                for (let i = 0; i < polyline.length - 1; i++) {
+                    const p1 = polyline[i];
+                    const p2 = polyline[i + 1];
+                    selectionBorder.moveTo(p1.x, p1.y);
+                    selectionBorder.lineTo(p2.x, p2.y);
+                }
+                selectionBorder.stroke({ color: 0xffff00, width: 5, alpha: 0.8 });
+            }
         }
 
         (selectionBorder as any).isSelectionBorder = true;
@@ -894,6 +1079,8 @@ const selectObject = (x: number, y: number): PIXI.Container | null => {
         editingUnitParty.value = 'player';
         editingUnitDirection.value = 2;
         editingUnitFriendly.value = false;
+        editingUnitSelectionGroup.value = '';
+        editingUnitHidden.value = false;
         editingOnlyVisition.value = false;
         editingOnlyBlock.value = false;
         return null;
@@ -991,6 +1178,10 @@ const handleKeyDown = (event: KeyboardEvent) => {
             editingUnitParty.value = 'player';
             editingUnitDirection.value = 2;
             editingUnitFriendly.value = false;
+            editingUnitSelectionGroup.value = '';
+            editingUnitHidden.value = false;
+            editingOnlyVisition.value = false;
+            editingOnlyBlock.value = false;
         }
     } else if (event.key === 'Delete' || event.key === 'Backspace') {
         // 删除选中的对象
@@ -1051,6 +1242,8 @@ const deleteSelectedObject = () => {
     editingUnitParty.value = 'player';
     editingUnitDirection.value = 2;
     editingUnitFriendly.value = false;
+    editingUnitSelectionGroup.value = '';
+    editingUnitHidden.value = false;
     editingOnlyVisition.value = false;
     editingOnlyBlock.value = false;
 
@@ -1078,6 +1271,8 @@ const clearCanvas = () => {
         saveEditorState();
         // 清除保存的状态（因为已经清空了）
         clearEditorState();
+        syncCanvasSizeWithMap();
+        resetViewTransform();
     }
 };
 
@@ -1091,10 +1286,14 @@ const syncUnitPropertiesToEditor = (unit: any) => {
     const partyProp = unit.properties?.find((p: any) => p.name === 'party');
     const directionProp = unit.properties?.find((p: any) => p.name === 'direction');
     const friendlyProp = unit.properties?.find((p: any) => p.name === 'friendly');
+    const selectionGroupProp = unit.properties?.find((p: any) => p.name === 'selectionGroup');
+    const hiddenProp = unit.properties?.find((p: any) => p.name === 'isSceneHidden');
 
     editingUnitParty.value = partyProp?.value || 'player';
     editingUnitDirection.value = directionProp?.value || 2;
     editingUnitFriendly.value = friendlyProp?.value === 'true' || friendlyProp?.value === true;
+    editingUnitSelectionGroup.value = typeof selectionGroupProp?.value === 'string' ? selectionGroupProp.value : '';
+    editingUnitHidden.value = hiddenProp?.value === 'true' || hiddenProp?.value === true;
 };
 
 // 应用单位属性更改
@@ -1107,15 +1306,39 @@ const applyUnitPropertyChanges = () => {
     unit.name = editingUnitName.value;
 
     // 更新 properties 数组
-    if (unit.properties) {
-        const partyProp = unit.properties.find((p: any) => p.name === 'party');
-        const directionProp = unit.properties.find((p: any) => p.name === 'direction');
-        const friendlyProp = unit.properties.find((p: any) => p.name === 'friendly');
-
-        if (partyProp) partyProp.value = editingUnitParty.value;
-        if (directionProp) directionProp.value = editingUnitDirection.value;
-        if (friendlyProp) friendlyProp.value = editingUnitFriendly.value;
+    if (!unit.properties) {
+        unit.properties = [];
     }
+
+    const upsertProperty = (name: string, type: string, value: any) => {
+        const existing = unit.properties.find((p: any) => p.name === name);
+        if (existing) {
+            existing.value = value;
+            existing.type = existing.type || type;
+        } else {
+            unit.properties.push({ name, type, value });
+        }
+    };
+
+    const removeProperty = (name: string) => {
+        const index = unit.properties.findIndex((p: any) => p.name === name);
+        if (index !== -1) {
+            unit.properties.splice(index, 1);
+        }
+    };
+
+    upsertProperty('party', 'string', editingUnitParty.value);
+    upsertProperty('direction', 'int', editingUnitDirection.value);
+    upsertProperty('friendly', 'bool', editingUnitFriendly.value);
+
+    const trimmedGroup = editingUnitSelectionGroup.value.trim();
+    if (trimmedGroup) {
+        upsertProperty('selectionGroup', 'string', trimmedGroup);
+    } else {
+        removeProperty('selectionGroup');
+    }
+
+    upsertProperty('isSceneHidden', 'bool', editingUnitHidden.value);
 
     // 更新视觉显示（名称标签）
     if (selectedContainer.value) {
@@ -1256,8 +1479,12 @@ const restoreFromHistory = async (state: any) => {
     editingUnitParty.value = 'player';
     editingUnitDirection.value = 2;
     editingUnitFriendly.value = false;
+    editingUnitSelectionGroup.value = '';
+    editingUnitHidden.value = false;
     editingOnlyVisition.value = false;
     editingOnlyBlock.value = false;
+
+    syncCanvasSizeWithMap();
 
     console.log('状态已恢复');
 };
@@ -1324,6 +1551,8 @@ const handleTMJImport = async (event: Event) => {
 
         // 解析TMJ数据
         await parseTMJData(tmjData);
+        syncCanvasSizeWithMap();
+        resetViewTransform();
 
         // 设置地图名称
         const fileName = file.name.replace(/\.(tmj|json)$/, '');
@@ -1353,10 +1582,45 @@ const parseTMJData = async (tmjData: any) => {
                     if (obj.id > maxId) maxId = obj.id;
 
                     // 获取属性
-                    const unitTypeName = obj.properties?.find((p: any) => p.name === 'unitTypeName')?.value || 'skeleton';
-                    const party = obj.properties?.find((p: any) => p.name === 'party')?.value || 'enemy';
-                    const direction = obj.properties?.find((p: any) => p.name === 'direction')?.value || 2;
-                    const friendly = obj.properties?.find((p: any) => p.name === 'friendly')?.value || false;
+                        const unitTypeName = obj.properties?.find((p: any) => p.name === 'unitTypeName')?.value || 'skeleton';
+                        const party = obj.properties?.find((p: any) => p.name === 'party')?.value || 'enemy';
+                        const directionRaw = obj.properties?.find((p: any) => p.name === 'direction')?.value ?? 2;
+                        const friendlyRaw = obj.properties?.find((p: any) => p.name === 'friendly')?.value ?? false;
+                        const selectionGroupRaw = obj.properties?.find((p: any) => p.name === 'selectionGroup')?.value || '';
+                        const hiddenRaw = obj.properties?.find((p: any) => p.name === 'isSceneHidden')?.value ?? false;
+
+                        const direction = typeof directionRaw === 'number' ? directionRaw : parseInt(directionRaw as string, 10) || 2;
+                        const friendly = friendlyRaw === 'true' || friendlyRaw === true;
+                        const selectionGroup = typeof selectionGroupRaw === 'string' ? selectionGroupRaw.trim() : '';
+                        const isSceneHidden = hiddenRaw === 'true' || hiddenRaw === true;
+
+                        const clonedProperties = obj.properties ? JSON.parse(JSON.stringify(obj.properties)) : [];
+                        const upsertProperty = (name: string, type: string, value: any) => {
+                            const existing = clonedProperties.find((p: any) => p.name === name);
+                            if (existing) {
+                                existing.value = value;
+                                existing.type = existing.type || type;
+                            } else {
+                                clonedProperties.push({ name, type, value });
+                            }
+                        };
+                        const removeProperty = (name: string) => {
+                            const index = clonedProperties.findIndex((p: any) => p.name === name);
+                            if (index !== -1) {
+                                clonedProperties.splice(index, 1);
+                            }
+                        };
+
+                        upsertProperty('unitTypeName', 'string', unitTypeName);
+                        upsertProperty('party', 'string', party);
+                        upsertProperty('direction', 'int', direction);
+                        upsertProperty('friendly', 'bool', friendly);
+                        upsertProperty('isSceneHidden', 'bool', isSceneHidden);
+                        if (selectionGroup) {
+                            upsertProperty('selectionGroup', 'string', selectionGroup);
+                        } else {
+                            removeProperty('selectionGroup');
+                        }
 
                     const unitHeight = obj.height || gridSize;
                     const unit = {
@@ -1367,12 +1631,7 @@ const parseTMJData = async (tmjData: any) => {
                         width: obj.width || gridSize,
                         height: unitHeight,
                         type: 'unit',
-                        properties: [
-                            { name: 'unitTypeName', type: 'string', value: unitTypeName },
-                            { name: 'party', type: 'string', value: party },
-                            { name: 'direction', type: 'int', value: direction },
-                            { name: 'friendly', type: 'bool', value: friendly }
-                        ]
+                            properties: clonedProperties
                     };
 
                     placedUnits.value.push(unit);
@@ -1644,6 +1903,12 @@ const getModeText = () => {
 .toolbar-label {
     font-weight: bold;
     margin-right: 5px;
+}
+
+.zoom-controls .zoom-display {
+    min-width: 50px;
+    text-align: center;
+    display: inline-block;
 }
 
 .toolbar-separator {

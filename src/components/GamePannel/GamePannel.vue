@@ -53,7 +53,9 @@ import { UnitAnimSpirite } from "@/core/anim/UnitAnimSprite";
 import type { TiledMap } from "@/core/MapClass";
 import type { Unit } from "@/core/units/Unit";
 import { UnitSystem } from "@/core/system/UnitSystem";
-import { FogSystem } from "@/core/system/FogSystem";
+import { FogSystem } from "@/core/system/NewFogSystem";
+import { MapCanvasService } from "@/core/service/2dcanvas/MapCanvasService";
+
 
 const appSetting = envSetting.appSetting;
 const route = useRoute();
@@ -73,8 +75,8 @@ onMounted(async () => {
   golbalSetting.app = app;
 
   //初始化容器
-  const rlayers = createRenderLayers(app);
-  const container = createContainer(app, rlayers);
+  const rlayers = MapCanvasService.getInstance().createRenderLayers(app);
+  const container = MapCanvasService.getInstance().createContainer();
   container.sortableChildren = true;
   setContainer(container);
   setLayer(rlayers);
@@ -93,10 +95,7 @@ onMounted(async () => {
       unit.stateMachinePack.doAction();
     });
   }, 1000 / 30); // 每秒30帧
-  //暴露创建动画方法，给drama系统使用，让他可以在显示隐藏单位是创建销毁动画精灵
-  DramaSystem.getInstance().createSpriteAnim =  async (unit: Unit) => {
-    await generateAnimSprite(unit);
-   };
+
   // 检查是否需要从存档加载
   const loadSlot = route.query.loadSlot;
   if (loadSlot) {
@@ -113,7 +112,7 @@ onMounted(async () => {
     console.log("[changemap0] setDramaUse 前 golbalSetting.map:", golbalSetting.map);
     await DramaSystem.getInstance().setDramaUse("d1");
     console.log("[changemap0] setDramaUse 后 golbalSetting.map:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
-    await initByMap(golbalSetting.map);
+    await MapCanvasService.getInstance().initByMap(golbalSetting.map);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     DramaSystem.getInstance().play();
     const characterOutCombatController = CharacterOutCombatController.getInstance();
@@ -122,198 +121,9 @@ onMounted(async () => {
 
 
 });
-// 辅助函数：根据地图初始化
-const initByMap = async (mapPassiable: any) => {
-  // golbalSetting.map = mapPassiable;
-  const container = golbalSetting.rootContainer;
-  const rlayers = golbalSetting.rlayers;
-  const units = mapPassiable.sprites;
-  const mapView = mapPassiable.textures;
-
-  // 绘制地图（现在是异步的，会先绘制遮罩）
-  await drawMap(mapView, container, rlayers);
-  console.log(units);
-
-  // 等待一帧，确保战争迷雾遮罩已经完全渲染
-  await new Promise(resolve => requestAnimationFrame(resolve));
-
-  // 创建门
-  const doors = mapPassiable.doors;
-  const doorPromises: Promise<any>[] = [];
-  doors.forEach((door: any) => {
-    const promise = createDoorAnimSpriteFromDoor(door).then(doorSprite => {
-      doorSprite.visible = false; // 默认不可见，由战争迷雾系统控制
-      if (container) container.addChild(doorSprite);
-      if (rlayers.controllerLayer) rlayers.controllerLayer.attach(doorSprite);
-      door.doorSprite = doorSprite;
-    });
-    doorPromises.push(promise);
-  });
-  await Promise.all(doorPromises);
-
-  // 创建宝箱
-  const chests = mapPassiable.chests;
-  if (chests && chests.length > 0) {
-    const chestPromises: Promise<any>[] = [];
-    chests.forEach((chest: any) => {
-      const promise = createChestAnimSpriteFromChest(chest).then(chestSprite => {
-        chestSprite.visible = false; // 默认不可见，由战争迷雾系统控制
-        if (container) container.addChild(chestSprite);
-        if (rlayers.spriteLayer) rlayers.spriteLayer.attach(chestSprite);
-        console.log("Created chest sprite:", chest.id, "at", chest.x, chest.y);
-      });
-      chestPromises.push(promise);
-    });
-    await Promise.all(chestPromises);
-  }
-  console.log("创建宝箱:", chests);
-  // 创建单位
-  let createEndPromise: Promise<any>[] = [];
-  units.forEach((unit: Unit) => {
-    if (unit.state == "dead") {
-      return;
-    }
-    const promise = generateAnimSprite(unit);
-    createEndPromise.push(promise);
-  });
-
-  if (createEndPromise.length > 0) await Promise.all(createEndPromise);
-  // mapPassiable.sprites = units;
-  console.log("所有单位创建完成:", units);
-  const characterStore = useCharacterStore();
-  characterStore.clearCharacters();
-  units.forEach((unit: any) => {
-    if (unit.party === "player") {
-      characterStore.addCharacter(unit);
-      console.log('characterStore', characterStore)
-    }
-  });
-
-  // 绘制格子（在地图加载完成后绘制）
- // drawGrid(golbalSetting.app, rlayers);
-
-};
-
-// 辅助函数：绘制地图
-const drawMap = async (mapView: any, container: any, rlayers: any) => {
-  if (golbalSetting.mapContainer) {
-    golbalSetting.mapContainer.children.forEach((child: any) => {
-      golbalSetting.mapContainer!.removeChild(child);
-      child.destroy();
-    });
-  }
-
-  // 先初始化战争迷雾系统并绘制初始遮罩
-  if (golbalSetting.map && golbalSetting.rootContainer && golbalSetting.app) {
-    FogSystem.initFog(golbalSetting.map, golbalSetting.rootContainer, golbalSetting.app);
-
-    // 立即计算并绘制一次迷雾，确保在地图显示前遮罩已经存在
-    const visibilityData = FogSystem.instanse.caculteVersionByPlayers();
-    if (visibilityData) {
-      FogSystem.instanse.makeFogOfWar(visibilityData);
-    }
-  }
-  // 启动自动绘制循环
-
-  // 等待一帧，确保遮罩已经渲染
-  await new Promise((resolve) => FogSystem.instanse.autoDraw(resolve));
-
-  // 再绘制地图
-  const ms = new PIXI.Sprite(mapView);
-  ms.zIndex = envSetting.zIndexSetting.mapZindex;
-  ms.label = "map";
-  if (golbalSetting.mapContainer) {
-    golbalSetting.mapContainer.addChild(ms);
-  }
 
 
-};
 
-// 辅助函数：生成动画精灵
-const generateAnimSprite = async (unit: any) => {
-  console.log("generateAnimSprite", unit);
-  const container = golbalSetting.rootContainer;
-  const rlayers = golbalSetting.rlayers;
-  const mapPassiable = golbalSetting.map;
-  const animSpriteUnit = await createAnimSpriteUnits( unit);
-
-  unit.animUnit = animSpriteUnit;
-  animSpriteUnit.zIndex = envSetting.zIndexSetting.spriteZIndex;
-
-  console.log("generateAnimSprite", unit, animSpriteUnit);
-  addAnimSpriteUnit(unit);
-  animSpriteUnit.x = Math.round(unit.x / 64) * 64;
-  animSpriteUnit.y = Math.round(unit.y / 64) * 64;
-  unit.x = animSpriteUnit.x;
-  unit.y = animSpriteUnit.y;
-  return unit;
-};
-
-// 辅助函数：创建动画精灵单位
-const createAnimSpriteUnits = async ( unit: any) => {
-  const unitTypeName = unit.unitTypeName;
-  console.log("创建动画精灵单位:", unitTypeName, unit);
-  const testJsonFetchPromise = getAnimMetaJsonFile(unitTypeName);
-  const animMetaJson = new AnimMetaJson((await testJsonFetchPromise) as any);
-  const animSpriteUnit = new UnitAnimSpirite(unit);
-
-  animSpriteUnit.setFrameSize({
-    width: animMetaJson.frameSize,
-    height: animMetaJson.frameSize,
-  });
-  if (unit.creature) {
-    console.log("单位的视觉大小:", animSpriteUnit.visisualSizeValue, unit.creature.size);
-    if (unit.creature.size == "big")
-      animSpriteUnit.visisualSizeValue = { width: 128, height: 128 };
-  } else {
-    animSpriteUnit.visisualSizeValue = { width: 64, height: 64 };
-  }
-  animMetaJson.getAllExportedAnimations().forEach(async (anim) => {
-    console.log(anim);
-    const spriteUrl = getAnimSpriteImgUrl(unitTypeName, anim, "standard");
-    const sheetTexture = await PIXI.Assets.load(spriteUrl);
-    console.log(anim);
-    const jsonFetchPromise = getAnimActionSpriteJsonFile(unitTypeName, anim, "standard");
-    const json: any = await jsonFetchPromise;
-    if (json && json.frames) {
-      const spritesheet = new PIXI.Spritesheet(sheetTexture, json as any);
-      await spritesheet.parse();
-      animSpriteUnit.addAnimationSheet(anim, spritesheet);
-    }
-  });
-  return animSpriteUnit;
-};
-
-// 辅助函数：添加动画精灵单位
-const addAnimSpriteUnit = (unit: any ) => {
-  const animSpriteUnit = unit.animUnit;
-  console.log("addAnimSpriteUnit", unit);
-  const rlayers = golbalSetting.rlayers;
-  if (!rlayers || !golbalSetting.spriteContainer|| !rlayers.spriteLayer) {
-    console.error("渲染层或精灵容器未初始化，无法添加动画精灵单位");
-    return;
-  }
-  rlayers.spriteLayer.attach(animSpriteUnit);
-  animSpriteUnit.eventMode = "static";
-
-  animSpriteUnit.on("rightclick", (event: any) => {
-    if (unit.creature) {
-      // 这里可以触发选择事件，但为了保持简洁，暂时移除选择逻辑
-      console.log("Clicked on unit:", unit.unitTypeName);
-      if (unit.party === "player" || unit.party !== 'true') {
-        console.log("这是玩家角色，打开角色面板");
-        selectedCreature.value = unit.creature;
-        selectedUnit.value = unit;
-      } else {
-        console.log("这是非玩家角色，打开生物信息面板");
-      }
-
-    }
-  });
-  if (golbalSetting.spriteContainer) {
-    golbalSetting.spriteContainer.addChild(animSpriteUnit);
-  }
-};
 const selectedCreature = ref(null);
 const selectedUnit = ref(null);
 const creatureInfoPage = ref('basic'); // 添加页面状态
@@ -435,9 +245,8 @@ const loadGameState = async (slotId: number, needConfirm: boolean = true): Promi
 
     //
     DramaSystem.getInstance().stop();
-    clear();
-
-    createContainer(golbalSetting.app, golbalSetting.rlayers);
+    MapCanvasService.getInstance().clear();
+    MapCanvasService.getInstance().createContainer();
     // 重置地图为空对象
     console.log("[changemap1] 读档前重置地图为空对象", golbalSetting.map);
     golbalSetting.map = {} as TiledMap;
@@ -454,12 +263,12 @@ const loadGameState = async (slotId: number, needConfirm: boolean = true): Promi
     // 初始化地图视觉元素
     console.log("[changemap4] d1.loadTmj initByMap 前:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
 
-    await initByMap(golbalSetting.map);
+    await MapCanvasService.getInstance().initByMap(golbalSetting.map);
     console.log("[changemap4]  d1.loadTmj initByMap 后:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
 
     // 立即更新一次战争迷雾，确保门和宝箱立即显示
     // 强制刷新迷雾系统，清空缓存并重新计算可见性
-    FogSystem.instanse.refreshSpatialGrid(true);
+    // FogSystem.instanse.refreshSpatialGrid(true);
     console.log("[读档] 强制刷新战争迷雾完成，门和宝箱可见性已更新");
 
     console.log("初始化地图完成:", golbalSetting.map);
@@ -507,97 +316,10 @@ const loadGameState = async (slotId: number, needConfirm: boolean = true): Promi
     return false;
   }
 };
-const clear = () => {
-  const characterStore = useCharacterStore();
-  characterStore.characters = [];
-  const rootContainer = golbalSetting.rootContainer;
-  const clearContainer = (container: any) => {
-    if (container.children) {
-      const children = container.children;
-      for (let i = container.children.length - 1; i >= 0; i--) {
-        const child = container.children[i];
-        children.push(child);
-      }
-      children.forEach((child: any) => {
-        clearContainer(child);
-      });
-      container.destroy();
-    } else {
-      // container.parent.removeChild(container);
-      container.destroy();
-    }
-  };
-  if (rootContainer) {
-    clearContainer(rootContainer);
-    console.log("清空容器完成", rootContainer.parent);
-    rootContainer.destroy();
-  }
-  characterStore.clearCharacters();
-};
-const createRenderLayers = (app: any) => {
-  const rlayers: any = {
-    basicLayer: null,
-    spriteLayer: null,
-    lineLayer: null,
-    fogLayer: null,
-    selectLayer: null,
-    controllerLayer: null
-  };
-  rlayers.basicLayer = new PIXI.RenderLayer();
-  rlayers.spriteLayer = new PIXI.RenderLayer();
-  rlayers.lineLayer = new PIXI.RenderLayer();
-  rlayers.fogLayer = new PIXI.RenderLayer();
-  rlayers.selectLayer = new PIXI.RenderLayer();
-  rlayers.controllerLayer = new PIXI.RenderLayer();
-  app.stage.addChildAt(rlayers.basicLayer, 0);
-  app.stage.addChildAt(rlayers.spriteLayer, 1);
-  app.stage.addChildAt(rlayers.selectLayer, 2);
-  app.stage.addChildAt(rlayers.fogLayer, 3);
-  app.stage.addChildAt(rlayers.lineLayer, 4);
-  app.stage.addChildAt(rlayers.controllerLayer, 5);
-  rlayers.basicLayer.label = "basicLayer";
-  rlayers.spriteLayer.label = "spriteLayer";
-  rlayers.selectLayer.label = "selectLayer";
-  rlayers.lineLayer.label = "lineLayer";
-  rlayers.fogLayer.label = "fogLayer";
-  rlayers.controllerLayer.label = "controllerLayer";
-  golbalSetting.rlayers = rlayers;
 
-  return rlayers;
-};
 
-const createContainer = (app: any, rlayers: any) => {
-  app.stage.interactive = true;
-  const container = new PIXI.Container();
-  // 创建一个 800x600 的矩形图形作为底盘
-  const rect = new PIXI.Graphics();
-  // rect.rect(0, 0, 20000, 20000);
-  // rect.fill({ color: "black" }); // 黑色填充
-  container.addChild(rect);
-  container.eventMode = "static";
-  rlayers.basicLayer.attach(container);
-  app.stage.addChild(container);
-  const spriteContainer = new PIXI.Container();
-  const mapContainer = new PIXI.Container();
-  const tipContainer = new PIXI.Container();
-  spriteContainer.label = "spriteContainer";
-  mapContainer.label = "mapContainer";
-  container.addChild(spriteContainer);
-  container.addChild(mapContainer);
-  app.stage.addChild(tipContainer);
-  spriteContainer.zIndex = envSetting.zIndexSetting.spriteZIndex;
-  mapContainer.zIndex = envSetting.zIndexSetting.mapZindex;
-  tipContainer.zIndex = envSetting.zIndexSetting.tipZIndex;
-  // spriteContainer.eventMode = 'none';
-  mapContainer.eventMode = "dynamic";
-  mapContainer.interactiveChildren = true;
-  // 设置全局变量
-  golbalSetting.spriteContainer = spriteContainer;
-  golbalSetting.mapContainer = mapContainer;
-  golbalSetting.rootContainer = container;
-  golbalSetting.tipContainer = tipContainer;
-  return container;
-};
+
+
 
 const addListenKeyboard = () => {
   //监听键盘S键
@@ -606,6 +328,7 @@ const addListenKeyboard = () => {
     console.log("keydown", event.key);
     if (event.key === "s" && container) {
       container.y -= 64;
+      FogSystem.instanse.refreshSpatialGrid(true)
     }
   });
   //监听键盘A键
@@ -613,6 +336,7 @@ const addListenKeyboard = () => {
     const container = golbalSetting.rootContainer;
     if (event.key === "a" && container) {
       container.x += 64;
+        FogSystem.instanse.refreshSpatialGrid(true)
     }
   });
   //监听键盘D键
@@ -620,6 +344,7 @@ const addListenKeyboard = () => {
     const container = golbalSetting.rootContainer;
     if (event.key === "d" && container) {
       container.x -= 64;
+        FogSystem.instanse.refreshSpatialGrid(true)
     }
   });
   //监听键盘W键
@@ -627,6 +352,7 @@ const addListenKeyboard = () => {
     const container = golbalSetting.rootContainer;
     if (event.key === "w" && container) {
       container.y += 64;
+        FogSystem.instanse.refreshSpatialGrid(true)
     }
   });
 };

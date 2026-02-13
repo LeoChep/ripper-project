@@ -1,9 +1,15 @@
 import type { Unit } from "@/core/units/Unit";
 import { d1 } from "@/drama/d1";
-import type { Drama } from "@/drama/drama";
+import { Drama } from "@/drama/drama";
 import { UnitSystem } from "./UnitSystem";
 import { createChestFromBoxObj } from "../units/Chest";
 import { golbalSetting } from "@/core/golbalSetting";
+import { city_1 } from "@/drama/city_1";
+import type { TiledMap } from "@/core/MapClass";
+import { MapCanvasService } from "../service/2dcanvas/MapCanvasService";
+import { FogSystem } from "./NewFogSystem";
+import { CharacterOutCombatController } from "../controller/CharacterOutCombatController";
+import { CharacterController } from "../controller/CharacterController";
 interface DialogOption {
   text: string;
   value: any;
@@ -96,7 +102,9 @@ export class DramaSystem {
 
   //提供注入口
   //todo以后需要由专门模块负责
-  createSpriteAnim = async (unit: Unit):Promise<any> => {} ;
+  createSpriteAnim = async (unit: Unit): Promise<any> => {
+    await MapCanvasService.getInstance().createAnimSpriteUnits(unit);
+  };
   // 辅助函数：创建单位生物
   async createUnitCreature(unitTypeName: string, unit: any) {
     const { getUnitTypeJsonFile } = await import("@/utils/utils");
@@ -248,7 +256,6 @@ export class DramaSystem {
     }
   }
   unHiddenUnit = async (unitName: string) => {
-    
     const map = golbalSetting.map;
     if (!map) {
       console.error("地图未加载，无法显示单位:", unitName);
@@ -277,8 +284,27 @@ export class DramaSystem {
       console.log(`单位 ${unitName} 已从隐藏状态中移除并添加到地图上。`);
     }
   };
+  //辅助函数的接口，需要后续分离
+  clear = () => {};
+  createContainer = () => {};
+  changeScene = async (sceneName: string) => {
+    DramaSystem.getInstance().stop();
+    MapCanvasService.getInstance().clear();
+    MapCanvasService.getInstance().createContainer();
+    golbalSetting.map = {} as TiledMap;
+    await DramaSystem.getInstance().setDramaUse(sceneName);
+    await MapCanvasService.getInstance().initByMap(golbalSetting.map);
+    // FogSystem.instanse.refreshSpatialGrid(true);
+    DramaSystem.getInstance().play();
+    new CharacterOutCombatController();
+    CharacterOutCombatController.isUse = true;
+    const units = UnitSystem.getInstance().getAllUnits();
+    const playerUnits = units.filter((u) => u.party === "player");
+    CharacterController.selectCharacter(playerUnits[0]);
+  };
 }
 const initDramaMap = () => {
   const dramaSystem = DramaSystem.getInstance();
   dramaSystem.registerDrama("d1", d1);
+  dramaSystem.registerDrama("city_1", city_1);
 };

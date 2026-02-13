@@ -6,11 +6,10 @@ import * as InitSystem from "@/core/system/InitiativeSystem";
 import { Item, ItemRarity, ItemType, HolyWater } from "@/core/item";
 import { UnitSystem } from "@/core/system/UnitSystem";
 import { CharacterController } from "@/core/controller/CharacterController";
-import { DramaSystem } from "@/core/system/DramaSystem";
-class D1 extends Drama {
-  mapName: string = "A";
+class CITY_1 extends Drama {
+  mapName: string = "city_1";
   constructor() {
-    super("d1", "这是一个测试剧情");
+    super("city_1", "这是一个测试剧情");
   }
   loadInit() {
     const { CGstart, unitSpeak, speak, unitChoose, CGEnd, addInteraction } =
@@ -26,85 +25,17 @@ class D1 extends Drama {
       this.setVariable("startFlag", true);
       this.startEvent();
     }
-    const door1Flag = this.getVariable("door1");
-    console.log("门1的状态:", door1Flag);
-    if (!door1Flag) {
-      this.door1Event();
-    }
+   
   }
   public battleEndHandle(): void {
     const { CGstart, unitSpeak, speak, unitChoose, CGEnd } = this;
-    const inCombat1 = this.getVariable("inCombat1");
-    const combat1EndCgUsed = this.getVariable("combat1EndCgUsed");
-    if (inCombat1 && combat1EndCgUsed !== true) {
-      this.setVariable("combat1EndCgUsed", true);
-      this.setVariable("inCombat1", false);
-      this.combat1EndCG();
-    }
-    if (
-      this.getVariable("inCombat2") &&
-      this.getVariable("combat2EndCgUsed") !== true
-    ) {
-      this.setVariable("combat2EndCgUsed", true);
-      this.setVariable("inCombat2", false);
-      this.combat2EndCG();
-    }
+    
   }
   combat2EndCG = async () => {
-    const { CGstart, unitSpeak, speak, unitChoose, CGEnd } = this;
-    CGstart();
-    await speak("你们成功击败了那些骷髅，神殿里暂时恢复了平静。");
-    await speak("咯吱……神殿的灰尘似乎还在震动……地上散落的骨头在微微颤抖……");
-    await unitSpeak("npc牧师", "看起来仅靠武力是无法根绝这里的邪恶力量的……");
-    await unitSpeak(
-      "npc牧师",
-      "我们需要从长计议，先回到镇子里吧。看起来他们还不会离开这个神殿，镇子暂时还是安全的。"
-    );
-    CGEnd();
+  
   };
   combat1EndCG = async () => {
-    const {
-      CGstart,
-      unitSpeak,
-      speak,
-      unitChoose,
-      CGEnd,
-      addInteraction,
-      unHiddenUnit,
-    } = this;
-    CGstart();
-
-    await unitSpeak("npc牧师", "谢谢你们！那些骷髅终于被消灭了。");
-    await unitSpeak(
-      "npc牧师",
-      "不过我担心这只是个开始，神殿里可能还有更多的亡灵在徘徊。我们需要继续前进，彻底清理这里的邪恶力量。"
-    );
-    await unitChoose("npc牧师", [
-      { text: "我们准备好了，继续前进吧。", value: "option1" },
-      { text: "我们需要休息一下，恢复体力……", value: "option2" },
-    ]);
-    await speak("突然……传来一阵响动……");
-    await speak("你们发现更多的骷髅从神殿的深处涌了出来。");
-    await unitSpeak("npc牧师", "看起来我们还有更多的敌人要面对！准备战斗吧！");
-    const hiddenUnits =
-      UnitSystem.getInstance().getSceneHiddenUnitsBySelectionGroup("battle2");
-    for (const unit of hiddenUnits) {
-      await unHiddenUnit(unit.name);
-    }
-    const units = UnitSystem.getInstance().getUnitBySelectionGroup("battle2");
-    const players = UnitSystem.getInstance().getUnitBySelectionGroup("player");
-    players.forEach((player) => {
-      units.push(player);
-    });
-    const initCombatPromise =
-      InitiativeController.addUnitsToInitiativeSheet(units);
-
-    initCombatPromise.then(async () => {
-      await InitiativeController.startBattle();
-      this.setVariable("inCombat2", true);
-      InitiativeController.startCombatTurn();
-    });
-    CGEnd();
+   
   };
 
   cricleTalk = async () => {
@@ -157,12 +88,7 @@ class D1 extends Drama {
         "npc牧师",
         "我能做的并不多，但是我会尽我所能使用神术法术来攻击它们。但是别指望太多，我毕竟不是战斗人员。"
       );
-      unitSpeak(
-        "npc牧师",
-        "对了，如果你有任何关于这个神殿的线索或者想法，随时都可以来找我聊聊。虽然我不能直接帮你战斗，但我可以提供一些信息和建议。"
-      );
     CGEnd();
-    DramaSystem.getInstance().changeScene("city_1");
   };
 
   private async startEvent(): Promise<void> {
@@ -177,19 +103,13 @@ class D1 extends Drama {
     } = this;
 
     CGstart();
-    // await unHiddenUnit("bigSkeleton2");
+
 
     await unitSpeak(
       "npc牧师",
-      "你们终于来了……这里的亡灵作祟越来越可怕了，我们需要你们的帮助来消灭它们。"
+      "我会向领主报告此事，你们暂时现在城里逛逛吧。"
     );
-    await speak("你们能听见神殿里传来骨头摩擦的声音，似乎有骷髅在里面徘徊。");
-    await unitSpeak(
-      "npc牧师",
-      "培罗在上，我感觉它们简直随时都可能冲出来攻击我们。  还请你们小心行事。"
-    );
-
-    addInteraction("npc牧师", this.cricleTalk);
+   
     this.setVariable("cricleTalkUse", true);
     CGEnd();
     CharacterOutCombatController.isUse = true;
@@ -234,4 +154,4 @@ class D1 extends Drama {
   }
 }
 
-export const d1 = new D1();
+export const city_1 = new CITY_1();

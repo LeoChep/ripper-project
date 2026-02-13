@@ -7,7 +7,7 @@ import * as InitiativeSystem from "@/core/system/InitiativeSystem";
 import { CharacterCombatController } from "../controller/CharacterCombatController";
 import { CharacterOutCombatController } from "../controller/CharacterOutCombatController";
 import { CharacterController } from "../controller/CharacterController";
-import { FogSystem } from "../system/FogSystem";
+import { FogSystem } from "../system/NewFogSystem";
 import { interactionSetting } from "../envSetting";
 export class DoorAnimSprite extends Container {
   // 门的状态，true 表示打开，false 表示关闭

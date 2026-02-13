@@ -272,20 +272,18 @@ export class FogSystem {
           position[1] + Math.sin(angle) * visionRadius * tileSize,
         ]);
       }
-      return { polygon: visionPolygon, usedSegments: [] };
+      // return { polygon: visionPolygon, usedSegments: [] };
     }
 
     // 使用 visibility_polygon 库计算可视多边形
-    try {
+   
       const visibilityPolygon = VisibilityPolygon.compute(
         position,
         nearbySegments,
       );
-
+      console.log("[FogSystem]visibilityPolygon:",visibilityPolygon);
       return { polygon: visibilityPolygon, usedSegments: nearbySegments };
-    } catch (error) {
-      return null;
-    }
+ 
   };
 
   /**
@@ -581,10 +579,10 @@ export class FogSystem {
       );
 
       // 如果玩家位置没有改变，且缓存有效，跳过重绘
-      if (currentPositionKey === this.lastPlayerPositions && this.gridCache) {
-        console.log("[FogSystem] 玩家位置未改变，跳过重绘");
-        return;
-      }
+      // if (currentPositionKey === this.lastPlayerPositions && this.gridCache) {
+      //   console.log("[FogSystem] 玩家位置未改变，跳过重绘");
+      //   return;
+      // }
 
       // 更新位置key
       this.lastPlayerPositions = currentPositionKey;
@@ -615,19 +613,19 @@ export class FogSystem {
       this.updateObjectsVisibility();
 
       // 计算可见的方格（网格采样法）
-      const visibleCells = this.calculateVisibleCells(
-        shrunkPolygons,
-        mapWidth,
-        mapHeight,
-      );
+      // const visibleCells = this.calculateVisibleCells(
+      //   shrunkPolygons,
+      //   mapWidth,
+      //   mapHeight,
+      // );
 
       // 更新缓存
       this.gridCache = {
         playerPositions: this.lastPlayerPositions,
-        visibleCells: visibleCells,
+        visibleCells: new Set<string>(), // visibleCells,
       };
 
-      console.log(`[FogSystem] 计算可见方格: ${visibleCells.size}个`);
+   
 
       // 复用或创建 Canvas
       if (
