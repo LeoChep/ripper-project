@@ -1,4 +1,4 @@
-import { tileSize } from "../envSetting";
+import { tileSize, walkSpped } from "../envSetting";
 import { BattleEvenetSystem } from "../system/BattleEventSystem";
 import { OpportunitySystem } from "../system/OpportunitySystem";
 import { UnitSystem } from "../system/UnitSystem";
@@ -162,7 +162,7 @@ export class WalkStateMachine extends StateMachine {
 
       // 计算移动步长
       const distance = Math.sqrt(dx * dx + dy * dy);
-      const step = 7.68;
+      const step = walkSpped;
       const stepX =
         distance === 0 ? 0 : (dx / distance) * Math.min(step, Math.abs(dx));
       const stepY =

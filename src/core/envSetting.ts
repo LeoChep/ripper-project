@@ -4,8 +4,10 @@ export const zIndexSetting={
     doorZindex: 30,
     tipZIndex: 200
 }
-export const tileSize = 128; // 格子大小
-
+export const tileSize = 64; // 格子大小
+export const spriteTile=2.2;
+export const walkSpped=20;
+export const pannelHeight=150;
 export const appSetting = {
     width: 1600,
     height: 900,

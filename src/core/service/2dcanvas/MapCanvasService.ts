@@ -279,7 +279,7 @@ export class MapCanvasService {
       return;
     }
     rlayers.spriteLayer.attach(animSpriteUnit);
-    animSpriteUnit.eventMode = "static";
+    animSpriteUnit.eventMode = "none";
 
     animSpriteUnit.on("rightclick", (event: any) => {
       if (unit.creature) {
@@ -309,6 +309,7 @@ export class MapCanvasService {
     };
     rlayers.basicLayer = new PIXI.RenderLayer();
     rlayers.spriteLayer = new PIXI.RenderLayer();
+    rlayers.spriteLayer.sortableChildren=true;
     rlayers.lineLayer = new PIXI.RenderLayer();
     rlayers.fogLayer = new PIXI.RenderLayer();
     rlayers.selectLayer = new PIXI.RenderLayer();

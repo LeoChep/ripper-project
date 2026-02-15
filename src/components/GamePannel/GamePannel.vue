@@ -110,7 +110,7 @@ onMounted(async () => {
   } else {
     // 设置并启动剧情（会自动加载地图）
     console.log("[changemap0] setDramaUse 前 golbalSetting.map:", golbalSetting.map);
-    await DramaSystem.getInstance().setDramaUse("d1");
+    await DramaSystem.getInstance().setDramaUse("lord-room");
     console.log("[changemap0] setDramaUse 后 golbalSetting.map:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
     await MapCanvasService.getInstance().initByMap(golbalSetting.map);
     await new Promise((resolve) => setTimeout(resolve, 1000));

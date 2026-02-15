@@ -1,7 +1,7 @@
 import { Container } from "pixi.js";
 import * as PIXI from "pixi.js";
 import type { Unit } from "../units/Unit";
-import { tileSize, zIndexSetting } from "../envSetting";
+import { spriteTile, tileSize, zIndexSetting } from "../envSetting";
 import type { BuffInterface } from "../buff/BuffInterface";
 import { getStatusEffectsIconUrl } from "@/utils/utils";
 const lineIconLimit = 4;
@@ -59,6 +59,8 @@ export class UnitAnimSpirite extends Container {
     this.onRender = () => {
       this.update(this.callback);
     };
+    this.eventMode = "none";
+
   }
   public get ownerUnit(): Unit | undefined {
     return this.owner;
@@ -134,6 +136,8 @@ export class UnitAnimSpirite extends Container {
           0 -
           (this.anims[this._state].height - (this.visisualSize.height ?? 0)) /
             2;
+            this.anims[this._state].zIndex = this.y;
+          this.zIndex=this.y;
         if (this.owner?.direction != null) {
           this.direction = this.owner.direction;
           this.anims[this._state].textures =
@@ -204,7 +208,7 @@ export class UnitAnimSpirite extends Container {
     const animSprite = new PIXI.AnimatedSprite(
       spritesheet.animations[animKeys[0]]
     );
-    animSprite.scale = this.visisualSize.width / this.frameSize.width;
+    animSprite.scale = this.visisualSize.width / this.frameSize.width * spriteTile;
     console.log("动画精灵的视觉大小:", this.visisualSize);
     animSprite.animationSpeed = 0.1666;
     animSprite.textures = spritesheet.animations[animKeys[0]];
@@ -212,7 +216,7 @@ export class UnitAnimSpirite extends Container {
     // play the animation on a loop
     // animSprite.play();
     animSprite.label = name;
-    animSprite.anchor.set(0, 0); // 设置锚点为左上角，避免偏移
+    animSprite.anchor.set(0, 0.3); // 设置锚点为左上角，避免偏移
     this.addAnimation(name, animSprite);
   }
   public async addIcon(buff: BuffInterface) {

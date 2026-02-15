@@ -10,6 +10,7 @@ import { MapCanvasService } from "../service/2dcanvas/MapCanvasService";
 import { FogSystem } from "./NewFogSystem";
 import { CharacterOutCombatController } from "../controller/CharacterOutCombatController";
 import { CharacterController } from "../controller/CharacterController";
+import { lordRoom } from "@/drama/lord-room";
 interface DialogOption {
   text: string;
   value: any;
@@ -307,4 +308,6 @@ const initDramaMap = () => {
   const dramaSystem = DramaSystem.getInstance();
   dramaSystem.registerDrama("d1", d1);
   dramaSystem.registerDrama("city_1", city_1);
+  dramaSystem.registerDrama("lord-room", lordRoom);
+
 };

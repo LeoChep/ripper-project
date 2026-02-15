@@ -20,7 +20,7 @@ export const checkPassiable = (
     return false;
   }
   const mapWidth = mapPassiable.width * tileSize
-  const mapHeight = mapPassiable.height * mapPassiable.tileheight;
+  const mapHeight = mapPassiable.height * tileSize;
   if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
     return false;
   }
