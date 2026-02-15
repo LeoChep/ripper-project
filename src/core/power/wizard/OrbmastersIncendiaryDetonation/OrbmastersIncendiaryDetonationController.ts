@@ -181,8 +181,8 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
   ): Promise<void> {
     console.log("playAnim", unit, gridX, gridY, range);
     const sprite = await getAnimSpriteFromPNGpacks("FireballExplosion", 72);
-    sprite.x = gridX * tileSize + 32;
-    sprite.y = gridY * tileSize + 32;
+    sprite.x = gridX * tileSize + tileSize/2;
+    sprite.y = gridY * tileSize + tileSize/2;
     sprite.zIndex = zIndexSetting.spriteZIndex;
     sprite.scale = {
       x: ((range * 2 + 1) * tileSize) / sprite.width,

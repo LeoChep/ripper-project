@@ -21,10 +21,9 @@ import {
   getView,
   getViews,
 } from "../fog_modules/get-view.js";
-import { appSetting } from "../envSetting.js";
+import { appSetting, tileSize } from "../envSetting.js";
 
-const tileSize = 64;
-const GRID_SIZE = 64; // 网格采样的方格大小
+
 interface GridCacheEntry {
   playerPositions: string; // 所有玩家单位位置的组合key
 }
@@ -97,7 +96,7 @@ export class FogSystem {
   checkHashPointsChange = (points: Point[]) => {
     const playerPositionsKey = points
       .map(
-        (p) => `${Math.floor(p.x / GRID_SIZE)}_${Math.floor(p.y / GRID_SIZE)}`
+        (p) => `${Math.floor(p.x / tileSize)}_${Math.floor(p.y / tileSize)}`
       )
       .join("|");
     if (this.gridCache) {

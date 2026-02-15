@@ -191,8 +191,8 @@ export const checkPassiable = (
   if (!mapPassiable) {
     return false;
   }
-  const mapWidth = mapPassiable.width * mapPassiable.tilewidth;
-  const mapHeight = mapPassiable.height * mapPassiable.tileheight;
+  const mapWidth = mapPassiable.width * tileSize
+  const mapHeight = mapPassiable.height * tileSize
   if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
     return false;
   }
@@ -232,18 +232,18 @@ export const checkPassiable = (
 
           // 获取两个格子的四个顶点和中点
           const pointsA = [
-            { x: prex + 32, y: prey + 32 },
+            { x: prex + tileSize/2, y: prey + tileSize/2 },
             { x: prex, y: prey },
-            { x: prex + 64, y: prey },
-            { x: prex + 64, y: prey + 64 },
-            { x: prex, y: prey + 64 },
+            { x: prex + tileSize, y: prey },
+            { x: prex + tileSize, y: prey + tileSize },
+            { x: prex, y: prey + tileSize },
           ];
           const pointsB = [
-            { x: testx + 32, y: testy + 32 },
+            { x: testx + tileSize/2, y: testy + tileSize/2 },
             { x: testx, y: testy },
-            { x: testx + 64, y: testy },
-            { x: testx + 64, y: testy + 64 },
-            { x: testx, y: testy + 64 },
+            { x: testx + tileSize, y: testy },
+            { x: testx + tileSize, y: testy + tileSize },
+            { x: testx, y: testy + tileSize },
           ];
           // 检查所有中点的连线
           let intersectCount = 0;

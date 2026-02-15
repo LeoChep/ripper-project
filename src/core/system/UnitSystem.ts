@@ -1,3 +1,4 @@
+import { tileSize } from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import type { Unit } from "../units/Unit";
 
@@ -14,8 +15,8 @@ export class UnitSystem {
       console.warn("地图或单位列表未初始化");
       return null;
     }
-    const gridx = Math.floor(pixiX / 64);
-    const gridy = Math.floor(pixiY / 64);
+    const gridx = Math.floor(pixiX / tileSize);
+    const gridy = Math.floor(pixiY / tileSize);
 
     return this.findUnitByGridxy(gridx, gridy);
   }
@@ -32,8 +33,8 @@ export class UnitSystem {
       if (sprite.state === "dead") {
         return false; // 跳过已死亡的单位
       }
-      const spriteX = Math.floor(sprite.x / 64);
-      const spriteY = Math.floor(sprite.y / 64);
+      const spriteX = Math.floor(sprite.x / tileSize  );
+      const spriteY = Math.floor(sprite.y / tileSize);
       const size = sprite.creature.size;
 
       // 构建范围数组
@@ -68,8 +69,8 @@ export class UnitSystem {
       return [];
     }
     const size = unit.creature.size;
-    const spriteX = Math.floor(unit.x / 64);
-    const spriteY = Math.floor(unit.y / 64);
+    const spriteX = Math.floor(unit.x / tileSize);
+    const spriteY = Math.floor(unit.y / tileSize);
     return this.getGridsBySize(spriteX, spriteY, size);
   }
   getGridsByRange(x: number, y: number, range: number) {
@@ -89,8 +90,8 @@ export class UnitSystem {
       return [];
     }
     const size = unit.creature.size;
-    const spriteX = Math.floor(unit.x / 64);
-    const spriteY = Math.floor(unit.y / 64);
+    const spriteX = Math.floor(unit.x / tileSize);
+    const spriteY = Math.floor(unit.y / tileSize);
     let range = 1; // 默认范围为0，可根据需要调整
     if (size === "big") {
       range = 2;

@@ -32,8 +32,8 @@ export function playerSelectAttackMovement(
   }
   const offsetX = pos.x - container.x;
   const offsetY = pos.y - container.y;
-  const targetX = Math.floor(offsetX / 64);
-  const targetY = Math.floor(offsetY / 64);
+  const targetX = Math.floor(offsetX / tileSize);
+  const targetY = Math.floor(offsetY / tileSize);
   return attackMovementToXY(targetX, targetY, unit, attack, mapPassiable);
 }
 export async function attackMovementToUnit(

@@ -15,8 +15,9 @@ import { UnitSystem } from "../system/UnitSystem";
 import { BuffSystem } from "../system/BuffSystem";
 import { testDraw } from "../anim/DrawTest";
 import { standMovement } from "../action/UnitStand";
+import { tileSize } from "../envSetting";
 
-const tileSize = 64; // 假设每个格子的大小为64像素
+
 export class NormalAI implements AIInterface {
   public owner: Unit | undefined;
   constructor() {

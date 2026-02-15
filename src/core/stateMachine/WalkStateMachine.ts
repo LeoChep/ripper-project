@@ -1,9 +1,10 @@
+import { tileSize } from "../envSetting";
 import { BattleEvenetSystem } from "../system/BattleEventSystem";
 import { OpportunitySystem } from "../system/OpportunitySystem";
 import { UnitSystem } from "../system/UnitSystem";
 import type { Unit } from "../units/Unit";
 import { StateMachine } from "./StateMachine";
-const tileSize = 64; // 假设每个格子的大小为64像素
+
 export class WalkStateMachine extends StateMachine {
   public currentState: string | null = null;
   public walkType: "normal" | "step" = "normal";

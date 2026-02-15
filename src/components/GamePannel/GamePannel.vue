@@ -365,16 +365,16 @@ const drawGrid = (app: any, rlayers: any) => {
   const map = golbalSetting.map;
   if (!map) return;
   
-  const mapWidth = map.width * map.tilewidth;
-  const mapHeight = map.height * map.tileheight;
+  const mapWidth = map.width * envSetting.tileSize;
+  const mapHeight = map.height * envSetting.tileSize;
   const cols = map.width;
   const rows = map.height;
   
   // 画竖线
   for (let i = 1; i < cols; i++) {
     const line = new PIXI.Graphics();
-    line.moveTo(i * gridSize, 0);
-    line.lineTo(i * gridSize, mapHeight);
+    line.moveTo(i * envSetting.tileSize, 0);
+    line.lineTo(i * envSetting.tileSize, mapHeight);
     line.stroke({ width: 1, color: 0x444444, alpha: 1 });
     lineContainer.addChild(line);
   }
@@ -382,8 +382,8 @@ const drawGrid = (app: any, rlayers: any) => {
   // 画横线
   for (let j = 1; j < rows; j++) {
     const line = new PIXI.Graphics();
-    line.moveTo(0, j * gridSize);
-    line.lineTo(mapWidth, j * gridSize);
+    line.moveTo(0, j * envSetting.tileSize);
+    line.lineTo(mapWidth, j * envSetting.tileSize);
     line.stroke({ width: 1, color: 0x444444, alpha: 1 });
     lineContainer.addChild(line);
   }
@@ -401,8 +401,8 @@ const drawGrid = (app: any, rlayers: any) => {
           }
         });
         text.anchor.set(0.5, 0.5);
-        text.x = col * gridSize + gridSize / 2;
-        text.y = row * gridSize + gridSize / 2;
+        text.x = col * envSetting.tileSize + envSetting.tileSize / 2;
+        text.y = row * envSetting.tileSize + envSetting.tileSize / 2;
         lineContainer.addChild(text);
       }
     }

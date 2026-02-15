@@ -19,7 +19,7 @@ export const checkPassiable = (
   if (!mapPassiable) {
     return false;
   }
-  const mapWidth = mapPassiable.width * mapPassiable.tilewidth;
+  const mapWidth = mapPassiable.width * tileSize
   const mapHeight = mapPassiable.height * mapPassiable.tileheight;
   if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
     return false;
@@ -69,10 +69,10 @@ export const checkPassiable = (
         for (let i = 0; i < rangeArrA.length; i++) {
           if (
             segmentsIntersect(
-              rangeArrA[i].x + 32,
-              rangeArrA[i].y + 32,
-              rangeArrB[i].x + 32,
-              rangeArrB[i].y + 32,
+              rangeArrA[i].x + tileSize/2,
+              rangeArrA[i].y + tileSize/2,
+              rangeArrB[i].x + tileSize/2,
+              rangeArrB[i].y + tileSize/2,
               edge.x1,
               edge.y1,
               edge.x2,

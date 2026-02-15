@@ -8,7 +8,7 @@ import type { TiledMap } from "../MapClass";
 import { golbalSetting } from "../golbalSetting";
 import { CharacterController } from "./CharacterController";
 import { useTalkStateStore } from "@/stores/talkStateStore";
-const tileSize = 64;
+import { tileSize } from "../envSetting";
 
 type Rlayer = {
   basicLayer: PIXI.IRenderLayer;
@@ -92,7 +92,6 @@ export class CharacterOutCombatController {
     UnitMoveAction.playerSelectMovement(
       e,
      selectedCharacter,
-      
       path,
       result
     );

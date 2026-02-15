@@ -4,7 +4,7 @@ export const zIndexSetting={
     doorZindex: 30,
     tipZIndex: 200
 }
-export const tileSize = 64; // 格子大小
+export const tileSize = 128; // 格子大小
 
 export const appSetting = {
     width: 1600,

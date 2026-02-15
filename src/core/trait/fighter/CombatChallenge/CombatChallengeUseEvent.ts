@@ -15,6 +15,7 @@ import { UnitSystem } from "@/core/system/UnitSystem";
 import { WeaponSystem } from "@/core/system/WeaponSystem";
 import type { Unit } from "@/core/units/Unit";
 import type { Weapon } from "@/core/units/Weapon";
+import { tileSize } from "@/core/envSetting";
 
 export class CombatChallengeUseEvent extends BasedAbstractEvent {
   static readonly type = "attackEvent";
@@ -62,10 +63,10 @@ export class CombatChallengeUseEvent extends BasedAbstractEvent {
         this.owner?.party === target.party &&
         this.owner !== target
       ) {
-        const attackerX = Math.floor(attacker.x / 64);
-        const attackerY = Math.floor(attacker.y / 64);
-        const unitX = Math.floor(this.owner.x / 64);
-        const unitT = Math.floor(this.owner.y / 64);
+        const attackerX = Math.floor(attacker.x / tileSize  );
+        const attackerY = Math.floor(attacker.y / tileSize);
+        const unitX = Math.floor(this.owner.x / tileSize);
+        const unitT = Math.floor(this.owner.y / tileSize);
         const dx = Math.abs(attackerX - unitX);
         const dy = Math.abs(attackerY - unitT);
         if (dx <= 1 && dy <= 1) {

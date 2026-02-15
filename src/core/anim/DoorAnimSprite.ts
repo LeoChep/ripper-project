@@ -8,7 +8,7 @@ import { CharacterCombatController } from "../controller/CharacterCombatControll
 import { CharacterOutCombatController } from "../controller/CharacterOutCombatController";
 import { CharacterController } from "../controller/CharacterController";
 import { FogSystem } from "../system/NewFogSystem";
-import { interactionSetting } from "../envSetting";
+import { interactionSetting, tileSize } from "../envSetting";
 export class DoorAnimSprite extends Container {
   // 门的状态，true 表示打开，false 表示关闭
   private _isOpen: boolean = false;
@@ -256,8 +256,8 @@ export const createDoorAnimSpriteFromDoor = async (door: Door) => {
   doorAnimSprite.addChild(closedDoorSprite);
   doorAnimSprite.addChild(openedDoorSprite);
   // 将门的坐标设置为64*64矩形的中点
-  doorAnimSprite.x = door.x + 32;
-  doorAnimSprite.y = door.y + 32;
+  doorAnimSprite.x = door.x + tileSize/2;
+  doorAnimSprite.y = door.y + tileSize/2;
   // 设置锚点为中心，使门精灵围绕中心点渲染
   closedDoorSprite.anchor.set(0.5, 0.5);
   openedDoorSprite.anchor.set(0.5, 0.5);
@@ -332,7 +332,7 @@ const outBattleAction = (door: Door) => {
   const unitX = selectedCharacter.x;
   const unitY = selectedCharacter.y;
   const dis = Math.max(Math.abs(doorX - unitX), Math.abs(doorY - unitY));
-  if (dis > 64) {
+  if (dis > tileSize) {
     return { info: "距离过远", useful: false };
   }
   return { info: "动作可用", useful: true };
@@ -347,7 +347,7 @@ const inBattleAction = (door: Door) => {
   const unitX = selectedCharacter.x;
   const unitY = selectedCharacter.y;
   const dis = Math.max(Math.abs(doorX - unitX), Math.abs(doorY - unitY));
-  if (dis > 64) {
+  if (dis > tileSize) {
     return { info: "距离过远", useful: false };
   }
 

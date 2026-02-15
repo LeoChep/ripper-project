@@ -8,6 +8,7 @@ import { useInitiativeStore } from "@/stores/initiativeStore";
 import * as envSetting from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
+import { tileSize } from "../envSetting";
 
 export class CharCombatStepController {
   public static isUse: boolean = false;
@@ -35,7 +36,6 @@ export class CharCombatStepController {
       "walk",
     ) as WalkStateMachine;
 
-    const tileSize = 64;
     const graphics = new PIXI.Graphics();
     graphics.alpha = 0.4;
     graphics.zIndex = envSetting.zIndexSetting.mapZindex;

@@ -185,7 +185,7 @@ export class FogSystem {
    * @param layers 渐变层数（0-10，0表示无渐变）- 实际转换为模糊强度
    * @param stepSize 每层宽度（像素，建议16-64）- 控制模糊范围
    */
-  setGradientConfig(layers: number, stepSize: number = 32) {
+  setGradientConfig(layers: number, stepSize: number = tileSize/2) {
     this.gradientLayers = Math.max(0, Math.min(10, layers));
     this.gradientStepSize = Math.max(8, Math.min(128, stepSize));
   }

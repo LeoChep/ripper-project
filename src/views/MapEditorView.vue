@@ -193,7 +193,7 @@ import { UnitAnimSpirite } from '@/core/anim/UnitAnimSprite';
 import * as envSetting from '@/core/envSetting';
 
 // 配置
-const gridSize = 64;
+const gridSize = envSetting.tileSize
 const defaultCanvasWidth = 1536;
 const defaultCanvasHeight = 1920;
 const showGrid = ref(true);
@@ -1126,9 +1126,9 @@ const loadUnitSprite = async (unitTypeName: string): Promise<{ textures: PIXI.Te
         }
 
         // 根据单位类型判断大小（参考 GamePannel.vue）
-        const frameSize = animMetaJson.frameSize || 64;
+        const frameSize = animMetaJson.frameSize || envSetting.tileSize;
         const isBigUnit = unitTypeName === 'bigSkeleton'; // 可以添加更多大型单位
-        const visualSize = isBigUnit ? 128 : 64;
+        const visualSize = isBigUnit ? envSetting.tileSize * 2 : envSetting.tileSize;
         const scale = visualSize / frameSize;
 
         // 缓存精灵数据

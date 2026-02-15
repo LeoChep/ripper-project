@@ -3,6 +3,7 @@ import { golbalSetting } from "../golbalSetting";
 import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
 import type { Unit } from "../units/Unit";
 import * as PIXI from "pixi.js";
+import { tileSize } from "../envSetting";
 export const playerSelectMovement = (
   event: PIXI.FederatedPointerEvent,
   unit: Unit,
@@ -18,8 +19,8 @@ export const playerSelectMovement = (
   }
   const offsetX = pos.x - gobalContainer.x;
   const offsetY = pos.y - gobalContainer.y;
-  const targetX = Math.floor(offsetX / 64);
-  const targetY = Math.floor(offsetY / 64);
+  const targetX = Math.floor(offsetX / tileSize);
+  const targetY = Math.floor(offsetY / tileSize);
   if (!path[`${targetX},${targetY}`]) {
     console.warn("点击位置不在可移动范围内");
     return;
@@ -49,7 +50,7 @@ export const moveMovement =  (
   path: { [key: string]: { x: number; y: number } | null }
 ) => {
   unit.state = "walk"; // 设置单位状态为行走
-  const tileSize = 64; // 格子大小
+
   //计算出动画精灵所在的格子
   const spriteUnit = unit.animUnit;
   if (!spriteUnit) {
@@ -66,6 +67,8 @@ export const moveMovement =  (
   const tileY = targetY;
   console.log(`点击位置所在格子: (${tileX}, ${tileY})`);
   let pathCuror = path[`${tileX},${tileY}`];
+  console.log(`路径起点: (${centerX}, ${centerY})`);
+
   console.log(pathCuror);
   //获取路径
   const pathWay = [] as { x: number; y: number }[];
@@ -82,6 +85,7 @@ export const moveMovement =  (
   pathWay.reverse();
   pathWay.push({ x: tileX, y: tileY });
   pathWay.shift();
+  console.log(`完整路径: ${pathWay.map((p) => `(${p.x}, ${p.y})`).join(" -> ")}`);
   //合并路径中的直线
   for (let i = pathWay.length - 2; i > 0; i--) {
     const prev = pathWay[i - 1];

@@ -13,7 +13,7 @@ import { golbalSetting } from "../golbalSetting";
 import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
 import { endTurn } from "../system/InitiativeSystem";
 import { MoveSelector } from "../selector/MoveSeletor";
-const tileSize = 64;
+import { tileSize } from '../envSetting';
 
 type Rlayer = {
   basicLayer: PIXI.IRenderLayer;
@@ -56,7 +56,6 @@ export class CharCombatMoveController {
       }
     }
 
-    const tileSize = 64;
 
     const spriteUnit = unit.animUnit;
     console.log("spriteUnits", unit);

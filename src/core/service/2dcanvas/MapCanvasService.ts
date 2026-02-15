@@ -219,8 +219,8 @@ export class MapCanvasService {
 
     console.log("generateAnimSprite", unit, animSpriteUnit);
     this.addAnimSpriteUnit(unit);
-    animSpriteUnit.x = Math.round(unit.x / 64) * 64;
-    animSpriteUnit.y = Math.round(unit.y / 64) * 64;
+    animSpriteUnit.x = Math.round(unit.x / envSetting.tileSize) * envSetting.tileSize;
+    animSpriteUnit.y = Math.round(unit.y / envSetting.tileSize) * envSetting.tileSize;
     unit.x = animSpriteUnit.x;
     unit.y = animSpriteUnit.y;
     return unit;
@@ -245,9 +245,9 @@ export class MapCanvasService {
         unit.creature.size
       );
       if (unit.creature.size == "big")
-        animSpriteUnit.visisualSizeValue = { width: 128, height: 128 };
+        animSpriteUnit.visisualSizeValue = { width: envSetting.tileSize * 2, height: envSetting.tileSize * 2 };
     } else {
-      animSpriteUnit.visisualSizeValue = { width: 64, height: 64 };
+      animSpriteUnit.visisualSizeValue = { width: envSetting.tileSize, height: envSetting.tileSize };
     }
     animMetaJson.getAllExportedAnimations().forEach(async (anim) => {
       console.log(anim);

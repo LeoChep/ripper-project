@@ -11,7 +11,7 @@ export class ShiftAnim {
     });
     const interval = setInterval(() => {
       // 更新单位位置
-      //每次unit向target移动32pixi
+      //每次unit向target移动tileSize/2pixi
       const dx = tileSize / 4;
       const dy = tileSize / 4;
       if (target.x > unit.x + dx) {

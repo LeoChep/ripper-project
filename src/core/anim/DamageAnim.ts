@@ -1,5 +1,6 @@
 import { getContainer, getLayers } from "@/stores/container";
 import * as PIXI from "pixi.js";
+import { tileSize } from "../envSetting";
 
 export async function createDamageAnim(
   damage: string,
@@ -21,7 +22,7 @@ export async function createDamageAnim(
     },
   });
 
-  damageText.x = target.x + 32 - damageText.width / 2;
+  damageText.x = target.x + tileSize/2 - damageText.width / 2;
   damageText.y = target.y;
 
   container.addChild(damageText);

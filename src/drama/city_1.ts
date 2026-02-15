@@ -8,6 +8,7 @@ import { UnitSystem } from "@/core/system/UnitSystem";
 import { CharacterController } from "@/core/controller/CharacterController";
 class CITY_1 extends Drama {
   mapName: string = "city_1";
+  mapType: string = "jpg";
   constructor() {
     super("city_1", "这是一个测试剧情");
   }

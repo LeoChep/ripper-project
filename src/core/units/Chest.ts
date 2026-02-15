@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
 import { ItemSystem } from "../item";
 import { ChestSystem } from "../system/ChestSystem";
+import { tileSize } from "../envSetting";
 
 export class Chest {
   public id: number;
@@ -19,8 +20,8 @@ export class Chest {
     id: number,
     x: number,
     y: number,
-    width: number = 64,
-    height: number = 64,
+    width: number = tileSize,
+    height: number = tileSize,
   ) {
     this.id = id;
     this.chestSprite = null;
@@ -60,9 +61,9 @@ export class Chest {
 export async function createChestFromBoxObj(obj: any): Promise<Chest> {
   const x = obj.x;
   // Tiled 中带 gid 的对象 y 坐标是底部位置，需要减去高度转换为顶部位置
-  const height = obj.height || 64;
+  const height = obj.height || tileSize;
   const y = obj.y - height;
-  const width = obj.width || 64;
+  const width = obj.width || tileSize;
 
   const chest = new Chest(obj.id, x, y, width, height);
 

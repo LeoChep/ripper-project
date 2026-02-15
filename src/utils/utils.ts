@@ -8,8 +8,8 @@ export const getDoorSvg=(state:string)=>{
     return new URL(`../assets/door/door-${state}.svg`, import.meta.url)
     .href;
 }
-export const getMapAssetFile = (mapName: string) => {
-  return new URL(`../assets/map/${mapName}.png`, import.meta.url).href;
+export const getMapAssetFile = (mapName: string,mapType: string='png') => {
+  return new URL(`../assets/map/${mapName}.${mapType}`, import.meta.url).href;
 };
 export const getParticleFile = (particleName: string) => {
   return new URL(`../assets/partics/${particleName}.png`, import.meta.url).href;

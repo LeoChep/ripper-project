@@ -14,12 +14,12 @@ export class UnitAnimSpirite extends Container {
 
   private owner: Unit | undefined;
   private frameSize: { width: number; height: number } = {
-    width: 64,
-    height: 64,
+    width: tileSize,
+    height: tileSize,
   };
   private visisualSize: { width: number; height: number } = {
-    width: 64,
-    height: 64,
+    width: tileSize,
+    height: tileSize,
   };
 
   public getFrameSize(): { width: number; height: number } {
@@ -328,8 +328,8 @@ export const toward = (
   targetY: number
 ) => {
   let direction = unit.direction;
-  const spriteUnitX = Math.floor(unit.x / 64); // 假设动画
-  const spriteUnitY = Math.floor(unit.y / 64); // 假设动画
+  const spriteUnitX = Math.floor(unit.x / tileSize); // 假设动画
+  const spriteUnitY = Math.floor(unit.y / tileSize); // 假设动画
   const dx = targetX - spriteUnitX;
   const dy = targetY - spriteUnitY;
   //设置朝向

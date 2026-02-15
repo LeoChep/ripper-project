@@ -146,8 +146,8 @@ export class IceRaysController extends AbstractPwoerController {
     // await video.play(); // 兼容自动播放策略
 
     const sprite = await getAnimSpriteFromPNGpacks("iceRay", 77);
-    sprite.x = unit.x + 32;
-    sprite.y = unit.y + 32;
+    sprite.x = unit.x + tileSize/2;
+    sprite.y = unit.y + tileSize/2;
     const distance = Math.sqrt(
       (gridX * tileSize - unit.x) ** 2 + (gridY * tileSize - unit.y) ** 2
     );

@@ -9,6 +9,7 @@ import { CharacterController } from "@/core/controller/CharacterController";
 import { DramaSystem } from "@/core/system/DramaSystem";
 class D1 extends Drama {
   mapName: string = "A";
+  mapType: string = "png";
   constructor() {
     super("d1", "这是一个测试剧情");
   }

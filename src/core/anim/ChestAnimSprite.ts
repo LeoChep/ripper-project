@@ -8,6 +8,7 @@ import { CharacterCombatController } from "../controller/CharacterCombatControll
 import { CharacterOutCombatController } from "../controller/CharacterOutCombatController";
 import { CharacterController } from "../controller/CharacterController";
 import { MessageTipSystem } from "../system/MessageTipSystem";
+import { tileSize } from "../envSetting";
 
 export class ChestAnimSprite extends Container {
   // 宝箱的状态，true 表示打开，false 表示关闭
@@ -139,7 +140,7 @@ export class ChestAnimSprite extends Container {
     const tooltipHeight = this.tooltip.height + padding * 2;
     const tooltipWidth = this.tooltip.width + padding * 2;
     this.tooltipContainer.position.set(
-      (64 - tooltipWidth) / 2, // 水平居中
+      (tileSize - tooltipWidth) / 2, // 水平居中
       -tooltipHeight - 5, // 在宝箱上方，留 5 像素间距
     );
 
@@ -198,13 +199,13 @@ const outBattleChestAction = (chest: Chest) => {
     return { info: "未选择角色", useful: false };
   }
 
-  const chestX = chest.x + 32; // 宝箱中心点（考虑偏移）
-  const chestY = chest.y + 32;
-  const unitX = selectedCharacter.x + 32;
-  const unitY = selectedCharacter.y + 32;
+  const chestX = chest.x + tileSize/2; // 宝箱中心点（考虑偏移）
+  const chestY = chest.y + tileSize/2;
+  const unitX = selectedCharacter.x + tileSize/2;
+  const unitY = selectedCharacter.y + tileSize/2;
   const dis = Math.max(Math.abs(chestX - unitX), Math.abs(chestY - unitY));
 
-  if (dis > 64) {
+  if (dis > tileSize) {
     return { info: "距离过远", useful: false };
   }
   return { info: "动作可用", useful: true };
@@ -219,13 +220,13 @@ const inBattleChestAction = (chest: Chest) => {
   }
 
   let actionUseful = false;
-  const chestX = chest.x + 32; // 宝箱中心点（考虑偏移）
-  const chestY = chest.y + 32;
-  const unitX = selectedCharacter.x + 32;
-  const unitY = selectedCharacter.y + 32;
+  const chestX = chest.x + tileSize/2; // 宝箱中心点（考虑偏移）
+  const chestY = chest.y + tileSize/2;
+  const unitX = selectedCharacter.x + tileSize/2;
+  const unitY = selectedCharacter.y + tileSize/2;
   const dis = Math.max(Math.abs(chestX - unitX), Math.abs(chestY - unitY));
 
-  if (dis > 64) {
+  if (dis > tileSize) {
     return { info: "距离过远", useful: false };
   }
 
@@ -249,8 +250,8 @@ export const createChestAnimSpriteFromChest = async (chest: Chest) => {
   console.log("Chest texture loaded:", boxTextureUrl);
   // box1.png 是 4 帧的图集，每帧 64x64，间距 10
   // 第 0 帧是关闭状态，第 3 帧是打开状态
-  const frameWidth = 64;
-  const frameHeight = 64;
+  const frameWidth = tileSize;
+  const frameHeight = tileSize;
   const spacing = 10;
 
   // 创建关闭状态的纹理（第 0 帧）
@@ -290,9 +291,9 @@ export const createChestAnimSpriteFromChest = async (chest: Chest) => {
   chestAnimSprite.addChild(openedChestSprite);
 
   // 参考 unit 的位置设置：对齐到网格，居中显示（64格子中居中50像素的宝箱）
-  const offset = (64 - targetSize) / 2;
-  chestAnimSprite.x = Math.round(chest.x / 64) * 64 + offset;
-  chestAnimSprite.y = Math.round(chest.y / 64) * 64 + offset;
+  const offset = (tileSize - targetSize) / 2;
+  chestAnimSprite.x = Math.round(chest.x / tileSize) * tileSize + offset;
+  chestAnimSprite.y = Math.round(chest.y / tileSize) * tileSize + offset;
 
   chestAnimSprite.isOpen = chest.isOpen;
   chestAnimSprite.zIndex = 20;

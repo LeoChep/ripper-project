@@ -3,6 +3,7 @@ import type { Unit } from '../units/Unit';
 import { getContainer, getLayers } from '@/stores/container';
 import hitURL from "@/assets/effect/Impact_03_Regular_Yellow_400x400.webm";
 import missHRL from "@/assets/effect/Miss_02_White_200x200.webm";
+import { tileSize } from '../envSetting';
 export async function createMissOrHitAnimation(
   target: { x: number; y: number },
   hitFlag: boolean,
@@ -40,15 +41,15 @@ export async function createMissOrHitAnimation(
   // 设置 sprite 位置和大小
 
   if (hitFlag) {
-      sprite.x = target.x +32
-    sprite.y = target.y+32
+      sprite.x = target.x +tileSize/2
+    sprite.y = target.y+tileSize/2
   } else {
-    sprite.x = target.x + 32;
-    sprite.y = target.y - 32;
+    sprite.x = target.x + tileSize/2;
+    sprite.y = target.y - tileSize/2;
   }
   // alert(video.width)
   sprite.anchor.set(0.5, 0.5); // 设置锚点为中心
-  sprite.scale = (1 / (sprite.width / 64)) * 2;
+  sprite.scale = (1 / (sprite.width / tileSize)) * 2;
   // sprite.width=64
   // sprite.height=64
   // alert(sprite.width)

@@ -1,4 +1,4 @@
-const tileSize = 64;
+
 const defultCheckFunction = (
   x: number,
   y: number,

@@ -115,8 +115,8 @@ export const checkPassiableBySize = (
     for (let dx = 0; dx < range; dx++) {
       for (let dy = 0; dy < range; dy++) {
         rangeArrA.push({
-          x: unitx * tileSize + dx * tileSize + 32,
-          y: unity * tileSize + dy * tileSize + 32,
+          x: unitx * tileSize + dx * tileSize + tileSize/2,
+          y: unity * tileSize + dy * tileSize + tileSize/2,
         });
       }
     }
@@ -134,7 +134,7 @@ export const checkPassiableBySize = (
 
         // 构建范围数组
 
-        const pointsB = [{ x: x * tileSize + 32, y: y * tileSize + 32 }];
+        const pointsB = [{ x: x * tileSize + tileSize/2, y: y * tileSize + tileSize/2 }];
         // 检查所有中点的连线
         let intersectCount = 0;
         for (let i = 0; i < rangeArrA.length; i++) {
