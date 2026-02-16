@@ -33,7 +33,7 @@
     <property name="unitTypeName" value="manFighter"/>
    </properties>
   </object>
-  <object id="2" name="领主" x="632" y="202.667" width="64" height="64">
+  <object id="2" name="领主" x="641.333" y="252" width="64" height="64">
    <properties>
     <property name="direction" type="int" value="3"/>
     <property name="name" value="领主"/>

@@ -32,6 +32,11 @@ const router = createRouter({
       name: "mapEditor",
       component: () => import("../views/MapEditorView.vue"),
     },
+        {
+      path: "/front-editor",
+      name: "frontEditor",
+      component: () => import("../views/FrontObjEditorView.vue"),
+    },
   ],
 });
 

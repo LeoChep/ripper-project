@@ -3,33 +3,45 @@
   <div>
     <div v-if="currentUnit" class="character-portrait">
       <div class="portrait-container">
-        <img v-if="avatarUrl" :src="avatarUrl" :alt="currentUnit.name" class="portrait-image" />
+        <img
+          v-if="avatarUrl"
+          :src="avatarUrl"
+          :alt="currentUnit.name"
+          class="portrait-image"
+        />
       </div>
     </div>
 
     <!-- 对话框（无角色时使用） -->
     <!-- 嵌入式选项 -->
     <!-- 对话框（位于角色头像下方） -->
-    <div v-if="showFlag || talkState.options.length > 0" 
-         ref="talkWindowRef"
-         class="talk-window-portrait">
+    <div
+      v-if="showFlag || talkState.options.length > 0"
+      ref="talkWindowRef"
+      class="talk-window-portrait"
+    >
       <div v-if="currentUnit" class="dialog-character-name">
         <span>{{ currentUnit.creature?.name || currentUnit.name }}</span>
       </div>
       <div v-if="showFlag" class="talk-content-portrait">
         <p>{{ talkContent }}</p>
       </div>
-          <div v-if="talkState.options.length > 0" class="portrait-options">
-      <div v-for="(option, index) in talkState.options" :key="index"
-        :class="['portrait-option-item', { 'selected': index === talkState.selectedOption }]"
-        @click="handleOptionClick(index)" @mouseenter="handleOptionHover(index)">
-        <span class="option-text">{{ option.text }}</span>
+      <div v-if="talkState.options.length > 0" class="portrait-options">
+        <div
+          v-for="(option, index) in talkState.options"
+          :key="index"
+          :class="[
+            'portrait-option-item',
+            { selected: index === talkState.selectedOption },
+          ]"
+          @click="handleOptionClick(index)"
+          @mouseenter="handleOptionHover(index)"
+        >
+          <span class="option-text">{{ option.text }}</span>
+        </div>
       </div>
     </div>
-    </div>
-
   </div>
-
 </template>
 
 <script setup lang="ts">
@@ -75,11 +87,11 @@ watch(
 // 调整对话框位置，防止超出下边界
 const adjustTalkWindowPosition = (): void => {
   if (!talkWindowRef.value) return;
-  
+
   const windowHeight = talkWindowRef.value.offsetHeight;
   const defaultTop = appSetting.height / 2 + 170;
   const windowBottom = defaultTop + windowHeight;
-  
+
   // 如果对话框底部超出屏幕，则向上移动
   if (windowBottom > appSetting.height) {
     const overflow = windowBottom - appSetting.height;
@@ -429,6 +441,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: inherit;
   min-height: 40px;
   flex: 1;
 }
@@ -504,7 +517,8 @@ onMounted(() => {
 
 /* 闪烁动画 */
 @keyframes blink {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
