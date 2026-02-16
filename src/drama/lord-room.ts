@@ -101,21 +101,28 @@ class LordRoom extends Drama {
     }
     CGstart();
 
-    this.setVariable("inCombat1", true);
-    InitiativeController.setMap(this.map);
-    const units = UnitSystem.getInstance().getUnitBySelectionGroup("battle1");
-    const players = UnitSystem.getInstance().getUnitBySelectionGroup("player");
-    players.forEach((player) => {
-      units.push(player);
-    });
-    const initCombatPromise =
-      InitiativeController.addUnitsToInitiativeSheet(units);
-
-    // initCombatPromise.then(async () => {
-    //   await InitiativeController.startBattle();
-    //   InitiativeController.startCombatTurn();
-    // });
-
+    await unitSpeak(
+      "领主",
+      "哦，罗伊斯，很高兴能见到你。你和你的父亲简直长得一模一样。"
+    );
+    await unitSpeak(
+      "领主",
+      "听说你在离开骑士团后，就组建了一只冒险者小队。我想这件事正适合你，于是就邀请了你，很高兴你能前来帮我这个年老力衰的老头子。"
+    );
+    await unitSpeak(
+      "领主",
+      "长话短说，为了庆祝伟大的拿不丢勒将军和皇女殿下成婚，城里重新开始举办耀光节，但是在这个节骨眼上，却出现了城里人陆续失踪的怪事。这简直是对拿不丢勒将军的不敬，我希望你能调查这件事，并找出真凶。"
+    );
+    await unitSpeak("战士", "倒也不是离开骑士团……不过这件事我就接下了。");
+    await unitSpeak(
+      "领主",
+      "很好。稍后我会让唐宁整理相关信息。你也可以去找拉瓦苏斯中尉和警卫队了解更多线索，他在城中心的警卫处里。"
+    );
+    await unitSpeak(
+      "领主",
+      "不过，难得来一趟，不妨多在城里逛逛。这几天晚上我都会在城堡里举行晚宴，记得来参加，多交一些高级朋友。"
+    );
+    await unitSpeak("战士", "非常感谢您的邀请，届时我会前往。");
     CGEnd();
     CharacterOutCombatController.isUse = true;
   }

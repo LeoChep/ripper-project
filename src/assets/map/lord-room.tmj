@@ -68,8 +68,45 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":649.333333333333,
-                 "y":695.333333333333
+                 "x":649.333,
+                 "y":695.333
+                }, 
+                {
+                 "height":64,
+                 "id":2,
+                 "name":"\u9886\u4e3b",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":3
+                        }, 
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"\u9886\u4e3b"
+                        }, 
+                        {
+                         "name":"party",
+                         "type":"string",
+                         "value":"npc"
+                        }, 
+                        {
+                         "name":"selectionGroup",
+                         "type":"string",
+                         "value":""
+                        }, 
+                        {
+                         "name":"unitTypeName",
+                         "type":"string",
+                         "value":"lord-meibiwusi"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":641.333333333333,
+                 "y":252
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -90,7 +127,7 @@
          "y":0
         }],
  "nextlayerid":5,
- "nextobjectid":2,
+ "nextobjectid":3,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

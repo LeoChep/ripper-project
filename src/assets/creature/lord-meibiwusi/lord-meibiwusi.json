@@ -1,0 +1,148 @@
+{
+  "name": "领主梅比乌斯",
+  "level": 5,
+  "role": "牧师",
+  "xp": 25,
+  "size": "中型",
+  "type": "自然界",
+  "hp": 48,
+  "maxHp": 48,
+  "bloodied": 24,
+  "ac": 22,
+  "fortitude": 17,
+  "reflex": 13,
+  "will": 19,
+  "speed": 12,
+  "fly": null,
+  "initiative": 2,
+  "senses": "",
+  "immunities": [],
+  "resistances": [],
+  "alignment": "无",
+  "languages": [
+    "-"
+  ],
+  "skills": [],
+  "abilities": {
+    "STR": {
+      "value": 20,
+      "modifier": 5
+    },
+    "DEX": {
+      "value": 10,
+      "modifier": 0
+    },
+    "CON": {
+      "value": 14,
+      "modifier": 2
+    },
+    "INT": {
+      "value": 10,
+      "modifier": 0
+    },
+    "WIS": {
+      "value": 15,
+      "modifier": 2
+    },
+    "CHA": {
+      "value": 8,
+      "modifier": -1
+    }
+  },
+  "equipment": [],
+  "attacks": [
+    {
+      "name": "圣耀击",
+      "type": "Ranged",
+      "action": "武器",
+      "range": 20,
+      "attackBonus": 6,
+      "damage": "1d8",
+      "target": "AC",
+      "effect": null,
+      "missEffect": null
+    }
+  ],
+  "weapons": [
+    {
+      "name": "长剑",
+      "type": "Melee",
+      "action": "武器",
+      "range": 1,
+      "proficiency": 3,
+      "bonus": 1,
+      "target": "ac",
+      "weapon": "1d8",
+      "damage": "1d8",
+      "effect": "",
+      "missEffect": null
+    }
+  ],
+  "powers": [
+     {
+      "name": "SonnlinorsHammer",
+      "displayName": "索离诺尔之锤",
+      "useType": "atwill",
+      "actionType": "standard",
+      "range": null,
+      "target": null,
+      "description": "武器在你的手中成为可以进行强大的攻击和保卫盟友的神圣工具。",
+      "damage": null,
+      "attackBonus": null,
+      "missEffect": null
+    },
+    {
+      "name": "WeaponOfDivineProtection",
+      "displayName": "神圣守护武器",
+      "useType": "atwill",
+      "actionType": "standard",
+      "range": null,
+      "target": null,
+      "description": "武器在你的手中成为可以进行强大的攻击和保卫盟友的神圣工具。",
+      "damage": null,
+      "attackBonus": null,
+      "missEffect": null
+    },
+     {
+      "name": "DivineGlow",
+      "displayName": "神圣光辉",
+      "useType": "atwill",
+      "actionType": "standard",
+      "range": null,
+      "target": null,
+      "description": "武器在你的手中成为可以进行强大的攻击和保卫盟友的神圣工具。",
+      "damage": null,
+      "attackBonus": null,
+      "missEffect": null
+    },
+    {
+      "name": "HearteningStrike",
+      "displayName": "神圣光辉",
+      "useType": "atwill",
+      "actionType": "standard",
+      "range": null,
+      "target": null,
+      "description": "武器在你的手中成为可以进行强大的攻击和保卫盟友的神圣工具。",
+      "damage": null,
+      "attackBonus": null,
+      "missEffect": null
+    }
+  ],
+  "traits": [
+   
+  ],
+  "feats": [
+    {
+      "name": "SuperiorWill"
+    },
+    {
+      "name": "LightningReflexes"
+    },
+    {
+      "name": "WeaponExpertise"
+    }
+  ],
+  "notes": [
+    "Equipment: 长剑, 短弓, 20 支箭"
+  ]
+}

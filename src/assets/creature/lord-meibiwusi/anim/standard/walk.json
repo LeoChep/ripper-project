@@ -1,0 +1,33 @@
+{
+    "frames": {
+
+        "walk.png":
+        {
+            "frame": { "x": 0, "y": 0, "w": 912, "h": 1168 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 912, "h": 1168 },
+            "sourceSize": { "w": 912, "h": 1168 }
+        }
+    },
+    "animations": {
+        "walk_w": [
+        "walk.png"
+        ],
+        "walk_s": [
+              "walk.png"
+        ],
+        "walk_a": [
+             "walk.png"
+        ],
+        "walk_d": [
+             "walk.png"
+        ]
+    },
+    "meta": {
+        "version": "1.0",
+        "format": "RGBA8888",
+        "size": { "w": 912, "h": 1168 },
+        "scale": "1"
+    }
+}
