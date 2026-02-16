@@ -263,6 +263,7 @@ export class MapCanvasService {
       if (json && json.frames) {
         const spritesheet = new PIXI.Spritesheet(sheetTexture, json as any);
         await spritesheet.parse();
+        console.log("创建动画精灵单位 - 加载完成:", anim, spritesheet);
         animSpriteUnit.addAnimationSheet(anim, spritesheet);
       }
     });

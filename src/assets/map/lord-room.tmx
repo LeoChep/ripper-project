@@ -26,7 +26,7 @@
  <objectgroup id="2" name="sprite">
   <object id="1" name="战士" x="649.333" y="695.333" width="64" height="64">
    <properties>
-    <property name="direction" type="int" value="0"/>
+    <property name="direction" type="int" value="3"/>
     <property name="name" value="manFighter"/>
     <property name="party" value="player"/>
     <property name="selectionGroup" value="player"/>

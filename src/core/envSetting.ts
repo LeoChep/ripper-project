@@ -6,7 +6,7 @@ export const zIndexSetting={
 }
 export const tileSize = 64; // 格子大小
 export const spriteTile=2.2;
-export const walkSpped=12;
+export const walkSpped=7;
 export const pannelHeight=150;
 export const appSetting = {
     width: 1600,

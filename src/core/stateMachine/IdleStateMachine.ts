@@ -5,7 +5,7 @@ import { UnitSystem } from "../system/UnitSystem";
 import type { Unit } from "../units/Unit";
 import { StateMachine } from "./StateMachine";
 
-export class WalkStateMachine extends StateMachine {
+export class IdleStateMachineIdleStateMachine extends StateMachine {
   public currentState: string | null = null;
   public walkType: "normal" | "step" = "normal";
   private path: {
@@ -40,112 +40,18 @@ export class WalkStateMachine extends StateMachine {
   }
 
   public doAction() {
-    if (this.path.length === 0) {
-      console.warn("没有路径可供移动");
-      this.callBack(); // 调用回调函数
-      this.callBack = () => {};
-      return;
-    }
-    if (this.pauseMove) {
-      console.log("移动已暂停");
-      return;
-    }
-    const nextPathPoint = this.path[0];
-    const nextX = nextPathPoint.x * tileSize;
-    const nextY = nextPathPoint.y * tileSize;
-    //借机判断
-
-    if (this.currentGrids.length === 0) {
-      this.currentGrids = UnitSystem.getInstance().getUnitGrids(this.owner);
-    }
-    let haveMoveToNewTile = false;
-    if (
-      nextPathPoint.x !== this.currentGrids[0]?.x ||
-      nextPathPoint.y !== this.currentGrids[0]?.y
-    ) {
-      haveMoveToNewTile = true;
-    }
-    if (haveMoveToNewTile) {
-      this.oldGrids = this.currentGrids;
-      this.currentGrids = UnitSystem.getInstance().getUnitGrids(this.owner);
-    }
-    // const unitX = Math.floor(this.owner.x / tileSize);
-    // const unitY = Math.floor(this.owner.y / tileSize);
-
-    // if (
-    //   unitX !== this.currentGrids[0]?.x ||
-    //   unitY !== this.currentGrids[0]?.y
-    // ) {
-    //   haveMoveToNewTile = true;
-    //   this.oldGrids = this.currentGrids;
-    //   this.currentGrids = UnitSystem.getInstance().getUnitGrids(this.owner);
-    //   console.log(
-    //     "单位移动到新格子:",
-    //     unitX,
-    //     unitY,
-    //     this.oldGrids,
-    //     this.currentGrids
-    //   );
-    // }
-    // const unitX2 = Math.ceil(this.owner.x / tileSize);
-    // const unitY2 = Math.ceil(this.owner.y / tileSize);
-
-    // if (
-    //   unitX2 !== this.currentGrids[0]?.x ||
-    //   unitY2 !== this.currentGrids[0]?.y
-    // ) {
-    //   haveMoveToNewTile = true;
-    //   this.oldGrids = this.currentGrids;
-    //   this.currentGrids = UnitSystem.getInstance().getUnitGrids(this.owner);
-    //   console.log(
-    //     "单位移动到新格子:",
-    //     unitX2,
-    //     unitY2,
-    //     this.oldGrids,
-    //     this.currentGrids
-    //   );
-    // }
-    //判断是否需要移动到新的格子
-
-    if (haveMoveToNewTile) {
-      // 检查是否有单位可以触
-      BattleEvenetSystem.getInstance().handleEvent(
-        "moveToNewGridEvent",
-        this.owner,
-        this.oldGrids
-      );
-      if (this.walkType != "step") this.checkOpportunity(this.oldGrids);
-    }
-    //
-    console.log("nextpoint", nextPathPoint);
-    const unit = this.owner;
+   
     const spriteUnit = this.owner.animUnit;
-
+    console.log("IdleStateMachine执行doAction，单位位置:", this.owner,spriteUnit);
     if (!spriteUnit) {
       console.error("动画精灵不存在");
       return;
     }
-    spriteUnit.anims["walk"].animationSpeed = 0.16;
     spriteUnit.state = "walk";
-    const dx = nextX - spriteUnit.x;
-    const dy = nextY - spriteUnit.y;
-    //转向
-    let direction = unit.direction;
-    //设置朝向
-    if (Math.abs(dx) < 7 && Math.abs(dy) < 7) {
-      // 如果没有移动，直接返回
-    } else if (Math.abs(dx) >= Math.abs(dy) - 1) {
-      // 水平移动
-      direction = dx > 0 ? 0 : 1; // 0向右, 1向左
-    } else if (Math.abs(dy) > Math.abs(dx)) {
-      // 垂直移动
-      direction = dy > 0 ? 2 : 3; // 2向下, 3向上
-    } else if (dx == 0 && dy == 0) {
-      // 如果没有移动，直接返回
-    }
-
-    unit.direction = direction;
-    this.movefunc(unit, nextX, nextY, this.path);
+    spriteUnit.anims['walk'].animationSpeed=0.1666;
+   
+    // unit.direction = direction;
+    
   }
   clearHaveOpportunity() {
     this.haveOpportunity = [];
@@ -227,7 +133,6 @@ export class WalkStateMachine extends StateMachine {
         }
         this.path = []; // 清空路径
         this.owner.state = "idle"; // 设置单位状态为闲置
-        
         this.callBack(); // 调用回调函数
         this.callBack = () => {};
       }

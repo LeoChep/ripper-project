@@ -165,6 +165,11 @@ export class UnitAnimSpirite extends Container {
         this.anims["hurt"].renderable = true;
       }
     }
+    if (this._state === "idle") {
+      if (this.anims["idle"]) {
+        this.anims["idle"].renderable = true;
+      }
+    }
     if (
       this.anims[this.state] &&
       this.anims[this.state].currentFrame ===
@@ -198,6 +203,7 @@ export class UnitAnimSpirite extends Container {
   public addAnimation(name: string, animation: PIXI.AnimatedSprite): void {
     this.anims[name] = animation;
     this.addChild(animation);
+    console.log("添加动画:", name, animation);
     animation.renderable = false; // 默认不渲染
   }
   public addAnimationSheet(name: string, spritesheet: PIXI.Spritesheet): void {

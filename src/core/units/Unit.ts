@@ -12,6 +12,7 @@ import { WalkStateMachine } from "../stateMachine/WalkStateMachine";
 import { TriatSystem } from "../system/TraitSystem";
 import { PowerSystem } from "../system/PowerSystem";
 import type { Item } from "../item/Item";
+import { IdleStateMachineIdleStateMachine } from "../stateMachine/IdleStateMachine";
 
 export interface UnitOptions {
   id: number;
@@ -78,6 +79,7 @@ export class Unit {
 
     this.stateMachinePack = new StateMachinePack(this); // 初始化状态机包
     this.stateMachinePack.addMachine("walk", new WalkStateMachine(this)); // 添加默认的 AI 状态机
+    this.stateMachinePack.addMachine("idle", new IdleStateMachineIdleStateMachine(this)); // 添加默认的 Idle 状态机
   }
 
   /**

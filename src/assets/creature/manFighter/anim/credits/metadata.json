@@ -38,7 +38,7 @@
     "shoot": 13,
     "hurt": 6,
     "climb": 6,
-    "idle": 2,
+    "idle": 4,
     "jump": 5,
     "sit": 3,
     "emote": 3,
