@@ -1,91 +1,74 @@
+
 <template>
-	<div class="canvas-editor">
-		<div class="toolbar">
-		<input
-		 id="image-upload"
-		 type="file"
-		 accept="image/*"
-		 @change="handleImageUpload"
-		 style="display: none"
-		/>
-		<input
-		 id="json-upload"
-		 type="file"
-		 accept="application/json"
-		 @change="handleJsonImport"
-		 style="display: none"
-		/>
-		<button @click="clickImport">
-		 导入图片
-		</button>
-		<button @click="clickImportJson">
-		 导入对象JSON
-		</button>
-			<button @click="exportJson" :disabled="!objects.length">
-				导出JSON
-			</button>
-			<span class="zoom-controls" v-if="imageLoaded">
-				<button class="zoom-btn" @click="zoomOut">-</button>
-				<span class="zoom-label">{{ Math.round(scale * 100) }}%</span>
-				<button class="zoom-btn" @click="zoomIn">+</button>
-				<button class="zoom-reset" @click="resetZoom">100%</button>
-			</span>
-			<span class="mouse-position" v-if="imageLoaded">
-				鼠标位置: X: {{ mouseX }} , Y: {{ mouseY }}
-			</span>
-			<span v-if="currentSelectBox">
-				前景物名称:
-				<input
-					v-model="currentObject.name"
-					placeholder="输入名称"
-					style="width: 140px; margin: 0 8px"
-				/>
-				遮挡高度:
-				<input
-					v-model.number="currentObject.occlusionHeight"
-					type="number"
-					placeholder="输入高度"
-					style="width: 90px; margin: 0 8px"
-				/>
-				<button @click="confirmObject">确认创建</button>
-			</span>
-		</div>
-
-		<div class="main-content">
-			<div class="canvas-container" ref="canvasContainer" @wheel="handleWheel">
-				<canvas
-					ref="canvasRef"
-					:style="canvasStyle"
-					@mousedown="startDraw"
-					@mousemove="(e) => { drawing(e); updateMousePosition(e); }"
-					@mouseup="endDraw"
-					@click="setOcclusionHeight"
-				></canvas>
-				<div v-if="!imageLoaded" class="empty-tip">请先导入图片</div>
-			</div>
-
-			<div class="sidebar">
-				<h3>前景物对象列表</h3>
-				<div v-if="!objects.length" class="empty-list">暂无对象</div>
-				<div class="object-item" v-for="(obj, index) in objects" :key="index">
-					<div class="object-info">
-						<p>名称: {{ obj.name || '未命名' }}</p>
-						<p>位置: {{ obj.x }},{{ obj.y }} 大小: {{ obj.width }}x{{ obj.height }}</p>
-						<p>遮挡高度: {{ obj.occlusionHeight || 0 }}</p>
-					</div>
-					<div class="object-actions">
-						<button @click="editObject(index)">编辑</button>
-						<button
-							@click="deleteObject(index)"
-							style="background: #ff4444; color: white"
-						>
-							删除
-						</button>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+  <div class="canvas-editor dark">
+    <div class="toolbar">
+      <input id="image-upload" type="file" accept="image/*" @change="handleImageUpload" style="display: none" />
+      <input id="json-upload" type="file" accept="application/json" @change="handleJsonImport" style="display: none" />
+      <button @click="clickImport">导入图片</button>
+      <button @click="clickImportJson">导入对象JSON</button>
+      <button @click="exportJson" :disabled="!objects.length">导出JSON</button>
+      <span class="zoom-controls" v-if="imageLoaded">
+        <button class="zoom-btn" @click="zoomOut">-</button>
+        <span class="zoom-label">{{ Math.round(scale * 100) }}%</span>
+        <button class="zoom-btn" @click="zoomIn">+</button>
+        <button class="zoom-reset" @click="resetZoom">100%</button>
+      </span>
+      <span class="mouse-position" v-if="imageLoaded">
+        鼠标位置: X: {{ mouseX }} , Y: {{ mouseY }}
+      </span>
+    </div>
+    <div class="main-content">
+      <div class="left-panel">
+        <div class="property-box">
+          <h3>对象属性编辑</h3>
+          <div v-if="currentSelectBox">
+            <div class="form-row">
+              <label>前景物名称:</label>
+              <input v-model="currentObject.name" placeholder="输入名称" />
+            </div>
+            <div class="form-row">
+              <label>遮挡高度:</label>
+              <input v-model.number="currentObject.occlusionHeight" type="number" placeholder="输入高度" />
+            </div>
+            <div class="form-row">
+              <button @click="confirmObject">确认创建</button>
+            </div>
+          </div>
+          <div v-else class="tip">请在画布上框选对象</div>
+        </div>
+      </div>
+      <div class="canvas-center">
+        <div class="canvas-container" ref="canvasContainer" @wheel="handleWheel">
+          <canvas
+            ref="canvasRef"
+            :style="canvasStyle"
+            @mousedown="startDraw"
+            @mousemove="(e) => { drawing(e); updateMousePosition(e); }"
+            @mouseup="endDraw"
+            @click="setOcclusionHeight"
+          ></canvas>
+          <div v-if="!imageLoaded" class="empty-tip">请先导入图片</div>
+        </div>
+      </div>
+      <div class="right-panel">
+        <div class="sidebar">
+          <h3>前景物对象列表</h3>
+          <div v-if="!objects.length" class="empty-list">暂无对象</div>
+          <div class="object-item" v-for="(obj, index) in objects" :key="index">
+            <div class="object-info">
+              <p>名称: {{ obj.name || '未命名' }}</p>
+              <p>位置: {{ obj.x }},{{ obj.y }} 大小: {{ obj.width }}x{{ obj.height }}</p>
+              <p>遮挡高度: {{ obj.occlusionHeight || 0 }}</p>
+            </div>
+            <div class="object-actions">
+              <button @click="editObject(index)">编辑</button>
+              <button @click="deleteObject(index)" style="background: #ff4444; color: white">删除</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -380,110 +363,189 @@ const exportJson = () => {
 </script>
 
 <style scoped>
-.canvas-editor {
-	width: 100%;
+
+.canvas-editor.dark {
+	width: 100vw;
 	height: 100vh;
+	background: #181a1b;
+	color: #e0e0e0;
 	display: flex;
 	flex-direction: column;
-	padding: 16px;
+	padding: 0;
 	box-sizing: border-box;
 }
 
 .toolbar {
-	margin-bottom: 16px;
+	padding: 18px 32px 0 32px;
 	display: flex;
 	align-items: center;
-	gap: 16px;
+	gap: 18px;
+	background: #232323;
+	border-bottom: 1px solid #222;
 }
-
 .toolbar button {
-	padding: 8px 16px;
+	padding: 8px 18px;
 	cursor: pointer;
-	background: #2196f3;
-	color: white;
+	background: #222a2f;
+	color: #e0e0e0;
 	border: none;
-	border-radius: 4px;
+	border-radius: 6px;
+	font-weight: 500;
+	transition: background 0.2s;
 }
-
+.toolbar button:hover {
+	background: #2a3a4a;
+}
 .toolbar button:disabled {
-	background: #cccccc;
+	background: #444;
 	cursor: not-allowed;
 }
-
 .zoom-controls {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
-	background: #f5f5f5;
+	background: #232323;
 	padding: 4px 8px;
 	border-radius: 4px;
 }
-
 .zoom-btn,
 .zoom-reset {
 	padding: 4px 8px;
 	cursor: pointer;
-	background: #4caf50;
-	color: white;
+	background: #2a3a4a;
+	color: #e0e0e0;
 	border: none;
 	border-radius: 4px;
 }
-
 .zoom-label {
 	min-width: 52px;
 	text-align: center;
-	color: #555;
+	color: #b0b0b0;
 	font-size: 13px;
 }
-
 .mouse-position {
-	color: #666;
+	color: #b0b0b0;
 	font-size: 14px;
-	background: #f5f5f5;
+	background: #232323;
 	padding: 4px 8px;
 	border-radius: 4px;
 }
-
 .main-content {
 	display: flex;
 	flex: 1;
-	gap: 16px;
+	background: #181a1b;
+	gap: 0;
 }
-
-.canvas-container {
+.left-panel {
+	width: 320px;
+	background: #232323;
+	border-right: 1px solid #222;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	padding: 32px 18px 0 18px;
+}
+.property-box {
+	background: #232323;
+	border-radius: 8px;
+	padding: 18px;
+	box-shadow: 0 2px 8px #00000033;
+}
+.property-box h3 {
+	margin-bottom: 18px;
+	font-size: 18px;
+	color: #e0e0e0;
+}
+.form-row {
+	margin-bottom: 14px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+.form-row label {
+	min-width: 80px;
+	color: #b0b0b0;
+}
+.form-row input {
 	flex: 1;
-	border: 1px solid #ddd;
-	position: relative;
-	overflow: auto;
+	padding: 6px 10px;
+	border-radius: 4px;
+	border: 1px solid #444;
+	background: #181a1b;
+	color: #e0e0e0;
 }
-
+.form-row button {
+	padding: 6px 16px;
+	background: #4caf50;
+	color: #fff;
+	border: none;
+	border-radius: 4px;
+}
+.tip {
+	color: #888;
+	font-size: 14px;
+	margin-top: 18px;
+}
+.canvas-center {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #181a1b;
+}
+.canvas-container {
+	background: #232323;
+	border-radius: 12px;
+	box-shadow: 0 2px 12px #00000044;
+	padding: 18px;
+	position: relative;
+	min-width: 600px;
+	min-height: 400px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
 .empty-tip {
 	position: absolute;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	color: #999;
+	color: #888;
 }
-
+.right-panel {
+	width: 340px;
+	background: #232323;
+	border-left: 1px solid #222;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	padding: 32px 18px 0 18px;
+}
 .sidebar {
-	width: 300px;
-	border: 1px solid #ddd;
-	padding: 16px;
-	overflow-y: auto;
+	background: #232323;
+	border-radius: 8px;
+	padding: 18px;
+	box-shadow: 0 2px 8px #00000033;
 }
-
+.sidebar h3 {
+	margin-bottom: 18px;
+	font-size: 18px;
+	color: #e0e0e0;
+}
 .object-item {
 	padding: 12px;
-	border-bottom: 1px solid #eee;
+	border-bottom: 1px solid #333;
 	margin-bottom: 8px;
 }
-
+.object-info p {
+	color: #b0b0b0;
+	margin: 2px 0;
+}
 .object-actions {
 	margin-top: 8px;
 	display: flex;
 	gap: 8px;
 }
-
 .object-actions button {
 	padding: 4px 8px;
 	cursor: pointer;
@@ -492,9 +554,11 @@ const exportJson = () => {
 	background: #4caf50;
 	color: white;
 }
-
+.object-actions button:last-child {
+	background: #ff4444;
+}
 .empty-list {
-	color: #999;
+	color: #888;
 	text-align: center;
 	margin-top: 20px;
 }
