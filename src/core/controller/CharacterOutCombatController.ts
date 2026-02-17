@@ -36,7 +36,7 @@ export class CharacterOutCombatController {
     if (ms) {
       console.log("ms", ms);
       ms.eventMode = "static";
-      ms.on("pointerdown", (e: PIXI.FederatedPointerEvent) => {
+      ms.on("click", (e: PIXI.FederatedPointerEvent) => {
         console.log("map click", );
         console.log("CharacterOutCombatController.isUse", CharacterOutCombatController.isUse);
         if (!CharacterOutCombatController.isUse) {

@@ -9,7 +9,7 @@ export const getDoorSvg=(state:string)=>{
     .href;
 }
 export const getMapAssetFile = (mapName: string,mapType: string='png') => {
-  return new URL(`../assets/map/${mapName}.${mapType}`, import.meta.url).href;
+  return new URL(`../assets/map/${mapName}/${mapName}.${mapType}`, import.meta.url).href;
 };
 export const getParticleFile = (particleName: string) => {
   return new URL(`../assets/partics/${particleName}.png`, import.meta.url).href;
@@ -121,6 +121,19 @@ export const getJsonFile = (
   console.log("getJsonFile", `../assets/${dirName}/${fileName}.${type}`);
   const jsonUrl = new URL(
     `../assets/${dirName}/${fileName}.${type}`,
+    import.meta.url
+  ).href;
+  console.log(jsonUrl);
+  return fetchJsonFile(jsonUrl);
+};
+export const getMapTmjFile = (
+  dirName: string,
+  fileName: string,
+  type = "json"
+) => {
+  console.log("getMapTmjFile",  `../assets/${dirName}/${fileName}/${fileName}.${type}`);
+  const jsonUrl = new URL(
+    `../assets/${dirName}/${fileName}/${fileName}.${type}`,
     import.meta.url
   ).href;
   console.log(jsonUrl);

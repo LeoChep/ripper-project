@@ -42,7 +42,25 @@ export class UnitAnimSpirite extends Container {
   public anims: { [key: string]: PIXI.AnimatedSprite } = {};
   public animsSheet: { [key: string]: PIXI.Spritesheet } = {};
   public statusIcons: { [key: string]: PIXI.Container } = {};
+  private isLeftClick = false;
   private callback: any;
+  public containsPoint = (point: PIXI.Point): boolean => {
+    if (this.isLeftClick) {
+      return false;
+    }
+    return false;
+  };
+  public spriteContainsPoint = (
+    sprite: PIXI.Sprite,
+    point: PIXI.Point
+  ): boolean => {
+    console.log("Checking containsPoint for sprite:", sprite, "with point:", point);
+    if (this.isLeftClick) {
+      console.log("containsPoint ignored due to left click",sprite);
+      return false;
+    } else return PIXI.Sprite.prototype.containsPoint.call(sprite, point);
+  };
+
   public get animationCallback(): any {
     return this.callback;
   }
@@ -50,7 +68,16 @@ export class UnitAnimSpirite extends Container {
   public set animationCallback(cb: any) {
     this.callback = cb;
   }
-
+  setSpriteContainsPoint(container: PIXI.Container) {
+    container.children.forEach((child) => {
+      if (child instanceof PIXI.AnimatedSprite) {
+        child.containsPoint = (point: PIXI.Point) =>
+          this.spriteContainsPoint(child, point);
+      } else {
+        this.setSpriteContainsPoint(child as PIXI.Container);
+      }
+    });
+  }
   constructor(unit: Unit | undefined) {
     super();
 
@@ -58,9 +85,23 @@ export class UnitAnimSpirite extends Container {
     // 可以在这里初始化你的自定义属性
     this.onRender = () => {
       this.update(this.callback);
+      this.setSpriteContainsPoint(this);
     };
-    this.eventMode = "none";
 
+    // this.eventMode = "none";
+    this.on("mousedown", (e) => {
+      console.log("mousedown", e);
+
+      this.isLeftClick = e.button === 0;
+    });
+
+    // 监听鼠标松开事件，重置标记（避免状态残留）
+    this.on("mouseup", () => {
+      this.isLeftClick = false;
+    });
+    this.on("mouseupoutside", () => {
+      this.isLeftClick = false;
+    });
   }
   public get ownerUnit(): Unit | undefined {
     return this.owner;
@@ -136,8 +177,8 @@ export class UnitAnimSpirite extends Container {
           0 -
           (this.anims[this._state].height - (this.visisualSize.height ?? 0)) /
             2;
-            this.anims[this._state].zIndex = this.y;
-          this.zIndex=this.y;
+        this.anims[this._state].zIndex = this.y;
+        this.zIndex = this.y;
         if (this.owner?.direction != null) {
           this.direction = this.owner.direction;
           this.anims[this._state].textures =
@@ -203,6 +244,7 @@ export class UnitAnimSpirite extends Container {
   public addAnimation(name: string, animation: PIXI.AnimatedSprite): void {
     this.anims[name] = animation;
     this.addChild(animation);
+
     console.log("添加动画:", name, animation);
     animation.renderable = false; // 默认不渲染
   }
@@ -214,7 +256,8 @@ export class UnitAnimSpirite extends Container {
     const animSprite = new PIXI.AnimatedSprite(
       spritesheet.animations[animKeys[0]]
     );
-    animSprite.scale = this.visisualSize.width / this.frameSize.width * spriteTile;
+    animSprite.scale =
+      (this.visisualSize.width / this.frameSize.width) * spriteTile;
     console.log("动画精灵的视觉大小:", this.visisualSize);
     animSprite.animationSpeed = 0.1666;
     animSprite.textures = spritesheet.animations[animKeys[0]];

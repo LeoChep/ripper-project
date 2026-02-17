@@ -34,7 +34,6 @@ import { getAnimActionSpriteJsonFile, getAnimMetaJsonFile, getAnimSpriteImgUrl, 
 import * as PIXI from "pixi.js";
 import { setContainer, setLayer } from "@/stores/container";
 import CharacterPannel from "../CharacterPannel/CharacterPannel.vue";
-import { useCharacterStore } from "@/stores/characterStore";
 import { CharacterOutCombatController } from "@/core/controller/CharacterOutCombatController";
 import * as envSetting from "@/core/envSetting";
 import { golbalSetting } from "@/core/golbalSetting";
@@ -46,15 +45,13 @@ import { AreaSystem } from "@/core/system/AreaSystem";
 import InitBar from "../ActionBar/InitBar.vue";
 import TurnAnnouncement from "../TurnAnnouncement/TurnAnnouncement.vue";
 import { CharacterController } from "@/core/controller/CharacterController";
-import { AnimMetaJson } from "@/core/anim/AnimMetaJson";
-import { createDoorAnimSpriteFromDoor } from "@/core/anim/DoorAnimSprite";
-import { createChestAnimSpriteFromChest } from "@/core/anim/ChestAnimSprite";
-import { UnitAnimSpirite } from "@/core/anim/UnitAnimSprite";
+
 import type { TiledMap } from "@/core/MapClass";
 import type { Unit } from "@/core/units/Unit";
 import { UnitSystem } from "@/core/system/UnitSystem";
 import { FogSystem } from "@/core/system/NewFogSystem";
 import { MapCanvasService } from "@/core/service/2dcanvas/MapCanvasService";
+import  { Creature } from "@/core/units/Creature";
 
 
 const appSetting = envSetting.appSetting;
@@ -62,7 +59,9 @@ const route = useRoute();
 
 // 测试功能开关：控制是否显示格子行列号
 const showGridNumbers = ref(false);
-
+const selectedCreature = ref(null as Creature | null);
+const selectedUnit = ref(null as Unit | null);
+const creatureInfoPage = ref('basic'); // 添加页面状态
 onMounted(async () => {
   const app = new PIXI.Application();
   await app.init(appSetting);
@@ -80,7 +79,12 @@ onMounted(async () => {
   container.sortableChildren = true;
   setContainer(container);
   setLayer(rlayers);
+//增加选择角色监听
 
+MapCanvasService.getInstance().openDetail = (unit: Unit, creature: Creature) => {
+  selectedCreature.value = creature;
+  selectedUnit.value = unit;
+};
   //增加键盘监听
   addListenKeyboard();
 
@@ -124,9 +128,7 @@ onMounted(async () => {
 
 
 
-const selectedCreature = ref(null);
-const selectedUnit = ref(null);
-const creatureInfoPage = ref('basic'); // 添加页面状态
+
 
 // 监听打开背包事件
 onMounted(() => {

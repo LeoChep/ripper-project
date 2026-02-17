@@ -92,10 +92,10 @@ export class DramaSystem {
   // 辅助函数：加载地图
   async loadMap(mapName: string, mapType: string = "png"): Promise<TiledMap> {
     const PIXI = await import("pixi.js");
-    const { getMapAssetFile, getJsonFile } = await import("@/utils/utils");
+    const { getMapAssetFile, getMapTmjFile } = await import("@/utils/utils");
     const url = getMapAssetFile(mapName, mapType);
     const mapTexture = await PIXI.Assets.load(url);
-    const mapPassiablePOJO = await getJsonFile("map", mapName, "tmj");
+    const mapPassiablePOJO = await getMapTmjFile("map", mapName, "tmj");
     const { TiledMap } = await import("@/core/MapClass");
     const mapPassiable = new TiledMap(mapPassiablePOJO, mapTexture);
     return mapPassiable;

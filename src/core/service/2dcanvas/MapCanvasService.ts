@@ -13,6 +13,7 @@ import {
 } from "@/utils/utils";
 import { AnimMetaJson } from "@/core/anim/AnimMetaJson";
 import { UnitAnimSpirite } from "@/core/anim/UnitAnimSprite";
+import type { Creature } from "@/core/units/Creature";
 
 export class MapCanvasService {
   constructor() {}
@@ -270,6 +271,7 @@ export class MapCanvasService {
     return animSpriteUnit;
   };
 
+  openDetail=(unit:Unit,creature:Creature)=>{}
   // 辅助函数：添加动画精灵单位
   addAnimSpriteUnit = (unit: any) => {
     const animSpriteUnit = unit.animUnit;
@@ -288,8 +290,7 @@ export class MapCanvasService {
         console.log("Clicked on unit:", unit.unitTypeName);
         if (unit.party === "player" || unit.party !== "true") {
           console.log("这是玩家角色，打开角色面板");
-          //   selectedCreature.value = unit.creature;
-          //   selectedUnit.value = unit;
+          this.openDetail(unit, unit.creature);
         } else {
           console.log("这是非玩家角色，打开生物信息面板");
         }

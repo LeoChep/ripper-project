@@ -111,7 +111,7 @@
 
 <script setup lang="ts">
 import { ModifierSystem } from "@/core/system/ModifierSystem";
-import type { Creature } from "@/core/units/Creature";
+import  { Creature } from "@/core/units/Creature";
 import type { Unit } from "@/core/units/Unit";
 import { onMounted, onBeforeUnmount, ref, computed, provide } from "vue";
 import { getUnitAvatar } from "@/utils/utils";
@@ -123,6 +123,7 @@ import CreatureEquipment from "./pages/CreatureEquipment.vue";
 import CreatureFeats from "./pages/CreatureFeats.vue";
 import CreatureOther from "./pages/CreatureOther.vue";
 import CreatureInventory from "./pages/CreatureInventory.vue";
+import { MapCanvasService } from "@/core/service/2dcanvas/MapCanvasService";
 
 defineEmits(["close"]);
 

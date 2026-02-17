@@ -1,0 +1,82 @@
+[
+  {
+    "name": "战士雕像1",
+    "x": 67,
+    "y": 39.383331298828125,
+    "width": 97,
+    "height": 187,
+    "occlusionHeight": 81
+  },
+  {
+    "name": "龙形雕像1",
+    "x": 307,
+    "y": 35.383331298828125,
+    "width": 93,
+    "height": 191,
+    "occlusionHeight": 81
+  },
+  {
+    "name": "领主桌子",
+    "x": 490,
+    "y": 35.383331298828125,
+    "width": 320,
+    "height": 191,
+    "occlusionHeight": 62
+  },
+  {
+    "name": "占扑水晶球",
+    "x": 837,
+    "y": 89.38333129882812,
+    "width": 100,
+    "height": 137,
+    "occlusionHeight": 47
+  },
+  {
+    "name": "火把架",
+    "x": 959,
+    "y": 85.38333129882812,
+    "width": 90,
+    "height": 148,
+    "occlusionHeight": 47
+  },
+  {
+    "name": "领主椅子",
+    "x": 1057,
+    "y": 43.383331298828125,
+    "width": 121,
+    "height": 181,
+    "occlusionHeight": 158
+  },
+  {
+    "name": "战士雕像2",
+    "x": 55,
+    "y": 242.35000610351562,
+    "width": 122,
+    "height": 224,
+    "occlusionHeight": 92
+  },
+  {
+    "name": "龙形雕像2",
+    "x": 285,
+    "y": 254.98333740234375,
+    "width": 137,
+    "height": 211,
+    "occlusionHeight": 90
+  },
+  {
+    "name": "战士雕像3",
+    "x": 527,
+    "y": 256.6000061035156,
+    "width": 142,
+    "height": 214,
+    "occlusionHeight": 98
+  },
+  {
+    "name": "龙形雕像3",
+    "x": 748,
+    "y": 251.23333740234375,
+    "width": 151,
+    "height": 221,
+    "occlusionHeight": 100
+  }
+]
