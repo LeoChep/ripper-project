@@ -11,6 +11,7 @@ import { FogSystem } from "./NewFogSystem";
 import { CharacterOutCombatController } from "../controller/CharacterOutCombatController";
 import { CharacterController } from "../controller/CharacterController";
 import { lordRoom } from "@/drama/lord-room";
+import { createFrontObjFromObj } from "../units/FrontObj";
 interface DialogOption {
   text: string;
   value: any;
@@ -97,7 +98,7 @@ export class DramaSystem {
     const mapTexture = await PIXI.Assets.load(url);
     const mapPassiablePOJO = await getMapTmjFile("map", mapName, "tmj");
     const { TiledMap } = await import("@/core/MapClass");
-    const mapPassiable = new TiledMap(mapPassiablePOJO, mapTexture);
+    const mapPassiable = new TiledMap(mapName,mapPassiablePOJO, mapTexture);
     return mapPassiable;
   }
 
@@ -181,6 +182,14 @@ export class DramaSystem {
     //从units中去掉隐藏单位，先不添加到地图中，等需要的时候再添加
 
     console.log("Loaded boxOBJ from map:", boxOBJ);
+    //创建前景对象
+    let frontObjs = mapPassiable.frontObjs;
+    frontObjs=frontObjs.map((obj:any)=>{
+      return createFrontObjFromObj(obj);
+    })
+
+
+    //创建宝箱
     const chests = await Promise.all(
       boxOBJ.map((obj) => createChestFromBoxObj(obj))
     );
@@ -216,6 +225,7 @@ export class DramaSystem {
     await new Promise((resolve) => setTimeout(resolve, 1000)); // 确保所有异步操作完成
     mapPassiable.sprites = units;
     mapPassiable.chests = chests;
+    mapPassiable.frontObjs = frontObjs;
     // 处理宝箱
     console.log("Loaded chests from map:", mapPassiable.chests);
 

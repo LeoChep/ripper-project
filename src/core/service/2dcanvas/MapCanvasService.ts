@@ -1,3 +1,4 @@
+import { FrontObjSystem } from './../../system/FrontObjSystem';
 import { golbalSetting } from "@/core/golbalSetting";
 import { useCharacterStore } from "@/stores/characterStore";
 import * as PIXI from "pixi.js";
@@ -14,6 +15,7 @@ import {
 import { AnimMetaJson } from "@/core/anim/AnimMetaJson";
 import { UnitAnimSpirite } from "@/core/anim/UnitAnimSprite";
 import type { Creature } from "@/core/units/Creature";
+import { createFrontObjAnimSpriteFromFront } from "@/core/anim/FrontObjAnimSprite";
 
 export class MapCanvasService {
   constructor() {}
@@ -144,6 +146,38 @@ export class MapCanvasService {
       await Promise.all(chestPromises);
     }
     console.log("创建宝箱:", chests);
+
+     // 创建前景
+     console.log("加载前景物件信息...", mapPassiable.name);
+    await FrontObjSystem.getInstance().loadAsset(mapPassiable.name);
+    const frontObjs  = mapPassiable.frontObjs;
+    if (frontObjs && frontObjs.length > 0) {
+      const frontObjPromises: Promise<any>[] = [];
+      frontObjs.forEach((obj: any) => {
+        const promise = createFrontObjAnimSpriteFromFront(obj,mapPassiable.name).then(
+          (objSprite) => {
+            if (!objSprite) {
+              console.error(`Failed to create sprite for front object: ${obj.name}`);
+              return;
+            }
+            objSprite.visible = true; // 默认不可见，由战争迷雾系统控制
+            if (container) container.addChild(objSprite);
+            if (rlayers.spriteLayer) rlayers.spriteLayer.attach(objSprite);
+            console.log(
+              "Created front object sprite:",
+              obj.id,
+              "at",
+              obj.x,
+              obj.y
+            );
+          }
+        );
+        frontObjPromises.push(promise);
+      });
+      await Promise.all(frontObjPromises);
+    }
+
+    // console.log("创建前景物件:", frontObjs);
     // 创建单位
     let createEndPromise: Promise<any>[] = [];
     units.forEach((unit: Unit) => {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="22" height="16" tilewidth="64" tileheight="64" infinite="0" nextlayerid="5" nextobjectid="3">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="22" height="16" tilewidth="64" tileheight="64" infinite="0" nextlayerid="7" nextobjectid="5">
  <editorsettings>
   <export target="lord-room.tmj" format="json"/>
  </editorsettings>
@@ -43,7 +43,22 @@
    </properties>
   </object>
  </objectgroup>
+ <objectgroup id="5" name="frontObj">
+  <object id="3" name="领主桌子" x="495.867" y="221.557" width="321" height="192">
+   <properties>
+    <property name="frontObjName" value="领主桌子"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="6" name="wall">
+  <object id="4" x="502.9" y="256.725">
+   <properties>
+    <property name="onlyBlock" value="true"/>
+   </properties>
+   <polygon points="0,0 305.96,-1.75839 305.96,142.43 8.79196,144.188 -3.51679,130.121"/>
+  </object>
+ </objectgroup>
  <imagelayer id="4" name="图像图层 1">
-  <image source="lord-room.png" width="1408" height="1022"/>
+  <image source="C:/Users/chen/Downloads/generated-image-1771260924515.png" width="1408" height="1019"/>
  </imagelayer>
 </map>

@@ -105,7 +105,7 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":641.333333333333,
+                 "x":641.333,
                  "y":252
                 }],
          "opacity":1,
@@ -115,9 +115,86 @@
          "y":0
         }, 
         {
+         "draworder":"topdown",
+         "id":5,
+         "name":"frontObj",
+         "objects":[
+                {
+                 "height":192,
+                 "id":3,
+                 "name":"\u9886\u4e3b\u684c\u5b50",
+                 "properties":[
+                        {
+                         "name":"frontObjName",
+                         "type":"string",
+                         "value":"\u9886\u4e3b\u684c\u5b50"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":321,
+                 "x":495.866746801752,
+                 "y":221.557482613549
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":6,
+         "name":"wall",
+         "objects":[
+                {
+                 "height":0,
+                 "id":4,
+                 "name":"",
+                 "polygon":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":305.960333132996,
+                         "y":-1.75839271915515
+                        }, 
+                        {
+                         "x":305.960333132996,
+                         "y":142.429810251567
+                        }, 
+                        {
+                         "x":8.79196359577577,
+                         "y":144.188202970722
+                        }, 
+                        {
+                         "x":-3.51678543831025,
+                         "y":130.121061217481
+                        }],
+                 "properties":[
+                        {
+                         "name":"onlyBlock",
+                         "type":"string",
+                         "value":"true"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":502.900317678372,
+                 "y":256.725336996651
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
          "id":4,
-         "image":"lord-room.png",
-         "imageheight":1022,
+         "image":"C:\/Users\/chen\/Downloads\/generated-image-1771260924515.png",
+         "imageheight":1019,
          "imagewidth":1408,
          "name":"\u56fe\u50cf\u56fe\u5c42 1",
          "opacity":1,
@@ -126,8 +203,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":5,
- "nextobjectid":3,
+ "nextlayerid":7,
+ "nextobjectid":5,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

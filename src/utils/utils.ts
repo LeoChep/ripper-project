@@ -11,6 +11,9 @@ export const getDoorSvg=(state:string)=>{
 export const getMapAssetFile = (mapName: string,mapType: string='png') => {
   return new URL(`../assets/map/${mapName}/${mapName}.${mapType}`, import.meta.url).href;
 };
+export const getMapFrontObjIMG = (mapName: string, objName: string, objType: string = 'png') => {
+  return new URL(`../assets/map/${mapName}/${objName}.${objType}`, import.meta.url).href;
+}
 export const getParticleFile = (particleName: string) => {
   return new URL(`../assets/partics/${particleName}.png`, import.meta.url).href;
 };
@@ -113,6 +116,13 @@ export const getAnimActionSpriteJsonFile = (
   console.log(jsonUrl);
   return fetchJsonFile(jsonUrl);
 };
+export const getFrontObjInfoJsonFile = (mapName: string,frontInfoName:string) => {
+ const jsonUrl = new URL(
+    `../assets/map/${mapName}/${frontInfoName}.json`,
+    import.meta.url
+  ).href;
+  return fetchJsonFile(jsonUrl);
+}
 export const getJsonFile = (
   dirName: string,
   fileName: string,

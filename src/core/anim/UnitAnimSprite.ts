@@ -4,6 +4,7 @@ import type { Unit } from "../units/Unit";
 import { spriteTile, tileSize, zIndexSetting } from "../envSetting";
 import type { BuffInterface } from "../buff/BuffInterface";
 import { getStatusEffectsIconUrl } from "@/utils/utils";
+
 const lineIconLimit = 4;
 export class UnitAnimSpirite extends Container {
   // 单位的朝向，单位为弧度，0 表示向右
@@ -44,22 +45,6 @@ export class UnitAnimSpirite extends Container {
   public statusIcons: { [key: string]: PIXI.Container } = {};
   private isLeftClick = false;
   private callback: any;
-  public containsPoint = (point: PIXI.Point): boolean => {
-    if (this.isLeftClick) {
-      return false;
-    }
-    return false;
-  };
-  public spriteContainsPoint = (
-    sprite: PIXI.Sprite,
-    point: PIXI.Point
-  ): boolean => {
-    console.log("Checking containsPoint for sprite:", sprite, "with point:", point);
-    if (this.isLeftClick) {
-      console.log("containsPoint ignored due to left click",sprite);
-      return false;
-    } else return PIXI.Sprite.prototype.containsPoint.call(sprite, point);
-  };
 
   public get animationCallback(): any {
     return this.callback;
@@ -68,16 +53,7 @@ export class UnitAnimSpirite extends Container {
   public set animationCallback(cb: any) {
     this.callback = cb;
   }
-  setSpriteContainsPoint(container: PIXI.Container) {
-    container.children.forEach((child) => {
-      if (child instanceof PIXI.AnimatedSprite) {
-        child.containsPoint = (point: PIXI.Point) =>
-          this.spriteContainsPoint(child, point);
-      } else {
-        this.setSpriteContainsPoint(child as PIXI.Container);
-      }
-    });
-  }
+
   constructor(unit: Unit | undefined) {
     super();
 
@@ -85,7 +61,6 @@ export class UnitAnimSpirite extends Container {
     // 可以在这里初始化你的自定义属性
     this.onRender = () => {
       this.update(this.callback);
-      this.setSpriteContainsPoint(this);
     };
 
     // this.eventMode = "none";
@@ -177,8 +152,7 @@ export class UnitAnimSpirite extends Container {
           0 -
           (this.anims[this._state].height - (this.visisualSize.height ?? 0)) /
             2;
-        this.anims[this._state].zIndex = this.y;
-        this.zIndex = this.y;
+
         if (this.owner?.direction != null) {
           this.direction = this.owner.direction;
           this.anims[this._state].textures =
@@ -187,9 +161,16 @@ export class UnitAnimSpirite extends Container {
             ];
           console.log("切换动画状态转向: " + this._state + "_" + dirctionWASD);
         }
+
         this._animationState = this._state;
         this.anims[this._state].play();
       }
+    if (this.anims[this._state]) {
+      this.anims[this._state].zIndex = this.y;
+      this.zIndex = this.y;
+      console.log(`更新z-index  : ${this.zIndex}`);
+    }
+
     // 如果当前状态是行走状态，则渲染行走动画
     if (this._state === "walk") {
       if (this.anims["walk"]) {

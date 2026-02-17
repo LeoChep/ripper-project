@@ -70,6 +70,7 @@ export interface TiledMapTileset {
 
 // 主地图类
 export class TiledMap {
+  name:string;
   compressionlevel: number;
   height: number;
   infinite: boolean;
@@ -97,10 +98,12 @@ export class TiledMap {
   }> = [];
   textures?: PIXI.Sprite;
   sprites: any[] = [];
+  frontObjs: any[] = [];
   hiddenUnits: any[] = [];
   doors: Door[] = [];
   chests: Chest[] = [];
-  constructor(data: any, textures: any) {
+  constructor(name:string,data: any, textures: any) {
+    this.name=name;
     this.compressionlevel = data.compressionlevel;
     this.height = data.height;
     this.infinite = data.infinite;
@@ -128,7 +131,13 @@ export class TiledMap {
     if (spriteLayer && spriteLayer.objects) {
       this.sprites = spriteLayer.objects;
     }
-
+    //初始化前景物件
+    const  frontObjLayer = this.layers.find(
+      (l) => l.type === "objectgroup" && l.name === "frontObj",
+    );
+    if (frontObjLayer && frontObjLayer.objects) {
+      this.frontObjs = frontObjLayer.objects;
+    }
     // 初始化宝箱
     const boxLayer = this.layers.find(
       (l) => l.type === "objectgroup" && l.name === "box",
