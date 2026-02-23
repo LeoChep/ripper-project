@@ -11,7 +11,7 @@
         </div>
         <ActionBar :character="selectedCharacter" id="action-bar" />
         <!-- 原位置显示选中角色详情 -->
-        <div v-if="selectedCharacter" class="character-detail-panel" id="character-detail-panel">
+        <div v-if="selectedCharacter" class="character-detail-panel" id="character-detail-panel" :style="{top: actionPannelTop+'px'}">
             <!-- 动作条 - 独立组件 -->
 
 
@@ -50,6 +50,7 @@ import { CharacterCombatController } from "@/core/controller/CharacterCombatCont
 import * as InitiativeSystem from "@/core/system/InitiativeSystem";
 import test3Img from '@/assets/ui/test3.png';
 import { UnitSystem } from '@/core/system/UnitSystem'
+import { appSetting } from '@/core/envSetting'
 const characters = ref([])
 const hp = ref(0)
 const maxHp = ref(0)
@@ -61,6 +62,7 @@ const show = computed(() => {
 const selectedIndex = ref(0)
 const selectedCharacter = ref(null)
 const actionPanelRef = ref(null)
+const actionPannelTop=ref(0)
 const checkUsePowerHandler = () => {
     if (CharacterCombatController.getInstance().inUsePower) {
         const actionPanel = document.getElementById('character-detail-panel')
@@ -83,7 +85,7 @@ onMounted(() => {
     setInterval(() => {
         checkUsePowerHandler()
     }, 100);
-
+    actionPannelTop.value=appSetting.height-170-10;
     characterStore.value = useCharacterStore();
     CharacterController.selectCharacterHandlers.push(useCharacterStore().selectCharacter)
     const updataCharacters = () => {
@@ -169,7 +171,7 @@ function selectCharacter(character, index) {
 </script>
 
 <style scoped>
-/* 左侧角色列表 */
+/* 右侧角色列表 */
 .character-list {
     position: fixed;
     left: 1450px;

@@ -9,8 +9,8 @@ export const spriteTile=1.5;
 export const walkSpped=15;
 export const pannelHeight=150;
 export const appSetting = {
-    width: 1200,
-    height: 900,
+    width: 1700,
+    height: 800,
     antialias: true,
     background: 0x262626, // 设置canvas背景颜色
     backgroundAlpha: 1,   // 设置背景颜色透明度

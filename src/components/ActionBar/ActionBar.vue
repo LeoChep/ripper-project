@@ -106,6 +106,7 @@ const currentMoveActions = ref(0);
 const currentMinorActions = ref(0);
 const currentReactionActions = ref(0);
 const isInBattle = ref(false);
+const actionBarTop=ref(0)
 // 轮询定时器
 let pollingTimer = null;
 
@@ -122,6 +123,7 @@ const pollActionNumbers = () => {
 
 // 组件挂载时启动轮询
 onMounted(() => {
+  actionBarTop.value=appSetting.height-170-30;
   // 立即执行一次
   pollActionNumbers();
   const checkIsInBattle = () => {
@@ -161,8 +163,8 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
 .action-bar-container {
   position: fixed;
   left: 400px;
-  top: 700px;
-  /* 让角色面板底部贴着游戏边界(730px - 50px - 10px = 670px) */
+
+
   width: 800px;
   z-index: 10;
 }

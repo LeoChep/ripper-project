@@ -3,8 +3,13 @@
   <!-- <img :src="hitURL"> -->
   <InitBar></InitBar>
   <TurnAnnouncement ref="turnAnnouncementRef" />
-  <CreatureInfo :creature="selectedCreature" :unit="selectedUnit" v-if="selectedUnit"
-    @close="selectedCreature = null" />
+
+  <CreatureInfo
+    :creature="(selectedCreature as any)"
+    :unit="(selectedUnit as any)"
+    v-if="selectedUnit"
+    @close="selectedCreature = null"
+  />
   <TalkPannel />
   <CharacterPannel />
   <MessageTipTool />
@@ -15,7 +20,12 @@
     <button class="load-button" @click="openLoadDialog">读取游戏</button>
   </div>
   <!-- 存档对话框 -->
-  <SaveLoadDialog :mode="dialogMode" :isVisible="showDialog" @close="closeDialog" @select="handleSlotSelect" />
+  <SaveLoadDialog
+    :mode="dialogMode"
+    :isVisible="showDialog"
+    @close="closeDialog"
+    @select="handleSlotSelect"
+  />
   <!-- 宝箱内容对话框 -->
   <ChestLootDialog />
 </template>
@@ -30,7 +40,12 @@ import ChestLootDialog from "../ChestLootDialog/ChestLootDialog.vue";
 import { MessageTipSystem } from "@/core/system/MessageTipSystem";
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import { getAnimActionSpriteJsonFile, getAnimMetaJsonFile, getAnimSpriteImgUrl, getMapAssetFile } from "@/utils/utils";
+import {
+  getAnimActionSpriteJsonFile,
+  getAnimMetaJsonFile,
+  getAnimSpriteImgUrl,
+  getMapAssetFile,
+} from "@/utils/utils";
 import * as PIXI from "pixi.js";
 import { setContainer, setLayer } from "@/stores/container";
 import CharacterPannel from "../CharacterPannel/CharacterPannel.vue";
@@ -51,8 +66,7 @@ import type { Unit } from "@/core/units/Unit";
 import { UnitSystem } from "@/core/system/UnitSystem";
 import { FogSystem } from "@/core/system/NewFogSystem";
 import { MapCanvasService } from "@/core/service/2dcanvas/MapCanvasService";
-import  { Creature } from "@/core/units/Creature";
-
+import { Creature } from "@/core/units/Creature";
 
 const appSetting = envSetting.appSetting;
 const route = useRoute();
@@ -61,7 +75,7 @@ const route = useRoute();
 const showGridNumbers = ref(false);
 const selectedCreature = ref(null as Creature | null);
 const selectedUnit = ref(null as Unit | null);
-const creatureInfoPage = ref('basic'); // 添加页面状态
+const creatureInfoPage = ref("basic"); // 添加页面状态
 onMounted(async () => {
   const app = new PIXI.Application();
   await app.init(appSetting);
@@ -79,12 +93,12 @@ onMounted(async () => {
   container.sortableChildren = true;
   setContainer(container);
   setLayer(rlayers);
-//增加选择角色监听
+  //增加选择角色监听
 
-MapCanvasService.getInstance().openDetail = (unit: Unit, creature: Creature) => {
-  selectedCreature.value = creature;
-  selectedUnit.value = unit;
-};
+  MapCanvasService.getInstance().openDetail = (unit: Unit, creature: Creature) => {
+    selectedCreature.value = creature;
+    selectedUnit.value = unit;
+  };
   //增加键盘监听
   addListenKeyboard();
 
@@ -109,26 +123,22 @@ MapCanvasService.getInstance().openDetail = (unit: Unit, creature: Creature) => 
     await new Promise((resolve) => setTimeout(resolve, 500));
     await loadGameState(Number(loadSlot), false);
     const characterOutCombatController = CharacterOutCombatController.getInstance();
-
-
   } else {
     // 设置并启动剧情（会自动加载地图）
     console.log("[changemap0] setDramaUse 前 golbalSetting.map:", golbalSetting.map);
-    await DramaSystem.getInstance().setDramaUse("city_1");
-    console.log("[changemap0] setDramaUse 后 golbalSetting.map:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
+    await DramaSystem.getInstance().setDramaUse("lord-room");
+    console.log(
+      "[changemap0] setDramaUse 后 golbalSetting.map:",
+      golbalSetting.map,
+      "sprites:",
+      golbalSetting.map?.sprites?.length
+    );
     await MapCanvasService.getInstance().initByMap(golbalSetting.map);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     DramaSystem.getInstance().play();
     const characterOutCombatController = CharacterOutCombatController.getInstance();
-
   }
-
-
 });
-
-
-
-
 
 // 监听打开背包事件
 onMounted(() => {
@@ -143,32 +153,32 @@ onMounted(() => {
       // 需要通知CreatureInfo切换到背包页
       setTimeout(() => {
         // 使用自定义事件通知CreatureInfo切换页面
-        window.dispatchEvent(new CustomEvent('switchToInventoryPage'));
+        window.dispatchEvent(new CustomEvent("switchToInventoryPage"));
       }, 100);
     }
   };
 
-  window.addEventListener('openCharacterInventory', handleOpenInventory);
+  window.addEventListener("openCharacterInventory", handleOpenInventory);
 
   // 清理事件监听
   return () => {
-    window.removeEventListener('openCharacterInventory', handleOpenInventory);
+    window.removeEventListener("openCharacterInventory", handleOpenInventory);
   };
 });
 
 // 存档对话框相关状态
 const showDialog = ref(false);
-const dialogMode = ref<'save' | 'load'>('save');
+const dialogMode = ref<"save" | "load">("save");
 
 // 打开保存对话框
 const openSaveDialog = () => {
-  dialogMode.value = 'save';
+  dialogMode.value = "save";
   showDialog.value = true;
 };
 
 // 打开读取对话框
 const openLoadDialog = () => {
-  dialogMode.value = 'load';
+  dialogMode.value = "load";
   showDialog.value = true;
 };
 
@@ -179,7 +189,7 @@ const closeDialog = () => {
 
 // 处理栏位选择
 const handleSlotSelect = async (slotId: number) => {
-  if (dialogMode.value === 'save') {
+  if (dialogMode.value === "save") {
     saveGameState(slotId);
     closeDialog();
   } else {
@@ -226,7 +236,10 @@ const saveGameState = (slotId: number) => {
 };
 
 // 添加读取游戏状态的方法（修改为支持栏位）
-const loadGameState = async (slotId: number, needConfirm: boolean = true): Promise<boolean> => {
+const loadGameState = async (
+  slotId: number,
+  needConfirm: boolean = true
+): Promise<boolean> => {
   try {
     const savedState = localStorage.getItem(`gameState_slot_${slotId}`);
     if (!savedState) {
@@ -238,7 +251,9 @@ const loadGameState = async (slotId: number, needConfirm: boolean = true): Promi
     // 确认是否要读取存档
     if (needConfirm) {
       const confirmLoad = await MessageTipSystem.getInstance().confirm(
-        `是否要读取栏位 ${slotId} 的存档?\n保存时间: ${new Date(gameState.timestamp).toLocaleString()}`
+        `是否要读取栏位 ${slotId} 的存档?\n保存时间: ${new Date(
+          gameState.timestamp
+        ).toLocaleString()}`
       );
       if (!confirmLoad) {
         return false;
@@ -256,17 +271,37 @@ const loadGameState = async (slotId: number, needConfirm: boolean = true): Promi
 
     // setDramaUse 会在 d1.ts 中加载并创建新的地图对象
 
-    console.log("[changemap3] setDramaUse 后, loadGameState 前:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
+    console.log(
+      "[changemap3] setDramaUse 后, loadGameState 前:",
+      golbalSetting.map,
+      "sprites:",
+      golbalSetting.map?.sprites?.length
+    );
 
     // 从存档恢复游戏状态（可能会更新 golbalSetting.map）
     await Saver.loadGameState(gameState);
-    console.log("[changemap3] loadGameState 后:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
+    console.log(
+      "[changemap3] loadGameState 后:",
+      golbalSetting.map,
+      "sprites:",
+      golbalSetting.map?.sprites?.length
+    );
 
     // 初始化地图视觉元素
-    console.log("[changemap4] d1.loadTmj initByMap 前:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
+    console.log(
+      "[changemap4] d1.loadTmj initByMap 前:",
+      golbalSetting.map,
+      "sprites:",
+      golbalSetting.map?.sprites?.length
+    );
 
     await MapCanvasService.getInstance().initByMap(golbalSetting.map);
-    console.log("[changemap4]  d1.loadTmj initByMap 后:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
+    console.log(
+      "[changemap4]  d1.loadTmj initByMap 后:",
+      golbalSetting.map,
+      "sprites:",
+      golbalSetting.map?.sprites?.length
+    );
 
     // 立即更新一次战争迷雾，确保门和宝箱立即显示
     // 强制刷新迷雾系统，清空缓存并重新计算可见性
@@ -291,7 +326,6 @@ const loadGameState = async (slotId: number, needConfirm: boolean = true): Promi
         } else {
           unit.ai?.autoAction(unit, golbalSetting.map);
         }
-
       }
     } else {
       if (golbalSetting.rlayers && golbalSetting.rootContainer && golbalSetting.map) {
@@ -303,7 +337,6 @@ const loadGameState = async (slotId: number, needConfirm: boolean = true): Promi
         console.log("进入非战斗状态");
         // 使用 JSON 序列化来快照当前状态，避免控制台延迟展开导致的不一致
         console.log("进入非战斗状态 - 地图:", golbalSetting.map);
-
       }
     }
     console.log("恢复的地图数据:", golbalSetting.map, golbalSetting);
@@ -319,10 +352,6 @@ const loadGameState = async (slotId: number, needConfirm: boolean = true): Promi
   }
 };
 
-
-
-
-
 const addListenKeyboard = () => {
   //监听键盘S键
   document.addEventListener("keydown", (event) => {
@@ -330,7 +359,7 @@ const addListenKeyboard = () => {
     console.log("keydown", event.key);
     if (event.key === "s" && container) {
       container.y -= 64;
-      FogSystem.instanse.refreshSpatialGrid(true)
+      FogSystem.instanse.refreshSpatialGrid(true);
     }
   });
   //监听键盘A键
@@ -338,7 +367,7 @@ const addListenKeyboard = () => {
     const container = golbalSetting.rootContainer;
     if (event.key === "a" && container) {
       container.x += 64;
-        FogSystem.instanse.refreshSpatialGrid(true)
+      FogSystem.instanse.refreshSpatialGrid(true);
     }
   });
   //监听键盘D键
@@ -346,7 +375,7 @@ const addListenKeyboard = () => {
     const container = golbalSetting.rootContainer;
     if (event.key === "d" && container) {
       container.x -= 64;
-        FogSystem.instanse.refreshSpatialGrid(true)
+      FogSystem.instanse.refreshSpatialGrid(true);
     }
   });
   //监听键盘W键
@@ -354,7 +383,7 @@ const addListenKeyboard = () => {
     const container = golbalSetting.rootContainer;
     if (event.key === "w" && container) {
       container.y += 64;
-        FogSystem.instanse.refreshSpatialGrid(true)
+      FogSystem.instanse.refreshSpatialGrid(true);
     }
   });
 };
@@ -362,16 +391,16 @@ const drawGrid = (app: any, rlayers: any) => {
   //格子
   const lineContainer = new PIXI.Container();
   const gridSize = 64;
-  
+
   // 使用地图的实际大小而不是视口大小
   const map = golbalSetting.map;
   if (!map) return;
-  
+
   const mapWidth = map.width * envSetting.tileSize;
   const mapHeight = map.height * envSetting.tileSize;
   const cols = map.width;
   const rows = map.height;
-  
+
   // 画竖线
   for (let i = 1; i < cols; i++) {
     const line = new PIXI.Graphics();
@@ -399,8 +428,8 @@ const drawGrid = (app: any, rlayers: any) => {
           style: {
             fontSize: 12,
             fill: 0xff0000,
-            align: 'center'
-          }
+            align: "center",
+          },
         });
         text.anchor.set(0.5, 0.5);
         text.x = col * envSetting.tileSize + envSetting.tileSize / 2;
@@ -409,8 +438,7 @@ const drawGrid = (app: any, rlayers: any) => {
       }
     }
   }
-  if (golbalSetting.rootContainer)
-    golbalSetting.rootContainer.addChild(lineContainer);
+  if (golbalSetting.rootContainer) golbalSetting.rootContainer.addChild(lineContainer);
   rlayers.lineLayer.attach(lineContainer);
 };
 </script>
