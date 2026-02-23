@@ -23,13 +23,13 @@ import {
 } from "../fog_modules/get-view.js";
 import { appSetting, tileSize } from "../envSetting.js";
 
-
 interface GridCacheEntry {
   playerPositions: string; // 所有玩家单位位置的组合key
 }
 export class FogSystem {
   static instanse: FogSystem;
   ctx: CanvasRenderingContext2D = null!;
+  testStopFlag: boolean = false;
   fogCanvas: any;
   fogContext: any;
   fogSprite: any;
@@ -91,13 +91,12 @@ export class FogSystem {
       width,
       height // 临时Canvas的绘制区域
     );
+
     return this.viewPortConten;
   }
   checkHashPointsChange = (points: Point[]) => {
     const playerPositionsKey = points
-      .map(
-        (p) => `${Math.floor(p.x / tileSize)}_${Math.floor(p.y / tileSize)}`
-      )
+      .map((p) => `${Math.floor(p.x / tileSize)}_${Math.floor(p.y / tileSize)}`)
       .join("|");
     if (this.gridCache) {
       if (this.gridCache.playerPositions === playerPositionsKey) {
@@ -128,32 +127,54 @@ export class FogSystem {
     this.updateObjectsVisibility();
 
     // console.log(views);
-    requestAnimationFrame(() => {
-      console.log("run: 绘制视野", views);
-      drawViews(
-        views,
-        golbalSetting.map!.width * tileSize,
-        golbalSetting.map!.height * tileSize,
-        this.getCanvasContext()
-      );
-      const containerX = golbalSetting.rootContainer?.x;
-      const containerY = golbalSetting.rootContainer?.y;
-      if (containerX === undefined || containerY === undefined) {
-        console.warn("run: rootContainer 的位置未定义，无法正确绘制视口");
-        return false;
-      }
-      this.cacheContainerPosition.x = containerX;
-      this.cacheContainerPosition.y = containerY;
-      //为了保证阴影正确，我们绘制额外的区域，这样当玩家接近边界时，阴影也能正确显示
-      this.drawViewInViewport(
-        this.getViewPortCtx(),
-        this.fogCanvas,
-        -this.cacheContainerPosition.x - appSetting.width,
-        -this.cacheContainerPosition.y - appSetting.height,
-        appSetting.width * 3,
-        appSetting.height * 3
-      );
-    });
+    // requestAnimationFrame(() => {
+    console.log("run: 绘制视野", views);
+    drawViews(
+      views,
+      golbalSetting.map!.width * tileSize,
+      golbalSetting.map!.height * tileSize,
+      this.getCanvasContext()
+    );
+
+    const containerX = golbalSetting.rootContainer?.x;
+    const containerY = golbalSetting.rootContainer?.y;
+    if (containerX === undefined || containerY === undefined) {
+      console.warn("run: rootContainer 的位置未定义，无法正确绘制视口");
+      return false;
+    }
+    this.cacheContainerPosition.x = containerX;
+    this.cacheContainerPosition.y = containerY;
+    let left = -this.cacheContainerPosition.x - appSetting.width;
+    if (left <= 0) {
+      left = 0;
+      console.log("run: 视口左边界超出地图，调整为0");
+    }
+    let top = -this.cacheContainerPosition.y - appSetting.height;
+    if (top <= 0) {
+      top = 0;
+      console.log("run: 视口上边界超出地图，调整为0");
+    }
+    let width = appSetting.width * 3;
+    if (left + width > golbalSetting.map!.width * tileSize) {
+      width = golbalSetting.map!.width * tileSize - left;
+      console.log("run: 视口右边界超出地图，调整宽度为", width);
+    }
+    let height = appSetting.height * 3;
+    if (top + height > golbalSetting.map!.height * tileSize) {
+      height = golbalSetting.map!.height * tileSize - top;
+      console.log("run: 视口下边界超出地图，调整高度为", height);
+    }
+
+    //为了保证阴影正确，我们绘制额外的区域，这样当玩家接近边界时，阴影也能正确显示
+    this.drawViewInViewport(
+      this.getViewPortCtx(),
+      this.fogCanvas,
+      left,
+      top,
+      width,
+      height
+    );
+    // });
     return true;
   };
   getCanvasContext() {
@@ -236,7 +257,7 @@ export class FogSystem {
       this.fogSprite.y = -this.cacheContainerPosition.y - appSetting.height;
       this.getMask()?.addChild(this.fogSprite);
       this.getMask()!.eventMode = "none";
-    } else {
+    } else if (!this.testStopFlag) {
       // 销毁旧纹理并重新创建（PixiJS v7+需要这样更新canvas纹理）
       this.fogTexture?.destroy(true);
       this.fogTexture = PIXI.Texture.from(this.viewPortCanvas!);
@@ -265,7 +286,7 @@ export class FogSystem {
       const timePromise = new Promise<void>((resolve) => {
         setTimeout(() => {
           resolve();
-        }, 100);
+        }, 1000);
       });
       const versionCaculatePromise = new Promise((resolve) => {
         const isReRender = this.run(this.getPointsTransFromUnits());
@@ -279,6 +300,10 @@ export class FogSystem {
           this.makeFogOfWar();
         }
         resolve();
+        // if (this.testStopFlag) {
+        //   console.log("autoDraw: 测试停止标志已触发，停止自动绘制循环");
+        //   return;
+        // }
         darwFogFunc();
       });
     };

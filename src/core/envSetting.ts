@@ -4,12 +4,12 @@ export const zIndexSetting={
     doorZindex: 30,
     tipZIndex: 200
 }
-export const tileSize = 64; // 格子大小
-export const spriteTile=2.2;
-export const walkSpped=7;
+export const tileSize = 80; // 格子大小
+export const spriteTile=1.5;
+export const walkSpped=15;
 export const pannelHeight=150;
 export const appSetting = {
-    width: 1600,
+    width: 1200,
     height: 900,
     antialias: true,
     background: 0x262626, // 设置canvas背景颜色

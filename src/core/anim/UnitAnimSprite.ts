@@ -12,7 +12,7 @@ export class UnitAnimSpirite extends Container {
 
   // 单位的状态
   private _state: string = "walk"; // 例如 'walking', 'attacking', 'idle' 等
-
+  
   private owner: Unit | undefined;
   private frameSize: { width: number; height: number } = {
     width: tileSize,
@@ -38,6 +38,8 @@ export class UnitAnimSpirite extends Container {
   public set visisualSizeValue(size: { width: number; height: number }) {
     this.visisualSize = size;
   }
+
+
   // 动画执行状态
   private _animationState: string = "";
   public anims: { [key: string]: PIXI.AnimatedSprite } = {};
@@ -45,7 +47,11 @@ export class UnitAnimSpirite extends Container {
   public statusIcons: { [key: string]: PIXI.Container } = {};
   private isLeftClick = false;
   private callback: any;
-
+// containsPoint  (point: PIXI.Point): boolean {
+//   // 仅当右键触发时，才判定“命中”；左键时返回false，不拦截
+//   console.log("containsPoint called with point:", point, "isLeftClick:", this.isLeftClick);
+//   return false;;
+// };
   public get animationCallback(): any {
     return this.callback;
   }
@@ -60,15 +66,16 @@ export class UnitAnimSpirite extends Container {
     this.owner = unit;
     // 可以在这里初始化你的自定义属性
     this.onRender = () => {
+      
       this.update(this.callback);
     };
 
     // this.eventMode = "none";
-    this.on("mousedown", (e) => {
-      console.log("mousedown", e);
+    // this.on("click", (e) => {
+    //  console.log("点击了单位动画精灵");
 
-      this.isLeftClick = e.button === 0;
-    });
+    //   this.isLeftClick = e.button === 0;
+    // });
 
     // 监听鼠标松开事件，重置标记（避免状态残留）
     this.on("mouseup", () => {
@@ -136,6 +143,7 @@ export class UnitAnimSpirite extends Container {
             this._state + "_" + dirctionWASD
           ];
         console.log("切换动画状态转向: " + this._state + "_" + dirctionWASD);
+        
       }
     }
     //存在切换则调整并播放动画
@@ -163,12 +171,13 @@ export class UnitAnimSpirite extends Container {
         }
 
         this._animationState = this._state;
-        this.anims[this._state].play();
+       this.anims[this._state].play();
       }
     if (this.anims[this._state]) {
       this.anims[this._state].zIndex = this.y;
       this.zIndex = this.y;
-      console.log(`更新z-index  : ${this.zIndex}`);
+    //  console.log(`更新z-index  : ${this.zIndex}`);
+      
     }
 
     // 如果当前状态是行走状态，则渲染行走动画
@@ -226,6 +235,12 @@ export class UnitAnimSpirite extends Container {
     this.anims[name] = animation;
     this.addChild(animation);
 
+   animation.eventMode = "static";
+//    animation.containsPoint = (point: PIXI.Point): boolean => {
+//   // 仅当右键触发时，才判定“命中”；左键时返回false，不拦截
+//   console.log("containsPoint called with animation:", point, "isLeftClick:", this.isLeftClick);
+//   return false;;
+// };
     console.log("添加动画:", name, animation);
     animation.renderable = false; // 默认不渲染
   }
@@ -239,7 +254,7 @@ export class UnitAnimSpirite extends Container {
     );
     animSprite.scale =
       (this.visisualSize.width / this.frameSize.width) * spriteTile;
-    console.log("动画精灵的视觉大小:", this.visisualSize);
+    // console.log("动画精灵的视觉大小:", this.visisualSize);
     animSprite.animationSpeed = 0.1666;
     animSprite.textures = spritesheet.animations[animKeys[0]];
     animSprite.renderable = false;
@@ -248,6 +263,9 @@ export class UnitAnimSpirite extends Container {
     animSprite.label = name;
     animSprite.anchor.set(0, 0.3); // 设置锚点为左上角，避免偏移
     this.addAnimation(name, animSprite);
+    
+        // this.anims['walk'].renderable = true;
+
   }
   public async addIcon(buff: BuffInterface) {
     const unit = this.owner;
@@ -374,9 +392,9 @@ export const toward = (
     // 垂直移动
     direction = dy > 0 ? 2 : 3; // 2向下, 3向上
   }
-  console.log(
-    `单位 ${unit.name} 攻击方向: ${direction}，目标位置: (${targetX}, ${targetY}), dx: ${dx}, dy: ${dy}`
-  );
+  // console.log(
+  //   `单位 ${unit.name} 攻击方向: ${direction}，目标位置: (${targetX}, ${targetY}), dx: ${dx}, dy: ${dy}`
+  // );
   // 设置动画精灵的新位置
   unit.direction = direction;
 };

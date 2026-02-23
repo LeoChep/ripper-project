@@ -1,4 +1,4 @@
-import { FrontObjSystem } from './../../system/FrontObjSystem';
+import { FrontObjSystem } from "./../../system/FrontObjSystem";
 import { golbalSetting } from "@/core/golbalSetting";
 import { useCharacterStore } from "@/stores/characterStore";
 import * as PIXI from "pixi.js";
@@ -16,6 +16,7 @@ import { AnimMetaJson } from "@/core/anim/AnimMetaJson";
 import { UnitAnimSpirite } from "@/core/anim/UnitAnimSprite";
 import type { Creature } from "@/core/units/Creature";
 import { createFrontObjAnimSpriteFromFront } from "@/core/anim/FrontObjAnimSprite";
+import { MapContainer } from "@/core/anim/MapContainer";
 
 export class MapCanvasService {
   constructor() {}
@@ -73,7 +74,7 @@ export class MapCanvasService {
     rlayers.basicLayer.attach(container);
     app.stage.addChild(container);
     const spriteContainer = new PIXI.Container();
-    const mapContainer = new PIXI.Container();
+    const mapContainer = new MapContainer();
     const tipContainer = new PIXI.Container();
     spriteContainer.label = "spriteContainer";
     mapContainer.label = "mapContainer";
@@ -84,8 +85,9 @@ export class MapCanvasService {
     mapContainer.zIndex = envSetting.zIndexSetting.mapZindex;
     tipContainer.zIndex = envSetting.zIndexSetting.tipZIndex;
     // spriteContainer.eventMode = 'none';
-    mapContainer.eventMode = "dynamic";
+    mapContainer.eventMode = "static";
     mapContainer.interactiveChildren = true;
+
     // 设置全局变量
     golbalSetting.spriteContainer = spriteContainer;
     golbalSetting.mapContainer = mapContainer;
@@ -147,31 +149,34 @@ export class MapCanvasService {
     }
     console.log("创建宝箱:", chests);
 
-     // 创建前景
-     console.log("加载前景物件信息...", mapPassiable.name);
+    // 创建前景
+    console.log("加载前景物件信息...", mapPassiable.name);
     await FrontObjSystem.getInstance().loadAsset(mapPassiable.name);
-    const frontObjs  = mapPassiable.frontObjs;
+    const frontObjs = mapPassiable.frontObjs;
     if (frontObjs && frontObjs.length > 0) {
       const frontObjPromises: Promise<any>[] = [];
       frontObjs.forEach((obj: any) => {
-        const promise = createFrontObjAnimSpriteFromFront(obj,mapPassiable.name).then(
-          (objSprite) => {
-            if (!objSprite) {
-              console.error(`Failed to create sprite for front object: ${obj.name}`);
-              return;
-            }
-            objSprite.visible = true; // 默认不可见，由战争迷雾系统控制
-            if (container) container.addChild(objSprite);
-            if (rlayers.spriteLayer) rlayers.spriteLayer.attach(objSprite);
-            console.log(
-              "Created front object sprite:",
-              obj.id,
-              "at",
-              obj.x,
-              obj.y
+        const promise = createFrontObjAnimSpriteFromFront(
+          obj,
+          mapPassiable.name
+        ).then((objSprite) => {
+          if (!objSprite) {
+            console.error(
+              `Failed to create sprite for front object: ${obj.name}`
             );
+            return;
           }
-        );
+          objSprite.visible = true; // 默认不可见，由战争迷雾系统控制
+          if (container) container.addChild(objSprite);
+          if (rlayers.spriteLayer) rlayers.spriteLayer.attach(objSprite);
+          console.log(
+            "Created front object sprite:",
+            obj.id,
+            "at",
+            obj.x,
+            obj.y
+          );
+        });
         frontObjPromises.push(promise);
       });
       await Promise.all(frontObjPromises);
@@ -215,11 +220,11 @@ export class MapCanvasService {
 
     // 先初始化战争迷雾系统并绘制初始遮罩
     if (golbalSetting.map && golbalSetting.rootContainer && golbalSetting.app) {
-      FogSystem.initFog(
-        golbalSetting.map,
-        golbalSetting.rootContainer,
-        golbalSetting.app
-      );
+      // FogSystem.initFog(
+      //   golbalSetting.map,
+      //   golbalSetting.rootContainer,
+      //   golbalSetting.app
+      // );
 
       // 立即计算并绘制一次迷雾，确保在地图显示前遮罩已经存在
       // const visibilityData = FogSystem.instanse.caculteVersionByPlayers();
@@ -230,11 +235,16 @@ export class MapCanvasService {
     // 启动自动绘制循环
 
     // 等待一帧，确保遮罩已经渲染
-  
-    await new Promise((resolve) => FogSystem.instanse.autoDraw(resolve));
-    FogSystem.instanse.refreshSpatialGrid(true);
+
+    // await new Promise((resolve) => FogSystem.instanse.autoDraw(resolve));
+    // FogSystem.instanse.refreshSpatialGrid(true);
+    // document.addEventListener('keydown', (e) => {
+    //   if (e.key === 'F') {
+    //     FogSystem.instanse.testStopFlag=true;
+    //   }})
     // 再绘制地图
     const ms = new PIXI.Sprite(mapView);
+    ms.eventMode = "static";
     ms.zIndex = envSetting.zIndexSetting.mapZindex;
     ms.label = "map";
     if (golbalSetting.mapContainer) {
@@ -254,8 +264,10 @@ export class MapCanvasService {
 
     console.log("generateAnimSprite", unit, animSpriteUnit);
     this.addAnimSpriteUnit(unit);
-    animSpriteUnit.x = Math.round(unit.x / envSetting.tileSize) * envSetting.tileSize;
-    animSpriteUnit.y = Math.round(unit.y / envSetting.tileSize) * envSetting.tileSize;
+    animSpriteUnit.x =
+      Math.round(unit.x / envSetting.tileSize) * envSetting.tileSize;
+    animSpriteUnit.y =
+      Math.round(unit.y / envSetting.tileSize) * envSetting.tileSize;
     unit.x = animSpriteUnit.x;
     unit.y = animSpriteUnit.y;
     return unit;
@@ -280,9 +292,15 @@ export class MapCanvasService {
         unit.creature.size
       );
       if (unit.creature.size == "big")
-        animSpriteUnit.visisualSizeValue = { width: envSetting.tileSize * 2, height: envSetting.tileSize * 2 };
+        animSpriteUnit.visisualSizeValue = {
+          width: envSetting.tileSize * 2,
+          height: envSetting.tileSize * 2,
+        };
     } else {
-      animSpriteUnit.visisualSizeValue = { width: envSetting.tileSize, height: envSetting.tileSize };
+      animSpriteUnit.visisualSizeValue = {
+        width: envSetting.tileSize,
+        height: envSetting.tileSize,
+      };
     }
     animMetaJson.getAllExportedAnimations().forEach(async (anim) => {
       console.log(anim);
@@ -302,10 +320,14 @@ export class MapCanvasService {
         animSpriteUnit.addAnimationSheet(anim, spritesheet);
       }
     });
+    // setTimeout(() => {
+    //   animSpriteUnit.anims["walk"].renderable = true;
+    // }, 6000);
+
     return animSpriteUnit;
   };
 
-  openDetail=(unit:Unit,creature:Creature)=>{}
+  openDetail = (unit: Unit, creature: Creature) => {};
   // 辅助函数：添加动画精灵单位
   addAnimSpriteUnit = (unit: any) => {
     const animSpriteUnit = unit.animUnit;
@@ -345,7 +367,7 @@ export class MapCanvasService {
     };
     rlayers.basicLayer = new PIXI.RenderLayer();
     rlayers.spriteLayer = new PIXI.RenderLayer();
-    rlayers.spriteLayer.sortableChildren=true;
+    rlayers.spriteLayer.sortableChildren = true;
     rlayers.lineLayer = new PIXI.RenderLayer();
     rlayers.fogLayer = new PIXI.RenderLayer();
     rlayers.selectLayer = new PIXI.RenderLayer();

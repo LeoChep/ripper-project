@@ -106,14 +106,34 @@ class CITY_1 extends Drama {
     CGstart();
 
 
-    await unitSpeak(
-      "npc牧师",
-      "我会向领主报告此事，你们暂时现在城里逛逛吧。"
-    );
+    
    
     this.setVariable("cricleTalkUse", true);
     CGEnd();
     CharacterOutCombatController.isUse = true;
+    UnitSystem.getInstance().getAllUnits().forEach((unit) => {
+      if (unit.party === "player") {
+        CharacterController.curser=unit.id;
+      }
+    })
+
+    // if (!this.map) {
+    //       return;
+    //     }
+    //     this.setVariable("inCombat1", true);
+    //     InitiativeController.setMap(this.map);
+    //     const units = UnitSystem.getInstance().getUnitBySelectionGroup("battle1");
+    //     const players = UnitSystem.getInstance().getUnitBySelectionGroup("player");
+    //     players.forEach((player) => {
+    //       units.push(player);
+    //     });
+    //     const initCombatPromise =
+    //       InitiativeController.addUnitsToInitiativeSheet(units);
+    
+    //     initCombatPromise.then(async () => {
+    //       await InitiativeController.startBattle();
+    //       InitiativeController.startCombatTurn();
+    //     });
   }
 
   private async door1Event(): Promise<void> {

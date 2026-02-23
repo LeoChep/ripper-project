@@ -93,7 +93,7 @@ MapCanvasService.getInstance().openDetail = (unit: Unit, creature: Creature) => 
   // 单位状态机更新循环
   setInterval(() => {
     const units = golbalSetting.map?.sprites;
-    console.log("单位状态机更新循环", units, golbalSetting);
+    // console.log("单位状态机更新循环", units, golbalSetting);
     if (!units) return;
     units.forEach((unit) => {
       unit.stateMachinePack.doAction();
@@ -114,7 +114,7 @@ MapCanvasService.getInstance().openDetail = (unit: Unit, creature: Creature) => 
   } else {
     // 设置并启动剧情（会自动加载地图）
     console.log("[changemap0] setDramaUse 前 golbalSetting.map:", golbalSetting.map);
-    await DramaSystem.getInstance().setDramaUse("lord-room");
+    await DramaSystem.getInstance().setDramaUse("city_1");
     console.log("[changemap0] setDramaUse 后 golbalSetting.map:", golbalSetting.map, "sprites:", golbalSetting.map?.sprites?.length);
     await MapCanvasService.getInstance().initByMap(golbalSetting.map);
     await new Promise((resolve) => setTimeout(resolve, 1000));

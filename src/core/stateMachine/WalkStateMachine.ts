@@ -41,13 +41,13 @@ export class WalkStateMachine extends StateMachine {
 
   public doAction() {
     if (this.path.length === 0) {
-      console.warn("没有路径可供移动");
+      //console.warn("没有路径可供移动");
       this.callBack(); // 调用回调函数
       this.callBack = () => {};
       return;
     }
     if (this.pauseMove) {
-      console.log("移动已暂停");
+    //  console.log("移动已暂停");
       return;
     }
     const nextPathPoint = this.path[0];
@@ -117,7 +117,7 @@ export class WalkStateMachine extends StateMachine {
       if (this.walkType != "step") this.checkOpportunity(this.oldGrids);
     }
     //
-    console.log("nextpoint", nextPathPoint);
+   // console.log("nextpoint", nextPathPoint);
     const unit = this.owner;
     const spriteUnit = this.owner.animUnit;
 
@@ -175,10 +175,10 @@ export class WalkStateMachine extends StateMachine {
       // 更新动画精灵的位置
       spriteUnit.x += stepX;
       spriteUnit.y += stepY;
-      console.log(
-        `移动到位置: (${spriteUnit.x}, ${spriteUnit.y})，目标位置`,
-        `(${nextX}, ${nextY})，步长: (${stepX}, ${stepY})，距离 ： ${distance}`
-      );
+      // console.log(
+      //   `移动到位置: (${spriteUnit.x}, ${spriteUnit.y})，目标位置`,
+      //   `(${nextX}, ${nextY})，步长: (${stepX}, ${stepY})，距离 ： ${distance}`
+      // );
       // 如果接近目标位置，则直接设置到目标位置
       if (
         Math.abs(spriteUnit.x - nextX) < 1 &&
@@ -197,7 +197,7 @@ export class WalkStateMachine extends StateMachine {
       spriteUnit.x = nextX;
       spriteUnit.y = nextY;
       // 移除已到达的路径点
-      console.log("到达目标点", nextX, nextY);
+      //console.log("到达目标点", nextX, nextY);
       this.path.shift();
       const unitX = Math.floor(this.owner.x / tileSize);
       const unitY = Math.floor(this.owner.y / tileSize);
@@ -257,7 +257,7 @@ export class WalkStateMachine extends StateMachine {
         }
       );
     } else {
-      console.log("没有单位可以触发借机");
+      // console.log("没有单位可以触发借机");
     }
   };
 }
