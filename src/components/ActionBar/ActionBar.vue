@@ -1,5 +1,5 @@
 <template>
-  <div class="action-bar-container" v-if="isInBattle">
+  <div class="action-bar-container" v-if="isInBattle" :style="{top: actionBarTop + 'px'}">
     <div class="fantasy-bar">
       <!-- 装饰性边框 -->
       <div class="bar-ornament left"></div>
@@ -124,7 +124,7 @@ const pollActionNumbers = () => {
 
 // 组件挂载时启动轮询
 onMounted(() => {
-  actionBarTop.value=appSetting.height-170-30;
+  actionBarTop.value=appSetting.height-170-40;
   // 立即执行一次
   pollActionNumbers();
   const checkIsInBattle = () => {
@@ -162,7 +162,7 @@ const remainingReactionActions = computed(() => currentReactionActions.value);
 
 <style scoped>
 .action-bar-container {
-  position: fixed;
+  position: absolute;
   left: 400px;
 
 

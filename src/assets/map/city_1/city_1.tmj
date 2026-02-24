@@ -143,7 +143,7 @@
                         {
                          "name":"isSceneHidden",
                          "type":"bool",
-                         "value":false
+                         "value":true
                         }, 
                         {
                          "name":"name",
@@ -169,8 +169,176 @@
                  "type":"",
                  "visible":true,
                  "width":64,
-                 "x":2096,
-                 "y":1420
+                 "x":1680.84848484848,
+                 "y":1674.54545454545
+                }, 
+                {
+                 "height":64,
+                 "id":5,
+                 "name":"skeleton",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"isSceneHidden",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"skeleton"
+                        }, 
+                        {
+                         "name":"party",
+                         "type":"string",
+                         "value":"skeletons"
+                        }, 
+                        {
+                         "name":"selectionGroup",
+                         "type":"string",
+                         "value":"battle1"
+                        }, 
+                        {
+                         "name":"unitTypeName",
+                         "type":"string",
+                         "value":"skeleton"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":2016.48484848485,
+                 "y":1586.18181818182
+                }, 
+                {
+                 "height":64,
+                 "id":6,
+                 "name":"skeleton",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"isSceneHidden",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"skeleton"
+                        }, 
+                        {
+                         "name":"party",
+                         "type":"string",
+                         "value":"skeletons"
+                        }, 
+                        {
+                         "name":"selectionGroup",
+                         "type":"string",
+                         "value":"battle1"
+                        }, 
+                        {
+                         "name":"unitTypeName",
+                         "type":"string",
+                         "value":"skeleton"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":2195.27272727273,
+                 "y":1395.27272727273
+                }, 
+                {
+                 "height":64,
+                 "id":7,
+                 "name":"skeleton",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"isSceneHidden",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"skeleton"
+                        }, 
+                        {
+                         "name":"party",
+                         "type":"string",
+                         "value":"skeletons"
+                        }, 
+                        {
+                         "name":"selectionGroup",
+                         "type":"string",
+                         "value":"battle1"
+                        }, 
+                        {
+                         "name":"unitTypeName",
+                         "type":"string",
+                         "value":"skeleton"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":2004.36363636364,
+                 "y":1295.27272727273
+                }, 
+                {
+                 "height":64,
+                 "id":8,
+                 "name":"skeleton",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"isSceneHidden",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"skeleton"
+                        }, 
+                        {
+                         "name":"party",
+                         "type":"string",
+                         "value":"skeletons"
+                        }, 
+                        {
+                         "name":"selectionGroup",
+                         "type":"string",
+                         "value":"battle1"
+                        }, 
+                        {
+                         "name":"unitTypeName",
+                         "type":"string",
+                         "value":"skeleton"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":1640.72727272727,
+                 "y":1374.06060606061
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -218,7 +386,7 @@
          "y":0
         }],
  "nextlayerid":5,
- "nextobjectid":5,
+ "nextobjectid":9,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

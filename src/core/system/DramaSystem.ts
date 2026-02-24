@@ -98,16 +98,16 @@ export class DramaSystem {
     const mapTexture = await PIXI.Assets.load(url);
     const mapPassiablePOJO = await getMapTmjFile("map", mapName, "tmj");
     const { TiledMap } = await import("@/core/MapClass");
-    const mapPassiable = new TiledMap(mapName,mapPassiablePOJO, mapTexture);
+    const mapPassiable = new TiledMap(mapName, mapPassiablePOJO, mapTexture);
     return mapPassiable;
   }
 
   //提供注入口
   //todo以后需要由专门模块负责
   createSpriteAnim = async (unit: Unit): Promise<any> => {
-    await MapCanvasService.getInstance().createAnimSpriteUnits(unit);
+    
+     await  MapCanvasService.getInstance().generateAnimSprite(unit);
   };
-
 
   // 加载剧情
   async load(
@@ -163,10 +163,9 @@ export class DramaSystem {
     console.log("Loaded boxOBJ from map:", boxOBJ);
     //创建前景对象
     let frontObjs = mapPassiable.frontObjs;
-    frontObjs=frontObjs.map((obj:any)=>{
+    frontObjs = frontObjs.map((obj: any) => {
       return createFrontObjFromObj(obj);
-    })
-
+    });
 
     //创建宝箱
     const chests = await Promise.all(
@@ -182,13 +181,14 @@ export class DramaSystem {
     });
 
     //导入全局的玩家角色到player单位槽内
-    let playerUnitsSlot=0;
-    for (let i=0;i<units.length;i++) {
+    let playerUnitsSlot = 0;
+    for (let i = 0; i < units.length; i++) {
       if (units[i].party === "player") {
-        golbalSetting.playerRoles[playerUnitsSlot].x=units[i].x;
-        golbalSetting.playerRoles[playerUnitsSlot].y=units[i].y;
-        golbalSetting.playerRoles[playerUnitsSlot].direction=units[i].direction;
-        units[i]=golbalSetting.playerRoles[playerUnitsSlot];
+        golbalSetting.playerRoles[playerUnitsSlot].x = units[i].x;
+        golbalSetting.playerRoles[playerUnitsSlot].y = units[i].y;
+        golbalSetting.playerRoles[playerUnitsSlot].direction =
+          units[i].direction;
+        units[i] = golbalSetting.playerRoles[playerUnitsSlot];
         playerUnitsSlot++;
       }
     }
@@ -197,7 +197,7 @@ export class DramaSystem {
     const createCreatureEndPromise = units.map(async (unit) => {
       // Tiled 中带 gid 的对象 y 坐标是底部位置，需要减去高度转换为顶部位置
       // 没有 gid 的对象 y 坐标已经是顶部位置，不需要调整
-    
+
       try {
         const unitCreature = await UnitSystem.getInstance().createUnitCreature(
           unit.unitTypeName,
@@ -256,7 +256,42 @@ export class DramaSystem {
       });
     }
   }
-  unHiddenUnit = async (unitName: string) => {
+  unHiddenUnitsByGroup = async (groupName: string) => {
+    const units = golbalSetting.map?.hiddenUnits.filter(
+      (unit) => unit.selectionGroup === groupName
+    );
+    console.log(`找到 ${units?.length} 个选择组为 "${groupName}" 的隐藏单位`);
+    if (!units || units.length === 0) {
+      console.log(`未找到选择组为 "${groupName}" 的隐藏单位`);
+      return;
+    }
+    for (const unit of units) {
+      await this.unHiddenUnit(unit);
+    }
+  };
+  unHiddenUnit = async (unit: Unit) => {
+    try {
+      const unitCreature = await UnitSystem.getInstance().createUnitCreature(
+        unit.unitTypeName,
+        unit
+      );
+      console.log("创建生物成功:", unitCreature);
+      await this.createSpriteAnim(unit);
+    } catch (error) {
+      console.error(
+        `[DramaSystem.loadTmj] 创建生物失败: ${unit.unitTypeName}`,
+        error
+      );
+    }
+    const map = golbalSetting.map;
+    if (!map) {
+      console.error("地图未加载，无法显示单位:", unit.name);
+      return;
+    }
+    map.sprites.push(unit);
+    console.log(`单位 ${unit.name} 已从隐藏状态中移除并添加到地图上。`);
+  };
+  unHiddenUnitByName = async (unitName: string) => {
     const map = golbalSetting.map;
     if (!map) {
       console.error("地图未加载，无法显示单位:", unitName);
@@ -267,23 +302,7 @@ export class DramaSystem {
     );
     if (hiddenUnitIndex !== -1) {
       const [unit] = map.hiddenUnits.splice(hiddenUnitIndex, 1);
-      
-      try {
-        const unitCreature = await UnitSystem.getInstance().createUnitCreature(
-          unit.unitTypeName,
-          unit
-        );
-        console.log("创建生物成功:", unitCreature);
-        await this.createSpriteAnim(unit);
-      } catch (error) {
-        console.error(
-          `[DramaSystem.loadTmj] 创建生物失败: ${unit.unitTypeName}`,
-          error
-        );
-      }
-
-      map.sprites.push(unit);
-      console.log(`单位 ${unitName} 已从隐藏状态中移除并添加到地图上。`);
+      this.unHiddenUnit(unit);
     }
   };
   //辅助函数的接口，需要后续分离
@@ -310,5 +329,4 @@ const initDramaMap = () => {
   dramaSystem.registerDrama("d1", d1);
   dramaSystem.registerDrama("city_1", city_1);
   dramaSystem.registerDrama("lord-room", lordRoom);
-
 };
