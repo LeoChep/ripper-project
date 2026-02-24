@@ -107,28 +107,7 @@ export class DramaSystem {
   createSpriteAnim = async (unit: Unit): Promise<any> => {
     await MapCanvasService.getInstance().createAnimSpriteUnits(unit);
   };
-  // 辅助函数：创建单位生物
-  async createUnitCreature(unitTypeName: string, unit: any) {
-    const { getUnitTypeJsonFile } = await import("@/utils/utils");
-    const { createCreature } = await import("@/core/units/Creature");
-    const { loadTraits, loadPowers } = await import("@/core/units/Unit");
-    if (unit.gid) {
-      unit.y -= unit.height;
-    }
-    const json: any = await getUnitTypeJsonFile(unitTypeName);
-    if (!json) {
-      console.error(`Creature JSON file for ${unitTypeName} not found.`);
-      return null;
-    }
 
-    const creature = createCreature(json as any);
-    const unitCreature = creature;
-    unit.creature = unitCreature;
-    loadTraits(unit, unitCreature);
-    loadPowers(unit, unitCreature);
-
-    return creature;
-  }
 
   // 加载剧情
   async load(
@@ -202,14 +181,25 @@ export class DramaSystem {
       chestSystem.registerChest(chest);
     });
 
+    //导入全局的玩家角色到player单位槽内
+    let playerUnitsSlot=0;
+    for (let i=0;i<units.length;i++) {
+      if (units[i].party === "player") {
+        golbalSetting.playerRoles[playerUnitsSlot].x=units[i].x;
+        golbalSetting.playerRoles[playerUnitsSlot].y=units[i].y;
+        golbalSetting.playerRoles[playerUnitsSlot].direction=units[i].direction;
+        units[i]=golbalSetting.playerRoles[playerUnitsSlot];
+        playerUnitsSlot++;
+      }
+    }
     // 使用 map 而不是 forEach，避免冗余的 Promise 包装
     // 读取对应的生物类别，创建完整的单位对象
     const createCreatureEndPromise = units.map(async (unit) => {
       // Tiled 中带 gid 的对象 y 坐标是底部位置，需要减去高度转换为顶部位置
       // 没有 gid 的对象 y 坐标已经是顶部位置，不需要调整
-
+    
       try {
-        const unitCreature = await this.createUnitCreature(
+        const unitCreature = await UnitSystem.getInstance().createUnitCreature(
           unit.unitTypeName,
           unit
         );
@@ -277,8 +267,9 @@ export class DramaSystem {
     );
     if (hiddenUnitIndex !== -1) {
       const [unit] = map.hiddenUnits.splice(hiddenUnitIndex, 1);
+      
       try {
-        const unitCreature = await this.createUnitCreature(
+        const unitCreature = await UnitSystem.getInstance().createUnitCreature(
           unit.unitTypeName,
           unit
         );

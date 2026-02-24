@@ -47,7 +47,7 @@
                         {
                          "name":"name",
                          "type":"string",
-                         "value":"manFighter"
+                         "value":"player1"
                         }, 
                         {
                          "name":"party",
@@ -58,11 +58,6 @@
                          "name":"selectionGroup",
                          "type":"string",
                          "value":"player"
-                        }, 
-                        {
-                         "name":"unitTypeName",
-                         "type":"string",
-                         "value":"manFighter"
                         }],
                  "rotation":0,
                  "type":"",
@@ -107,6 +102,37 @@
                  "width":64,
                  "x":641.333,
                  "y":252
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":7,
+         "name":"door",
+         "objects":[
+                {
+                 "height":0,
+                 "id":5,
+                 "name":"\u79bb\u5f00",
+                 "polyline":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":146.260387811634,
+                         "y":0
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":582.382271468144,
+                 "y":995.457063711911
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -203,8 +229,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":7,
- "nextobjectid":5,
+ "nextlayerid":8,
+ "nextobjectid":6,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

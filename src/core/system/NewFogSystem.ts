@@ -286,7 +286,7 @@ export class FogSystem {
       const timePromise = new Promise<void>((resolve) => {
         setTimeout(() => {
           resolve();
-        }, 1000);
+        }, 100);
       });
       const versionCaculatePromise = new Promise((resolve) => {
         const isReRender = this.run(this.getPointsTransFromUnits());

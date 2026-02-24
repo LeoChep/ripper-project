@@ -220,11 +220,11 @@ export class MapCanvasService {
 
     // 先初始化战争迷雾系统并绘制初始遮罩
     if (golbalSetting.map && golbalSetting.rootContainer && golbalSetting.app) {
-      // FogSystem.initFog(
-      //   golbalSetting.map,
-      //   golbalSetting.rootContainer,
-      //   golbalSetting.app
-      // );
+      FogSystem.initFog(
+        golbalSetting.map,
+        golbalSetting.rootContainer,
+        golbalSetting.app
+      );
 
       // 立即计算并绘制一次迷雾，确保在地图显示前遮罩已经存在
       // const visibilityData = FogSystem.instanse.caculteVersionByPlayers();
@@ -236,8 +236,8 @@ export class MapCanvasService {
 
     // 等待一帧，确保遮罩已经渲染
 
-    // await new Promise((resolve) => FogSystem.instanse.autoDraw(resolve));
-    // FogSystem.instanse.refreshSpatialGrid(true);
+    await new Promise((resolve) => FogSystem.instanse.autoDraw(resolve));
+    FogSystem.instanse.refreshSpatialGrid(true);
     // document.addEventListener('keydown', (e) => {
     //   if (e.key === 'F') {
     //     FogSystem.instanse.testStopFlag=true;
@@ -257,7 +257,13 @@ export class MapCanvasService {
     const container = golbalSetting.rootContainer;
     const rlayers = golbalSetting.rlayers;
     const mapPassiable = golbalSetting.map;
-    const animSpriteUnit = await this.createAnimSpriteUnits(unit);
+     let animSpriteUnit =  null
+    try {
+      animSpriteUnit = await this.createAnimSpriteUnits(unit);
+    }
+      catch (error) {
+      return null;
+      }
 
     unit.animUnit = animSpriteUnit;
     animSpriteUnit.zIndex = envSetting.zIndexSetting.spriteZIndex;

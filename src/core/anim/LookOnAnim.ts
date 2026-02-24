@@ -1,7 +1,9 @@
 import { golbalSetting } from "../golbalSetting";
 import * as envSetting from "../envSetting";
 
-export const lookOn=(x:number,y:number)=>{
+export const lookOn=(x?:number,y?:number)=>{
+    if (x===undefined||y===undefined) {
+        return;}
     const rootContainer = golbalSetting.rootContainer;
     const appSetting = envSetting.appSetting;
     const centerX=Math.floor((appSetting.width / 2 - x)/envSetting.tileSize)*envSetting.tileSize;

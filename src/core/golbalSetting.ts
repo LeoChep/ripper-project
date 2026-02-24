@@ -2,6 +2,7 @@ import type { Application, Container } from "pixi.js";
 // If you are using @pixi/layers, import IRenderLayer from there:
 import type { IRenderLayer } from "pixi.js";
 import { TiledMap } from "./MapClass";
+import type { Unit } from "./units/Unit";
 
 export const golbalSetting = {
     app: null as null | Application,
@@ -17,5 +18,6 @@ export const golbalSetting = {
         selectLayer: null as null | IRenderLayer,
         controllerLayer: null as null | IRenderLayer
     },
-    map:null as TiledMap|null
+    map:null as TiledMap|null,
+    playerRoles:[] as Unit[]
 }

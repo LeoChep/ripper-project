@@ -182,4 +182,26 @@ export class UnitSystem {
     if (!map) return null;
     return map.sprites.find((sprite: Unit) => sprite.name === name) || null;
   }
+    // 辅助函数：创建单位生物
+  async createUnitCreature(unitTypeName: string, unit: any) {
+    const { getUnitTypeJsonFile } = await import("@/utils/utils");
+    const { createCreature } = await import("@/core/units/Creature");
+    const { loadTraits, loadPowers } = await import("@/core/units/Unit");
+    if (unit.gid) {
+      unit.y -= unit.height;
+    }
+    const json: any = await getUnitTypeJsonFile(unitTypeName);
+    if (!json) {
+      console.error(`Creature JSON file for ${unitTypeName} not found.`);
+      return null;
+    }
+
+    const creature = createCreature(json as any);
+    const unitCreature = creature;
+    unit.creature = unitCreature;
+    loadTraits(unit, unitCreature);
+    loadPowers(unit, unitCreature);
+
+    return creature;
+  }
 }

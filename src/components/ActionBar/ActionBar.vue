@@ -85,6 +85,7 @@
 import { computed, ref, onMounted, onUnmounted } from "vue";
 import * as InitSystem from "@/core/system/InitiativeSystem";
 import { initiativeCursor } from "@/core/system/InitiativeSystem";
+import { appSetting } from "@/core/envSetting";
 // Props
 const props = defineProps({
   character: {

@@ -8,6 +8,7 @@ export const tileSize = 80; // 格子大小
 export const spriteTile=1.5;
 export const walkSpped=15;
 export const pannelHeight=150;
+
 export const appSetting = {
     width: 1700,
     height: 800,
