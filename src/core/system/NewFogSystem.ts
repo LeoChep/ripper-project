@@ -109,7 +109,24 @@ export class FogSystem {
     };
     return true;
   };
-  //如果有重绘，返回true，否则返回false
+
+  run2 = (points: Point[]) => {
+    const walls = this.getWallFormMap();
+    const room = new Rectangle(
+      0,
+      0,
+      golbalSetting.map!.width * tileSize,
+      golbalSetting.map!.height * tileSize
+    );
+    if (!this.checkHashPointsChange(points)) {
+      return false;
+    }
+    const segments = getSegments(room, points[0], [], walls);
+    const views = getViews(points, segments, room);
+    this.currentVisibilityPolygons = views;
+    this.updateObjectsVisibility();
+  };
+
   run = (points: Point[]) => {
     const walls = this.getWallFormMap();
     const room = new Rectangle(
@@ -289,7 +306,7 @@ export class FogSystem {
         }, 100);
       });
       const versionCaculatePromise = new Promise((resolve) => {
-        const isReRender = this.run(this.getPointsTransFromUnits());
+        const isReRender = this.run2(this.getPointsTransFromUnits());
         resolve(isReRender);
       });
       Promise.all([timePromise, versionCaculatePromise]).then((value) => {
