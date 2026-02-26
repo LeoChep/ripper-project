@@ -280,7 +280,11 @@ const loadGameState = async (
       "sprites:",
       golbalSetting.map?.sprites?.length
     );
-
+    const playerUnits = UnitSystem.getInstance()
+      .getAllUnits()
+      .filter((u) => u.party === "player");
+    golbalSetting.playerRoles = playerUnits;
+    console.log("恢复玩家角色:", golbalSetting.playerRoles);
     // 初始化地图视觉元素
     console.log(
       "[changemap4] d1.loadTmj initByMap 前:",

@@ -1,0 +1,155 @@
+{
+  "name": "守卫 ",
+  "level": 5,
+  "role": "守卫",
+  "xp": 25,
+  "size": "中型",
+  "type": "自然界",
+  "hp": 53,
+  "maxHp": 53,
+  "bloodied": 27,
+  "ac": 23,
+  "fortitude": 21,
+  "reflex": 18,
+  "will": 20,
+  "speed": 5,
+  "fly": null,
+  "initiative": 2,
+  "senses": "",
+  "immunities": [],
+  "resistances": [],
+  "alignment": "无",
+  "languages": [
+    "-"
+  ],
+  "skills": [],
+  "abilities": {
+    "STR": {
+      "value": 20,
+      "modifier": 5
+    },
+    "DEX": {
+      "value": 10,
+      "modifier": 0
+    },
+    "CON": {
+      "value": 14,
+      "modifier": 2
+    },
+    "INT": {
+      "value": 10,
+      "modifier": 0
+    },
+    "WIS": {
+      "value": 15,
+      "modifier": 2
+    },
+    "CHA": {
+      "value": 8,
+      "modifier": -1
+    }
+  },
+  "equipment": [],
+  "weapons": [
+    {
+      "name": "长剑",
+      "type": "Melee",
+      "action": "武器",
+      "range": 1,
+      "proficiency": 3,
+      "bonus": 1,
+      "target": "ac",
+      "weapon": "1d8",
+      "damage": "1d8",
+      "effect": "",
+      "missEffect": null
+    },
+    {
+      "name": "战斗盾牌",
+      "type": "Melee",
+      "action": "武器",
+      "range": 1,
+      "attackBonus": 12,
+      "bonus": 1,
+      "proficiency": 2,
+      "target": "ac",
+      "weapon": "1d6",
+      "damage": "1d6",
+      "effect": "",
+      "missEffect": null
+    }
+  ],
+  "powers": [
+    {
+      "name": "LungingStrike",
+      "displayName": "突刺击",
+      "useType": "atwill",
+      "actionType": "standard",
+      "range": null,
+      "target": null,
+      "description": "突刺击 Lunging Strike  MP\n战士攻击 1\n你一记突刺，击中了本来位于你攻击范围外的敌人。\n遭遇✦武术，武器\n标准动作✦近战武器 + 1触及\n目标： 一个生物\n攻击： 力量 - 1 vs. AC\n命中： 2[W] + 力量调整值的伤害。",
+      "damage": null,
+      "attackBonus": null,
+      "missEffect": null
+    },
+    {
+      "name": "FunnelingFlurry",
+      "displayName": "流动疾风斩",
+      "useType": "encounter",
+      "actionType": "standard",
+      "range": null,
+      "target": null,
+      "description": "流动疾风斩 Funneling Flurry  MP\n战士攻击 1\n随着如同毒蛇般的攻击，你将两个敌人逼迫到你认为合适的位置。\n遭遇✦武术，武器\n标准动作✦近战武器\n要求：你必须持用两件近战武器\n目标：两个生物\n攻击：力量 vs. AC （主手武器和副手武器），每个目标一次攻击\n命中：1[W] + 力量调整值的伤害。并且你令目标滑动1格。",
+      "damage": null,
+      "attackBonus": null,
+      "missEffect": null
+    },
+    {
+      "name": "ChargeAttack",
+      "displayName": "冲锋",
+      "useType": "atwill",
+      "actionType": "standard",
+      "range": null,
+      "target": null,
+      "description": "流动疾风斩 Funneling Flurry  MP\n战士攻击 1\n随着如同毒蛇般的攻击，你将两个敌人逼迫到你认为合适的位置。\n遭遇✦武术，武器\n标准动作✦近战武器\n要求：你必须持用两件近战武器\n目标：两个生物\n攻击：力量 vs. AC （主手武器和副手武器），每个目标一次攻击\n命中：1[W] + 力量调整值的伤害。并且你令目标滑动1格。",
+      "damage": null,
+      "attackBonus": null,
+      "missEffect": null
+    },
+    {
+      "name": "ShieldEdgeBlock",
+      "displayName": "盾缘阻挡",
+      "useType": "encounter",
+      "action": "reaction",
+      "range": null,
+      "target": null,
+      "description": "盾缘阻挡 Shield Edge Block  MP2\n战士攻击 3\n你以快速的盾缘猛击阻挡对手的攻势，并接着还以强力挥击。\n遭遇✦武术\n即时中断✦近战1\n要求：\\t你必须使用盾牌\n触发：\\t邻近你的一名敌人以近程或近战攻击对你命中或失手\n目标：\\t触发的敌人\n效果：\\t目标的这次攻击检定受到-4减值。\n攻击：\\t力量 + 2 vs. 强韧\n11级：力量 + 4 vs. 强韧\n命中：\\t2d6 + 力量调整值的伤害。",
+      "damage": null,
+      "attackBonus": null,
+      "missEffect": null
+    }
+  ],
+  "traits": [
+    {
+      "name": "CombatChallenge",
+      "displayName": "战斗挑战",
+      "description": "",
+      "icon": "challenge",
+      "type": "combat"
+    }
+  ],
+  "feats": [
+    {
+      "name": "SuperiorWill"
+    },
+    {
+      "name": "LightningReflexes"
+    },
+    {
+      "name": "WeaponExpertise"
+    }
+  ],
+  "notes": [
+    "Equipment: 长剑, 短弓, 20 支箭"
+  ]
+}

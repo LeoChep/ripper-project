@@ -20,4 +20,7 @@ export class StateMachine {
     public  doAction(){
 
     }
+    public stop() {
+        // 停止当前状态的行为
+    }
 }

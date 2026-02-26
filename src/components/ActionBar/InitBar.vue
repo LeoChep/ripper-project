@@ -37,7 +37,7 @@ import initCursorImg from "@/assets/ui/init-cursor.png";
 import initAvatarBoxImg from "@/assets/ui/init-avtarbox2.png";
 import delayButtonImg from "@/assets/ui/delay-button.png";
 import { appSetting } from "@/core/envSetting";
-import type { Unit } from "@/class/Unit";
+
 import { UnitSystem } from "@/core/system/UnitSystem";
 import { CharacterCombatController } from "@/core/controller/CharacterCombatController";
 import { CharacterCombatDelayControlle } from "@/core/controller/CharacterCombatDelayControlle";
@@ -150,7 +150,9 @@ const isCurrentUnit = (unit: any) => {
 const lastUnitId = ref<number | null>(null);
 setInterval(() => {
 
-  const currentUnitId = InitSystem.getPointAtUnit()?.id || null;
+  const currentUnitId = InitSystem.getPointAtUnit()?.id ;
+  console.log("Current Unit ID:", currentUnitId);
+  console.log("Units in Initiative:", InitSystem.getPointAtUnit()?.id);
   const unit = UnitSystem.getInstance().getUnitById(currentUnitId?.toString() || '');
   for (const u of units.value) {
     if (u.state === 'dead') {
@@ -160,8 +162,8 @@ setInterval(() => {
         unitElement.style.display = "none";
     }
   }
-  if (isAllLoaded.value && currentUnitId && scrollContainer.value) {
-    if (lastUnitId.value) {
+  if (isAllLoaded.value && currentUnitId!=undefined && scrollContainer.value) {
+    if (lastUnitId.value!=undefined) {
       const lastUnitElement = document.getElementById(`init-${lastUnitId.value}`);
       if (lastUnitElement) {
         lastUnitElement.classList.remove("is-current");

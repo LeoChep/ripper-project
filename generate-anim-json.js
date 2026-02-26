@@ -41,7 +41,7 @@ const frameW = Number(args.width);
 const frameH = Number(args.height);
 const outputPath = args.output;
 const dirs = (args.dirs ? String(args.dirs) : "w,a,s,d").split(",").map((d) => d.trim()).filter(Boolean);
-
+console.log(`Generating animation JSON with name="${name}", frames=${framesPerRow}, width=${frameW}, height=${frameH}, output="${outputPath}", dirs=[${dirs.join(", ")}]`);
 if (!name || !framesPerRow || !frameW || !frameH || !outputPath || dirs.length === 0) {
     console.error(usage());
     process.exit(1);

@@ -260,4 +260,7 @@ export class WalkStateMachine extends StateMachine {
       // console.log("没有单位可以触发借机");
     }
   };
+  public stop(): void {
+      this.path = [];
+  }
 }

@@ -44,5 +44,12 @@ export class StateMachinePack {
       console.warn(`状态机 ${name} 不存在`);
     }
   }
+  public stop(): void {
+    const name = this.owner.state;
+    const machine = this.getMachine(name);  
+    if (machine) {
+      machine.stop();
+    }
+  }
  
 }

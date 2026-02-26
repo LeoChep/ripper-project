@@ -45,6 +45,7 @@ export class DramaSystem {
   async setDramaUse(dramaName: string): Promise<void> {
     const drama = this.getDrama(dramaName);
     let varliabeleArr: any[] = [];
+    console.log("设置当前使用的剧情:", dramaName, "变量存档:", this.records);
     this.records.forEach((record) => {
       if (record.name === dramaName) {
         varliabeleArr = record.variables;
@@ -114,11 +115,12 @@ export class DramaSystem {
     drama: any,
     variables: { name: string; value: any }[]
   ): Promise<void> {
-    drama.variables.clear();
+    //drama.variables.clear();
     if (!variables) {
       variables = [];
     }
-    variables = [...variables];
+    // variables = [...variables];
+    console.log("加载剧情:", drama.name, "变量:", variables);
     for (let i = 0; i < variables.length; i++) {
       drama.variables.set(variables[i].name, variables[i].value);
     }
@@ -139,6 +141,10 @@ export class DramaSystem {
   // 设置剧情变量
   setVariable(drama: any, key: string, value: any): void {
     drama.variables.set(key, value);
+    const recordIndex = this.records.findIndex((record) => record.name === drama.name);
+    if (recordIndex === -1) {
+      this.records.push({ name: drama.name, variables: drama.variables });
+    }
   }
 
   // 加载 Tiled 地图
@@ -183,7 +189,7 @@ export class DramaSystem {
     //导入全局的玩家角色到player单位槽内
     let playerUnitsSlot = 0;
     for (let i = 0; i < units.length; i++) {
-      if (units[i].party === "player") {
+      if (units[i].party === "player"&& playerUnitsSlot < golbalSetting.playerRoles.length) {
         golbalSetting.playerRoles[playerUnitsSlot].x = units[i].x;
         golbalSetting.playerRoles[playerUnitsSlot].y = units[i].y;
         golbalSetting.playerRoles[playerUnitsSlot].direction =
@@ -310,6 +316,9 @@ export class DramaSystem {
   createContainer = () => {};
   changeScene = async (sceneName: string) => {
     DramaSystem.getInstance().stop();
+    UnitSystem.getInstance().getAllUnits().forEach((unit) => {
+    unit.stateMachinePack.stop();
+    })
     MapCanvasService.getInstance().clear();
     MapCanvasService.getInstance().createContainer();
     golbalSetting.map = {} as TiledMap;
