@@ -87,11 +87,12 @@ class D1 extends Drama {
     await speak("突然……传来一阵响动……");
     await speak("你们发现更多的骷髅从神殿的深处涌了出来。");
     await unitSpeak("npc牧师", "看起来我们还有更多的敌人要面对！准备战斗吧！");
-    const hiddenUnits =
-      UnitSystem.getInstance().getSceneHiddenUnitsBySelectionGroup("battle2");
-    for (const unit of hiddenUnits) {
-      await unHiddenUnit(unit.name);
-    }
+    // const hiddenUnits =
+    //   UnitSystem.getInstance().getSceneHiddenUnitsBySelectionGroup("battle2");
+    // for (const unit of hiddenUnits) {
+    //   await unHiddenUnit(unit.name);
+    // }
+    await DramaSystem.getInstance().unHiddenUnitsByGroup("battle2");
     const units = UnitSystem.getInstance().getUnitBySelectionGroup("battle2");
     const players = UnitSystem.getInstance().getUnitBySelectionGroup("player");
     players.forEach((player) => {

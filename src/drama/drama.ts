@@ -1,3 +1,4 @@
+import { Unit } from './../core/units/Unit';
 import type { TiledMap } from "@/core/MapClass";
 import { DramaSystem } from "@/core/system/DramaSystem";
 
@@ -31,9 +32,9 @@ export abstract class Drama {
     const dramaSystem = DramaSystem.getInstance();
     dramaSystem.CGstart();
   };
-  protected unHiddenUnit = async (unitName: string): Promise<void> => {
+  protected unHiddenUnit = async (unit: Unit): Promise<void> => {
     const dramaSystem = DramaSystem.getInstance();
-    await dramaSystem.unHiddenUnit(unitName);
+    await dramaSystem.unHiddenUnit(unit);
   }
   protected CGEnd = (): void => {
     const dramaSystem = DramaSystem.getInstance();

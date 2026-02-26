@@ -448,24 +448,21 @@
          "name":"door",
          "objects":[
                 {
-                 "height":0,
-                 "id":30,
-                 "name":"\u57ce\u5821",
-                 "polyline":[
+                 "height":64,
+                 "id":35,
+                 "name":"",
+                 "properties":[
                         {
-                         "x":-2,
-                         "y":-59.3333333333334
-                        }, 
-                        {
-                         "x":144.26,
-                         "y":-59.3333333333334
+                         "name":"linkId",
+                         "type":"string",
+                         "value":"84"
                         }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":0,
-                 "x":3557.93939393939,
-                 "y":472
+                 "width":64,
+                 "x":3597.33333333333,
+                 "y":420.666666666667
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1677,6 +1674,10 @@
                  "name":"",
                  "polyline":[
                         {
+                         "x":-133.333333333333,
+                         "y":-52.6666666666666
+                        }, 
+                        {
                          "x":9.33333333333303,
                          "y":-50.6666666666666
                         }, 
@@ -1727,12 +1728,12 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":35,
+ "nextobjectid":36,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

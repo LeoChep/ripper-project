@@ -29,7 +29,7 @@ class CITY_1 extends Drama {
       this.startEvent();
     }
         const lordRoomDoor = golbalSetting.map?.doors?.find(
-      (door: { id: number }) => door.id === 30
+      (door: { id: number }) => door.id === 35
     );
     if (lordRoomDoor) {
       if (lordRoomDoor.isOpen) {
