@@ -344,7 +344,7 @@ export class MapCanvasService {
       return;
     }
     rlayers.spriteLayer.attach(animSpriteUnit);
-    animSpriteUnit.eventMode = "none";
+    animSpriteUnit.eventMode = "static";
 
     animSpriteUnit.on("rightclick", (event: any) => {
       if (unit.creature) {

@@ -393,6 +393,11 @@
                          "value":"npc"
                         }, 
                         {
+                         "name":"selectionGroup",
+                         "type":"string",
+                         "value":"battle1"
+                        }, 
+                        {
                          "name":"unitTypeName",
                          "type":"string",
                          "value":"city_1_guard"
@@ -425,6 +430,11 @@
                          "value":"npc"
                         }, 
                         {
+                         "name":"selectionGroup",
+                         "type":"string",
+                         "value":"battle1"
+                        }, 
+                        {
                          "name":"unitTypeName",
                          "type":"string",
                          "value":"city_1_guard"
@@ -435,6 +445,43 @@
                  "width":64,
                  "x":1022.54545454545,
                  "y":1343.75757575758
+                }, 
+                {
+                 "height":64,
+                 "id":36,
+                 "name":"\u7267\u5e08",
+                 "properties":[
+                        {
+                         "name":"friendly",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"dragonCleric"
+                        }, 
+                        {
+                         "name":"party",
+                         "type":"string",
+                         "value":"npc"
+                        }, 
+                        {
+                         "name":"selectionGroup",
+                         "type":"string",
+                         "value":"battle1"
+                        }, 
+                        {
+                         "name":"unitTypeName",
+                         "type":"string",
+                         "value":"dragonCleric"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":2170,
+                 "y":902.666666666667
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1733,7 +1780,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":36,
+ "nextobjectid":37,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

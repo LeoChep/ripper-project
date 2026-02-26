@@ -1,4 +1,4 @@
-import { lordRoom } from './lord-room';
+import { lordRoom } from "./lord-room";
 import * as InitiativeController from "@/core/system/InitiativeSystem";
 import { CharacterOutCombatController } from "@/core/controller/CharacterOutCombatController";
 import { golbalSetting } from "@/core/golbalSetting";
@@ -21,6 +21,13 @@ class CITY_1 extends Drama {
   loadInit() {
     const { CGstart, unitSpeak, speak, unitChoose, CGEnd, addInteraction } =
       this;
+    if (this.getVariable("guardTalkUsed") === true) {
+      addInteraction("守卫1", this.guardTalk);
+      addInteraction("守卫2", this.guardTalk);
+    }
+    if (this.getVariable("dragonCircleTalkUsed") === true) {
+      addInteraction("牧师", this.dragonCircleTalk);
+    }
   }
   play(): void {
     const startFlag = this.getVariable("startFlag");
@@ -28,7 +35,7 @@ class CITY_1 extends Drama {
       this.setVariable("startFlag", true);
       this.startEvent();
     }
-        const lordRoomDoor = golbalSetting.map?.doors?.find(
+    const lordRoomDoor = golbalSetting.map?.doors?.find(
       (door: { id: number }) => door.id === 35
     );
     if (lordRoomDoor) {
@@ -53,7 +60,7 @@ class CITY_1 extends Drama {
       CGEnd();
       return;
     }
-    await moveNear( 
+    await moveNear(
       guard,
       golbalSetting.playerRoles[0].x,
       golbalSetting.playerRoles[0].y
@@ -70,6 +77,11 @@ class CITY_1 extends Drama {
       "守卫1",
       "关于亡灵，最近培罗神殿的牧师也汇报过相关的情况，说是城外废弃神殿里有亡灵出没。最近一个叫安特卫普的牧师反应过这件事，并且向城主要求招募冒险者来解决这事。他现在在城外的废弃神殿旁值守。"
     );
+    this.addInteraction("守卫1", this.guardTalk);
+    this.addInteraction("守卫2", this.guardTalk);
+    this.addInteraction("牧师", this.dragonCircleTalk);
+    this.setVariable("guardTalkUsed", true);
+    this.setVariable("dragonCircleTalkUsed", true);
     CGEnd();
   };
 
@@ -157,43 +169,76 @@ class CITY_1 extends Drama {
       this.combat2EndCG();
     }
   }
-  private async door1Event(): Promise<void> {
-    const { CGstart, speak, unitSpeak, CGEnd } = this;
-
-    const door1 = golbalSetting.map?.doors?.find(
-      (door: { id: number }) => door.id === 86
+  protected guardTalk = async () => {
+    this.CGstart();
+    await this.unitSpeak(
+      "守卫1",
+      "感谢你们的帮助。要是没有你们，我们可就麻烦了。"
     );
-    if (!door1) return;
-    if (door1?.isOpen === false) {
-      return;
+    const choice = await this.unitChoose("守卫1", [
+      { text: "最近城还有什么别的奇怪的事情发生吗？", value: "option1" },
+      { text: "亡灵相关的事情你们后续如何跟进？", value: "option2" },
+      { text: "安特卫普牧师在哪？", value: "option3" },
+      { text: "你们的长官在哪？", value: "option4" },
+    ]);
+    if (choice === "option1") {
+      await this.unitSpeak(
+        "守卫1",
+        "最近城里是有不少人失踪，但是长官告诉我们别插手，会有专门的人来解决。"
+      );
+    } else if (choice === "option2") {
+      await this.unitSpeak(
+        "守卫1",
+        "光是普通的治安问题我们就忙的焦头烂额了，长官告诉我们别插手，会有专门的人来解决。"
+      );
+    } else if (choice === "option3") {
+      await this.unitSpeak("守卫1", "安特卫普牧师现在在城外的废弃神殿旁值守。");
+    } else if (choice === "option4") {
+      await this.unitSpeak(
+        "守卫1",
+        "就在旁边的警备处里。如果你有事要找他，最好小心点，他最近脾气暴躁的很。"
+      );
+    }
+    this.CGEnd();
+  };
+  protected dragonCircleTalk = async () => {
+    this.CGstart();
+    const chatWithClericFlag = this.getVariable("chatWithClericFlag");
+    if (!chatWithClericFlag) {
+      this.setVariable("chatWithClericFlag", true);
+      await this.unitSpeak("战士", "哦，你是最近大名鼎鼎的龙怒-达克吧。");
+      await this.unitSpeak("牧师", "想必你就是红发的罗伊斯吧。");
+      await this.unitSpeak("战士", "哈哈，谬赞了");
+    }
+    const clericJoinFlag = this.getVariable("clericJoinFlag");
+    if (!clericJoinFlag) {
+      const choice = await this.unitChoose("牧师", [
+        { text: "有兴趣加入我的冒险者小队吗？", value: "option1" },
+        { text: "祝你旅途愉快", value: "option2" },
+      ]);
+      if (choice === "option1") {
+        await this.unitSpeak(
+          "战士",
+          "我正在寻找可靠的冒险者来加入我的小队，你看起来很有潜力。"
+        );
+        await this.unitSpeak(
+          "牧师",
+          "听起来不错，我正好也想找个队伍一起冒险。就先结伴试试看吧。"
+        );
+        const cleric = UnitSystem.getInstance().getUnitByName("牧师");
+        if (cleric) {
+          cleric.party = "player";
+          golbalSetting.playerRoles.push(cleric);
+          this.setVariable("clericJoinFlag", true);
+        }
+      } else if (choice === "option2") {
+        await this.unitSpeak("战士", "祝你旅途愉快");
+        await this.unitSpeak("牧师", "谢谢，你也是。");
+      }
     }
 
-    CGstart();
-    this.setVariable("door1", true);
-    await speak(
-      "你走近废弃的房屋,发现门口有一扇破旧的门。你试图推开门,但它似乎被什么东西卡住了。你决定用力推开它。"
-    );
-    await unitSpeak("skeleton", "骷髅:咯吱吱……咯吱吱");
-    CGEnd();
-    //开始战斗
-    if (!this.map) {
-      return;
-    }
-    this.setVariable("inCombat1", true);
-    InitiativeController.setMap(this.map);
-    const units = UnitSystem.getInstance().getUnitBySelectionGroup("battle1");
-    const players = UnitSystem.getInstance().getUnitBySelectionGroup("player");
-    players.forEach((player) => {
-      units.push(player);
-    });
-    const initCombatPromise =
-      InitiativeController.addUnitsToInitiativeSheet(units);
-
-    initCombatPromise.then(async () => {
-      await InitiativeController.startBattle();
-      InitiativeController.startCombatTurn();
-    });
-  }
+    this.CGEnd();
+  };
 }
 
 export const city_1 = new CITY_1();

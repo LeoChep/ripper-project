@@ -21,6 +21,7 @@ import {
 import { lookOn } from "../anim/LookOnAnim";
 import { DramaSystem } from "./DramaSystem";
 import { MessageTipSystem } from "./MessageTipSystem";
+import { UnitSystem } from "./UnitSystem";
 
 export const InitiativeSheet = [] as InitiativeClass[];
 export const initiativeCursor = {
@@ -388,6 +389,11 @@ export function startBattle() {
   if (!CharacterCombatController.instance) {
     CharacterCombatController.instance = new CharacterCombatController();
   }
+  //所有单位不影响选中
+  UnitSystem.getInstance().getAllUnits().forEach((unit) => {
+    if (unit.animUnit) {
+      unit.animUnit.eventMode = "none";
+    }})
   CharacterCombatController.instance.inUse = true;
   initiativeCursor.map.sprites.forEach((unit) => {
     const u = unit as Unit;
@@ -569,6 +575,12 @@ export async function endBattle() {
   if (CharacterCombatController.instance) {
     CharacterCombatController.instance.inUse = false;
   }
+  //战斗结束，恢复单位交互
+  UnitSystem.getInstance().getAllUnits().forEach((unit) => {
+    if (unit.animUnit) {
+      unit.animUnit.eventMode = "static";
+    }
+  });
 }
 export async function playEndAnim() {
   const container = golbalSetting.tipContainer;

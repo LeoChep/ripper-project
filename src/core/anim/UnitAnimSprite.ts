@@ -236,10 +236,10 @@ export class UnitAnimSpirite extends Container {
     this.addChild(animation);
 
    animation.eventMode = "static";
-   animation.on("pointerdown", (e) => {
-     alert("点击了动画:" + name + " 事件对象:" + e);
-     this.isLeftClick = e.button === 0;
-   })
+  //  animation.on("pointerdown", (e) => {
+  //    alert("点击了动画:" + name + " 事件对象:" + e);
+  //    this.isLeftClick = e.button === 0;
+  //  })
 //    animation.containsPoint = (point: PIXI.Point): boolean => {
 //   // 仅当右键触发时，才判定“命中”；左键时返回false，不拦截
 //   console.log("containsPoint called with animation:", point, "isLeftClick:", this.isLeftClick);

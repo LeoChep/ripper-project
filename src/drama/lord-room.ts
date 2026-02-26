@@ -17,6 +17,7 @@ class LordRoom extends Drama {
   loadInit() {
     const { CGstart, unitSpeak, speak, unitChoose, CGEnd, addInteraction } =
       this;
+    addInteraction("领主", this.lordTalk);
   }
   play(): void {
     const startFlag = this.getVariable("startFlag");
@@ -38,6 +39,13 @@ class LordRoom extends Drama {
   }
   combat2EndCG = async () => {};
   combat1EndCG = async () => {};
+
+  private lordTalk = async () => {
+    const { CGstart, unitSpeak, speak, unitChoose, CGEnd } = this;
+    CGstart();
+    await unitSpeak("领主", "哦，罗伊斯，你先去城里逛逛，我还有些公务要处理。");
+    CGEnd();
+  };
 
   private async startEvent(): Promise<void> {
     const {

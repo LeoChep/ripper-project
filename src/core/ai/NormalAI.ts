@@ -16,7 +16,8 @@ import { BuffSystem } from "../system/BuffSystem";
 import { testDraw } from "../anim/DrawTest";
 import { standMovement } from "../action/UnitStand";
 import { tileSize } from "../envSetting";
-
+import { WeaponSystem } from "../system/WeaponSystem";
+import { Weapon } from "../units/Weapon";
 
 export class NormalAI implements AIInterface {
   public owner: Unit | undefined;
@@ -30,6 +31,27 @@ export class NormalAI implements AIInterface {
     // 这里可以实现AI的目标选择逻辑
     //用于存放结果
     console.log("AI行动:", unit);
+    if (unit.creature?.attacks.length === 0) {
+      if (!unit.creature?.weapons) {
+        unit.creature.weapons = [];
+      }
+      if (!unit.creature?.weapons[0]) {
+        unit.creature.weapons[0] = new Weapon({
+          name: "拳头",
+          damage: "1d4",
+          range: 1,
+          type: "melee",
+        });
+      }
+
+      unit.creature.attacks.push(
+        WeaponSystem.getInstance().createWeaponAttack(
+          unit,
+          unit.creature.weapons[0],
+          "STR"
+        )
+      );
+    }
     const result = await moveMovementAI(unit);
     await standardMovementAI(unit, result);
     InitiativeController.endTurn(unit);
