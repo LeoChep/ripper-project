@@ -1100,7 +1100,7 @@ const finishDrawing = () => {
         })),
         properties: objType === 'wall' ? [
             { name: 'onlyVisition', type: 'string', value: 'false' },
-            { name: 'onlyBlock', type: 'string', value: 'false' }
+            { name: 'onlyBlock', type: 'string', value: 'true' }
         ] : [
             { name: 'onlyVisition', type: 'string', value: 'false' },
             { name: 'onlyBlock', type: 'string', value: 'true' }
