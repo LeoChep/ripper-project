@@ -30,15 +30,17 @@ export class CharacterOutCombatController {
     return CharacterOutCombatController.instance;
   }
 
-
   constructor() {
     const ms = golbalSetting.mapContainer;
     if (ms) {
       console.log("ms", ms);
       ms.eventMode = "static";
       ms.on("click", (e: PIXI.FederatedPointerEvent) => {
-        console.log("map click", );
-        console.log("CharacterOutCombatController.isUse", CharacterOutCombatController.isUse);
+        console.log("map click");
+        console.log(
+          "CharacterOutCombatController.isUse",
+          CharacterOutCombatController.isUse
+        );
         if (!CharacterOutCombatController.isUse) {
           return;
         }
@@ -51,7 +53,6 @@ export class CharacterOutCombatController {
   }
 
   unitMove(e: PIXI.FederatedPointerEvent) {
-
     console.log("unitMove CgolbalSetting", golbalSetting);
     const mapPassiable = golbalSetting.map;
 
@@ -82,19 +83,39 @@ export class CharacterOutCombatController {
           y * tileSize,
           mapPassiable
         );
-      }
+      },
     });
 
     console.log("Path generated:", path);
     const result = {} as any;
     const container = golbalSetting.rootContainer;
     if (!container) return;
-    UnitMoveAction.playerSelectMovement(
-      e,
-     selectedCharacter,
-      path,
-      result
-    );
+    UnitMoveAction.playerSelectMovement(e, selectedCharacter, path, result);
+    const pos = e.data.global;
+    // 计算点击位置相对于动画精灵的偏移
+    let gobalContainer = golbalSetting.rootContainer;
+    if (!gobalContainer) {
+      console.error("全局容器不存在");
+      return;
+    }
+    const offsetX = pos.x - gobalContainer.x;
+    const offsetY = pos.y - gobalContainer.y;
+    const targetX = Math.floor(offsetX / tileSize);
+    const targetY = Math.floor(offsetY / tileSize);
+    let targetPoint = path[`${targetX},${targetY}`];
+    const roles = golbalSetting.playerRoles;
+    if (roles.length > 1) {
+      for (let i = 0; i < roles.length; i++) {
+        const playerSlotUnit = roles[i];
+        if (playerSlotUnit === selectedCharacter) {
+          continue;
+        }
+        else if (targetPoint){
+          UnitMoveSystem.moveNear(playerSlotUnit,targetPoint.x*tileSize,targetPoint.y*tileSize)
+          targetPoint=path[`${targetPoint.x},${targetPoint.y}`]
+        }
+      }
+    }
   }
   // 添加你的方法和属性
 }

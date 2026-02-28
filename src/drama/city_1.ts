@@ -21,6 +21,9 @@ class CITY_1 extends Drama {
   loadInit() {
     const { CGstart, unitSpeak, speak, unitChoose, CGEnd, addInteraction } =
       this;
+    if (!this.getVariable("clericJoinFlag") === true) {
+      DramaSystem.getInstance().unHiddenUnitByName("牧师");
+    }
     if (this.getVariable("guardTalkUsed") === true) {
       addInteraction("守卫1", this.guardTalk);
       addInteraction("守卫2", this.guardTalk);
@@ -41,6 +44,14 @@ class CITY_1 extends Drama {
     if (lordRoomDoor) {
       if (lordRoomDoor.isOpen) {
         DramaSystem.getInstance().changeScene("lord-room");
+      }
+    }
+       const tavernDoor = golbalSetting.map?.doors?.find(
+      (door: { id: number }) => door.id === 38
+    );
+    if (tavernDoor) {
+      if (tavernDoor.isOpen) {
+        DramaSystem.getInstance().changeScene("tavern");
       }
     }
     const undeadAppearFlag = this.getVariable("undeadAppearFlag");

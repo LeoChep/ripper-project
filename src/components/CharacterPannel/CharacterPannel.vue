@@ -51,6 +51,7 @@ import * as InitiativeSystem from "@/core/system/InitiativeSystem";
 import test3Img from '@/assets/ui/test3.png';
 import { UnitSystem } from '@/core/system/UnitSystem'
 import { appSetting } from '@/core/envSetting'
+import { golbalSetting } from '@/core/golbalSetting'
 const characters = ref([])
 const hp = ref(0)
 const maxHp = ref(0)
@@ -90,7 +91,7 @@ onMounted(() => {
     CharacterController.selectCharacterHandlers.push(useCharacterStore().selectCharacter)
     const updataCharacters = () => {
         characters.value = []
-        const nChartacters = characterStore.value.characters;
+        const nChartacters = golbalSetting.playerRoles;
         console.log('角色列表更新:', nChartacters)
         nChartacters.forEach(character => {
             characters.value.push(character);

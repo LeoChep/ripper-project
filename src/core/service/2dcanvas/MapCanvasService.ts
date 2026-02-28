@@ -17,6 +17,7 @@ import { UnitAnimSpirite } from "@/core/anim/UnitAnimSprite";
 import type { Creature } from "@/core/units/Creature";
 import { createFrontObjAnimSpriteFromFront } from "@/core/anim/FrontObjAnimSprite";
 import { MapContainer } from "@/core/anim/MapContainer";
+import { DramaSystem } from "@/core/system/DramaSystem";
 
 export class MapCanvasService {
   constructor() {}
@@ -345,7 +346,12 @@ export class MapCanvasService {
     }
     rlayers.spriteLayer.attach(animSpriteUnit);
     animSpriteUnit.eventMode = "static";
-
+    animSpriteUnit.on("click",(event:any)=>{
+           if (unit.name) {
+        // 这里可以触发选择事件，但为了保持简洁，暂时移除选择逻辑
+            DramaSystem.getInstance().checkInteraction(unit.name)
+      }
+    })
     animSpriteUnit.on("rightclick", (event: any) => {
       if (unit.creature) {
         // 这里可以触发选择事件，但为了保持简洁，暂时移除选择逻辑

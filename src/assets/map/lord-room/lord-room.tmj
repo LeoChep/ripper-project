@@ -102,6 +102,38 @@
                  "width":64,
                  "x":641.333,
                  "y":252
+                }, 
+                {
+                 "height":64,
+                 "id":6,
+                 "name":"player2",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":3
+                        }, 
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"player2"
+                        }, 
+                        {
+                         "name":"party",
+                         "type":"string",
+                         "value":"player"
+                        }, 
+                        {
+                         "name":"selectionGroup",
+                         "type":"string",
+                         "value":"player"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":711.711911357341,
+                 "y":768.443213296399
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -230,7 +262,7 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":6,
+ "nextobjectid":10,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

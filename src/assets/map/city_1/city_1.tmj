@@ -457,6 +457,11 @@
                          "value":true
                         }, 
                         {
+                         "name":"isSceneHidden",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
                          "name":"name",
                          "type":"string",
                          "value":"dragonCleric"
@@ -482,6 +487,38 @@
                  "width":64,
                  "x":2170,
                  "y":902.666666666667
+                }, 
+                {
+                 "height":64,
+                 "id":37,
+                 "name":"player2",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":3
+                        }, 
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"player2"
+                        }, 
+                        {
+                         "name":"party",
+                         "type":"string",
+                         "value":"player"
+                        }, 
+                        {
+                         "name":"selectionGroup",
+                         "type":"string",
+                         "value":"player"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":3572,
+                 "y":668
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -510,6 +547,23 @@
                  "width":64,
                  "x":3597.33333333333,
                  "y":420.666666666667
+                }, 
+                {
+                 "height":64,
+                 "id":38,
+                 "name":"\u65c5\u9986",
+                 "properties":[
+                        {
+                         "name":"linkId",
+                         "type":"string",
+                         "value":"84"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":1908,
+                 "y":769
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1780,7 +1834,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":37,
+ "nextobjectid":39,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

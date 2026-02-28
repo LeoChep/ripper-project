@@ -12,6 +12,7 @@ import { CharacterOutCombatController } from "../controller/CharacterOutCombatCo
 import { CharacterController } from "../controller/CharacterController";
 import { lordRoom } from "@/drama/lord-room";
 import { createFrontObjFromObj } from "../units/FrontObj";
+import { tavern } from "@/drama/tavern";
 interface DialogOption {
   text: string;
   value: any;
@@ -20,6 +21,7 @@ export class DramaSystem {
   private dramaMap: Map<string, any> = new Map();
   static instance: DramaSystem;
   records = [] as { name: any; variables: unknown[] }[];
+ interactionHandle:Map<string, (...args: any[]) => {}>=new Map();
   interval = null as unknown as NodeJS.Timeout;
   dramaUse: Drama | null = null;
 
@@ -106,8 +108,7 @@ export class DramaSystem {
   //提供注入口
   //todo以后需要由专门模块负责
   createSpriteAnim = async (unit: Unit): Promise<any> => {
-    
-     await  MapCanvasService.getInstance().generateAnimSprite(unit);
+    await MapCanvasService.getInstance().generateAnimSprite(unit);
   };
 
   // 加载剧情
@@ -141,7 +142,9 @@ export class DramaSystem {
   // 设置剧情变量
   setVariable(drama: any, key: string, value: any): void {
     drama.variables.set(key, value);
-    const recordIndex = this.records.findIndex((record) => record.name === drama.name);
+    const recordIndex = this.records.findIndex(
+      (record) => record.name === drama.name
+    );
     if (recordIndex === -1) {
       this.records.push({ name: drama.name, variables: drama.variables });
     }
@@ -162,10 +165,38 @@ export class DramaSystem {
     const allUnits = createUnitsFromMapSprites(spritesOBJ);
     const hidenUnits = allUnits.filter((unit) => unit.isSceneHidden);
     mapPassiable.hiddenUnits = hidenUnits; // 将隐藏单位存储在地图对象中，后续需要时可以从这里获取
-    const units = allUnits.filter((unit) => !unit.isSceneHidden); // 过滤掉隐藏单位，先不添加到地图中，等需要的时候再添加
-    // 处理隐藏单位，暂时先不添加到地图中，等需要的时候再添加
-    //从units中去掉隐藏单位，先不添加到地图中，等需要的时候再添加
-
+    // 过滤掉隐藏单位，先不添加到地图中，等需要的时候再添加
+    //玩家单位另外读取
+    const units = allUnits.filter(
+      (unit) => !unit.isSceneHidden && !(unit.party === "player")
+    );
+    const playerUnitsPort = allUnits.filter((unit) => unit.party === "player");
+    console.log(
+      "从地图加载的玩家单位:",
+      playerUnitsPort,
+      golbalSetting.playerRoles
+    );
+    let playerUnitsSlot = 0;
+    for (let i = 0; i < playerUnitsPort.length; i++) {
+      console.log("处理玩家单位:", playerUnitsPort[i]);
+      if (playerUnitsSlot >= golbalSetting.playerRoles.length) {
+        console.log(
+          "玩家单位超过预设的角色数量，无法继续加载:",
+          playerUnitsPort[i]
+        );
+        break;
+      }
+      if (playerUnitsPort[i].party === "player") {
+        golbalSetting.playerRoles[playerUnitsSlot].x = playerUnitsPort[i].x;
+        golbalSetting.playerRoles[playerUnitsSlot].y = playerUnitsPort[i].y;
+        golbalSetting.playerRoles[playerUnitsSlot].direction =
+          playerUnitsPort[i].direction;
+        playerUnitsPort[i] = golbalSetting.playerRoles[playerUnitsSlot];
+        units.push(golbalSetting.playerRoles[playerUnitsSlot]);
+        playerUnitsSlot++;
+      }
+    }
+    console.log("Loaded units from map:", units);
     console.log("Loaded boxOBJ from map:", boxOBJ);
     //创建前景对象
     let frontObjs = mapPassiable.frontObjs;
@@ -187,17 +218,8 @@ export class DramaSystem {
     });
 
     //导入全局的玩家角色到player单位槽内
-    let playerUnitsSlot = 0;
-    for (let i = 0; i < units.length; i++) {
-      if (units[i].party === "player"&& playerUnitsSlot < golbalSetting.playerRoles.length) {
-        golbalSetting.playerRoles[playerUnitsSlot].x = units[i].x;
-        golbalSetting.playerRoles[playerUnitsSlot].y = units[i].y;
-        golbalSetting.playerRoles[playerUnitsSlot].direction =
-          units[i].direction;
-        units[i] = golbalSetting.playerRoles[playerUnitsSlot];
-        playerUnitsSlot++;
-      }
-    }
+
+    for (let i = 0; i < units.length; i++) {}
     // 使用 map 而不是 forEach，避免冗余的 Promise 包装
     // 读取对应的生物类别，创建完整的单位对象
     const createCreatureEndPromise = units.map(async (unit) => {
@@ -253,13 +275,12 @@ export class DramaSystem {
   addInteraction(unitname: string, event: (...args: any[]) => {}) {
     this.addInteractionHandle(unitname, event);
     console.log("为单位添加交互事件:", unitname);
-    const unit = UnitSystem.getInstance().getUnitByName(unitname);
-    if (unit) {
-      console.log("找到单位，添加事件监听器:", unit);
-      unit.animUnit?.on("click", (...args: any[]) => {
-        console.log("触发交互事件:", unitname);
-        event(...args);
-      });
+    this.interactionHandle.set(unitname,event)
+  }
+  checkInteraction(unitName:string){
+    const interaction=this.interactionHandle.get(unitName);
+    if (interaction){
+      interaction();
     }
   }
   unHiddenUnitsByGroup = async (groupName: string) => {
@@ -308,6 +329,14 @@ export class DramaSystem {
     );
     if (hiddenUnitIndex !== -1) {
       const [unit] = map.hiddenUnits.splice(hiddenUnitIndex, 1);
+      for (let i = 0; i < map.sprites.length; i++) {
+        if (map.sprites[i].id === unit.id) {
+          console.warn(
+            `单位 ${unit.name} 已经在地图上了，不需要再次添加。`
+          );
+          return;
+        }
+      }
       this.unHiddenUnit(unit);
     }
   };
@@ -316,9 +345,11 @@ export class DramaSystem {
   createContainer = () => {};
   changeScene = async (sceneName: string) => {
     DramaSystem.getInstance().stop();
-    UnitSystem.getInstance().getAllUnits().forEach((unit) => {
-    unit.stateMachinePack.stop();
-    })
+    UnitSystem.getInstance()
+      .getAllUnits()
+      .forEach((unit) => {
+        unit.stateMachinePack.stop();
+      });
     MapCanvasService.getInstance().clear();
     MapCanvasService.getInstance().createContainer();
     golbalSetting.map = {} as TiledMap;
@@ -338,4 +369,5 @@ const initDramaMap = () => {
   dramaSystem.registerDrama("d1", d1);
   dramaSystem.registerDrama("city_1", city_1);
   dramaSystem.registerDrama("lord-room", lordRoom);
+  dramaSystem.registerDrama('tavern',tavern)
 };
