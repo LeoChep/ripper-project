@@ -1,275 +1,1091 @@
-{ "compressionlevel":-1,
- "height":16,
- "infinite":false,
- "layers":[
+{
+  "compressionlevel": -1,
+  "height": 24,
+  "infinite": false,
+  "layers": [
+    {
+      "draworder": "topdown",
+      "id": 2,
+      "name": "wall",
+      "objects": [
         {
-         "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-         "height":16,
-         "id":1,
-         "name":"\u56fe\u5757\u5c42 1",
-         "opacity":1,
-         "type":"tilelayer",
-         "visible":true,
-         "width":22,
-         "x":0,
-         "y":0
-        }, 
+          "height": 0,
+          "id": 4,
+          "name": "",
+          "polyline": [],
+          "properties": [
+            {
+              "name": "onlyBlock",
+              "type": "string",
+              "value": "true"
+            }
+          ],
+          "rotation": 0,
+          "type": "wall",
+          "visible": true,
+          "width": 0,
+          "x": 502.900317678372,
+          "y": 256.725336996651
+        },
         {
-         "draworder":"topdown",
-         "id":2,
-         "name":"sprite",
-         "objects":[
-                {
-                 "height":64,
-                 "id":1,
-                 "name":"\u6218\u58eb",
-                 "properties":[
-                        {
-                         "name":"direction",
-                         "type":"int",
-                         "value":3
-                        }, 
-                        {
-                         "name":"name",
-                         "type":"string",
-                         "value":"player1"
-                        }, 
-                        {
-                         "name":"party",
-                         "type":"string",
-                         "value":"player"
-                        }, 
-                        {
-                         "name":"selectionGroup",
-                         "type":"string",
-                         "value":"player"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":64,
-                 "x":649.333,
-                 "y":695.333
-                }, 
-                {
-                 "height":64,
-                 "id":2,
-                 "name":"\u9886\u4e3b",
-                 "properties":[
-                        {
-                         "name":"direction",
-                         "type":"int",
-                         "value":3
-                        }, 
-                        {
-                         "name":"name",
-                         "type":"string",
-                         "value":"\u9886\u4e3b"
-                        }, 
-                        {
-                         "name":"party",
-                         "type":"string",
-                         "value":"npc"
-                        }, 
-                        {
-                         "name":"selectionGroup",
-                         "type":"string",
-                         "value":""
-                        }, 
-                        {
-                         "name":"unitTypeName",
-                         "type":"string",
-                         "value":"lord-meibiwusi"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":64,
-                 "x":641.333,
-                 "y":252
-                }, 
-                {
-                 "height":64,
-                 "id":6,
-                 "name":"player2",
-                 "properties":[
-                        {
-                         "name":"direction",
-                         "type":"int",
-                         "value":3
-                        }, 
-                        {
-                         "name":"name",
-                         "type":"string",
-                         "value":"player2"
-                        }, 
-                        {
-                         "name":"party",
-                         "type":"string",
-                         "value":"player"
-                        }, 
-                        {
-                         "name":"selectionGroup",
-                         "type":"string",
-                         "value":"player"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":64,
-                 "x":711.711911357341,
-                 "y":768.443213296399
-                }],
-         "opacity":1,
-         "type":"objectgroup",
-         "visible":true,
-         "x":0,
-         "y":0
-        }, 
+          "height": 0,
+          "id": 16,
+          "name": "",
+          "polyline": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 104.6666259765625,
+              "y": 0.66668701171875
+            },
+            {
+              "x": 104.6666259765625,
+              "y": 120.66668701171875
+            },
+            {
+              "x": 39.3333740234375,
+              "y": 118
+            },
+            {
+              "x": 42.6666259765625,
+              "y": 203.33334350585938
+            },
+            {
+              "x": -9.33331298828125,
+              "y": 205.33334350585938
+            },
+            {
+              "x": -8,
+              "y": 160.66668701171875
+            },
+            {
+              "x": -1.3333740234375,
+              "y": 154.66668701171875
+            },
+            {
+              "x": -6.66668701171875,
+              "y": 136
+            },
+            {
+              "x": -1.3333740234375,
+              "y": -3.33331298828125
+            },
+            {
+              "x": -1.3333740234375,
+              "y": -1.33331298828125
+            }
+          ],
+          "properties": [
+            {
+              "name": "onlyVisition",
+              "type": "string",
+              "value": "false"
+            },
+            {
+              "name": "onlyBlock",
+              "type": "string",
+              "value": "true"
+            }
+          ],
+          "rotation": 0,
+          "type": "wall",
+          "visible": true,
+          "width": 0,
+          "x": 776,
+          "y": 465.99998474121094
+        },
         {
-         "draworder":"topdown",
-         "id":7,
-         "name":"door",
-         "objects":[
-                {
-                 "height":0,
-                 "id":5,
-                 "name":"\u79bb\u5f00",
-                 "polyline":[
-                        {
-                         "x":0,
-                         "y":0
-                        }, 
-                        {
-                         "x":146.260387811634,
-                         "y":0
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":582.382271468144,
-                 "y":995.457063711911
-                }],
-         "opacity":1,
-         "type":"objectgroup",
-         "visible":true,
-         "x":0,
-         "y":0
-        }, 
+          "height": 0,
+          "id": 17,
+          "name": "",
+          "polyline": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 85.3333740234375,
+              "y": 0
+            },
+            {
+              "x": 89.3333740234375,
+              "y": 70
+            },
+            {
+              "x": 75.3333740234375,
+              "y": 80.66668701171875
+            },
+            {
+              "x": 4,
+              "y": 84
+            },
+            {
+              "x": -8.6666259765625,
+              "y": 64.66668701171875
+            },
+            {
+              "x": -2.6666259765625,
+              "y": 0
+            }
+          ],
+          "properties": [
+            {
+              "name": "onlyVisition",
+              "type": "string",
+              "value": "false"
+            },
+            {
+              "name": "onlyBlock",
+              "type": "string",
+              "value": "true"
+            }
+          ],
+          "rotation": 0,
+          "type": "wall",
+          "visible": true,
+          "width": 0,
+          "x": 1072.6666259765625,
+          "y": 904.6666259765625
+        },
         {
-         "draworder":"topdown",
-         "id":5,
-         "name":"frontObj",
-         "objects":[
-                {
-                 "height":192,
-                 "id":3,
-                 "name":"\u9886\u4e3b\u684c\u5b50",
-                 "properties":[
-                        {
-                         "name":"frontObjName",
-                         "type":"string",
-                         "value":"\u9886\u4e3b\u684c\u5b50"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":321,
-                 "x":495.866746801752,
-                 "y":221.557482613549
-                }],
-         "opacity":1,
-         "type":"objectgroup",
-         "visible":true,
-         "x":0,
-         "y":0
-        }, 
+          "height": 0,
+          "id": 18,
+          "name": "",
+          "polyline": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 78.66665649414062,
+              "y": 2
+            },
+            {
+              "x": 92.00003051757812,
+              "y": 16.6666259765625
+            },
+            {
+              "x": 92.00003051757812,
+              "y": 81.33331298828125
+            },
+            {
+              "x": 74.00003051757812,
+              "y": 93.33331298828125
+            },
+            {
+              "x": 8.66668701171875,
+              "y": 95.33331298828125
+            },
+            {
+              "x": -1.33331298828125,
+              "y": 78
+            },
+            {
+              "x": 1.333343505859375,
+              "y": 0.6666259765625
+            }
+          ],
+          "properties": [
+            {
+              "name": "onlyVisition",
+              "type": "string",
+              "value": "false"
+            },
+            {
+              "name": "onlyBlock",
+              "type": "string",
+              "value": "true"
+            }
+          ],
+          "rotation": 0,
+          "type": "wall",
+          "visible": true,
+          "width": 0,
+          "x": 188.66665649414062,
+          "y": 904
+        },
         {
-         "draworder":"topdown",
-         "id":6,
-         "name":"wall",
-         "objects":[
-                {
-                 "height":0,
-                 "id":4,
-                 "name":"",
-                 "polygon":[
-                        {
-                         "x":0,
-                         "y":0
-                        }, 
-                        {
-                         "x":305.960333132996,
-                         "y":-1.75839271915515
-                        }, 
-                        {
-                         "x":305.960333132996,
-                         "y":142.429810251567
-                        }, 
-                        {
-                         "x":8.79196359577577,
-                         "y":144.188202970722
-                        }, 
-                        {
-                         "x":-3.51678543831025,
-                         "y":130.121061217481
-                        }],
-                 "properties":[
-                        {
-                         "name":"onlyBlock",
-                         "type":"string",
-                         "value":"true"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":502.900317678372,
-                 "y":256.725336996651
-                }],
-         "opacity":1,
-         "type":"objectgroup",
-         "visible":true,
-         "x":0,
-         "y":0
-        }, 
+          "height": 0,
+          "id": 19,
+          "name": "",
+          "polyline": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 79.3333740234375,
+              "y": -3.33331298828125
+            },
+            {
+              "x": 83.3333740234375,
+              "y": 18
+            },
+            {
+              "x": 82,
+              "y": 70
+            },
+            {
+              "x": 65.3333740234375,
+              "y": 84.66668701171875
+            },
+            {
+              "x": 9.3333740234375,
+              "y": 86.66668701171875
+            },
+            {
+              "x": -6.6666259765625,
+              "y": 74.66668701171875
+            },
+            {
+              "x": -0.6666259765625,
+              "y": -2.666656494140625
+            }
+          ],
+          "properties": [
+            {
+              "name": "onlyVisition",
+              "type": "string",
+              "value": "false"
+            },
+            {
+              "name": "onlyBlock",
+              "type": "string",
+              "value": "true"
+            }
+          ],
+          "rotation": 0,
+          "type": "wall",
+          "visible": true,
+          "width": 0,
+          "x": 1152,
+          "y": 659.9999694824219
+        },
         {
-         "id":4,
-         "image":"C:\/Users\/chen\/Downloads\/generated-image-1771260924515.png",
-         "imageheight":1019,
-         "imagewidth":1408,
-         "name":"\u56fe\u50cf\u56fe\u5c42 1",
-         "opacity":1,
-         "type":"imagelayer",
-         "visible":true,
-         "x":0,
-         "y":0
-        }],
- "nextlayerid":8,
- "nextobjectid":10,
- "orientation":"orthogonal",
- "renderorder":"right-down",
- "tiledversion":"1.11.2",
- "tileheight":64,
- "tilesets":[],
- "tilewidth":64,
- "type":"map",
- "version":"1.10",
- "width":22
+          "height": 0,
+          "id": 20,
+          "name": "",
+          "polyline": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 80,
+              "y": 4.666656494140625
+            },
+            {
+              "x": 92.66665649414062,
+              "y": 14.666656494140625
+            },
+            {
+              "x": 90,
+              "y": 73.33331298828125
+            },
+            {
+              "x": 72,
+              "y": 84
+            },
+            {
+              "x": 18,
+              "y": 84.66665649414062
+            },
+            {
+              "x": -1.333343505859375,
+              "y": 66
+            },
+            {
+              "x": -2.666656494140625,
+              "y": -0.66668701171875
+            }
+          ],
+          "properties": [
+            {
+              "name": "onlyVisition",
+              "type": "string",
+              "value": "false"
+            },
+            {
+              "name": "onlyBlock",
+              "type": "string",
+              "value": "true"
+            }
+          ],
+          "rotation": 0,
+          "type": "wall",
+          "visible": true,
+          "width": 0,
+          "x": 148.66665649414062,
+          "y": 652.6666564941406
+        },
+        {
+          "height": 0,
+          "id": 21,
+          "name": "",
+          "polyline": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 312.66668701171875,
+              "y": 3.3333282470703125
+            },
+            {
+              "x": 311.33331298828125,
+              "y": 143.3333282470703
+            },
+            {
+              "x": 10,
+              "y": 147.3333282470703
+            },
+            {
+              "x": -1.33331298828125,
+              "y": -0.6666717529296875
+            }
+          ],
+          "properties": [
+            {
+              "name": "onlyVisition",
+              "type": "string",
+              "value": "false"
+            },
+            {
+              "name": "onlyBlock",
+              "type": "string",
+              "value": "true"
+            }
+          ],
+          "rotation": 0,
+          "type": "wall",
+          "visible": true,
+          "width": 0,
+          "x": 499.33331298828125,
+          "y": 258
+        },
+        {
+          "height": 0,
+          "id": 22,
+          "name": "",
+          "polyline": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 84,
+              "y": 0.666656494140625
+            },
+            {
+              "x": 90.66668701171875,
+              "y": 66
+            },
+            {
+              "x": 78,
+              "y": 82
+            },
+            {
+              "x": 10.66668701171875,
+              "y": 80.66665649414062
+            },
+            {
+              "x": -5.33331298828125,
+              "y": 69.33334350585938
+            },
+            {
+              "x": 0.66668701171875,
+              "y": 0
+            }
+          ],
+          "properties": [
+            {
+              "name": "onlyVisition",
+              "type": "string",
+              "value": "false"
+            },
+            {
+              "name": "onlyBlock",
+              "type": "string",
+              "value": "false"
+            }
+          ],
+          "rotation": 0,
+          "type": "wall",
+          "visible": true,
+          "width": 0,
+          "x": 267.33331298828125,
+          "y": 367.3333282470703
+        },
+        {
+          "height": 0,
+          "id": 23,
+          "name": "",
+          "polyline": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 90.666748046875,
+              "y": 3.333343505859375
+            },
+            {
+              "x": 92.666748046875,
+              "y": 79.33331298828125
+            },
+            {
+              "x": 5.3333740234375,
+              "y": 84
+            },
+            {
+              "x": 1.3333740234375,
+              "y": -0.666656494140625
+            }
+          ],
+          "properties": [
+            {
+              "name": "onlyVisition",
+              "type": "string",
+              "value": "false"
+            },
+            {
+              "name": "onlyBlock",
+              "type": "string",
+              "value": "true"
+            }
+          ],
+          "rotation": 0,
+          "type": "wall",
+          "visible": true,
+          "width": 0,
+          "x": 1072.6666259765625,
+          "y": 385.3333282470703
+        },
+        {
+          "height": 0,
+          "id": 24,
+          "name": "",
+          "polyline": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 4,
+              "y": -46.666656494140625
+            },
+            {
+              "x": 7.3333740234375,
+              "y": -136
+            },
+            {
+              "x": 95.3333740234375,
+              "y": -132.6666717529297
+            },
+            {
+              "x": 94,
+              "y": -59.333343505859375
+            },
+            {
+              "x": 102.66668701171875,
+              "y": 1.333343505859375
+            },
+            {
+              "x": -10,
+              "y": 5.333343505859375
+            },
+            {
+              "x": -1.33331298828125,
+              "y": 1.333343505859375
+            }
+          ],
+          "properties": [
+            {
+              "name": "onlyVisition",
+              "type": "string",
+              "value": "false"
+            },
+            {
+              "name": "onlyBlock",
+              "type": "string",
+              "value": "true"
+            }
+          ],
+          "rotation": 0,
+          "type": "wall",
+          "visible": true,
+          "width": 0,
+          "x": 611.3333129882812,
+          "y": 247.3333282470703
+        },
+        {
+          "height": 0,
+          "id": 25,
+          "name": "",
+          "polyline": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 84,
+              "y": -0.6666717529296875
+            },
+            {
+              "x": 80,
+              "y": 68.66665649414062
+            },
+            {
+              "x": 5.3333740234375,
+              "y": 74
+            },
+            {
+              "x": 0.6666259765625,
+              "y": -4.6666717529296875
+            }
+          ],
+          "properties": [
+            {
+              "name": "onlyVisition",
+              "type": "string",
+              "value": "false"
+            },
+            {
+              "name": "onlyBlock",
+              "type": "string",
+              "value": "true"
+            }
+          ],
+          "rotation": 0,
+          "type": "wall",
+          "visible": true,
+          "width": 0,
+          "x": 850,
+          "y": 123.33332824707031
+        },
+        {
+          "height": 0,
+          "id": 26,
+          "name": "",
+          "polyline": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 20,
+              "y": 14.66668701171875
+            },
+            {
+              "x": 364.66668701171875,
+              "y": -172
+            },
+            {
+              "x": 362.66668701171875,
+              "y": -202
+            },
+            {
+              "x": 390.66668701171875,
+              "y": -213.99998474121094
+            },
+            {
+              "x": 1031.3333740234375,
+              "y": -219.99998474121094
+            },
+            {
+              "x": 1032.6666259765625,
+              "y": -170
+            },
+            {
+              "x": 1372,
+              "y": 14
+            },
+            {
+              "x": 1405.3333740234375,
+              "y": -4.666656494140625
+            }
+          ],
+          "properties": [
+            {
+              "name": "onlyVisition",
+              "type": "string",
+              "value": "false"
+            },
+            {
+              "name": "onlyBlock",
+              "type": "string",
+              "value": "true"
+            }
+          ],
+          "rotation": 0,
+          "type": "wall",
+          "visible": true,
+          "width": 0,
+          "x": 6,
+          "y": 363.99998474121094
+        },
+        {
+          "height": 0,
+          "id": 27,
+          "name": "",
+          "polyline": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 1440.6666717529297,
+              "y": -0.6666641235351562
+            },
+            {
+              "x": 1434.6666717529297,
+              "y": 1040.6666412353516
+            },
+            {
+              "x": 0,
+              "y": 1041.999984741211
+            },
+            {
+              "x": 2,
+              "y": 0.6666641235351562
+            }
+          ],
+          "properties": [
+            {
+              "name": "onlyVisition",
+              "type": "string",
+              "value": "false"
+            },
+            {
+              "name": "onlyBlock",
+              "type": "string",
+              "value": "false"
+            }
+          ],
+          "rotation": 0,
+          "type": "wall",
+          "visible": true,
+          "width": 0,
+          "x": 1.3333282470703125,
+          "y": 1.3333282470703125
+        },
+        {
+          "height": 0,
+          "id": 28,
+          "name": "",
+          "polyline": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 109.33331298828125,
+              "y": 1.333343505859375
+            },
+            {
+              "x": 118,
+              "y": 0.666656494140625
+            },
+            {
+              "x": 116,
+              "y": 213.33331298828125
+            },
+            {
+              "x": 54,
+              "y": 214.66668701171875
+            },
+            {
+              "x": 55.33331298828125,
+              "y": 127.33334350585938
+            },
+            {
+              "x": -4,
+              "y": 128.66665649414062
+            },
+            {
+              "x": -2,
+              "y": -2.666656494140625
+            }
+          ],
+          "properties": [
+            {
+              "name": "onlyVisition",
+              "type": "string",
+              "value": "false"
+            },
+            {
+              "name": "onlyBlock",
+              "type": "string",
+              "value": "false"
+            }
+          ],
+          "rotation": 0,
+          "type": "wall",
+          "visible": true,
+          "width": 0,
+          "x": 432,
+          "y": 461.3333282470703
+        }
+      ],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 3,
+      "name": "door",
+      "objects": [
+        {
+          "height": 0,
+          "id": 5,
+          "name": "离开",
+          "polyline": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 146.260387811634,
+              "y": 0
+            }
+          ],
+          "properties": [],
+          "rotation": 0,
+          "type": "door",
+          "visible": true,
+          "width": 0,
+          "x": 582.382271468144,
+          "y": 995.457063711911
+        }
+      ],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 5,
+      "name": "frontObj",
+      "objects": [
+        {
+          "height": 148,
+          "id": 7,
+          "name": "火把架",
+          "properties": [
+            {
+              "name": "frontObjName",
+              "type": "string",
+              "value": "火把架"
+            }
+          ],
+          "rotation": 0,
+          "type": "frontObj",
+          "visible": true,
+          "width": 90,
+          "x": 1262,
+          "y": 361.999984741211
+        },
+        {
+          "height": 221,
+          "id": 8,
+          "name": "龙形雕像3",
+          "properties": [
+            {
+              "name": "frontObjName",
+              "type": "string",
+              "value": "龙形雕像3"
+            }
+          ],
+          "rotation": 0,
+          "type": "frontObj",
+          "visible": true,
+          "width": 151,
+          "x": 1035.333251953125,
+          "y": 776.0000000000001
+        },
+        {
+          "height": 214,
+          "id": 9,
+          "name": "战士雕像3",
+          "properties": [
+            {
+              "name": "frontObjName",
+              "type": "string",
+              "value": "战士雕像3"
+            }
+          ],
+          "rotation": 0,
+          "type": "frontObj",
+          "visible": true,
+          "width": 142,
+          "x": 167.33334350585974,
+          "y": 791.9999694824222
+        },
+        {
+          "height": 211,
+          "id": 10,
+          "name": "龙形雕像2",
+          "properties": [
+            {
+              "name": "frontObjName",
+              "type": "string",
+              "value": "龙形雕像2"
+            }
+          ],
+          "rotation": 0,
+          "type": "frontObj",
+          "visible": true,
+          "width": 137,
+          "x": 1122.6666259765625,
+          "y": 541.9999694824216
+        },
+        {
+          "height": 224,
+          "id": 11,
+          "name": "战士雕像2",
+          "properties": [
+            {
+              "name": "frontObjName",
+              "type": "string",
+              "value": "战士雕像2"
+            }
+          ],
+          "rotation": 0,
+          "type": "frontObj",
+          "visible": true,
+          "width": 122,
+          "x": 134.6666259765625,
+          "y": 517.3333282470704
+        },
+        {
+          "height": 191,
+          "id": 12,
+          "name": "龙形雕像1",
+          "properties": [
+            {
+              "name": "frontObjName",
+              "type": "string",
+              "value": "龙形雕像1"
+            }
+          ],
+          "rotation": 0,
+          "type": "frontObj",
+          "visible": true,
+          "width": 93,
+          "x": 1075.333251953125,
+          "y": 276.6666107177735
+        },
+        {
+          "height": 187,
+          "id": 13,
+          "name": "战士雕像1",
+          "properties": [
+            {
+              "name": "frontObjName",
+              "type": "string",
+              "value": "战士雕像1"
+            }
+          ],
+          "rotation": 0,
+          "type": "frontObj",
+          "visible": true,
+          "width": 97,
+          "x": 259.9999694824223,
+          "y": 260.6666564941409
+        },
+        {
+          "height": 191,
+          "id": 14,
+          "name": "领主桌子",
+          "properties": [
+            {
+              "name": "frontObjName",
+              "type": "string",
+              "value": "领主桌子"
+            }
+          ],
+          "rotation": 0,
+          "type": "frontObj",
+          "visible": true,
+          "width": 320,
+          "x": 494.666748046875,
+          "y": 222.6666259765625
+        }
+      ],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 4,
+      "name": "sprite",
+      "objects": [
+        {
+          "height": 64,
+          "id": 1,
+          "name": "战士",
+          "rotation": 0,
+          "type": "unit",
+          "visible": true,
+          "width": 64,
+          "x": 649.333,
+          "y": 695.333,
+          "properties": [
+            {
+              "name": "direction",
+              "type": "int",
+              "value": 3
+            },
+            {
+              "name": "friendly",
+              "type": "bool",
+              "value": false
+            },
+            {
+              "name": "isSceneHidden",
+              "type": "bool",
+              "value": false
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "value": "player1"
+            },
+            {
+              "name": "party",
+              "type": "string",
+              "value": "player"
+            },
+            {
+              "name": "selectionGroup",
+              "type": "string",
+              "value": "player"
+            },
+            {
+              "name": "unitTypeName",
+              "type": "string",
+              "value": "skeleton"
+            }
+          ]
+        },
+        {
+          "height": 64,
+          "id": 2,
+          "name": "领主",
+          "rotation": 0,
+          "type": "unit",
+          "visible": true,
+          "width": 64,
+          "x": 641.333,
+          "y": 252,
+          "properties": [
+            {
+              "name": "direction",
+              "type": "int",
+              "value": 3
+            },
+            {
+              "name": "friendly",
+              "type": "bool",
+              "value": false
+            },
+            {
+              "name": "isSceneHidden",
+              "type": "bool",
+              "value": false
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "value": "领主"
+            },
+            {
+              "name": "party",
+              "type": "string",
+              "value": "npc"
+            },
+            {
+              "name": "unitTypeName",
+              "type": "string",
+              "value": "lord-meibiwusi"
+            }
+          ]
+        },
+        {
+          "height": 64,
+          "id": 6,
+          "name": "player2",
+          "rotation": 0,
+          "type": "unit",
+          "visible": true,
+          "width": 64,
+          "x": 711.711911357341,
+          "y": 768.443213296399,
+          "properties": [
+            {
+              "name": "direction",
+              "type": "int",
+              "value": 3
+            },
+            {
+              "name": "friendly",
+              "type": "bool",
+              "value": false
+            },
+            {
+              "name": "isSceneHidden",
+              "type": "bool",
+              "value": false
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "value": "player2"
+            },
+            {
+              "name": "party",
+              "type": "string",
+              "value": "player"
+            },
+            {
+              "name": "selectionGroup",
+              "type": "string",
+              "value": "player"
+            },
+            {
+              "name": "unitTypeName",
+              "type": "string",
+              "value": "skeleton"
+            }
+          ]
+        }
+      ],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "nextlayerid": 6,
+  "nextobjectid": 29,
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tiledversion": "1.11.2",
+  "tileheight": 80,
+  "tilesets": [],
+  "tilewidth": 80,
+  "type": "map",
+  "version": "1.10",
+  "width": 20
 }

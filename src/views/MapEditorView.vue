@@ -9,6 +9,13 @@
                 <button @click="importTMJ" class="btn btn-primary">导入地图(TMJ)</button>
                 <input ref="tmjFileInput" type="file" accept=".tmj,.json" style="display: none"
                     @change="handleTMJImport" />
+                <span class="toolbar-separator">|</span>
+                <button @click="importFrontObjImage" class="btn btn-info">导入前景物图片</button>
+                <input ref="frontObjImageInput" type="file" accept="image/*" style="display: none"
+                    @change="handleFrontObjImageImport" />
+                <button @click="importFrontObjJson" class="btn btn-info">导入前景物JSON</button>
+                <input ref="frontObjJsonInput" type="file" accept="application/json" style="display: none"
+                    @change="handleFrontObjJsonImport" />
                 <button @click="toggleGrid" class="btn">{{ showGrid ? '隐藏网格' : '显示网格' }}</button>
                 <button @click="clearCanvas" class="btn btn-warning">清空画布</button>
                 <span class="toolbar-separator">|</span>
@@ -31,6 +38,9 @@
                 </button>
                 <button @click="setMode('door')" :class="['btn', currentMode === 'door' ? 'btn-active' : '']">
                     绘制门
+                </button>
+                <button @click="setMode('frontObj')" :class="['btn', currentMode === 'frontObj' ? 'btn-active' : '']">
+                    放置前景物
                 </button>
                 <button @click="setMode('select')" :class="['btn', currentMode === 'select' ? 'btn-active' : '']">
                     选择/删除
@@ -166,6 +176,48 @@
             </div>
         </div>
 
+        <!-- 前景物面板 -->
+        <div class="sidebar" v-if="currentMode === 'frontObj'">
+            <h3>前景物列表</h3>
+            <div v-if="frontObjTemplates.length === 0" class="empty-list">
+                <p>暂无前景物</p>
+                <p style="font-size: 12px; color: #888; margin-top: 10px;">
+                    请先导入前景物图片和JSON文件
+                </p>
+            </div>
+            <div class="unit-item front-obj-item"
+                 v-for="(obj, index) in frontObjTemplates"
+                 :key="index"
+                 @click="selectFrontObjTemplate(index)"
+                 :class="{ selected: selectedFrontObjIndex === index }">
+                <div class="front-obj-thumb">
+                    <img :src="obj.thumbUrl" alt="" v-if="obj.thumbUrl" />
+                </div>
+                <div class="front-obj-info">
+                    <strong>{{ obj.name || '未命名' }}</strong>
+                    <p style="font-size: 11px; color: #888; margin: 2px 0;">
+                        {{ obj.width }}x{{ obj.height }} | 遮挡高度: {{ obj.occlusionHeight || 0 }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 选中前景物属性编辑面板 -->
+        <div class="sidebar" v-if="currentMode === 'select' && selectedObject && selectedObject.type === 'frontObj'">
+            <h3>编辑前景物属性</h3>
+            <div class="unit-properties">
+                <label>
+                    名称: <input v-model="editingFrontObjName" type="text" class="input-text" placeholder="前景物名称" />
+                </label>
+                <label>
+                    遮挡高度:
+                    <input v-model.number="editingFrontObjOcclusionHeight" type="number" class="input-text" />
+                </label>
+                <button @click="applyFrontObjPropertyChanges" class="btn btn-primary"
+                    style="margin-top: 10px; width: 100%;">应用更改</button>
+            </div>
+        </div>
+
         <!-- 画布容器 -->
         <div ref="canvasContainer" class="canvas-container with-sidebar">
         </div>
@@ -174,6 +226,9 @@
         <div class="status-bar">
             <span>模式: {{ getModeText() }}</span>
             <span v-if="selectedUnitType && currentMode === 'unit'">当前单位: {{ selectedUnitType }}</span>
+            <span v-if="currentMode === 'frontObj' && selectedFrontObjIndex >= 0">
+                当前前景物: {{ frontObjTemplates[selectedFrontObjIndex]?.name || '未选择' }}
+            </span>
             <span>鼠标位置: ({{ mouseX }}, {{ mouseY }})</span>
             <span>网格位置: ({{ Math.floor(mouseX / gridSize) }}, {{ Math.floor(mouseY / gridSize) }})</span>
             <span>对象数: {{ objectCount }}</span>
@@ -198,7 +253,7 @@ const defaultCanvasWidth = 1536;
 const defaultCanvasHeight = 1920;
 const showGrid = ref(true);
 const mapName = ref('custom_map');
-const currentMode = ref<'unit' | 'wall' | 'door' | 'select'>('unit');
+const currentMode = ref<'unit' | 'wall' | 'door' | 'frontObj' | 'select'>('unit');
 const zoomLevel = ref(1);
 const minZoom = 0.25;
 const maxZoom = 3;
@@ -211,6 +266,7 @@ let worldContainer: PIXI.Container;
 let gridContainer: PIXI.Container;
 let objectsContainer: PIXI.Container;
 let previewGraphics: PIXI.Graphics;
+let previewSprite: PIXI.Sprite | null = null; // 前景物预览精灵
 let wheelListener: ((event: WheelEvent) => void) | null = null;
 
 // 单位相关
@@ -266,11 +322,25 @@ const dragOffset = { x: 0, y: 0 };
 // 文件输入
 const fileInput = ref<HTMLInputElement | null>(null);
 const tmjFileInput = ref<HTMLInputElement | null>(null);
+const frontObjImageInput = ref<HTMLInputElement | null>(null);
+const frontObjJsonInput = ref<HTMLInputElement | null>(null);
 const canvasContainer = ref<HTMLDivElement | null>(null);
+
+// 前景物相关
+const frontObjTexture = ref<PIXI.Texture | null>(null);
+const frontObjTextureUrl = ref<string>('');
+const frontObjImage = ref<HTMLImageElement | null>(null); // 存储原始图片元素用于创建裁剪纹理
+const frontObjTemplates = ref<any[]>([]);
+const selectedFrontObjIndex = ref(-1);
+const frontObjObjects = ref<any[]>([]);
+
+// 编辑选中前景物的属性
+const editingFrontObjName = ref('');
+const editingFrontObjOcclusionHeight = ref(0);
 
 // 计算对象总数
 const objectCount = computed(() => {
-    return placedUnits.value.length + wallObjects.value.length + doorObjects.value.length;
+    return placedUnits.value.length + wallObjects.value.length + doorObjects.value.length + frontObjObjects.value.length;
 });
 
 const zoomPercent = computed(() => Math.round(zoomLevel.value * 100));
@@ -296,6 +366,7 @@ const saveEditorState = () => {
             placedUnits: placedUnits.value,
             wallObjects: wallObjects.value,
             doorObjects: doorObjects.value,
+            frontObjObjects: frontObjObjects.value,
             nextObjectId: nextObjectId,
             mapName: mapName.value,
             timestamp: Date.now()
@@ -314,11 +385,12 @@ const loadEditorState = async () => {
         if (!savedState) return false;
 
         const state = JSON.parse(savedState);
-        
+
         // 恢复数据
         placedUnits.value = state.placedUnits || [];
         wallObjects.value = state.wallObjects || [];
         doorObjects.value = state.doorObjects || [];
+        frontObjObjects.value = state.frontObjObjects || [];
         nextObjectId = state.nextObjectId || 1;
         mapName.value = state.mapName || 'custom_map';
 
@@ -408,8 +480,15 @@ onMounted(async () => {
     objectsContainer.sortableChildren = true;
     previewGraphics = new PIXI.Graphics();
 
+    // 创建前景物预览精灵
+    previewSprite = new PIXI.Sprite();
+    previewSprite.visible = false; // 默认隐藏
+    previewSprite.anchor.set(0, 0); // 左上角锚点
+    previewSprite.alpha = 0.7; // 半透明预览
+
     worldContainer.addChild(gridContainer);
     worldContainer.addChild(objectsContainer);
+    worldContainer.addChild(previewSprite); // 预览精灵在 graphics 之前
     worldContainer.addChild(previewGraphics);
     app.stage.addChild(worldContainer);
 
@@ -627,7 +706,7 @@ const handleFileSelect = async (event: Event) => {
 };
 
 // 设置编辑模式
-const setMode = (mode: 'unit' | 'wall' | 'door' | 'select') => {
+const setMode = (mode: 'unit' | 'wall' | 'door' | 'frontObj' | 'select') => {
     // 取消当前绘制
     if (currentMode.value === 'wall' || currentMode.value === 'door') {
         cancelDrawing();
@@ -648,15 +727,15 @@ const handlePointerMove = (event: PIXI.FederatedPointerEvent) => {
 
     // 如果正在拖动对象
     if (isDragging.value && selectedContainer.value && selectedObject.value) {
-        // 单位对齐网格，墙体和门自由移动
+        // 单位对齐网格，墙体/门/前景物自由移动
         let newX, newY;
-        
+
         if (selectedObject.value.type === 'unit') {
             // 单位：对齐到网格
             newX = Math.floor((pos.x - dragOffset.x) / gridSize) * gridSize;
             newY = Math.floor((pos.y - dragOffset.y) / gridSize) * gridSize;
         } else {
-            // 墙体和门：自由移动
+            // 墙体、门和前景物：自由移动
             newX = pos.x - dragOffset.x;
             newY = pos.y - dragOffset.y;
         }
@@ -675,6 +754,11 @@ const handlePointerMove = (event: PIXI.FederatedPointerEvent) => {
 const updatePreview = (x: number, y: number) => {
     previewGraphics.clear();
 
+    // 默认隐藏预览精灵
+    if (previewSprite) {
+        previewSprite.visible = false;
+    }
+
     if (currentMode.value === 'unit') {
         // 显示单位放置预览
         const gridX = Math.floor(x / gridSize) * gridSize;
@@ -683,6 +767,43 @@ const updatePreview = (x: number, y: number) => {
         previewGraphics.rect(gridX, gridY, gridSize, gridSize);
         previewGraphics.fill({ color: 0x00ff00, alpha: 0.3 });
         previewGraphics.stroke({ color: 0x00ff00, width: 2 });
+    } else if (currentMode.value === 'frontObj') {
+        // 显示前景物放置预览
+        if (selectedFrontObjIndex.value >= 0 && frontObjTemplates.value[selectedFrontObjIndex.value] && frontObjImage.value) {
+            const template = frontObjTemplates.value[selectedFrontObjIndex.value];
+            // 鼠标位置即为左上角（与 FrontObjAnimSprite 一致）
+            const previewX = x;
+            const previewY = y;
+
+            // 更新预览精灵
+            if (previewSprite) {
+                // 创建裁剪后的纹理
+                const frame = new PIXI.Rectangle(
+                    template.x || 0,
+                    template.y || 0,
+                    template.width,
+                    template.height
+                );
+                const texture = new PIXI.Texture({
+                    source: PIXI.Texture.from(frontObjImage.value).source,
+                    frame: frame,
+                });
+
+                previewSprite.texture = texture;
+                previewSprite.x = previewX;
+                previewSprite.y = previewY;
+                previewSprite.visible = true;
+            }
+
+            // 绘制边框
+            previewGraphics.rect(previewX, previewY, template.width, template.height);
+            previewGraphics.stroke({ color: 0xff00ff, width: 2 });
+        } else {
+            // 隐藏预览精灵
+            if (previewSprite) {
+                previewSprite.visible = false;
+            }
+        }
     } else if (currentMode.value === 'wall' || currentMode.value === 'door') {
         // 显示绘制预览
         if (drawingPoints.value.length > 0) {
@@ -725,6 +846,8 @@ const handlePointerDown = (event: PIXI.FederatedPointerEvent) => {
         placeUnit(pos.x, pos.y);
     } else if (currentMode.value === 'wall' || currentMode.value === 'door') {
         addDrawingPoint(pos.x, pos.y);
+    } else if (currentMode.value === 'frontObj') {
+        placeFrontObj(pos.x, pos.y);
     } else if (currentMode.value === 'select') {
         const hitContainer = selectObject(pos.x, pos.y);
         if (hitContainer) {
@@ -1005,10 +1128,31 @@ const selectObject = (x: number, y: number): PIXI.Container | null => {
         }
     }
 
-    // 如果没找到单位，第二遍：查找墙体/门
+    // 如果没找到单位，第二遍：查找前景物
+    if (!hitContainer) {
+        for (let i = objectsContainer.children.length - 1; i >= 0; i--) {
+            const child = objectsContainer.children[i] as PIXI.Container;
+            const userData = (child as any).userData;
+
+            if (userData && userData.type === 'frontObj' && userData.data) {
+                const localBounds = child.getLocalBounds();
+                const left = child.position.x + localBounds.x;
+                const top = child.position.y + localBounds.y;
+                const right = left + localBounds.width;
+                const bottom = top + localBounds.height;
+
+                if (x >= left && x <= right && y >= top && y <= bottom) {
+                    hitContainer = child;
+                    break;
+                }
+            }
+        }
+    }
+
+    // 如果没找到前景物，第三遍：查找墙体/门
     if (!hitContainer) {
         const tolerance = 10; // 点击容差：10像素（世界坐标）
-        
+
         for (let i = objectsContainer.children.length - 1; i >= 0; i--) {
             const child = objectsContainer.children[i] as PIXI.Container;
             const userData = (child as any).userData;
@@ -1038,6 +1182,11 @@ const selectObject = (x: number, y: number): PIXI.Container | null => {
             const height = localBounds.height || gridSize;
             selectionBorder.rect(localBounds.x, localBounds.y, width, height);
             selectionBorder.stroke({ color: 0xffff00, width: 3 });
+        } else if (userData.type === 'frontObj') {
+            // 前景物：矩形边框
+            const data = userData.data;
+            selectionBorder.rect(0, -data.height, data.width, data.height);
+            selectionBorder.stroke({ color: 0xff00ff, width: 3 });
         } else if (userData.type === 'wall' || userData.type === 'door') {
             // 墙体/门：沿折线高亮
             const polyline = userData.data?.polyline;
@@ -1064,7 +1213,12 @@ const selectObject = (x: number, y: number): PIXI.Container | null => {
         if (userData.type === 'unit' && userData.data) {
             syncUnitPropertiesToEditor(userData.data);
         }
-        
+
+        // 如果选中的是前景物，同步属性到编辑器
+        if (userData.type === 'frontObj' && userData.data) {
+            syncFrontObjPropertiesToEditor(userData.data);
+        }
+
         // 如果选中的是墙体或门，同步属性到编辑器
         if ((userData.type === 'wall' || userData.type === 'door') && userData.data) {
             syncWallDoorPropertiesToEditor(userData.data);
@@ -1081,6 +1235,8 @@ const selectObject = (x: number, y: number): PIXI.Container | null => {
         editingUnitFriendly.value = false;
         editingUnitSelectionGroup.value = '';
         editingUnitHidden.value = false;
+        editingFrontObjName.value = '';
+        editingFrontObjOcclusionHeight.value = 0;
         editingOnlyVisition.value = false;
         editingOnlyBlock.value = false;
         return null;
@@ -1233,6 +1389,18 @@ const deleteSelectedObject = () => {
         selectedContainer.value.destroy({ children: true });
 
         console.log(`已删除门: ${userData.id}`);
+    } else if (userData.type === 'frontObj') {
+        // 从前景物数组中移除
+        const index = frontObjObjects.value.findIndex(o => o.id === userData.id);
+        if (index !== -1) {
+            frontObjObjects.value.splice(index, 1);
+        }
+
+        // 从场景中移除
+        objectsContainer.removeChild(selectedContainer.value as any);
+        selectedContainer.value.destroy({ children: true });
+
+        console.log(`已删除前景物: ${userData.data?.name || userData.id}`);
     }
 
     selectedObject.value = null;
@@ -1244,6 +1412,8 @@ const deleteSelectedObject = () => {
     editingUnitFriendly.value = false;
     editingUnitSelectionGroup.value = '';
     editingUnitHidden.value = false;
+    editingFrontObjName.value = '';
+    editingFrontObjOcclusionHeight.value = 0;
     editingOnlyVisition.value = false;
     editingOnlyBlock.value = false;
 
@@ -1259,6 +1429,7 @@ const clearCanvas = () => {
         placedUnits.value = [];
         wallObjects.value = [];
         doorObjects.value = [];
+        frontObjObjects.value = [];
         objectsContainer.removeChildren();
         if (mapSprite) {
             objectsContainer.addChild(mapSprite);
@@ -1354,6 +1525,24 @@ const applyUnitPropertyChanges = () => {
     console.log('单位属性已更新:', unit);
 };
 
+// 同步前景物属性到编辑器
+const syncFrontObjPropertiesToEditor = (obj: any) => {
+    editingFrontObjName.value = obj.name || '';
+
+    // 从 properties 数组中提取属性
+    const frontObjNameProp = obj.properties?.find((p: any) => p.name === 'frontObjName');
+    const occlusionHeightProp = obj.properties?.find((p: any) => p.name === 'occlusionHeight');
+
+    if (frontObjNameProp) {
+        editingFrontObjName.value = frontObjNameProp.value;
+    }
+    if (occlusionHeightProp) {
+        editingFrontObjOcclusionHeight.value = occlusionHeightProp.value;
+    } else {
+        editingFrontObjOcclusionHeight.value = 0;
+    }
+};
+
 // 同步墙体/门属性到编辑器
 const syncWallDoorPropertiesToEditor = (obj: any) => {
     // 从 properties 数组中提取属性
@@ -1414,6 +1603,7 @@ const saveHistory = () => {
         placedUnits: JSON.parse(JSON.stringify(placedUnits.value)),
         wallObjects: JSON.parse(JSON.stringify(wallObjects.value)),
         doorObjects: JSON.parse(JSON.stringify(doorObjects.value)),
+        frontObjObjects: JSON.parse(JSON.stringify(frontObjObjects.value)),
         nextObjectId: nextObjectId
     };
 
@@ -1444,6 +1634,7 @@ const restoreFromHistory = async (state: any) => {
     placedUnits.value = JSON.parse(JSON.stringify(state.placedUnits));
     wallObjects.value = JSON.parse(JSON.stringify(state.wallObjects));
     doorObjects.value = JSON.parse(JSON.stringify(state.doorObjects));
+    frontObjObjects.value = JSON.parse(JSON.stringify(state.frontObjObjects));
     nextObjectId = state.nextObjectId;
 
     // 清空场景
@@ -1471,6 +1662,17 @@ const restoreFromHistory = async (state: any) => {
         createDoorVisual(door);
     }
 
+    // 重建前景物
+    for (const obj of frontObjObjects.value) {
+        // 从 properties 中提取 frontObjName，获取模板信息
+        const frontObjNameProp = obj.properties?.find((p: any) => p.name === 'frontObjName');
+        const frontObjName = frontObjNameProp?.value || obj.name;
+        const template = frontObjTemplates.value.find(t => t.name === frontObjName);
+        if (template) {
+            createFrontObjVisual(obj, template);
+        }
+    }
+
     // 清除选中状态
     selectedObject.value = null;
     selectedContainer.value = null;
@@ -1481,6 +1683,8 @@ const restoreFromHistory = async (state: any) => {
     editingUnitFriendly.value = false;
     editingUnitSelectionGroup.value = '';
     editingUnitHidden.value = false;
+    editingFrontObjName.value = '';
+    editingFrontObjOcclusionHeight.value = 0;
     editingOnlyVisition.value = false;
     editingOnlyBlock.value = false;
 
@@ -1534,7 +1738,7 @@ const handleTMJImport = async (event: Event) => {
         const tmjData = JSON.parse(text);
 
         // 确认是否覆盖现有内容
-        if (placedUnits.value.length > 0 || wallObjects.value.length > 0 || doorObjects.value.length > 0) {
+        if (placedUnits.value.length > 0 || wallObjects.value.length > 0 || doorObjects.value.length > 0 || frontObjObjects.value.length > 0) {
             if (!confirm('导入地图将清空现有内容，是否继续？')) {
                 return;
             }
@@ -1544,6 +1748,7 @@ const handleTMJImport = async (event: Event) => {
         placedUnits.value = [];
         wallObjects.value = [];
         doorObjects.value = [];
+        frontObjObjects.value = [];
         objectsContainer.removeChildren();
         if (mapSprite) {
             objectsContainer.addChild(mapSprite);
@@ -1654,6 +1859,48 @@ const parseTMJData = async (tmjData: any) => {
                     obj.type = 'door'; // 确保type字段正确
                     doorObjects.value.push(obj);
                     createDoorVisual(obj);
+                });
+            } else if (layer.name === 'frontObj' && layer.objects) {
+                // 解析前景物层
+                layer.objects.forEach((obj: any) => {
+                    if (obj.id > maxId) maxId = obj.id;
+
+                    // 获取 frontObjName 属性
+                    const frontObjName = obj.properties?.find((p: any) => p.name === 'frontObjName')?.value || obj.name || '';
+                    const occlusionHeight = obj.properties?.find((p: any) => p.name === 'occlusionHeight')?.value ?? 0;
+
+                    // 创建前景物对象
+                    const frontObj = {
+                        id: obj.id,
+                        x: obj.x,
+                        y: obj.y,
+                        width: obj.width,
+                        height: obj.height,
+                        name: obj.name || frontObjName,
+                        type: 'frontObj',
+                        visible: obj.visible !== undefined ? obj.visible : true,
+                        rotation: obj.rotation || 0,
+                        properties: obj.properties || [
+                            {
+                                name: 'frontObjName',
+                                type: 'string',
+                                value: frontObjName
+                            },
+                            {
+                                name: 'occlusionHeight',
+                                type: 'number',
+                                value: occlusionHeight
+                            }
+                        ]
+                    };
+
+                    frontObjObjects.value.push(frontObj);
+
+                    // 查找对应的模板（如果已导入）
+                    const template = frontObjTemplates.value.find((t: any) => t.name === frontObjName);
+                    if (template) {
+                        createFrontObjVisual(frontObj, template);
+                    }
                 });
             }
         }
@@ -1790,6 +2037,20 @@ const exportMapData = () => {
         y: door.y || 0
     }));
 
+    // 确保前景物对象格式完整
+    const exportedFrontObjs = frontObjObjects.value.map(obj => ({
+        height: obj.height,
+        id: obj.id,
+        name: obj.name || '',
+        properties: obj.properties || [],
+        rotation: obj.rotation || 0,
+        type: obj.type || '',
+        visible: obj.visible !== undefined ? obj.visible : true,
+        width: obj.width,
+        x: obj.x,
+        y: obj.y
+    }));
+
     const mapData = {
         compressionlevel: -1,
         height: Math.ceil(app.screen.height / gridSize),
@@ -1819,6 +2080,18 @@ const exportMapData = () => {
                 x: 0,
                 y: 0
             },
+            // 前景物层
+            {
+                draworder: 'topdown',
+                id: 5,
+                name: 'frontObj',
+                objects: exportedFrontObjs,
+                opacity: 1,
+                type: 'objectgroup',
+                visible: true,
+                x: 0,
+                y: 0
+            },
             // 单位层
             {
                 draworder: 'topdown',
@@ -1832,7 +2105,7 @@ const exportMapData = () => {
                 y: 0
             }
         ],
-        nextlayerid: 5,
+        nextlayerid: 6,
         nextobjectid: nextObjectId,
         orientation: 'orthogonal',
         renderorder: 'right-down',
@@ -1860,13 +2133,181 @@ const exportMapData = () => {
 
 // 获取模式文本
 const getModeText = () => {
-    const modeMap = {
+    const modeMap: any = {
         unit: '放置单位',
         wall: '绘制墙体',
         door: '绘制门',
+        frontObj: '放置前景物',
         select: '选择/删除'
     };
     return modeMap[currentMode.value];
+};
+
+// 导入前景物图片
+const importFrontObjImage = () => {
+    frontObjImageInput.value?.click();
+};
+
+const handleFrontObjImageImport = async (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        frontObjTextureUrl.value = e.target?.result as string;
+        const image = new Image();
+        image.onload = () => {
+            const texture = PIXI.Texture.from(image);
+            frontObjTexture.value = texture;
+            frontObjImage.value = image; // 保存原始图片元素用于创建裁剪纹理
+        };
+        image.src = frontObjTextureUrl.value;
+    };
+    reader.readAsDataURL(file);
+    // 清除input以允许重复选择同一文件
+    target.value = '';
+};
+
+// 导入前景物JSON
+const importFrontObjJson = () => {
+    frontObjJsonInput.value?.click();
+};
+
+const handleFrontObjJsonImport = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const jsonData = JSON.parse(e.target?.result as string);
+            if (Array.isArray(jsonData)) {
+                frontObjTemplates.value = jsonData.map(obj => ({
+                    ...obj,
+                    thumbUrl: frontObjTextureUrl.value
+                }));
+                console.log('已加载前景物模板:', frontObjTemplates.value.length);
+            }
+        } catch (err) {
+            alert('JSON 格式错误: ' + err);
+        }
+    };
+    reader.readAsText(file);
+    // 清除input以允许重复选择同一文件
+    target.value = '';
+};
+
+// 选择前景物模板
+const selectFrontObjTemplate = (index: number) => {
+    selectedFrontObjIndex.value = index;
+};
+
+// 放置前景物到地图
+const placeFrontObj = (x: number, y: number) => {
+    if (selectedFrontObjIndex.value === -1) return;
+
+    const template = frontObjTemplates.value[selectedFrontObjIndex.value];
+    // 鼠标点击位置即为左上角（与 FrontObjAnimSprite 一致）
+    const obj = {
+        id: nextObjectId++,
+        x: x,
+        y: y,
+        width: template.width,
+        height: template.height,
+        name: template.name,
+        type: 'frontObj',
+        visible: true,
+        rotation: 0,
+        properties: [
+            {
+                name: 'frontObjName',
+                type: 'string',
+                value: template.name
+            }
+        ]
+    };
+
+    frontObjObjects.value.push(obj);
+    createFrontObjVisual(obj, template);
+    saveHistory();
+};
+
+// 创建前景物视觉元素
+const createFrontObjVisual = (obj: any, template: any) => {
+    if (!frontObjImage.value) return;
+
+    const container = new PIXI.Container();
+    container.x = obj.x;
+    container.y = obj.y;
+    container.sortableChildren = true;
+
+    // 从原始图片创建带裁剪帧的纹理
+    const frame = new PIXI.Rectangle(
+        template.x || 0,
+        template.y || 0,
+        template.width,
+        template.height
+    );
+
+    // 创建裁剪后的纹理
+    const texture = new PIXI.Texture({
+        source: PIXI.Texture.from(frontObjImage.value).source,
+        frame: frame,
+    });
+
+    const sprite = new PIXI.Sprite(texture);
+
+    // 精灵位置相对于容器设为 0（容器已经在世界坐标 obj.x, obj.y）
+    sprite.x = 0;
+    sprite.y = 0;
+
+    // 锚点设置为左上角（与 FrontObjAnimSprite 一致）
+    sprite.anchor.set(0, 0);
+
+    // 计算 zIndex（实现遮挡效果）
+    // zIndex = y + (height - occlusionHeight)
+    const occlusionHeight = template.occlusionHeight || 0;
+    sprite.zIndex = obj.y + (obj.height - occlusionHeight);
+
+    sprite.eventMode = 'static';
+
+    // 创建边框（显示选中状态）
+    const graphics = new PIXI.Graphics();
+    graphics.lineStyle(2, 0x00ff00, 0.8);
+    graphics.rect(0, 0, obj.width, obj.height);
+    graphics.stroke();
+
+    container.addChild(sprite);
+    container.addChild(graphics);
+
+    (container as any).userData = { id: obj.id, type: 'frontObj', data: obj, template };
+    objectsContainer.addChild(container);
+};
+
+// 应用前景物属性更改
+const applyFrontObjPropertyChanges = () => {
+    if (!selectedObject.value) return;
+    const obj = frontObjObjects.value.find((o: any) => o.id === selectedObject.value.id);
+    if (obj) {
+        obj.name = editingFrontObjName.value;
+        const frontObjNameProp = obj.properties.find((p: any) => p.name === 'frontObjName');
+        if (frontObjNameProp) {
+            frontObjNameProp.value = editingFrontObjName.value;
+        }
+        const occlusionHeightProp = obj.properties.find((p: any) => p.name === 'occlusionHeight');
+        if (!occlusionHeightProp) {
+            obj.properties.push({
+                name: 'occlusionHeight',
+                type: 'number',
+                value: editingFrontObjOcclusionHeight.value
+            });
+        } else {
+            occlusionHeightProp.value = editingFrontObjOcclusionHeight.value;
+        }
+        saveHistory();
+    }
 };
 </script>
 
@@ -2122,5 +2563,66 @@ const getModeText = () => {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #555;
+}
+
+/* 前景物相关样式 */
+.front-obj-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    margin-bottom: 6px;
+    background: #333;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.front-obj-item:hover {
+    background: #444;
+}
+
+.front-obj-item.selected {
+    background: #007bff;
+}
+
+.front-obj-thumb {
+    width: 40px;
+    height: 40px;
+    background: #222;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.front-obj-thumb img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.front-obj-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.front-obj-info p {
+    margin: 2px 0;
+}
+
+.empty-list {
+    color: #888;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.btn-info {
+    background: #17a2b8;
+}
+
+.btn-info:hover {
+    background: #138496;
 }
 </style>
