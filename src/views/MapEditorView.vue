@@ -226,6 +226,10 @@
         <div class="status-bar">
             <span>模式: {{ getModeText() }}</span>
             <span v-if="selectedUnitType && currentMode === 'unit'">当前单位: {{ selectedUnitType }}</span>
+            <span v-if="currentMode === 'unit' && selectedUnitType === 'bigSkeleton'">单位大小: 2x2格 ({{ gridSize * 2 }}x{{ gridSize * 2 }}px)</span>
+            <span v-if="currentMode === 'unit' && selectedUnitType !== 'bigSkeleton'">单位大小: 1x1格 ({{ gridSize }}x{{ gridSize }}px)</span>
+            <span>格子大小: {{ gridSize }}px</span>
+            <span v-if="currentMode === 'unit'">spriteTile: {{ envSetting.spriteTile }} (实际缩放)</span>
             <span v-if="currentMode === 'frontObj' && selectedFrontObjIndex >= 0">
                 当前前景物: {{ frontObjTemplates[selectedFrontObjIndex]?.name || '未选择' }}
             </span>
@@ -240,7 +244,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue';
 import * as PIXI from 'pixi.js';
 import { getAnimMetaJsonFile, getAnimSpriteImgUrl, getAnimActionSpriteJsonFile } from '@/utils/utils';
 import { AnimMetaJson } from '@/core/anim/AnimMetaJson';
@@ -267,6 +271,9 @@ let gridContainer: PIXI.Container;
 let objectsContainer: PIXI.Container;
 let previewGraphics: PIXI.Graphics;
 let previewSprite: PIXI.Sprite | null = null; // 前景物预览精灵
+let unitPreviewSprite: PIXI.AnimatedSprite | null = null; // 单位预览精灵
+let unitPreviewContainer: PIXI.Container | null = null; // 单位预览容器
+let currentPreviewUnitType: string = ''; // 当前预览的单位类型（用于缓存）
 let wheelListener: ((event: WheelEvent) => void) | null = null;
 
 // 单位相关
@@ -486,9 +493,15 @@ onMounted(async () => {
     previewSprite.anchor.set(0, 0); // 左上角锚点
     previewSprite.alpha = 0.7; // 半透明预览
 
+    // 创建单位预览容器和精灵
+    unitPreviewContainer = new PIXI.Container();
+    unitPreviewContainer.visible = false; // 默认隐藏
+    unitPreviewContainer.alpha = 0.7; // 半透明预览
+
     worldContainer.addChild(gridContainer);
     worldContainer.addChild(objectsContainer);
     worldContainer.addChild(previewSprite); // 预览精灵在 graphics 之前
+    worldContainer.addChild(unitPreviewContainer); // 单位预览容器
     worldContainer.addChild(previewGraphics);
     app.stage.addChild(worldContainer);
 
@@ -519,16 +532,31 @@ onMounted(async () => {
     }
 });
 
+// 监听单位类型变化，清空预览缓存
+watch(selectedUnitType, (newType) => {
+    currentPreviewUnitType = ''; // 清空缓存，强制重新加载
+    if (unitPreviewContainer) {
+        unitPreviewContainer.visible = false;
+    }
+});
+
 onBeforeUnmount(() => {
     // 退出前保存当前状态
     saveEditorState();
-    
+
     window.removeEventListener('keydown', handleKeyDown);
     const canvasElement = app?.canvas as HTMLCanvasElement | undefined;
     if (canvasElement && wheelListener) {
         canvasElement.removeEventListener('wheel', wheelListener);
         wheelListener = null;
     }
+
+    // 清理单位预览容器
+    if (unitPreviewContainer) {
+        unitPreviewContainer.destroy();
+        unitPreviewContainer = null;
+    }
+
     if (app) {
         app.destroy(true);
     }
@@ -712,6 +740,15 @@ const setMode = (mode: 'unit' | 'wall' | 'door' | 'frontObj' | 'select') => {
         cancelDrawing();
     }
     currentMode.value = mode;
+
+    // 切换模式时隐藏所有预览
+    previewGraphics.clear();
+    if (previewSprite) {
+        previewSprite.visible = false;
+    }
+    if (unitPreviewContainer) {
+        unitPreviewContainer.visible = false;
+    }
 };
 
 // 选择单位类型
@@ -751,12 +788,15 @@ const handlePointerMove = (event: PIXI.FederatedPointerEvent) => {
 };
 
 // 更新预览
-const updatePreview = (x: number, y: number) => {
+const updatePreview = async (x: number, y: number) => {
     previewGraphics.clear();
 
     // 默认隐藏预览精灵
     if (previewSprite) {
         previewSprite.visible = false;
+    }
+    if (unitPreviewContainer) {
+        unitPreviewContainer.visible = false;
     }
 
     if (currentMode.value === 'unit') {
@@ -764,9 +804,63 @@ const updatePreview = (x: number, y: number) => {
         const gridX = Math.floor(x / gridSize) * gridSize;
         const gridY = Math.floor(y / gridSize) * gridSize;
 
-        previewGraphics.rect(gridX, gridY, gridSize, gridSize);
-        previewGraphics.fill({ color: 0x00ff00, alpha: 0.3 });
-        previewGraphics.stroke({ color: 0x00ff00, width: 2 });
+        // 根据单位类型判断大小（参考 MapCanvasService 的逻辑）
+        const isBigUnit = selectedUnitType.value === 'bigSkeleton';
+        const visualSize = isBigUnit ? gridSize * 2 : gridSize;
+
+        // 只在单位类型改变时重新加载精灵
+        if (selectedUnitType.value !== currentPreviewUnitType) {
+            currentPreviewUnitType = selectedUnitType.value;
+
+            // 加载单位预览精灵
+            if (unitPreviewContainer) {
+                const spriteData = await loadUnitSprite(selectedUnitType.value);
+                if (spriteData) {
+                    unitPreviewContainer.removeChildren();
+
+                    // 创建单位预览精灵
+                    const displaySprite = new PIXI.AnimatedSprite(spriteData.textures);
+                    displaySprite.animationSpeed = 0.1;
+                    displaySprite.play();
+                    displaySprite.scale.set(spriteData.scale);
+
+                    // 设置锚点与 UnitAnimSprite 一致，确保精灵底部对齐到格子
+                    displaySprite.anchor.set(0, 0.3);
+
+                    // 调整精灵位置（参考 UnitAnimSprite 的逻辑）
+                    displaySprite.x = 0;
+                    displaySprite.y = 0;
+
+                    // 添加边框以区分（根据实际大小）
+                    const border = new PIXI.Graphics();
+                    border.rect(0, 0, visualSize, visualSize);
+                    border.stroke({ color: 0x00ff00, width: 2, alpha: 0.8 });
+
+                    // 添加单位名称标签
+                    const nameText = new PIXI.Text({
+                        text: selectedUnitType.value,
+                        style: { fontSize: 10, fill: 0xffffff, stroke: { color: 0x000000, width: 2 } }
+                    });
+                    nameText.x = 2;
+                    nameText.y = 2;
+
+                    unitPreviewContainer.addChild(displaySprite);
+                    unitPreviewContainer.addChild(border);
+                    unitPreviewContainer.addChild(nameText);
+                }
+            }
+        }
+
+        // 更新预览容器位置
+        if (unitPreviewContainer) {
+            unitPreviewContainer.position.set(gridX, gridY);
+            unitPreviewContainer.visible = true;
+        }
+
+        // 绘制网格边框
+        previewGraphics.rect(gridX, gridY, visualSize, visualSize);
+        previewGraphics.fill({ color: 0x00ff00, alpha: 0.1 });
+        previewGraphics.stroke({ color: 0x00ff00, width: 1, alpha: 0.5 });
     } else if (currentMode.value === 'frontObj') {
         // 显示前景物放置预览
         if (selectedFrontObjIndex.value >= 0 && frontObjTemplates.value[selectedFrontObjIndex.value] && frontObjImage.value) {
@@ -886,13 +980,17 @@ const placeUnit = async (x: number, y: number) => {
         unitProperties.push({ name: 'selectionGroup', type: 'string', value: selectionGroupValue });
     }
 
+    // 根据单位类型判断大小
+    const isBigUnit = selectedUnitType.value === 'bigSkeleton';
+    const unitGridSize = isBigUnit ? gridSize * 2 : gridSize;
+
     const unit = {
         id: nextObjectId++,
         name: unitName.value || selectedUnitType.value,
         x: gridX,
         y: gridY,
-        width: gridSize,
-        height: gridSize,
+        width: unitGridSize,
+        height: unitGridSize,
         type: 'unit',
         properties: unitProperties
     };
@@ -906,9 +1004,9 @@ const placeUnit = async (x: number, y: number) => {
     container.cursor = 'pointer';
     (container as any).userData = { id: unit.id, type: 'unit', data: unit };
 
-    // 先显示加载中的占位符
+    // 先显示加载中的占位符（根据实际大小）
     const placeholder = new PIXI.Graphics();
-    placeholder.rect(0, 0, gridSize, gridSize);
+    placeholder.rect(0, 0, unitGridSize, unitGridSize);
     placeholder.fill({ color: 0x00ff00, alpha: 0.3 });
     placeholder.stroke({ color: 0x00ff00, width: 2 });
     container.addChild(placeholder);
@@ -939,9 +1037,12 @@ const placeUnit = async (x: number, y: number) => {
             displaySprite.play();
             displaySprite.scale.set(spriteData.scale);
 
-            // 调整精灵位置，居中显示（参考 UnitAnimSprite.ts 的逻辑）
-            displaySprite.x = -(displaySprite.width - unitGridSize) / 2;
-            displaySprite.y = -(displaySprite.height - unitGridSize) / 2;
+            // 设置锚点与 UnitAnimSprite 一致，确保精灵底部对齐到格子
+            displaySprite.anchor.set(0, 0.3);
+
+            // 调整精灵位置（参考 UnitAnimSprite 的逻辑）
+            displaySprite.x = 0;
+            displaySprite.y = 0;
 
             // 添加边框以区分（根据实际大小）
             const border = new PIXI.Graphics();
@@ -1281,11 +1382,12 @@ const loadUnitSprite = async (unitTypeName: string): Promise<{ textures: PIXI.Te
             return null;
         }
 
-        // 根据单位类型判断大小（参考 GamePannel.vue）
+        // 根据单位类型判断大小（参考 MapCanvasService 和 UnitAnimSprite 的逻辑）
         const frameSize = animMetaJson.frameSize || envSetting.tileSize;
         const isBigUnit = unitTypeName === 'bigSkeleton'; // 可以添加更多大型单位
         const visualSize = isBigUnit ? envSetting.tileSize * 2 : envSetting.tileSize;
-        const scale = visualSize / frameSize;
+        // 使用与 UnitAnimSprite 相同的缩放公式
+        const scale = (visualSize / frameSize) * envSetting.spriteTile;
 
         // 缓存精灵数据
         const spriteData = { textures, scale, visualSize, frameSize };
@@ -1927,8 +2029,11 @@ const createUnitVisual = async (unit: any, unitTypeName: string) => {
             displaySprite.animationSpeed = 0.1;
             displaySprite.play();
             displaySprite.scale.set(spriteData.scale);
-            displaySprite.x = -(displaySprite.width - unitGridSize) / 2;
-            displaySprite.y = -(displaySprite.height - unitGridSize) / 2;
+
+            // 设置锚点与 UnitAnimSprite 一致
+            displaySprite.anchor.set(0, 0.3);
+            displaySprite.x = 0;
+            displaySprite.y = 0;
 
             const border = new PIXI.Graphics();
             border.rect(0, 0, unitGridSize, unitGridSize);
