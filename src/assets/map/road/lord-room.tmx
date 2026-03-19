@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="22" height="16" tilewidth="64" tileheight="64" infinite="0" nextlayerid="7" nextobjectid="5">
+ <editorsettings>
+  <export target="lord-room.tmj" format="json"/>
+ </editorsettings>
+ <layer id="1" name="图块层 1" width="22" height="16">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <objectgroup id="2" name="sprite">
+  <object id="1" name="战士" x="649.333" y="695.333" width="64" height="64">
+   <properties>
+    <property name="direction" type="int" value="3"/>
+    <property name="name" value="manFighter"/>
+    <property name="party" value="player"/>
+    <property name="selectionGroup" value="player"/>
+    <property name="unitTypeName" value="manFighter"/>
+   </properties>
+  </object>
+  <object id="2" name="领主" x="641.333" y="252" width="64" height="64">
+   <properties>
+    <property name="direction" type="int" value="3"/>
+    <property name="name" value="领主"/>
+    <property name="party" value="npc"/>
+    <property name="selectionGroup" value=""/>
+    <property name="unitTypeName" value="lord-meibiwusi"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="5" name="frontObj">
+  <object id="3" name="领主桌子" x="495.867" y="221.557" width="321" height="192">
+   <properties>
+    <property name="frontObjName" value="领主桌子"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="6" name="wall">
+  <object id="4" x="502.9" y="256.725">
+   <properties>
+    <property name="onlyBlock" value="true"/>
+   </properties>
+   <polygon points="0,0 305.96,-1.75839 305.96,142.43 8.79196,144.188 -3.51679,130.121"/>
+  </object>
+ </objectgroup>
+ <imagelayer id="4" name="图像图层 1">
+  <image source="C:/Users/chen/Downloads/generated-image-1771260924515.png" width="1408" height="1019"/>
+ </imagelayer>
+</map>

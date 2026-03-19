@@ -12,7 +12,7 @@ export const initializeGuideGame = async () => {
   );
   const roles = await initializePlayerUnit();
   golbalSetting.playerRoles = roles;
-  await DramaSystem.getInstance().setDramaUse("lord-room");
+  await DramaSystem.getInstance().setDramaUse("road");
   console.log(
     "[changemap0] setDramaUse 后 golbalSetting.map:",
     golbalSetting.map,
@@ -21,6 +21,7 @@ export const initializeGuideGame = async () => {
   );
 };
 //初始化玩家角色
+
 export const initializePlayerUnit = async () => {
   const unitOptions = {
     name: "战士",

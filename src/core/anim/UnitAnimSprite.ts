@@ -175,7 +175,7 @@ export class UnitAnimSpirite extends Container {
       }
     if (this.anims[this._state]) {
       this.anims[this._state].zIndex = this.y;
-      this.zIndex = this.y;
+      this.zIndex = this.y+tileSize;
     //  console.log(`更新z-index  : ${this.zIndex}`);
       
     }

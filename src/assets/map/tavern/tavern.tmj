@@ -1,39 +1,156 @@
 { "compressionlevel":-1,
- "height":13,
+ "height":24,
  "infinite":false,
  "layers":[
         {
-         "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-         "height":13,
-         "id":1,
-         "name":"\u56fe\u5757\u5c42 1",
-         "opacity":1,
-         "type":"tilelayer",
-         "visible":true,
-         "width":19,
-         "x":0,
-         "y":0
-        }, 
-        {
+         "draworder":"topdown",
          "id":2,
-         "image":"tavern.png",
-         "imageheight":864,
-         "imagewidth":1184,
-         "name":"\u56fe\u50cf\u56fe\u5c42 1",
+         "name":"wall",
+         "objects":[
+                {
+                 "height":0,
+                 "id":22,
+                 "name":"",
+                 "polyline":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":2,
+                         "y":106
+                        }, 
+                        {
+                         "x":439,
+                         "y":108
+                        }, 
+                        {
+                         "x":483,
+                         "y":77
+                        }, 
+                        {
+                         "x":484,
+                         "y":-8
+                        }, 
+                        {
+                         "x":-4,
+                         "y":-4
+                        }],
+                 "properties":[
+                        {
+                         "name":"onlyBlock",
+                         "type":"string",
+                         "value":"true"
+                        }, 
+                        {
+                         "name":"onlyVisition",
+                         "type":"string",
+                         "value":"false"
+                        }],
+                 "rotation":0,
+                 "type":"wall",
+                 "visible":true,
+                 "width":0,
+                 "x":317,
+                 "y":189
+                }, 
+                {
+                 "height":0,
+                 "id":23,
+                 "name":"",
+                 "polyline":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":-138,
+                         "y":7
+                        }, 
+                        {
+                         "x":-278,
+                         "y":140
+                        }, 
+                        {
+                         "x":-278,
+                         "y":423
+                        }, 
+                        {
+                         "x":-76,
+                         "y":572
+                        }, 
+                        {
+                         "x":142,
+                         "y":573
+                        }, 
+                        {
+                         "x":144,
+                         "y":638
+                        }, 
+                        {
+                         "x":358,
+                         "y":637
+                        }, 
+                        {
+                         "x":356,
+                         "y":571
+                        }, 
+                        {
+                         "x":610,
+                         "y":573
+                        }, 
+                        {
+                         "x":839,
+                         "y":414
+                        }, 
+                        {
+                         "x":837,
+                         "y":116
+                        }, 
+                        {
+                         "x":782,
+                         "y":84
+                        }, 
+                        {
+                         "x":723,
+                         "y":136
+                        }, 
+                        {
+                         "x":592,
+                         "y":53
+                        }, 
+                        {
+                         "x":615,
+                         "y":34
+                        }, 
+                        {
+                         "x":620,
+                         "y":8
+                        }, 
+                        {
+                         "x":490,
+                         "y":7
+                        }],
+                 "properties":[
+                        {
+                         "name":"onlyBlock",
+                         "type":"string",
+                         "value":"true"
+                        }, 
+                        {
+                         "name":"onlyVisition",
+                         "type":"string",
+                         "value":"false"
+                        }],
+                 "rotation":0,
+                 "type":"wall",
+                 "visible":true,
+                 "width":0,
+                 "x":313,
+                 "y":225
+                }],
          "opacity":1,
-         "type":"imagelayer",
+         "type":"objectgroup",
          "visible":true,
          "x":0,
          "y":0
@@ -41,6 +158,62 @@
         {
          "draworder":"topdown",
          "id":3,
+         "name":"door",
+         "objects":[],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":5,
+         "name":"frontObj",
+         "objects":[
+                {
+                 "height":303,
+                 "id":6,
+                 "name":"\u5427\u53f0",
+                 "properties":[
+                        {
+                         "name":"frontObjName",
+                         "type":"string",
+                         "value":"\u5427\u53f0"
+                        }],
+                 "rotation":0,
+                 "type":"frontObj",
+                 "visible":true,
+                 "width":597,
+                 "x":289,
+                 "y":49
+                }, 
+                {
+                 "height":122,
+                 "id":7,
+                 "name":"\u544a\u793a\u724c",
+                 "properties":[
+                        {
+                         "name":"frontObjName",
+                         "type":"string",
+                         "value":"\u544a\u793a\u724c"
+                        }],
+                 "rotation":0,
+                 "type":"frontObj",
+                 "visible":true,
+                 "width":104.649993896484,
+                 "x":65,
+                 "y":324
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":4,
          "name":"sprite",
          "objects":[
                 {
@@ -48,6 +221,21 @@
                  "id":1,
                  "name":"\u6218\u58eb",
                  "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":2
+                        }, 
+                        {
+                         "name":"friendly",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
+                         "name":"isSceneHidden",
+                         "type":"bool",
+                         "value":false
+                        }, 
                         {
                          "name":"name",
                          "type":"string",
@@ -69,7 +257,7 @@
                          "value":"manFighter"
                         }],
                  "rotation":0,
-                 "type":"",
+                 "type":"unit",
                  "visible":true,
                  "width":64,
                  "x":509,
@@ -86,6 +274,16 @@
                          "value":3
                         }, 
                         {
+                         "name":"friendly",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
+                         "name":"isSceneHidden",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"name",
                          "type":"string",
                          "value":"player2"
@@ -99,9 +297,14 @@
                          "name":"selectionGroup",
                          "type":"string",
                          "value":"player"
+                        }, 
+                        {
+                         "name":"unitTypeName",
+                         "type":"string",
+                         "value":"skeleton"
                         }],
                  "rotation":0,
-                 "type":"",
+                 "type":"unit",
                  "visible":true,
                  "width":64,
                  "x":578,
@@ -118,6 +321,16 @@
                          "value":2
                         }, 
                         {
+                         "name":"friendly",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
+                         "name":"isSceneHidden",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"name",
                          "type":"string",
                          "value":"\u8001\u677f"
@@ -128,17 +341,12 @@
                          "value":"npc"
                         }, 
                         {
-                         "name":"selectionGroup",
-                         "type":"string",
-                         "value":""
-                        }, 
-                        {
                          "name":"unitTypeName",
                          "type":"string",
                          "value":"tavern_boss"
                         }],
                  "rotation":0,
-                 "type":"",
+                 "type":"unit",
                  "visible":true,
                  "width":80,
                  "x":557.666666666667,
@@ -155,6 +363,16 @@
                          "value":2
                         }, 
                         {
+                         "name":"friendly",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
+                         "name":"isSceneHidden",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"name",
                          "type":"string",
                          "value":"\u821e\u5973"
@@ -165,17 +383,12 @@
                          "value":"npc"
                         }, 
                         {
-                         "name":"selectionGroup",
-                         "type":"string",
-                         "value":""
-                        }, 
-                        {
                          "name":"unitTypeName",
                          "type":"string",
                          "value":"bard's_woman"
                         }],
                  "rotation":0,
-                 "type":"",
+                 "type":"unit",
                  "visible":true,
                  "width":80,
                  "x":79.3333333333333,
@@ -192,6 +405,16 @@
                          "value":2
                         }, 
                         {
+                         "name":"friendly",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
+                         "name":"isSceneHidden",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"name",
                          "type":"string",
                          "value":"\u827a\u4eba"
@@ -202,21 +425,53 @@
                          "value":"npc"
                         }, 
                         {
-                         "name":"selectionGroup",
-                         "type":"string",
-                         "value":""
-                        }, 
-                        {
                          "name":"unitTypeName",
                          "type":"string",
                          "value":"bard"
                         }],
                  "rotation":0,
-                 "type":"",
+                 "type":"unit",
                  "visible":true,
                  "width":80,
                  "x":172.666666666667,
                  "y":240
+                }, 
+                {
+                 "height":80,
+                 "id":14,
+                 "name":"skeleton",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":2
+                        }, 
+                        {
+                         "name":"friendly",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
+                         "name":"isSceneHidden",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
+                         "name":"party",
+                         "type":"string",
+                         "value":"player"
+                        }, 
+                        {
+                         "name":"unitTypeName",
+                         "type":"string",
+                         "value":"skeleton"
+                        }],
+                 "rotation":0,
+                 "type":"unit",
+                 "visible":true,
+                 "width":80,
+                 "x":800,
+                 "y":640
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -224,8 +479,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":4,
- "nextobjectid":6,
+ "nextlayerid":6,
+ "nextobjectid":24,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
@@ -234,5 +489,5 @@
  "tilewidth":80,
  "type":"map",
  "version":"1.10",
- "width":19
+ "width":20
 }

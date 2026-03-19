@@ -104,7 +104,7 @@ export class TiledMap {
   chests: Chest[] = [];
   constructor(name:string,data: any, textures: any) {
     this.name=name;
-    this.compressionlevel = data.compressionlevel;
+    this.compressionlevel = data?.compressionlevel;
     this.height = data.height;
     this.infinite = data.infinite;
     this.layers = data.layers;

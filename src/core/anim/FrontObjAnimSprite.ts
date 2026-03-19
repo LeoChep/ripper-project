@@ -61,5 +61,6 @@ export const createFrontObjAnimSpriteFromFront = async (
   frontObjSprite.y = frontObj.y ; // 
   frontObjSprite.zIndex=frontObj.y+(frontObjInfo.height-frontObjInfo.occlusionHeight)
   frontObjSprite.eventMode='none'
+  console.log('frontObjSprite',frontObjSprite)
   return frontObjSprite;
 };

@@ -13,6 +13,7 @@ import { CharacterController } from "../controller/CharacterController";
 import { lordRoom } from "@/drama/lord-room";
 import { createFrontObjFromObj } from "../units/FrontObj";
 import { tavern } from "@/drama/tavern";
+import { road } from "@/drama/road";
 interface DialogOption {
   text: string;
   value: any;
@@ -370,4 +371,5 @@ const initDramaMap = () => {
   dramaSystem.registerDrama("city_1", city_1);
   dramaSystem.registerDrama("lord-room", lordRoom);
   dramaSystem.registerDrama('tavern',tavern)
+  dramaSystem.registerDrama('road',road)
 };

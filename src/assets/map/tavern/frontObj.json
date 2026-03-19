@@ -1,0 +1,26 @@
+[
+  {
+    "name": "吧台",
+    "x": 4,
+    "y": 0,
+    "width": 597,
+    "height": 303,
+    "occlusionHeight": 0
+  },
+  {
+    "name": "告示牌",
+    "x": 12.350006103515625,
+    "y": 312,
+    "width": 104.64999389648438,
+    "height": 122,
+    "occlusionHeight": 0
+  },
+  {
+    "name": "桌子",
+    "x": 8,
+    "y": 458,
+    "width": 220.35000610351562,
+    "height": 163,
+    "occlusionHeight": 0
+  }
+]
