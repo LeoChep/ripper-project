@@ -31,7 +31,11 @@
               <input v-model.number="currentObject.occlusionHeight" type="number" placeholder="输入高度" />
             </div>
             <div class="form-row">
-              <button @click="confirmObject">确认创建</button>
+              <button @click="confirmObject">{{ editIndex > -1 ? '确认修改' : '确认创建' }}</button>
+              <button @click="cancelEdit" class="cancel-btn" v-if="editIndex > -1 || currentSelectBox">取消</button>
+            </div>
+            <div class="tip" v-if="editIndex > -1">
+              拖拽框内移动 • 拖拽绿点调整大小
             </div>
           </div>
           <div v-else class="tip">请在画布上框选对象</div>
@@ -53,16 +57,18 @@
       <div class="right-panel">
         <div class="sidebar">
           <h3>前景物对象列表</h3>
-          <div v-if="!objects.length" class="empty-list">暂无对象</div>
-          <div class="object-item" v-for="(obj, index) in objects" :key="index">
-            <div class="object-info">
-              <p>名称: {{ obj.name || '未命名' }}</p>
-              <p>位置: {{ obj.x }},{{ obj.y }} 大小: {{ obj.width }}x{{ obj.height }}</p>
-              <p>遮挡高度: {{ obj.occlusionHeight || 0 }}</p>
-            </div>
-            <div class="object-actions">
-              <button @click="editObject(index)">编辑</button>
-              <button @click="deleteObject(index)" style="background: #ff4444; color: white">删除</button>
+          <div class="object-list-container">
+            <div v-if="!objects.length" class="empty-list">暂无对象</div>
+            <div class="object-item" v-for="(obj, index) in objects" :key="index">
+              <div class="object-info">
+                <p>名称: {{ obj.name || '未命名' }}</p>
+                <p>位置: {{ obj.x }},{{ obj.y }} 大小: {{ obj.width }}x{{ obj.height }}</p>
+                <p>遮挡高度: {{ obj.occlusionHeight || 0 }}</p>
+              </div>
+              <div class="object-actions">
+                <button @click="editObject(index)">编辑</button>
+                <button @click="deleteObject(index)" style="background: #ff4444; color: white">删除</button>
+              </div>
             </div>
           </div>
         </div>
@@ -131,9 +137,24 @@ const minScale = 0.2;
 const maxScale = 4;
 const scaleStep = 0.1;
 
+// 编辑模式：'create' | 'move' | 'resize-tl' | 'resize-t' | 'resize-tr' | 'resize-r' | 'resize-br' | 'resize-b' | 'resize-bl' | 'resize-l' | null
+const editMode = ref(null);
+const handleSize = 8; // 手柄大小
+
 onMounted(() => {
 	canvas.value = canvasRef.value;
 	ctx.value = canvas.value.getContext('2d');
+
+	// 添加鼠标移动监听器来更新光标样式
+	canvas.value.addEventListener('mousemove', (e) => {
+		if (!imageLoaded.value || !currentSelectBox.value || isDrawing.value) {
+			canvas.value.style.cursor = 'default';
+			return;
+		}
+		const point = getCanvasPoint(e);
+		const handle = getHandleAtPosition(point.x, point.y, currentSelectBox.value);
+		canvas.value.style.cursor = getCursorStyle(handle);
+	});
 });
 
 const canvasStyle = computed(() => {
@@ -178,8 +199,65 @@ const getCanvasPoint = (e) => {
 	};
 };
 
+// 检测点是否在选择框的手柄上
+const getHandleAtPosition = (x, y, box) => {
+	if (!box) return null;
+	const tolerance = handleSize;
+
+	// 检查四个角
+	if (Math.abs(x - box.x) <= tolerance && Math.abs(y - box.y) <= tolerance) {
+		return 'resize-tl'; // 左上
+	}
+	if (Math.abs(x - (box.x + box.width)) <= tolerance && Math.abs(y - box.y) <= tolerance) {
+		return 'resize-tr'; // 右上
+	}
+	if (Math.abs(x - box.x) <= tolerance && Math.abs(y - (box.y + box.height)) <= tolerance) {
+		return 'resize-bl'; // 左下
+	}
+	if (Math.abs(x - (box.x + box.width)) <= tolerance && Math.abs(y - (box.y + box.height)) <= tolerance) {
+		return 'resize-br'; // 右下
+	}
+
+	// 检查四条边
+	if (Math.abs(x - box.x) <= tolerance && y > box.y && y < box.y + box.height) {
+		return 'resize-l'; // 左
+	}
+	if (Math.abs(x - (box.x + box.width)) <= tolerance && y > box.y && y < box.y + box.height) {
+		return 'resize-r'; // 右
+	}
+	if (Math.abs(y - box.y) <= tolerance && x > box.x && x < box.x + box.width) {
+		return 'resize-t'; // 上
+	}
+	if (Math.abs(y - (box.y + box.height)) <= tolerance && x > box.x && x < box.x + box.width) {
+		return 'resize-b'; // 下
+	}
+
+	// 检查是否在框内部
+	if (x >= box.x && x <= box.x + box.width && y >= box.y && y <= box.y + box.height) {
+		return 'move';
+	}
+
+	return null;
+};
+
+// 获取鼠标指针样式
+const getCursorStyle = (mode) => {
+	const cursorMap = {
+		'move': 'move',
+		'resize-tl': 'nw-resize',
+		'resize-tr': 'ne-resize',
+		'resize-bl': 'sw-resize',
+		'resize-br': 'se-resize',
+		'resize-t': 'n-resize',
+		'resize-b': 's-resize',
+		'resize-l': 'w-resize',
+		'resize-r': 'e-resize'
+	};
+	return cursorMap[mode] || 'default';
+};
+
 const updateMousePosition = (e) => {
-	if (!imageLoaded.value) return;
+	if (!imageLoaded.value || isDrawing.value) return;
 	const point = getCanvasPoint(e);
 	mouseX.value = Math.floor(point.x);
 	mouseY.value = Math.floor(point.y);
@@ -217,10 +295,29 @@ const clickImport = () => {
 const startDraw = (e) => {
     if (fMode.value) { return; }
 	if (!imageLoaded.value) return;
-	isDrawing.value = true;
 	const point = getCanvasPoint(e);
-	startX.value = point.x;
-	startY.value = point.y;
+	const x = point.x;
+	const y = point.y;
+
+	// 检查是否点击了现有选择框的手柄或内部
+	if (currentSelectBox.value) {
+		const handle = getHandleAtPosition(x, y, currentSelectBox.value);
+		if (handle) {
+			editMode.value = handle;
+			isDrawing.value = true;
+			startX.value = x;
+			startY.value = y;
+			// 保存初始状态
+			currentObject.value = { ...currentObject.value };
+			return;
+		}
+	}
+
+	// 如果没有点击到选择框，则创建新的选择框
+	isDrawing.value = true;
+	editMode.value = 'create';
+	startX.value = x;
+	startY.value = y;
 	currentSelectBox.value = {
 		x: startX.value,
 		y: startY.value,
@@ -243,33 +340,158 @@ const drawing = (e) => {
 	const point = getCanvasPoint(e);
 	const currentX = point.x;
 	const currentY = point.y;
+	const dx = currentX - startX.value;
+	const dy = currentY - startY.value;
 
 	ctx.value.clearRect(0, 0, canvas.value.width, canvas.value.height);
 	ctx.value.drawImage(image.value, 0, 0);
 
-	const x = Math.min(startX.value, currentX);
-	const y = Math.min(startY.value, currentY);
-	const width = Math.abs(currentX - startX.value);
-	const height = Math.abs(currentY - startY.value);
+	// 根据编辑模式执行不同的操作
+	if (editMode.value === 'create') {
+		// 创建新框模式
+		const x = Math.min(startX.value, currentX);
+		const y = Math.min(startY.value, currentY);
+		const width = Math.abs(currentX - startX.value);
+		const height = Math.abs(currentY - startY.value);
 
-	currentSelectBox.value = { x, y, width, height };
-	currentObject.value.x = x;
-	currentObject.value.y = y;
-	currentObject.value.width = width;
-	currentObject.value.height = height;
+		currentSelectBox.value = { x, y, width, height };
+		currentObject.value.x = x;
+		currentObject.value.y = y;
+		currentObject.value.width = width;
+		currentObject.value.height = height;
+	} else if (editMode.value === 'move') {
+		// 移动模式
+		const newX = currentObject.value.x + dx;
+		const newY = currentObject.value.y + dy;
 
-	ctx.value.strokeStyle = '#ff0000';
-	ctx.value.lineWidth = 2;
-	ctx.value.strokeRect(x, y, width, height);
+		currentSelectBox.value.x = newX;
+		currentSelectBox.value.y = newY;
+		currentObject.value.x = newX;
+		currentObject.value.y = newY;
+
+		startX.value = currentX;
+		startY.value = currentY;
+	} else if (editMode.value && editMode.value.startsWith('resize-')) {
+		// 调整大小模式
+		const direction = editMode.value.replace('resize-', '');
+		const obj = currentObject.value;
+		const box = currentSelectBox.value;
+
+		// 根据方向调整不同的边
+		if (direction.includes('l')) {
+			// 调整左边
+			const newWidth = obj.width - dx;
+			if (newWidth > 5) {
+				obj.x = obj.x + dx;
+				obj.width = newWidth;
+			}
+		}
+		if (direction.includes('r')) {
+			// 调整右边
+			const newWidth = dx + obj.width;
+			if (newWidth > 5) {
+				obj.width = newWidth;
+			}
+		}
+		if (direction.includes('t')) {
+			// 调整上边
+			const newHeight = obj.height - dy;
+			if (newHeight > 5) {
+				obj.y = obj.y + dy;
+				obj.height = newHeight;
+			}
+		}
+		if (direction.includes('b')) {
+			// 调整下边
+			const newHeight = dy + obj.height;
+			if (newHeight > 5) {
+				obj.height = newHeight;
+			}
+		}
+
+		box.x = obj.x;
+		box.y = obj.y;
+		box.width = obj.width;
+		box.height = obj.height;
+
+		startX.value = currentX;
+		startY.value = currentY;
+	}
+
+	// 绘制选择框和手柄
+	drawSelectionBox();
 };
 
 const endDraw = () => {
     if (fMode.value) { return; }
 	if (!isDrawing.value) return;
 	isDrawing.value = false;
-	if (currentSelectBox.value.width < 5 || currentSelectBox.value.height < 5) {
+
+	// 如果是创建模式且框太小，则取消
+	if (editMode.value === 'create' && currentSelectBox.value.width < 5 && currentSelectBox.value.height < 5) {
 		currentSelectBox.value = null;
+		currentObject.value = {
+			name: '',
+			x: 0,
+			y: 0,
+			width: 0,
+			height: 0,
+			occlusionHeight: 0
+		};
+		editIndex.value = -1;
 	}
+
+	editMode.value = null;
+};
+
+// 绘制选择框和手柄
+const drawSelectionBox = () => {
+	if (!currentSelectBox.value) return;
+
+	const box = currentSelectBox.value;
+
+	// 绘制选择框
+	ctx.value.strokeStyle = '#ff0000';
+	ctx.value.lineWidth = 2;
+	ctx.value.strokeRect(box.x, box.y, box.width, box.height);
+
+	// 绘制调整手柄
+	ctx.value.fillStyle = '#00ff00';
+	const handleRadius = handleSize;
+
+	// 四个角
+	ctx.value.beginPath();
+	ctx.value.arc(box.x, box.y, handleRadius, 0, Math.PI * 2); // 左上
+	ctx.value.fill();
+
+	ctx.value.beginPath();
+	ctx.value.arc(box.x + box.width, box.y, handleRadius, 0, Math.PI * 2); // 右上
+	ctx.value.fill();
+
+	ctx.value.beginPath();
+	ctx.value.arc(box.x, box.y + box.height, handleRadius, 0, Math.PI * 2); // 左下
+	ctx.value.fill();
+
+	ctx.value.beginPath();
+	ctx.value.arc(box.x + box.width, box.y + box.height, handleRadius, 0, Math.PI * 2); // 右下
+	ctx.value.fill();
+
+	// 四条边的中点
+	ctx.value.beginPath();
+	ctx.value.arc(box.x + box.width / 2, box.y, handleRadius, 0, Math.PI * 2); // 上
+	ctx.value.fill();
+
+	ctx.value.beginPath();
+	ctx.value.arc(box.x + box.width / 2, box.y + box.height, handleRadius, 0, Math.PI * 2); // 下
+	ctx.value.fill();
+
+	ctx.value.beginPath();
+	ctx.value.arc(box.x, box.y + box.height / 2, handleRadius, 0, Math.PI * 2); // 左
+	ctx.value.fill();
+
+	ctx.value.beginPath();
+	ctx.value.arc(box.x + box.width, box.y + box.height / 2, handleRadius, 0, Math.PI * 2); // 右
+	ctx.value.fill();
 };
 const fMode = ref(false);
 addEventListener('keydown', (e) => {
@@ -302,6 +524,7 @@ const confirmObject = () => {
 	} else {
 		objects.value.push({ ...currentObject.value });
 	}
+	// 清除选择框
 	currentSelectBox.value = null;
 	currentObject.value = {
 		name: '',
@@ -311,6 +534,8 @@ const confirmObject = () => {
 		height: 0,
 		occlusionHeight: 0
 	};
+	editMode.value = null;
+	// 重绘
 	ctx.value.clearRect(0, 0, canvas.value.width, canvas.value.height);
 	ctx.value.drawImage(image.value, 0, 0);
 };
@@ -319,17 +544,16 @@ const editObject = (index) => {
 	const obj = objects.value[index];
 	currentObject.value = { ...obj };
 	editIndex.value = index;
-	ctx.value.clearRect(0, 0, canvas.value.width, canvas.value.height);
-	ctx.value.drawImage(image.value, 0, 0);
-	ctx.value.strokeStyle = '#ff0000';
-	ctx.value.lineWidth = 2;
-	ctx.value.strokeRect(obj.x, obj.y, obj.width, obj.height);
 	currentSelectBox.value = {
 		x: obj.x,
 		y: obj.y,
 		width: obj.width,
 		height: obj.height
 	};
+	// 重绘以显示手柄
+	ctx.value.clearRect(0, 0, canvas.value.width, canvas.value.height);
+	ctx.value.drawImage(image.value, 0, 0);
+	drawSelectionBox();
 };
 
 const deleteObject = (index) => {
@@ -337,6 +561,7 @@ const deleteObject = (index) => {
 	if (index === editIndex.value) {
 		editIndex.value = -1;
 		currentSelectBox.value = null;
+		editMode.value = null;
 		currentObject.value = {
 			name: '',
 			x: 0,
@@ -345,6 +570,7 @@ const deleteObject = (index) => {
 			height: 0,
 			occlusionHeight: 0
 		};
+		// 重绘
 		ctx.value.clearRect(0, 0, canvas.value.width, canvas.value.height);
 		ctx.value.drawImage(image.value, 0, 0);
 	}
@@ -359,6 +585,38 @@ const exportJson = () => {
 	a.download = '前景物对象数据.json';
 	a.click();
 	URL.revokeObjectURL(url);
+};
+
+const cancelEdit = () => {
+	if (editIndex.value > -1) {
+		// 如果正在编辑对象，恢复原始值
+		const obj = objects.value[editIndex.value];
+		currentObject.value = { ...obj };
+		currentSelectBox.value = {
+			x: obj.x,
+			y: obj.y,
+			width: obj.width,
+			height: obj.height
+		};
+	} else {
+		// 如果是新创建的框，清除它
+		currentSelectBox.value = null;
+		currentObject.value = {
+			name: '',
+			x: 0,
+			y: 0,
+			width: 0,
+			height: 0,
+			occlusionHeight: 0
+		};
+	}
+	editMode.value = null;
+	// 重绘
+	ctx.value.clearRect(0, 0, canvas.value.width, canvas.value.height);
+	ctx.value.drawImage(image.value, 0, 0);
+	if (currentSelectBox.value) {
+		drawSelectionBox();
+	}
 };
 </script>
 
@@ -481,6 +739,12 @@ const exportJson = () => {
 	border: none;
 	border-radius: 4px;
 }
+.form-row .cancel-btn {
+	background: #666;
+}
+.form-row .cancel-btn:hover {
+	background: #777;
+}
 .tip {
 	color: #888;
 	font-size: 14px;
@@ -531,6 +795,26 @@ const exportJson = () => {
 	margin-bottom: 18px;
 	font-size: 18px;
 	color: #e0e0e0;
+}
+.object-list-container {
+	max-height: calc(100vh - 220px);
+	overflow-y: auto;
+	padding-right: 8px;
+}
+/* 自定义滚动条样式 */
+.object-list-container::-webkit-scrollbar {
+	width: 8px;
+}
+.object-list-container::-webkit-scrollbar-track {
+	background: #333;
+	border-radius: 4px;
+}
+.object-list-container::-webkit-scrollbar-thumb {
+	background: #555;
+	border-radius: 4px;
+}
+.object-list-container::-webkit-scrollbar-thumb:hover {
+	background: #666;
 }
 .object-item {
 	padding: 12px;

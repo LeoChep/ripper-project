@@ -3,462 +3,310 @@
     "name": "大树1",
     "x": 0,
     "y": 0,
-    "width": 64,
-    "height": 80,
+    "width": 133,
+    "height": 165,
     "occlusionHeight": 0
   },
   {
     "name": "大树2",
-    "x": 64,
+    "x": 128,
     "y": 0,
-    "width": 64,
-    "height": 80,
-    "occlusionHeight": 70
+    "width": 128,
+    "height": 128,
+    "occlusionHeight": 100
   },
   {
     "name": "大树3",
-    "x": 128,
+    "x": 256,
     "y": 0,
-    "width": 64,
-    "height": 80,
-    "occlusionHeight": 70
+    "width": 128,
+    "height": 128,
+    "occlusionHeight": 100
   },
   {
     "name": "大树4",
-    "x": 192,
+    "x": 384,
     "y": 0,
-    "width": 64,
-    "height": 80,
-    "occlusionHeight": 70
+    "width": 128,
+    "height": 128,
+    "occlusionHeight": 100
   },
   {
     "name": "灌木1",
     "x": 0,
-    "y": 80,
-    "width": 48,
-    "height": 40,
-    "occlusionHeight": 20
+    "y": 128,
+    "width": 64,
+    "height": 64,
+    "occlusionHeight": 32
   },
   {
     "name": "灌木2",
-    "x": 48,
-    "y": 80,
-    "width": 48,
-    "height": 40,
-    "occlusionHeight": 20
+    "x": 64,
+    "y": 128,
+    "width": 64,
+    "height": 64,
+    "occlusionHeight": 32
   },
   {
     "name": "灌木3",
-    "x": 96,
-    "y": 80,
-    "width": 48,
-    "height": 40,
-    "occlusionHeight": 20
+    "x": 128,
+    "y": 128,
+    "width": 64,
+    "height": 64,
+    "occlusionHeight": 32
   },
   {
     "name": "灌木4",
-    "x": 144,
-    "y": 80,
-    "width": 48,
-    "height": 40,
-    "occlusionHeight": 20
+    "x": 192,
+    "y": 128,
+    "width": 64,
+    "height": 64,
+    "occlusionHeight": 32
   },
   {
     "name": "灌木5",
+    "x": 256,
+    "y": 128,
+    "width": 64,
+    "height": 64,
+    "occlusionHeight": 32
+  },
+  {
+    "name": "小花1",
+    "x": 0,
+    "y": 192,
+    "width": 32,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "小花2",
+    "x": 32,
+    "y": 192,
+    "width": 32,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "小花3",
+    "x": 64,
+    "y": 192,
+    "width": 32,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "树桩",
+    "x": 96,
+    "y": 192,
+    "width": 32,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "小花4",
+    "x": 128,
+    "y": 192,
+    "width": 32,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "小花5",
+    "x": 160,
+    "y": 192,
+    "width": 32,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "小花6",
     "x": 192,
-    "y": 80,
-    "width": 48,
-    "height": 40,
-    "occlusionHeight": 20
+    "y": 192,
+    "width": 32,
+    "height": 32,
+    "occlusionHeight": 16
   },
   {
-    "name": "灌木6",
-    "x": 240,
-    "y": 80,
-    "width": 48,
-    "height": 40,
-    "occlusionHeight": 20
-  },
-  {
-    "name": "灌木7",
-    "x": 288,
-    "y": 80,
-    "width": 48,
-    "height": 40,
-    "occlusionHeight": 20
-  },
-  {
-    "name": "灌木8",
-    "x": 336,
-    "y": 80,
-    "width": 48,
-    "height": 40,
-    "occlusionHeight": 20
+    "name": "小花7",
+    "x": 224,
+    "y": 192,
+    "width": 32,
+    "height": 32,
+    "occlusionHeight": 16
   },
   {
     "name": "小灌木1",
     "x": 0,
-    "y": 120,
-    "width": 40,
+    "y": 224,
+    "width": 32,
     "height": 32,
     "occlusionHeight": 16
   },
   {
     "name": "小灌木2",
-    "x": 40,
-    "y": 120,
-    "width": 40,
+    "x": 32,
+    "y": 224,
+    "width": 32,
     "height": 32,
     "occlusionHeight": 16
   },
   {
     "name": "小灌木3",
-    "x": 80,
-    "y": 120,
-    "width": 40,
+    "x": 64,
+    "y": 224,
+    "width": 32,
     "height": 32,
     "occlusionHeight": 16
   },
   {
     "name": "小灌木4",
-    "x": 120,
-    "y": 120,
-    "width": 40,
+    "x": 96,
+    "y": 224,
+    "width": 32,
     "height": 32,
     "occlusionHeight": 16
   },
   {
     "name": "小灌木5",
-    "x": 160,
-    "y": 120,
-    "width": 40,
+    "x": 128,
+    "y": 224,
+    "width": 32,
     "height": 32,
     "occlusionHeight": 16
   },
   {
     "name": "小灌木6",
-    "x": 200,
-    "y": 120,
-    "width": 40,
+    "x": 160,
+    "y": 224,
+    "width": 32,
     "height": 32,
     "occlusionHeight": 16
   },
   {
     "name": "小灌木7",
-    "x": 240,
-    "y": 120,
-    "width": 40,
+    "x": 192,
+    "y": 224,
+    "width": 32,
     "height": 32,
     "occlusionHeight": 16
   },
   {
     "name": "小灌木8",
-    "x": 280,
-    "y": 120,
-    "width": 40,
-    "height": 32,
-    "occlusionHeight": 16
-  },
-  {
-    "name": "小灌木9",
-    "x": 320,
-    "y": 120,
-    "width": 40,
-    "height": 32,
-    "occlusionHeight": 16
-  },
-  {
-    "name": "小灌木10",
-    "x": 360,
-    "y": 120,
-    "width": 40,
+    "x": 224,
+    "y": 224,
+    "width": 32,
     "height": 32,
     "occlusionHeight": 16
   },
   {
     "name": "岩石1",
     "x": 0,
-    "y": 152,
-    "width": 56,
-    "height": 48,
-    "occlusionHeight": 24
+    "y": 256,
+    "width": 64,
+    "height": 64,
+    "occlusionHeight": 32
   },
   {
     "name": "岩石2",
-    "x": 56,
-    "y": 152,
-    "width": 56,
-    "height": 48,
-    "occlusionHeight": 24
+    "x": 64,
+    "y": 256,
+    "width": 64,
+    "height": 64,
+    "occlusionHeight": 32
   },
   {
     "name": "岩石3",
-    "x": 112,
-    "y": 152,
-    "width": 56,
-    "height": 48,
-    "occlusionHeight": 24
+    "x": 128,
+    "y": 256,
+    "width": 64,
+    "height": 64,
+    "occlusionHeight": 32
   },
   {
     "name": "岩石4",
-    "x": 168,
-    "y": 152,
-    "width": 56,
-    "height": 48,
-    "occlusionHeight": 24
-  },
-  {
-    "name": "岩石5",
-    "x": 224,
-    "y": 152,
-    "width": 56,
-    "height": 48,
-    "occlusionHeight": 24
-  },
-  {
-    "name": "岩石6",
-    "x": 280,
-    "y": 152,
-    "width": 56,
-    "height": 48,
-    "occlusionHeight": 24
-  },
-  {
-    "name": "岩石7",
-    "x": 336,
-    "y": 152,
-    "width": 56,
-    "height": 48,
-    "occlusionHeight": 24
-  },
-  {
-    "name": "岩石8",
-    "x": 392,
-    "y": 152,
-    "width": 56,
-    "height": 48,
-    "occlusionHeight": 24
-  },
-  {
-    "name": "古井1",
-    "x": 0,
-    "y": 200,
-    "width": 72,
-    "height": 72,
-    "occlusionHeight": 36
-  },
-  {
-    "name": "楼梯遗迹",
-    "x": 72,
-    "y": 200,
-    "width": 72,
-    "height": 72,
-    "occlusionHeight": 36
-  },
-  {
-    "name": "石柱遗迹",
-    "x": 144,
-    "y": 200,
-    "width": 72,
-    "height": 72,
-    "occlusionHeight": 60
-  },
-  {
-    "name": "古井2",
-    "x": 216,
-    "y": 200,
-    "width": 72,
-    "height": 72,
-    "occlusionHeight": 36
-  },
-  {
-    "name": "小岩石1",
-    "x": 0,
-    "y": 272,
-    "width": 48,
-    "height": 40,
-    "occlusionHeight": 20
-  },
-  {
-    "name": "小岩石2",
-    "x": 48,
-    "y": 272,
-    "width": 48,
-    "height": 40,
-    "occlusionHeight": 20
-  },
-  {
-    "name": "小岩石3",
-    "x": 96,
-    "y": 272,
-    "width": 48,
-    "height": 40,
-    "occlusionHeight": 20
-  },
-  {
-    "name": "小岩石4",
-    "x": 144,
-    "y": 272,
-    "width": 48,
-    "height": 40,
-    "occlusionHeight": 20
-  },
-  {
-    "name": "小岩石5",
     "x": 192,
-    "y": 272,
-    "width": 48,
-    "height": 40,
-    "occlusionHeight": 20
+    "y": 256,
+    "width": 64,
+    "height": 64,
+    "occlusionHeight": 32
   },
   {
-    "name": "小岩石6",
-    "x": 240,
-    "y": 272,
-    "width": 48,
-    "height": 40,
-    "occlusionHeight": 20
-  },
-  {
-    "name": "小岩石7",
-    "x": 288,
-    "y": 272,
-    "width": 48,
-    "height": 40,
-    "occlusionHeight": 20
-  },
-  {
-    "name": "小岩石8",
-    "x": 336,
-    "y": 272,
-    "width": 48,
-    "height": 40,
-    "occlusionHeight": 20
-  },
-  {
-    "name": "废弃石井",
+    "name": "圆形废墟",
     "x": 0,
-    "y": 312,
-    "width": 72,
-    "height": 72,
-    "occlusionHeight": 36
+    "y": 320,
+    "width": 128,
+    "height": 128,
+    "occlusionHeight": 80
   },
   {
-    "name": "破损石柱",
-    "x": 72,
-    "y": 312,
-    "width": 72,
-    "height": 72,
-    "occlusionHeight": 60
-  },
-  {
-    "name": "杂草古井",
-    "x": 144,
-    "y": 312,
-    "width": 72,
-    "height": 72,
-    "occlusionHeight": 36
-  },
-  {
-    "name": "石井遗迹",
-    "x": 216,
-    "y": 312,
-    "width": 72,
-    "height": 72,
-    "occlusionHeight": 36
-  },
-  {
-    "name": "微型灌木1",
-    "x": 0,
-    "y": 384,
-    "width": 32,
-    "height": 32,
-    "occlusionHeight": 16
-  },
-  {
-    "name": "微型灌木2",
-    "x": 32,
-    "y": 384,
-    "width": 32,
-    "height": 32,
-    "occlusionHeight": 16
-  },
-  {
-    "name": "微型灌木3",
-    "x": 64,
-    "y": 384,
-    "width": 32,
-    "height": 32,
-    "occlusionHeight": 16
-  },
-  {
-    "name": "微型灌木4",
-    "x": 96,
-    "y": 384,
-    "width": 32,
-    "height": 32,
-    "occlusionHeight": 16
-  },
-  {
-    "name": "微型灌木5",
+    "name": "楼梯废墟",
     "x": 128,
-    "y": 384,
-    "width": 32,
-    "height": 32,
-    "occlusionHeight": 16
+    "y": 320,
+    "width": 128,
+    "height": 128,
+    "occlusionHeight": 80
   },
   {
-    "name": "微型灌木6",
-    "x": 160,
-    "y": 384,
-    "width": 32,
-    "height": 32,
-    "occlusionHeight": 16
-  },
-  {
-    "name": "微型灌木7",
-    "x": 192,
-    "y": 384,
-    "width": 32,
-    "height": 32,
-    "occlusionHeight": 16
-  },
-  {
-    "name": "微型灌木8",
-    "x": 224,
-    "y": 384,
-    "width": 32,
-    "height": 32,
-    "occlusionHeight": 16
-  },
-  {
-    "name": "微型灌木9",
+    "name": "石柱废墟",
     "x": 256,
-    "y": 384,
+    "y": 320,
+    "width": 128,
+    "height": 128,
+    "occlusionHeight": 100
+  },
+  {
+    "name": "围栏废墟",
+    "x": 0,
+    "y": 448,
+    "width": 64,
+    "height": 64,
+    "occlusionHeight": 32
+  },
+  {
+    "name": "小柱子废墟1",
+    "x": 64,
+    "y": 448,
+    "width": 64,
+    "height": 64,
+    "occlusionHeight": 32
+  },
+  {
+    "name": "小圆形废墟",
+    "x": 128,
+    "y": 448,
+    "width": 64,
+    "height": 64,
+    "occlusionHeight": 32
+  },
+  {
+    "name": "微型柱子1",
+    "x": 0,
+    "y": 512,
     "width": 32,
     "height": 32,
     "occlusionHeight": 16
   },
   {
-    "name": "微型灌木10",
-    "x": 288,
-    "y": 384,
+    "name": "微型柱子2",
+    "x": 32,
+    "y": 512,
     "width": 32,
     "height": 32,
     "occlusionHeight": 16
   },
   {
-    "name": "微型灌木11",
-    "x": 320,
-    "y": 384,
+    "name": "微型柱子3",
+    "x": 64,
+    "y": 512,
     "width": 32,
     "height": 32,
     "occlusionHeight": 16
   },
   {
-    "name": "微型灌木12",
-    "x": 352,
-    "y": 384,
+    "name": "微型柱子4",
+    "x": 96,
+    "y": 512,
     "width": 32,
     "height": 32,
     "occlusionHeight": 16

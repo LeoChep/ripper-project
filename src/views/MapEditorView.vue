@@ -1,60 +1,76 @@
 <template>
     <div class="map-editor">
-        <!-- 顶部工具栏 -->
-        <div class="toolbar">
-            <div class="toolbar-section">
-                <button @click="newMap" class="btn btn-success" title="新建地图（清除自动保存）">新建地图</button>
-                <button @click="loadMapImage" class="btn btn-primary">加载地图图片</button>
-                <input ref="fileInput" type="file" accept="image/*" style="display: none" @change="handleFileSelect" />
-                <button @click="importTMJ" class="btn btn-primary">导入地图(TMJ)</button>
-                <input ref="tmjFileInput" type="file" accept=".tmj,.json" style="display: none"
-                    @change="handleTMJImport" />
-                <span class="toolbar-separator">|</span>
-                <button @click="importFrontObjImage" class="btn btn-info">导入前景物图片</button>
-                <input ref="frontObjImageInput" type="file" accept="image/*" style="display: none"
-                    @change="handleFrontObjImageImport" />
-                <button @click="importFrontObjJson" class="btn btn-info">导入前景物JSON</button>
-                <input ref="frontObjJsonInput" type="file" accept="application/json" style="display: none"
-                    @change="handleFrontObjJsonImport" />
-                <button @click="toggleGrid" class="btn">{{ showGrid ? '隐藏网格' : '显示网格' }}</button>
-                <button @click="clearCanvas" class="btn btn-warning">清空画布</button>
-                <span class="toolbar-separator">|</span>
-                <button @click="undo" :disabled="currentHistoryIndex <= 0" class="btn" title="撤回 (Ctrl+Z)">
-                    ↶ 撤回
-                </button>
-                <button @click="redo" :disabled="currentHistoryIndex >= historyStack.length - 1" class="btn"
-                    title="重做 (Ctrl+Y)">
-                    ↷ 重做
-                </button>
+        <!-- 顶部菜单栏 -->
+        <div class="menubar" @click="handleMenubarClick">
+            <!-- 文件菜单 -->
+            <div class="menu-item">
+                <button class="menu-btn" :class="{ active: activeMenu === 'file' }" @click.stop="toggleMenu('file')">文件 ▼</button>
+                <div class="dropdown-menu" v-show="activeMenu === 'file'">
+                    <div class="menu-item-content" @click="handleMenuAction('file', newMap)">📄 新建地图</div>
+                    <div class="menu-item-content" @click="handleMenuAction('file', loadMapImage)">🖼️ 加载地图图片</div>
+                    <div class="menu-item-content" @click="handleMenuAction('file', importTMJ)">📥 导入地图(TMJ)</div>
+                    <div class="menu-item-content" @click="handleMenuAction('file', batchImport)">📦 批量导入</div>
+                    <div class="menu-separator"></div>
+                    <div class="menu-item-content" @click="handleMenuAction('file', exportMapData)">💾 导出地图(TMJ)</div>
+                </div>
             </div>
 
-            <div class="toolbar-section">
-                <span class="toolbar-label">编辑模式：</span>
-                <button @click="setMode('unit')" :class="['btn', currentMode === 'unit' ? 'btn-active' : '']">
-                    放置单位
-                </button>
-                <button @click="setMode('wall')" :class="['btn', currentMode === 'wall' ? 'btn-active' : '']">
-                    绘制墙体
-                </button>
-                <button @click="setMode('door')" :class="['btn', currentMode === 'door' ? 'btn-active' : '']">
-                    绘制门
-                </button>
-                <button @click="setMode('frontObj')" :class="['btn', currentMode === 'frontObj' ? 'btn-active' : '']">
-                    放置前景物
-                </button>
-                <button @click="setMode('areaSelect')" :class="['btn', currentMode === 'areaSelect' ? 'btn-active' : '']">
-                    区域选择
-                </button>
-                <button @click="setMode('select')" :class="['btn', currentMode === 'select' ? 'btn-active' : '']">
-                    选择/删除
-                </button>
+            <!-- 前景物菜单 -->
+            <div class="menu-item">
+                <button class="menu-btn" :class="{ active: activeMenu === 'frontobj' }" @click.stop="toggleMenu('frontobj')">前景物 ▼</button>
+                <div class="dropdown-menu" v-show="activeMenu === 'frontobj'">
+                    <div class="menu-item-content" @click="handleMenuAction('frontobj', importFrontObjImage)">🖼️ 导入前景物图片</div>
+                    <div class="menu-item-content" @click="handleMenuAction('frontobj', importFrontObjJson)">📋 导入前景物JSON</div>
+                </div>
             </div>
 
-            <div class="toolbar-section">
-                <button @click="exportMapData" class="btn btn-success">导出地图(TMJ)</button>
+            <!-- 编辑菜单 -->
+            <div class="menu-item">
+                <button class="menu-btn" :class="{ active: activeMenu === 'edit' }" @click.stop="toggleMenu('edit')">编辑 ▼</button>
+                <div class="dropdown-menu" v-show="activeMenu === 'edit'">
+                    <div class="menu-item-content" @click="handleMenuAction('edit', undo)" :class="{ disabled: currentHistoryIndex <= 0 }">
+                        ↶ 撤回 (Ctrl+Z)
+                    </div>
+                    <div class="menu-item-content" @click="handleMenuAction('edit', redo)" :class="{ disabled: currentHistoryIndex >= historyStack.length - 1 }">
+                        ↷ 重做 (Ctrl+Y)
+                    </div>
+                    <div class="menu-separator"></div>
+                    <div class="menu-item-content" @click="handleMenuAction('edit', clearCanvas)">🗑️ 清空画布</div>
+                    <div class="menu-item-content" @click="handleMenuAction('edit', toggleGrid)">
+                        {{ showGrid ? '👁️ 隐藏网格' : '📐 显示网格' }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 地图名称输入 -->
+            <div class="toolbar-section map-name-section">
                 <input v-model="mapName" placeholder="地图名称" class="input-text" />
             </div>
 
+            <!-- 编辑模式选择 -->
+            <div class="toolbar-section mode-section">
+                <span class="toolbar-label">模式:</span>
+                <button @click="setMode('unit')" :class="['btn', 'btn-sm', currentMode === 'unit' ? 'btn-active' : '']" title="放置单位">
+                    🎭 单位
+                </button>
+                <button @click="setMode('wall')" :class="['btn', 'btn-sm', currentMode === 'wall' ? 'btn-active' : '']" title="绘制墙体">
+                    🧱 墙体
+                </button>
+                <button @click="setMode('door')" :class="['btn', 'btn-sm', currentMode === 'door' ? 'btn-active' : '']" title="绘制门">
+                    🚪 门
+                </button>
+                <button @click="setMode('frontObj')" :class="['btn', 'btn-sm', currentMode === 'frontObj' ? 'btn-active' : '']" title="放置前景物">
+                    🌳 前景
+                </button>
+                <button @click="setMode('areaSelect')" :class="['btn', 'btn-sm', currentMode === 'areaSelect' ? 'btn-active' : '']" title="区域选择">
+                    ⬚ 区域
+                </button>
+                <button @click="setMode('select')" :class="['btn', 'btn-sm', currentMode === 'select' ? 'btn-active' : '']" title="选择/删除">
+                    🔍 选择
+                </button>
+            </div>
+
+            <!-- 缩放控制 -->
             <div class="toolbar-section zoom-controls">
                 <span class="toolbar-label">缩放:</span>
                 <button @click="zoomOut" class="btn btn-sm">-</button>
@@ -63,6 +79,13 @@
                 <button @click="resetZoom" class="btn btn-sm">重置</button>
             </div>
         </div>
+
+        <!-- 隐藏的文件输入 -->
+        <input ref="fileInput" type="file" accept="image/*" style="display: none" @change="handleFileSelect" />
+        <input ref="tmjFileInput" type="file" accept=".tmj,.json" style="display: none" @change="handleTMJImport" />
+        <input ref="frontObjImageInput" type="file" accept="image/*" style="display: none" @change="handleFrontObjImageImport" />
+        <input ref="frontObjJsonInput" type="file" accept="application/json" style="display: none" @change="handleFrontObjJsonImport" />
+        <input ref="batchImportInput" type="file" accept=".tmj,.json,image/*" style="display: none" multiple @change="handleBatchImport" />
 
         <!-- 左侧单位选择面板 -->
         <div class="sidebar" v-if="currentMode === 'unit'">
@@ -326,6 +349,26 @@ const minZoom = 0.25;
 const maxZoom = 3;
 const zoomStep = 0.1;
 
+// 菜单相关
+const activeMenu = ref<string | null>(null);
+
+const toggleMenu = (menuName: string) => {
+    if (activeMenu.value === menuName) {
+        activeMenu.value = null;
+    } else {
+        activeMenu.value = menuName;
+    }
+};
+
+const handleMenuAction = (_menuName: string, action: () => void) => {
+    activeMenu.value = null;
+    action();
+};
+
+const handleMenubarClick = () => {
+    activeMenu.value = null;
+};
+
 // PIXI应用相关
 let app: PIXI.Application;
 let mapSprite: PIXI.Sprite | null = null;
@@ -401,6 +444,7 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const tmjFileInput = ref<HTMLInputElement | null>(null);
 const frontObjImageInput = ref<HTMLInputElement | null>(null);
 const frontObjJsonInput = ref<HTMLInputElement | null>(null);
+const batchImportInput = ref<HTMLInputElement | null>(null);
 const canvasContainer = ref<HTMLDivElement | null>(null);
 
 // 前景物相关
@@ -2672,6 +2716,240 @@ const handleFrontObjJsonImport = (event: Event) => {
     target.value = '';
 };
 
+// ========== 批量导入功能 ==========
+
+// 批量导入
+const batchImport = () => {
+    batchImportInput.value?.click();
+};
+
+// 文件类型识别
+interface FileClassification {
+    tmjFile: File | null;
+    mapImageFile: File | null;
+    frontObjImageFile: File | null;
+    frontObjJsonFile: File | null;
+    otherFiles: File[];
+}
+
+const classifyFiles = (files: FileList): FileClassification => {
+    const result: FileClassification = {
+        tmjFile: null,
+        mapImageFile: null,
+        frontObjImageFile: null,
+        frontObjJsonFile: null,
+        otherFiles: []
+    };
+
+    const fileArray = Array.from(files);
+
+    for (const file of fileArray) {
+        const fileName = file.name.toLowerCase();
+        const fileType = file.type;
+
+        // 识别TMJ文件 (优先识别 .tmj 后缀)
+        if (fileName.endsWith('.tmj')) {
+            result.tmjFile = file;
+        }
+        // 识别地图图片 (包含 road 或 map 的图片文件)
+        else if (fileType.startsWith('image/') && (fileName.includes('road') || fileName.includes('map'))) {
+            // 如果同时包含 road 和 frontObj，优先认为是地图图片
+            if (!fileName.includes('frontobj')) {
+                result.mapImageFile = file;
+            }
+        }
+        // 识别前景物图片 (包含 frontObj 的图片文件)
+        else if (fileType.startsWith('image/') && fileName.includes('frontobj')) {
+            result.frontObjImageFile = file;
+        }
+        // 识别前景物JSON (包含 frontObj 的 JSON 文件)
+        else if ((fileType === 'application/json' || fileName.endsWith('.json')) && fileName.includes('frontobj')) {
+            result.frontObjJsonFile = file;
+        }
+        // 其他文件
+        else {
+            result.otherFiles.push(file);
+        }
+    }
+
+    return result;
+};
+
+// 批量导入处理
+const handleBatchImport = async (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    const files = target.files;
+
+    if (!files || files.length === 0) return;
+
+    try {
+        // 分类文件
+        const classified = classifyFiles(files);
+
+        // 显示导入摘要
+        const summary = [];
+        if (classified.tmjFile) summary.push(`TMJ地图文件: ${classified.tmjFile.name}`);
+        if (classified.mapImageFile) summary.push(`地图图片: ${classified.mapImageFile.name}`);
+        if (classified.frontObjImageFile) summary.push(`前景物图片: ${classified.frontObjImageFile.name}`);
+        if (classified.frontObjJsonFile) summary.push(`前景物JSON: ${classified.frontObjJsonFile.name}`);
+        if (classified.otherFiles.length > 0) {
+            summary.push(`未识别文件: ${classified.otherFiles.map(f => f.name).join(', ')}`);
+        }
+
+        console.log('批量导入文件分类:', summary);
+
+        // 确认是否覆盖现有内容
+        if (placedUnits.value.length > 0 || wallObjects.value.length > 0 || doorObjects.value.length > 0 || frontObjObjects.value.length > 0) {
+            if (!confirm(`批量导入将清空现有内容，是否继续？\n\n检测到以下文件:\n${summary.join('\n')}`)) {
+                return;
+            }
+        }
+
+        // 1. 首先加载TMJ文件
+        if (classified.tmjFile) {
+            console.log('正在加载TMJ文件...');
+            const text = await classified.tmjFile.text();
+            const tmjData = JSON.parse(text);
+
+            // 清空现有内容
+            placedUnits.value = [];
+            wallObjects.value = [];
+            doorObjects.value = [];
+            frontObjObjects.value = [];
+            objectsContainer.removeChildren();
+            if (mapSprite) {
+                objectsContainer.addChild(mapSprite);
+            }
+
+            // 加载地图数据
+            await parseTMJData(tmjData);
+            syncCanvasSizeWithMap();
+            resetViewTransform();
+
+            // 设置地图名称
+            const fileName = classified.tmjFile.name.replace(/\.(tmj|json)$/, '');
+            mapName.value = fileName;
+        }
+
+        // 2. 加载地图图片
+        if (classified.mapImageFile) {
+            console.log('正在加载地图图片...');
+            await loadMapImageFromFile(classified.mapImageFile);
+        }
+
+        // 3. 加载前景物图片
+        if (classified.frontObjImageFile) {
+            console.log('正在加载前景物图片...');
+            await loadFrontObjImageFromFile(classified.frontObjImageFile);
+        }
+
+        // 4. 加载前景物JSON
+        if (classified.frontObjJsonFile) {
+            console.log('正在加载前景物JSON...');
+            await loadFrontObjJsonFromFile(classified.frontObjJsonFile);
+        }
+
+        // 显示导入结果
+        let resultMessage = '批量导入完成！\n\n';
+        resultMessage += summary.join('\n');
+        alert(resultMessage);
+
+        console.log('批量导入成功！');
+
+    } catch (error) {
+        console.error('批量导入失败:', error);
+        alert('批量导入失败，请检查文件格式！\n错误信息: ' + (error as Error).message);
+    }
+
+    // 清空文件选择器
+    if (target) target.value = '';
+};
+
+// 从文件对象加载地图图片（复用现有逻辑）
+const loadMapImageFromFile = async (file: File): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const result = e.target?.result as string;
+
+                // 移除旧的地图精灵
+                if (mapSprite) {
+                    objectsContainer.removeChild(mapSprite);
+                }
+
+                // 创建新的地图精灵
+                const texture = await PIXI.Assets.load(result);
+                mapSprite = new PIXI.Sprite(texture);
+                mapSprite.zIndex = -1;
+                objectsContainer.addChild(mapSprite);
+                objectsContainer.sortChildren();
+                syncCanvasSizeWithMap();
+                resetViewTransform();
+
+                resolve();
+            } catch (err) {
+                reject(err);
+            }
+        };
+        reader.onerror = () => reject(new Error('读取地图图片失败'));
+        reader.readAsDataURL(file);
+    });
+};
+
+// 从文件对象加载前景物图片（复用现有逻辑）
+const loadFrontObjImageFromFile = (file: File): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                frontObjTextureUrl.value = e.target?.result as string;
+                const image = new Image();
+                image.onload = () => {
+                    const texture = PIXI.Texture.from(image);
+                    frontObjTexture.value = texture;
+                    frontObjImage.value = image;
+                    resolve();
+                };
+                image.onerror = () => reject(new Error('加载前景物图片失败'));
+                image.src = frontObjTextureUrl.value;
+            } catch (err) {
+                reject(err);
+            }
+        };
+        reader.onerror = () => reject(new Error('读取前景物图片失败'));
+        reader.readAsDataURL(file);
+    });
+};
+
+// 从文件对象加载前景物JSON（复用现有逻辑）
+const loadFrontObjJsonFromFile = (file: File): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const jsonData = JSON.parse(e.target?.result as string);
+                if (Array.isArray(jsonData)) {
+                    frontObjTemplates.value = jsonData.map(obj => ({
+                        ...obj,
+                        thumbUrl: frontObjTextureUrl.value
+                    }));
+                    console.log(`已加载 ${frontObjTemplates.value.length} 个前景物模板`);
+                    resolve();
+                } else {
+                    reject(new Error('前景物JSON格式错误：应该是数组'));
+                }
+            } catch (err) {
+                reject(err);
+            }
+        };
+        reader.onerror = () => reject(new Error('读取前景物JSON失败'));
+        reader.readAsText(file);
+    });
+};
+
+// ========== 批量导入功能结束 ==========
+
 // 选择前景物模板
 const selectFrontObjTemplate = (index: number) => {
     selectedFrontObjIndex.value = index;
@@ -2797,6 +3075,89 @@ const applyFrontObjPropertyChanges = () => {
     left: 0;
 }
 
+.menubar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 20px;
+    background: #1a1a1a;
+    border-bottom: 2px solid #333;
+    flex-wrap: wrap;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    height: 50px;
+    box-sizing: border-box;
+}
+
+.menu-item {
+    position: relative;
+    display: inline-block;
+}
+
+.menu-btn {
+    padding: 6px 12px;
+    background: #2a2a2a;
+    color: #ddd;
+    border: 1px solid #444;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.menu-btn:hover {
+    background: #3a3a3a;
+    border-color: #666;
+}
+
+.menu-btn.active {
+    background: #3a3a3a;
+    border-color: #007bff;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 4px;
+    background: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    min-width: 180px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    z-index: 300;
+    padding: 4px 0;
+}
+
+.menu-item-content {
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #ddd;
+    transition: background 0.2s;
+}
+
+.menu-item-content:hover {
+    background: #3a3a3a;
+}
+
+.menu-item-content.disabled {
+    color: #666;
+    cursor: not-allowed;
+}
+
+.menu-item-content.disabled:hover {
+    background: transparent;
+}
+
+.menu-separator {
+    height: 1px;
+    background: #444;
+    margin: 4px 0;
+}
+
 .toolbar {
     display: flex;
     justify-content: space-between;
@@ -2812,6 +3173,18 @@ const applyFrontObjPropertyChanges = () => {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.map-name-section {
+    flex: 0 0 auto;
+}
+
+.map-name-section .input-text {
+    min-width: 150px;
+}
+
+.mode-section {
+    flex-wrap: wrap;
 }
 
 .toolbar-label {
@@ -2904,14 +3277,15 @@ const applyFrontObjPropertyChanges = () => {
 .sidebar {
     position: fixed;
     left: 0;
-    top: 60px;
+    top: 50px;
     width: 250px;
-    height: calc(100vh - 100px);
+    height: calc(100vh - 50px);
     background: #1a1a1a;
     border-right: 2px solid #333;
     padding: 20px;
     overflow-y: auto;
-    z-index: 100;
+    z-index: 150;
+    box-sizing: border-box;
 }
 
 .sidebar h3 {
@@ -2969,9 +3343,9 @@ const applyFrontObjPropertyChanges = () => {
 
 .draw-hints {
     position: fixed;
-    top: 70px;
+    top: 60px;
     right: 20px;
-    z-index: 100;
+    z-index: 150;
 }
 
 .hint-box {
@@ -3093,6 +3467,15 @@ const applyFrontObjPropertyChanges = () => {
 
 .btn-info {
     background: #17a2b8;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    font-weight: bold;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
 }
 
 .btn-info:hover {
