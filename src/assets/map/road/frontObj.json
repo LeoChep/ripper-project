@@ -1,82 +1,466 @@
 [
   {
-    "name": "战士雕像1",
-    "x": 67,
-    "y": 39.383331298828125,
-    "width": 97,
-    "height": 187,
-    "occlusionHeight": 81
+    "name": "大树1",
+    "x": 0,
+    "y": 0,
+    "width": 64,
+    "height": 80,
+    "occlusionHeight": 0
   },
   {
-    "name": "龙形雕像1",
-    "x": 307,
-    "y": 35.383331298828125,
-    "width": 93,
-    "height": 191,
-    "occlusionHeight": 81
+    "name": "大树2",
+    "x": 64,
+    "y": 0,
+    "width": 64,
+    "height": 80,
+    "occlusionHeight": 70
   },
   {
-    "name": "领主桌子",
-    "x": 490,
-    "y": 35.383331298828125,
-    "width": 320,
-    "height": 191,
-    "occlusionHeight": 62
+    "name": "大树3",
+    "x": 128,
+    "y": 0,
+    "width": 64,
+    "height": 80,
+    "occlusionHeight": 70
   },
   {
-    "name": "占扑水晶球",
-    "x": 837,
-    "y": 89.38333129882812,
-    "width": 100,
-    "height": 137,
-    "occlusionHeight": 47
+    "name": "大树4",
+    "x": 192,
+    "y": 0,
+    "width": 64,
+    "height": 80,
+    "occlusionHeight": 70
   },
   {
-    "name": "火把架",
-    "x": 959,
-    "y": 85.38333129882812,
-    "width": 90,
-    "height": 148,
-    "occlusionHeight": 47
+    "name": "灌木1",
+    "x": 0,
+    "y": 80,
+    "width": 48,
+    "height": 40,
+    "occlusionHeight": 20
   },
   {
-    "name": "领主椅子",
-    "x": 1057,
-    "y": 43.383331298828125,
-    "width": 121,
-    "height": 181,
-    "occlusionHeight": 158
+    "name": "灌木2",
+    "x": 48,
+    "y": 80,
+    "width": 48,
+    "height": 40,
+    "occlusionHeight": 20
   },
   {
-    "name": "战士雕像2",
-    "x": 55,
-    "y": 242.35000610351562,
-    "width": 122,
-    "height": 224,
-    "occlusionHeight": 92
+    "name": "灌木3",
+    "x": 96,
+    "y": 80,
+    "width": 48,
+    "height": 40,
+    "occlusionHeight": 20
   },
   {
-    "name": "龙形雕像2",
-    "x": 285,
-    "y": 254.98333740234375,
-    "width": 137,
-    "height": 211,
-    "occlusionHeight": 90
+    "name": "灌木4",
+    "x": 144,
+    "y": 80,
+    "width": 48,
+    "height": 40,
+    "occlusionHeight": 20
   },
   {
-    "name": "战士雕像3",
-    "x": 527,
-    "y": 256.6000061035156,
-    "width": 142,
-    "height": 214,
-    "occlusionHeight": 98
+    "name": "灌木5",
+    "x": 192,
+    "y": 80,
+    "width": 48,
+    "height": 40,
+    "occlusionHeight": 20
   },
   {
-    "name": "龙形雕像3",
-    "x": 748,
-    "y": 251.23333740234375,
-    "width": 151,
-    "height": 221,
-    "occlusionHeight": 100
+    "name": "灌木6",
+    "x": 240,
+    "y": 80,
+    "width": 48,
+    "height": 40,
+    "occlusionHeight": 20
+  },
+  {
+    "name": "灌木7",
+    "x": 288,
+    "y": 80,
+    "width": 48,
+    "height": 40,
+    "occlusionHeight": 20
+  },
+  {
+    "name": "灌木8",
+    "x": 336,
+    "y": 80,
+    "width": 48,
+    "height": 40,
+    "occlusionHeight": 20
+  },
+  {
+    "name": "小灌木1",
+    "x": 0,
+    "y": 120,
+    "width": 40,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "小灌木2",
+    "x": 40,
+    "y": 120,
+    "width": 40,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "小灌木3",
+    "x": 80,
+    "y": 120,
+    "width": 40,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "小灌木4",
+    "x": 120,
+    "y": 120,
+    "width": 40,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "小灌木5",
+    "x": 160,
+    "y": 120,
+    "width": 40,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "小灌木6",
+    "x": 200,
+    "y": 120,
+    "width": 40,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "小灌木7",
+    "x": 240,
+    "y": 120,
+    "width": 40,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "小灌木8",
+    "x": 280,
+    "y": 120,
+    "width": 40,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "小灌木9",
+    "x": 320,
+    "y": 120,
+    "width": 40,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "小灌木10",
+    "x": 360,
+    "y": 120,
+    "width": 40,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "岩石1",
+    "x": 0,
+    "y": 152,
+    "width": 56,
+    "height": 48,
+    "occlusionHeight": 24
+  },
+  {
+    "name": "岩石2",
+    "x": 56,
+    "y": 152,
+    "width": 56,
+    "height": 48,
+    "occlusionHeight": 24
+  },
+  {
+    "name": "岩石3",
+    "x": 112,
+    "y": 152,
+    "width": 56,
+    "height": 48,
+    "occlusionHeight": 24
+  },
+  {
+    "name": "岩石4",
+    "x": 168,
+    "y": 152,
+    "width": 56,
+    "height": 48,
+    "occlusionHeight": 24
+  },
+  {
+    "name": "岩石5",
+    "x": 224,
+    "y": 152,
+    "width": 56,
+    "height": 48,
+    "occlusionHeight": 24
+  },
+  {
+    "name": "岩石6",
+    "x": 280,
+    "y": 152,
+    "width": 56,
+    "height": 48,
+    "occlusionHeight": 24
+  },
+  {
+    "name": "岩石7",
+    "x": 336,
+    "y": 152,
+    "width": 56,
+    "height": 48,
+    "occlusionHeight": 24
+  },
+  {
+    "name": "岩石8",
+    "x": 392,
+    "y": 152,
+    "width": 56,
+    "height": 48,
+    "occlusionHeight": 24
+  },
+  {
+    "name": "古井1",
+    "x": 0,
+    "y": 200,
+    "width": 72,
+    "height": 72,
+    "occlusionHeight": 36
+  },
+  {
+    "name": "楼梯遗迹",
+    "x": 72,
+    "y": 200,
+    "width": 72,
+    "height": 72,
+    "occlusionHeight": 36
+  },
+  {
+    "name": "石柱遗迹",
+    "x": 144,
+    "y": 200,
+    "width": 72,
+    "height": 72,
+    "occlusionHeight": 60
+  },
+  {
+    "name": "古井2",
+    "x": 216,
+    "y": 200,
+    "width": 72,
+    "height": 72,
+    "occlusionHeight": 36
+  },
+  {
+    "name": "小岩石1",
+    "x": 0,
+    "y": 272,
+    "width": 48,
+    "height": 40,
+    "occlusionHeight": 20
+  },
+  {
+    "name": "小岩石2",
+    "x": 48,
+    "y": 272,
+    "width": 48,
+    "height": 40,
+    "occlusionHeight": 20
+  },
+  {
+    "name": "小岩石3",
+    "x": 96,
+    "y": 272,
+    "width": 48,
+    "height": 40,
+    "occlusionHeight": 20
+  },
+  {
+    "name": "小岩石4",
+    "x": 144,
+    "y": 272,
+    "width": 48,
+    "height": 40,
+    "occlusionHeight": 20
+  },
+  {
+    "name": "小岩石5",
+    "x": 192,
+    "y": 272,
+    "width": 48,
+    "height": 40,
+    "occlusionHeight": 20
+  },
+  {
+    "name": "小岩石6",
+    "x": 240,
+    "y": 272,
+    "width": 48,
+    "height": 40,
+    "occlusionHeight": 20
+  },
+  {
+    "name": "小岩石7",
+    "x": 288,
+    "y": 272,
+    "width": 48,
+    "height": 40,
+    "occlusionHeight": 20
+  },
+  {
+    "name": "小岩石8",
+    "x": 336,
+    "y": 272,
+    "width": 48,
+    "height": 40,
+    "occlusionHeight": 20
+  },
+  {
+    "name": "废弃石井",
+    "x": 0,
+    "y": 312,
+    "width": 72,
+    "height": 72,
+    "occlusionHeight": 36
+  },
+  {
+    "name": "破损石柱",
+    "x": 72,
+    "y": 312,
+    "width": 72,
+    "height": 72,
+    "occlusionHeight": 60
+  },
+  {
+    "name": "杂草古井",
+    "x": 144,
+    "y": 312,
+    "width": 72,
+    "height": 72,
+    "occlusionHeight": 36
+  },
+  {
+    "name": "石井遗迹",
+    "x": 216,
+    "y": 312,
+    "width": 72,
+    "height": 72,
+    "occlusionHeight": 36
+  },
+  {
+    "name": "微型灌木1",
+    "x": 0,
+    "y": 384,
+    "width": 32,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "微型灌木2",
+    "x": 32,
+    "y": 384,
+    "width": 32,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "微型灌木3",
+    "x": 64,
+    "y": 384,
+    "width": 32,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "微型灌木4",
+    "x": 96,
+    "y": 384,
+    "width": 32,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "微型灌木5",
+    "x": 128,
+    "y": 384,
+    "width": 32,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "微型灌木6",
+    "x": 160,
+    "y": 384,
+    "width": 32,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "微型灌木7",
+    "x": 192,
+    "y": 384,
+    "width": 32,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "微型灌木8",
+    "x": 224,
+    "y": 384,
+    "width": 32,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "微型灌木9",
+    "x": 256,
+    "y": 384,
+    "width": 32,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "微型灌木10",
+    "x": 288,
+    "y": 384,
+    "width": 32,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "微型灌木11",
+    "x": 320,
+    "y": 384,
+    "width": 32,
+    "height": 32,
+    "occlusionHeight": 16
+  },
+  {
+    "name": "微型灌木12",
+    "x": 352,
+    "y": 384,
+    "width": 32,
+    "height": 32,
+    "occlusionHeight": 16
   }
 ]

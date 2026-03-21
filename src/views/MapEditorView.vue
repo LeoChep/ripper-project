@@ -42,6 +42,9 @@
                 <button @click="setMode('frontObj')" :class="['btn', currentMode === 'frontObj' ? 'btn-active' : '']">
                     放置前景物
                 </button>
+                <button @click="setMode('areaSelect')" :class="['btn', currentMode === 'areaSelect' ? 'btn-active' : '']">
+                    区域选择
+                </button>
                 <button @click="setMode('select')" :class="['btn', currentMode === 'select' ? 'btn-active' : '']">
                     选择/删除
                 </button>
@@ -202,6 +205,66 @@
             </div>
         </div>
 
+        <!-- 区域选择面板 -->
+        <div class="sidebar" v-if="currentMode === 'areaSelect'">
+            <h3>区域选择</h3>
+            <div class="unit-properties">
+                <p><strong>区域选择模式</strong></p>
+                <p style="font-size: 12px; color: #666; margin: 10px 0;">
+                    点击地图添加点，绘制不规则区域。完成后可随机填充前景物。
+                </p>
+                <p v-if="areaSelectPoints.length > 0" style="margin: 10px 0;">
+                    当前点数: {{ areaSelectPoints.length }}
+                </p>
+                <div style="margin-top: 15px;" v-if="areaSelectPoints.length >= 3">
+                    <label style="display: block; margin-bottom: 5px;">
+                        填充密度: {{ randomFillDensity }}%
+                    </label>
+                    <input type="range" v-model.number="randomFillDensity" min="1" max="50"
+                           style="width: 100%; margin-bottom: 10px;" />
+
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">
+                        填充模式:
+                    </label>
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 5px; font-size: 12px;">
+                            <input type="radio" :value="1" v-model.number="fillMode" style="margin-right: 5px;" />
+                            <strong>模式1:</strong> 锚点在选区内（内容可超出边界）
+                        </label>
+                        <label style="display: block; margin-bottom: 5px; font-size: 12px;">
+                            <input type="radio" :value="2" v-model.number="fillMode" style="margin-right: 5px;" />
+                            <strong>模式2:</strong> 整体在选区内（内容不可超出）
+                        </label>
+                    </div>
+
+                    <label style="display: block; margin-bottom: 10px; font-size: 12px;">
+                        <input type="checkbox" v-model="alignToGrid" style="margin-right: 5px;" />
+                        <strong>对齐网格中心点</strong>（取消勾选则完全随机放置）
+                    </label>
+
+                    <button @click="randomFillArea" class="btn btn-primary" style="width: 100%;">
+                        随机填充选中前景物
+                    </button>
+                </div>
+                <div style="margin-top: 10px;">
+                    <button @click="finishAreaSelect" class="btn btn-success"
+                            :disabled="areaSelectPoints.length < 3"
+                            style="width: 100%; margin-bottom: 5px;">
+                        完成区域选择
+                    </button>
+                    <button @click="cancelAreaSelect" class="btn btn-warning" style="width: 100%;">
+                        取消
+                    </button>
+                </div>
+                <div style="margin-top: 15px; padding: 10px; background: #f0f0f0; border-radius: 4px;">
+                    <p style="font-size: 11px; margin: 0;">
+                        <strong>当前前景物:</strong><br>
+                        {{ selectedFrontObjIndex >= 0 ? frontObjTemplates[selectedFrontObjIndex]?.name || '未选择' : '请先在前景物模式选择' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
         <!-- 选中前景物属性编辑面板 -->
         <div class="sidebar" v-if="currentMode === 'select' && selectedObject && selectedObject.type === 'frontObj'">
             <h3>编辑前景物属性</h3>
@@ -257,7 +320,7 @@ const defaultCanvasWidth = 1536;
 const defaultCanvasHeight = 1920;
 const showGrid = ref(true);
 const mapName = ref('custom_map');
-const currentMode = ref<'unit' | 'wall' | 'door' | 'frontObj' | 'select'>('unit');
+const currentMode = ref<'unit' | 'wall' | 'door' | 'frontObj' | 'areaSelect' | 'select'>('unit');
 const zoomLevel = ref(1);
 const minZoom = 0.25;
 const maxZoom = 3;
@@ -301,6 +364,13 @@ const editingOnlyBlock = ref(false);
 // 绘制相关
 const drawingPoints = ref<{ x: number, y: number }[]>([]);
 const currentDrawingGraphics = ref<PIXI.Graphics | null>(null);
+
+// 区域选择相关
+const areaSelectPoints = ref<{ x: number, y: number }[]>([]);
+const areaSelectGraphics = ref<PIXI.Graphics | null>(null);
+const randomFillDensity = ref(10); // 随机填充密度（每100格放置的数量）
+const fillMode = ref<1 | 2>(1); // 填充模式：1-锚点不超边界，2-整体不超边界
+const alignToGrid = ref(true); // 是否对齐网格中心点
 
 // 鼠标位置
 const mouseX = ref(0);
@@ -734,10 +804,14 @@ const handleFileSelect = async (event: Event) => {
 };
 
 // 设置编辑模式
-const setMode = (mode: 'unit' | 'wall' | 'door' | 'frontObj' | 'select') => {
+const setMode = (mode: 'unit' | 'wall' | 'door' | 'frontObj' | 'areaSelect' | 'select') => {
     // 取消当前绘制
     if (currentMode.value === 'wall' || currentMode.value === 'door') {
         cancelDrawing();
+    }
+    // 取消区域选择
+    if (currentMode.value === 'areaSelect') {
+        cancelAreaSelect();
     }
     currentMode.value = mode;
 
@@ -929,6 +1003,32 @@ const updatePreview = async (x: number, y: number) => {
                 previewGraphics.fill({ color: 0xffff00 });
             });
         }
+    } else if (currentMode.value === 'areaSelect') {
+        // 显示区域选择预览
+        if (areaSelectPoints.value.length > 0) {
+            // 绘制从最后一个点到鼠标位置的线
+            const lastPoint = areaSelectPoints.value[areaSelectPoints.value.length - 1];
+            previewGraphics.moveTo(lastPoint.x, lastPoint.y);
+            previewGraphics.lineTo(x, y);
+            previewGraphics.stroke({ color: 0xff00ff, width: 2, alpha: 0.6 });
+
+            // 绘制已有的线和点
+            if (areaSelectPoints.value.length > 1) {
+                for (let i = 0; i < areaSelectPoints.value.length; i++) {
+                    const p1 = areaSelectPoints.value[i];
+                    const p2 = areaSelectPoints.value[(i + 1) % areaSelectPoints.value.length];
+                    previewGraphics.moveTo(p1.x, p1.y);
+                    previewGraphics.lineTo(p2.x, p2.y);
+                    previewGraphics.stroke({ color: 0xff00ff, width: 2, alpha: 0.8 });
+                }
+            }
+
+            // 绘制所有点
+            areaSelectPoints.value.forEach(point => {
+                previewGraphics.circle(point.x, point.y, 5);
+                previewGraphics.fill({ color: 0xff00ff });
+            });
+        }
     }
 };
 
@@ -942,6 +1042,8 @@ const handlePointerDown = (event: PIXI.FederatedPointerEvent) => {
         addDrawingPoint(pos.x, pos.y);
     } else if (currentMode.value === 'frontObj') {
         placeFrontObj(pos.x, pos.y);
+    } else if (currentMode.value === 'areaSelect') {
+        addAreaSelectPoint(pos.x, pos.y);
     } else if (currentMode.value === 'select') {
         const hitContainer = selectObject(pos.x, pos.y);
         if (hitContainer) {
@@ -1142,6 +1244,271 @@ const finishDrawing = () => {
 const cancelDrawing = () => {
     drawingPoints.value = [];
     previewGraphics.clear();
+};
+
+// 区域选择相关函数
+// 添加区域选择点
+const addAreaSelectPoint = (x: number, y: number) => {
+    areaSelectPoints.value.push({ x, y });
+};
+
+// 完成区域选择
+const finishAreaSelect = () => {
+    if (areaSelectPoints.value.length < 3) {
+        alert('至少需要3个点才能完成区域选择');
+        return;
+    }
+    // 创建区域选择的可视化
+    if (!areaSelectGraphics.value) {
+        const graphics = new PIXI.Graphics();
+        areaSelectGraphics.value = graphics as any;
+        objectsContainer.addChild(graphics as any);
+    }
+
+    const graphics = areaSelectGraphics.value as any;
+    graphics.clear();
+
+    // 绘制多边形填充
+    graphics.moveTo(areaSelectPoints.value[0].x, areaSelectPoints.value[0].y);
+    for (let i = 1; i < areaSelectPoints.value.length; i++) {
+        graphics.lineTo(areaSelectPoints.value[i].x, areaSelectPoints.value[i].y);
+    }
+    graphics.closePath();
+    graphics.fill({ color: 0xff00ff, alpha: 0.2 });
+    graphics.stroke({ color: 0xff00ff, width: 2 });
+};
+
+// 取消区域选择
+const cancelAreaSelect = () => {
+    areaSelectPoints.value = [];
+    if (areaSelectGraphics.value) {
+        areaSelectGraphics.value.clear();
+    }
+    previewGraphics.clear();
+};
+
+// 判断点是否在多边形内（使用射线法）
+const isPointInPolygon = (x: number, y: number, polygon: { x: number, y: number }[]): boolean => {
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const xi = polygon[i].x, yi = polygon[i].y;
+        const xj = polygon[j].x, yj = polygon[j].y;
+
+        const intersect = ((yi > y) !== (yj > y)) &&
+            (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+    }
+    return inside;
+};
+
+// 获取多边形的边界框
+const getPolygonBounds = (polygon: { x: number, y: number }[]) => {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const p of polygon) {
+        minX = Math.min(minX, p.x);
+        minY = Math.min(minY, p.y);
+        maxX = Math.max(maxX, p.x);
+        maxY = Math.max(maxY, p.y);
+    }
+    return { minX, minY, maxX, maxY };
+};
+
+// 检查矩形是否完全在多边形内
+const isRectangleInPolygon = (rectX: number, rectY: number, rectWidth: number, rectHeight: number, polygon: { x: number, y: number }[]): boolean => {
+    // 采样精度：边缘采样点数
+    const sampleSteps = Math.max(Math.floor(Math.max(rectWidth, rectHeight) / 10), 4);
+
+    // 检查矩形的四个角
+    const corners = [
+        { x: rectX, y: rectY },
+        { x: rectX + rectWidth, y: rectY },
+        { x: rectX, y: rectY + rectHeight },
+        { x: rectX + rectWidth, y: rectY + rectHeight }
+    ];
+
+    for (const corner of corners) {
+        if (!isPointInPolygon(corner.x, corner.y, polygon)) {
+            return false;
+        }
+    }
+
+    // 检查矩形边缘上的采样点
+    // 上边缘
+    for (let i = 1; i < sampleSteps; i++) {
+        const x = rectX + (rectWidth * i) / sampleSteps;
+        const y = rectY;
+        if (!isPointInPolygon(x, y, polygon)) return false;
+    }
+
+    // 下边缘
+    for (let i = 1; i < sampleSteps; i++) {
+        const x = rectX + (rectWidth * i) / sampleSteps;
+        const y = rectY + rectHeight;
+        if (!isPointInPolygon(x, y, polygon)) return false;
+    }
+
+    // 左边缘
+    for (let i = 1; i < sampleSteps; i++) {
+        const x = rectX;
+        const y = rectY + (rectHeight * i) / sampleSteps;
+        if (!isPointInPolygon(x, y, polygon)) return false;
+    }
+
+    // 右边缘
+    for (let i = 1; i < sampleSteps; i++) {
+        const x = rectX + rectWidth;
+        const y = rectY + (rectHeight * i) / sampleSteps;
+        if (!isPointInPolygon(x, y, polygon)) return false;
+    }
+
+    // 检查中心点
+    const centerX = rectX + rectWidth / 2;
+    const centerY = rectY + rectHeight / 2;
+    if (!isPointInPolygon(centerX, centerY, polygon)) return false;
+
+    return true;
+};
+
+// 随机填充区域
+const randomFillArea = () => {
+    if (areaSelectPoints.value.length < 3) {
+        alert('请先完成区域选择（至少3个点）');
+        return;
+    }
+
+    if (selectedFrontObjIndex.value === -1 || !frontObjTemplates.value[selectedFrontObjIndex.value]) {
+        alert('请先在前景物模式中选择一个前景物');
+        return;
+    }
+
+    const template = frontObjTemplates.value[selectedFrontObjIndex.value];
+    const bounds = getPolygonBounds(areaSelectPoints.value);
+    const gridXStart = Math.floor(bounds.minX / gridSize);
+    const gridYStart = Math.floor(bounds.minY / gridSize);
+    const gridXEnd = Math.ceil(bounds.maxX / gridSize);
+    const gridYEnd = Math.ceil(bounds.maxY / gridSize);
+
+    // 计算可能的放置点数量
+    const totalPositions = (gridXEnd - gridXStart) * (gridYEnd - gridYStart);
+    const density = Math.max(1, Math.min(50, randomFillDensity.value));
+    const placeCount = Math.floor(totalPositions * density / 100);
+
+    if (placeCount === 0) {
+        alert('密度太低，请增加填充密度');
+        return;
+    }
+
+    // 收集所有可能的放置位置
+    const candidates: { x: number, y: number }[] = [];
+
+    if (alignToGrid.value) {
+        // 模式1：对齐网格中心点
+        for (let gx = gridXStart; gx < gridXEnd; gx++) {
+            for (let gy = gridYStart; gy < gridYEnd; gy++) {
+                const centerX = gx * gridSize + gridSize / 2;
+                const centerY = gy * gridSize + gridSize / 2;
+                const posX = centerX - template.width / 2;
+                const posY = centerY - template.height / 2;
+
+                // 根据填充模式检查是否可以放置
+                let canPlace = false;
+                if (fillMode.value === 1) {
+                    // 模式1：锚点在选区内（内容可超出边界）
+                    canPlace = isPointInPolygon(centerX, centerY, areaSelectPoints.value);
+                } else {
+                    // 模式2：整体在选区内（内容不可超出）
+                    canPlace = isRectangleInPolygon(posX, posY, template.width, template.height, areaSelectPoints.value);
+                }
+
+                if (canPlace) {
+                    candidates.push({ x: posX, y: posY });
+                }
+            }
+        }
+    } else {
+        // 模式2：完全随机放置
+        // 尝试生成足够多的随机点，最多尝试placeCount * 10次
+        const maxAttempts = placeCount * 10;
+        let attempts = 0;
+        let foundCount = 0;
+
+        while (foundCount < placeCount && attempts < maxAttempts) {
+            attempts++;
+
+            // 在边界框内生成随机点
+            const randomX = bounds.minX + Math.random() * (bounds.maxX - bounds.minX);
+            const randomY = bounds.minY + Math.random() * (bounds.maxY - bounds.minY);
+            const posX = randomX - template.width / 2;
+            const posY = randomY - template.height / 2;
+
+            // 根据填充模式检查是否可以放置
+            let canPlace = false;
+            if (fillMode.value === 1) {
+                // 模式1：锚点在选区内（内容可超出边界）
+                canPlace = isPointInPolygon(randomX, randomY, areaSelectPoints.value);
+            } else {
+                // 模式2：整体在选区内（内容不可超出）
+                canPlace = isRectangleInPolygon(posX, posY, template.width, template.height, areaSelectPoints.value);
+            }
+
+            if (canPlace) {
+                // 检查是否与已有候选点太近（避免重叠）
+                let tooClose = false;
+                for (const existing of candidates) {
+                    const dist = Math.sqrt(Math.pow(posX - existing.x, 2) + Math.pow(posY - existing.y, 2));
+                    if (dist < Math.min(template.width, template.height) * 0.8) {
+                        tooClose = true;
+                        break;
+                    }
+                }
+
+                if (!tooClose) {
+                    candidates.push({ x: posX, y: posY });
+                    foundCount++;
+                }
+            }
+        }
+    }
+
+    if (candidates.length === 0) {
+        alert('区域内没有可放置的位置');
+        return;
+    }
+
+    // 随机选择位置放置
+    const actualPlaceCount = Math.min(placeCount, candidates.length);
+    const shuffled = candidates.sort(() => Math.random() - 0.5);
+    const selectedPositions = shuffled.slice(0, actualPlaceCount);
+
+    // 放置前景物
+    for (const pos of selectedPositions) {
+        const obj = {
+            id: nextObjectId++,
+            x: pos.x,
+            y: pos.y,
+            width: template.width,
+            height: template.height,
+            name: template.name,
+            type: 'frontObj',
+            visible: true,
+            rotation: 0,
+            properties: [
+                {
+                    name: 'frontObjName',
+                    type: 'string',
+                    value: template.name
+                }
+            ]
+        };
+
+        frontObjObjects.value.push(obj);
+        createFrontObjVisual(obj, template);
+    }
+
+    saveHistory();
+    const modeText = fillMode.value === 1 ? '模式1（锚点不超边界）' : '模式2（整体不超边界）';
+    const gridText = alignToGrid.value ? '网格对齐' : '完全随机';
+    alert(`已使用${modeText} + ${gridText}放置 ${selectedPositions.length} 个前景物`);
 };
 
 // 计算点到线段的最短距离
@@ -2243,6 +2610,7 @@ const getModeText = () => {
         wall: '绘制墙体',
         door: '绘制门',
         frontObj: '放置前景物',
+        areaSelect: '区域选择',
         select: '选择/删除'
     };
     return modeMap[currentMode.value];
