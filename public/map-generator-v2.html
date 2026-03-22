@@ -1,0 +1,3881 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>森林地图生成器 - 规则版</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #4ecca3;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .controls {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 350px;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .output {
+            flex: 1;
+            min-width: 700px;
+        }
+        .map-output {
+            background: #0f3460;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            min-height: 500px;
+        }
+        .map-row {
+            white-space: nowrap;
+            font-family: Consolas, Monaco, "Courier New", monospace;
+            font-size: 16px;
+            line-height: 1.6;
+            letter-spacing: 4px;
+            font-weight: bold;
+        }
+        .map-row span {
+            display: inline-block;
+            min-width: 1ch;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        .control-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #2a3f5f;
+        }
+        .control-section:last-child {
+            border-bottom: none;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #4ecca3;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .control-group {
+            margin-bottom: 12px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #bbb;
+            font-size: 13px;
+        }
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        input[type="range"] {
+            flex: 1;
+            cursor: pointer;
+        }
+        input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            background: #1a1a2e;
+            border: 1px solid #4ecca3;
+            color: #eee;
+            border-radius: 5px;
+            text-align: center;
+        }
+        input[type="checkbox"] {
+            width: auto;
+            cursor: pointer;
+        }
+        .value-display {
+            color: #4ecca3;
+            font-size: 12px;
+            min-width: 45px;
+            text-align: right;
+        }
+        button {
+            background: #4ecca3;
+            color: #1a1a2e;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #45b393;
+        }
+        .button-secondary {
+            background: #e74c3c;
+            margin-top: 5px;
+        }
+        .button-secondary:hover {
+            background: #c0392b;
+        }
+        .button-tertiary {
+            background: #3498db;
+        }
+        .button-tertiary:hover {
+            background: #2980b9;
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background: #0f3460;
+            border-radius: 10px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-box {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .rules-summary {
+            background: #1a3a5c;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+        .rules-summary h4 {
+            color: #4ecca3;
+            margin-bottom: 10px;
+        }
+        .rules-summary ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .rules-summary li {
+            margin-bottom: 5px;
+            color: #bbb;
+        }
+        select {
+            background: #1a1a2e;
+            border: 1px solid #4ecca3;
+            color: #eee;
+            padding: 5px;
+            border-radius: 5px;
+            width: 100%;
+            cursor: pointer;
+        }
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .preset-btn {
+            background: #2a3f5f;
+            border: 1px solid #4ecca3;
+            color: #eee;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        .preset-btn:hover {
+            background: #3a5f8f;
+        }
+
+        /* 图片转换部分样式 */
+        .image-converter {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .image-converter h3 {
+            margin: 0 0 15px 0;
+            color: #4ecca3;
+        }
+        .asset-upload {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .upload-section h4 {
+            margin: 0 0 10px 0;
+        }
+        .upload-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        .upload-item {
+            background: #0f3460;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .upload-item label {
+            display: block;
+            font-size: 12px;
+            color: #4ecca3;
+            margin-bottom: 8px;
+        }
+        .upload-item input[type="file"] {
+            width: 100%;
+            font-size: 11px;
+            color: #888;
+        }
+        .asset-preview {
+            width: 100%;
+            height: 80px;
+            background: #1a1a2e;
+            border: 2px dashed #4ecca3;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .asset-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .asset-preview .placeholder {
+            color: #888;
+            font-size: 11px;
+            text-align: center;
+        }
+        .settings-section {
+            background: #0f3460;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .settings-section h4 {
+            margin: 0 0 15px 0;
+        }
+        .setting-item {
+            margin-bottom: 15px;
+        }
+        .setting-item:last-child {
+            margin-bottom: 0;
+        }
+        .setting-item label {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        .converter-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .btn-generate {
+            background: #27ae60;
+            flex: 1;
+        }
+        .btn-generate:hover {
+            background: #219a52;
+        }
+        .btn-download {
+            background: #3498db;
+            flex: 1;
+        }
+        .btn-download:hover {
+            background: #2980b9;
+        }
+        @media (max-width: 1200px) {
+            .asset-upload {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 素材映射显示样式 */
+        .asset-mapping-display {
+            background: #0f3460;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 11px;
+        }
+        .mapping-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+            color: #bbb;
+        }
+        .mapping-item:last-child {
+            margin-bottom: 0;
+        }
+        .mapping-label {
+            font-weight: bold;
+            color: #4ecca3;
+            min-width: 60px;
+        }
+        .mapping-position {
+            background: #1a1a2e;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        /* 边缘预览样式 */
+        .edge-cell {
+            background: #1a1a2e;
+            border: 2px solid #4ecca3;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .edge-cell:hover {
+            background: #2a3f5f;
+            transform: scale(1.05);
+        }
+        .edge-cell.center {
+            background: #4ecca3;
+            border-color: #27ae60;
+        }
+        .edge-cell.center:hover {
+            background: #45b393;
+        }
+        .edge-cell-preview {
+            width: 48px;
+            height: 48px;
+            border: 1px solid #4ecca3;
+            border-radius: 3px;
+            margin: 5px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0f3460;
+        }
+        .edge-cell-preview img {
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+        }
+        .edge-cell-label {
+            font-size: 10px;
+            color: #bbb;
+            margin-top: 5px;
+        }
+        .edge-cell-tile-id {
+            font-size: 11px;
+            color: #4ecca3;
+            font-weight: bold;
+        }
+        .edge-direction-label {
+            font-size: 9px;
+            color: #888;
+            margin-top: 2px;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>🌲 森林地图生成器 - 规则配置版 🌲</h1>
+    <p class="subtitle">完全可控的地形生成规则系统</p>
+
+    <div class="container">
+        <div class="controls">
+            <!-- 基础设置 -->
+            <div class="control-section">
+                <div class="section-title">📐 基础设置</div>
+
+                <div class="control-group">
+                    <label>地图宽度: <span id="widthValue" class="value-display">60</span></label>
+                    <div class="control-row">
+                        <input type="range" id="mapWidth" min="20" max="100" value="60" oninput="updateValue('width')">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>地图高度: <span id="heightValue" class="value-display">40</span></label>
+                    <div class="control-row">
+                        <input type="range" id="mapHeight" min="20" max="80" value="40" oninput="updateValue('height')">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>随机种子: <span id="seedValue" class="value-display">12345</span></label>
+                    <div class="control-row">
+                        <input type="range" id="seed" min="1" max="99999" value="12345" oninput="updateValue('seed')">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>地形平滑度: <span id="scaleValue" class="value-display">30</span></label>
+                    <div class="control-row">
+                        <input type="range" id="noiseScale" min="10" max="100" value="30" oninput="updateValue('scale')">
+                    </div>
+                    <small style="color: #888;">数值越大，地形越平滑连续</small>
+                </div>
+            </div>
+
+            <!-- 树林规则 -->
+            <div class="control-section">
+                <div class="section-title">🌲 树林生成规则</div>
+
+                <div class="control-group">
+                    <label>基础树林覆盖率: <span id="forestCoverValue" class="value-display">35%</span></label>
+                    <div class="control-row">
+                        <input type="range" id="forestCover" min="0" max="80" value="35" oninput="updateValue('forestCover')">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>树林斑块数量: <span id="forestPatchesValue" class="value-display">8</span></label>
+                    <div class="control-row">
+                        <input type="range" id="forestPatches" min="0" max="20" value="8" oninput="updateValue('forestPatches')">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>树林避开河边距离: <span id="forestRiverBufferValue" class="value-display">2</span></label>
+                    <div class="control-row">
+                        <input type="range" id="forestRiverBuffer" min="0" max="5" value="2" oninput="updateValue('forestRiverBuffer')">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="forestAvoidRoads" checked>
+                        树林避开道路
+                    </label>
+                </div>
+
+                <div class="control-group">
+                    <label>树林分布模式</label>
+                    <select id="forestDistribution">
+                        <option value="clustered">聚集分布（成片树林）</option>
+                        <option value="scattered">分散分布（零散树木）</option>
+                        <option value="random">随机分布</option>
+                        <option value="perimeter">边缘分布（围绕地图边缘）</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 河流规则 -->
+            <div class="control-section">
+                <div class="section-title">🌊 河流生成规则</div>
+
+                <div class="control-group">
+                    <label>河流数量: <span id="riverCountValue" class="value-display">1</span></label>
+                    <div class="control-row">
+                        <input type="range" id="riverCount" min="0" max="5" value="1" oninput="updateValue('riverCount')">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>河流宽度</label>
+                    <select id="riverWidth">
+                        <option value="1">狭窄（1格）</option>
+                        <option value="2" selected>标准（1-2格）</option>
+                        <option value="3">宽阔（2-3格）</option>
+                        <option value="4">宽阔（2-4格）</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>河流弯曲度: <span id="riverCurvatureValue" class="value-display">50%</span></label>
+                    <div class="control-row">
+                        <input type="range" id="riverCurvature" min="0" max="100" value="50" oninput="updateValue('riverCurvature')">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="riverBranching">
+                        允许河流分支
+                    </label>
+                </div>
+
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="riverCrossMap" checked>
+                        河流必须穿过整个地图
+                    </label>
+                </div>
+            </div>
+
+            <!-- 道路规则 -->
+            <div class="control-section">
+                <div class="section-title">🛤️ 道路生成规则</div>
+
+                <div class="control-group">
+                    <label>道路数量: <span id="roadCountValue" class="value-display">2</span></label>
+                    <div class="control-row">
+                        <input type="range" id="roadCount" min="0" max="5" value="2" oninput="updateValue('roadCount')">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>道路类型</label>
+                    <select id="roadType">
+                        <option value="cross">穿越道路（连接对边）</option>
+                        <option value="random">随机道路（任意连接）</option>
+                        <option value="network">网络道路（网格状）</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>道路弯曲度: <span id="roadCurvatureValue" class="value-display">30%</span></label>
+                    <div class="control-row">
+                        <input type="range" id="roadCurvature" min="0" max="100" value="30" oninput="updateValue('roadCurvature')">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="roadCrossRiver">
+                        道路可以跨河（自动建桥）
+                    </label>
+                </div>
+
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="roadAvoidForest" checked>
+                        道路优先避开树林
+                    </label>
+                </div>
+            </div>
+
+            <!-- 岩石规则 -->
+            <div class="control-section">
+                <div class="section-title">🪨 岩石生成规则</div>
+
+                <div class="control-group">
+                    <label>岩石密度: <span id="rockDensityValue" class="value-display">2%</span></label>
+                    <div class="control-row">
+                        <input type="range" id="rockDensity" min="0" max="10" value="2" oninput="updateValue('rockDensity')">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>岩石分布模式</label>
+                    <select id="rockDistribution">
+                        <option value="scattered">分散（单个岩石）</option>
+                        <option value="clustered">聚集（岩石群）</option>
+                        <option value="mixed" selected>混合（既有分散也有聚集）</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="rockAvoidPathways" checked>
+                        岩石避开道路和河流
+                    </label>
+                </div>
+            </div>
+
+            <!-- 高坡规则 -->
+            <div class="control-section">
+                <div class="section-title">⛰️ 高坡生成规则</div>
+
+                <div class="control-group">
+                    <label>高坡密度: <span id="hillDensityValue" class="value-display">3%</span></label>
+                    <div class="control-row">
+                        <input type="range" id="hillDensity" min="0" max="10" value="3" oninput="updateValue('hillDensity')">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>高坡最小半径: <span id="hillMinRadiusValue" class="value-display">2</span></label>
+                    <div class="control-row">
+                        <input type="range" id="hillMinRadius" min="1" max="5" value="2" oninput="updateValue('hillMinRadius')">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>高坡最大半径: <span id="hillMaxRadiusValue" class="value-display">6</span></label>
+                    <div class="control-row">
+                        <input type="range" id="hillMaxRadius" min="3" max="10" value="6" oninput="updateValue('hillMaxRadius')">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="hillAvoidPathways" checked>
+                        高坡避开道路和河流
+                    </label>
+                </div>
+            </div>
+
+            <!-- 预设 -->
+            <div class="control-section">
+                <div class="section-title">⚡ 快速预设</div>
+                <div class="preset-buttons">
+                    <button class="preset-btn" onclick="applyPreset('plains')">平原</button>
+                    <button class="preset-btn" onclick="applyPreset('forest')">密林</button>
+                    <button class="preset-btn" onclick="applyPreset('mountains')">山地</button>
+                    <button class="preset-btn" onclick="applyPreset('swamp')">湿地</button>
+                    <button class="preset-btn" onclick="applyPreset('crossing')">交叉口</button>
+                    <button class="preset-btn" onclick="applyPreset('isolated')">孤立</button>
+                </div>
+            </div>
+
+            <button onclick="generateMap()">🎲 生成地图</button>
+            <button class="button-tertiary" onclick="importAndGenerateMap()">📥 导入地图矩阵</button>
+            <button class="button-secondary" onclick="copyMap()">📋 复制紧凑格式</button>
+            <button class="button-tertiary" onclick="exportConfig()">💾 导出配置</button>
+
+            <div class="rules-summary">
+                <h4>📋 当前规则摘要</h4>
+                <ul id="rulesSummary"></ul>
+            </div>
+        </div>
+
+        <div class="output">
+            <div class="map-output">
+                <div id="mapOutput">点击"生成地图"开始...</div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #90EE90; color: #000;">A</div>
+                    <span>草地</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #8B4513;">B</div>
+                    <span>道路</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #4169E1;">C</div>
+                    <span>河流</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #808080;">D</div>
+                    <span>岩石</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #DEB887;">E</div>
+                    <span>高坡</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #228B22;">F</div>
+                    <span>密林</span>
+                </div>
+            </div>
+
+            <!-- 图片转换部分 -->
+            <div class="image-converter">
+                <h3 style="color: #4ecca3; margin-bottom: 15px;">🎨 转换为图片地图</h3>
+
+                <!-- 手动图块配置 -->
+                <div style="background: #1a3a5c; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="color: #4ecca3; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+                        🎮 地形图块配置
+                        <span id="autoExtractStatus" style="font-size: 12px; color: #888;"></span>
+                    </h4>
+                    <p style="color: #bbb; font-size: 12px; margin: 0 0 15px 0;">
+                        点击下方图集中的图块来为每个地形类型选择对应的地形，或直接输入图块ID
+                    </p>
+
+                    <!-- 图集选择器 -->
+                    <div style="background: #0f3460; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                        <label style="color: #4ecca3; font-size: 12px; display: block; margin-bottom: 5px;">
+                            📐 地形图集选择器: ground_grasss.png
+                        </label>
+                        <div style="font-size: 10px; color: #888; margin-bottom: 8px;">
+                            点击图块选择 | 当前编辑: <span id="currentEditingTerrain" style="color: #4ecca3; font-weight: bold;">草地 (A)</span>
+                        </div>
+                        <div id="tileSelectorContainer" style="background: #1a1a2e; padding: 10px; border-radius: 5px;
+                                                      overflow-x: auto; display: flex; justify-content: center;">
+                            <canvas id="tileSelectorCanvas" style="border: 2px solid #4ecca3; border-radius: 3px;
+                                                                     cursor: crosshair; image-rendering: pixelated;"></canvas>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                            <span id="spriteSheetStatus0" style="color: #888; font-size: 10px;">加载中...</span>
+                            <div id="tilesetInfo" style="font-size: 10px; color: #888;">
+                                图集配置未设置
+                            </div>
+                        </div>
+                        <!-- 选中图块信息 -->
+                        <div id="selectedTileInfo" style="margin-top: 10px; padding: 8px; background: #1a1a2e; border-radius: 3px;
+                                                          display: none; font-size: 11px;">
+                            <span style="color: #4ecca3;">已选中图块:</span>
+                            <span id="selectedTileId" style="color: #eee;">-</span>
+                            <span style="color: #888;">|</span>
+                            <span id="selectedTilePos" style="color: #eee;">-</span>
+                        </div>
+                    </div>
+
+                    <!-- 瓦片配置 -->
+                    <div style="background: #0f3460; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+                        <h5 style="color: #4ecca3; margin: 0 0 12px 0; font-size: 13px;">🔧 瓦片配置</h5>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+
+                            <!-- 瓦片宽度 -->
+                            <div>
+                                <label style="color: #bbb; font-size: 11px; display: block; margin-bottom: 5px;">
+                                    瓦片宽度 (像素)
+                                </label>
+                                <input type="number" id="tileWidth" min="8" max="128" value="16"
+                                       style="width: 100%; padding: 5px; background: #1a1a2e; border: 1px solid #4ecca3;
+                                              color: #eee; border-radius: 3px; text-align: center;">
+                            </div>
+
+                            <!-- 瓦片高度 -->
+                            <div>
+                                <label style="color: #bbb; font-size: 11px; display: block; margin-bottom: 5px;">
+                                    瓦片高度 (像素)
+                                </label>
+                                <input type="number" id="tileHeight" min="8" max="128" value="16"
+                                       style="width: 100%; padding: 5px; background: #1a1a2e; border: 1px solid #4ecca3;
+                                              color: #eee; border-radius: 3px; text-align: center;">
+                            </div>
+
+                            <!-- 列数 -->
+                            <div>
+                                <label style="color: #bbb; font-size: 11px; display: block; margin-bottom: 5px;">
+                                    列数
+                                </label>
+                                <input type="number" id="tileColumns" min="1" max="64" value="24"
+                                       style="width: 100%; padding: 5px; background: #1a1a2e; border: 1px solid #4ecca3;
+                                              color: #eee; border-radius: 3px; text-align: center;">
+                            </div>
+
+                        </div>
+
+                        <div style="margin-top: 12px; display: flex; gap: 10px;">
+                            <button onclick="applyTilesetConfig()" style="flex: 1; background: #3498db; font-size: 11px;
+                                    padding: 8px; border-radius: 5px; border: none; color: white; cursor: pointer;">
+                                ✅ 应用配置
+                            </button>
+                            <button onclick="resetTilesetConfig()" style="flex: 1; background: #e74c3c; font-size: 11px;
+                                    padding: 8px; border-radius: 5px; border: none; color: white; cursor: pointer;">
+                                🔄 重置
+                            </button>
+                        </div>
+
+                        <div style="margin-top: 8px; font-size: 10px; color: #888;">
+                            提示: 修改瓦片配置后需要点击"应用配置"，图块选择器会自动更新
+                        </div>
+                    </div>
+
+                    <!-- 图块配置表 -->
+                    <div style="background: #0f3460; padding: 15px; border-radius: 5px;">
+                        <h5 style="color: #4ecca3; margin: 0 0 12px 0; font-size: 13px;">基础图块配置</h5>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+
+                            <!-- 草地 -->
+                            <div style="background: #1a1a2e; padding: 10px; border-radius: 5px;">
+                                <label style="color: #90EE90; font-size: 12px; display: block; margin-bottom: 5px;">
+                                    🌿 草地 (A)
+                                </label>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <input type="number" id="tileId_A" min="0" max="48" value="15"
+                                           style="width: 50px; padding: 5px; background: #0f3460; border: 1px solid #4ecca3;
+                                                  color: #eee; border-radius: 3px; text-align: center;">
+                                    <button onclick="startTileSelection('A')" style="padding: 5px 10px; font-size: 11px;
+                                            background: #9b59b6; border-radius: 3px; border: none; color: white; cursor: pointer;"
+                                            title="从图集中选择">
+                                        🖼️ 选择
+                                    </button>
+                                    <button onclick="showEdgePreview('A')" style="padding: 5px 10px; font-size: 11px;
+                                            background: #e67e22; border-radius: 3px; border: none; color: white; cursor: pointer;"
+                                            title="查看边缘预览">
+                                        🔲 边缘
+                                    </button>
+                                    <div id="preview_A" style="width: 32px; height: 32px; border: 1px solid #4ecca3;
+                                                           border-radius: 3px; display: flex; align-items: center;
+                                                           justify-content: center; background: #1a1a2e;">
+                                        <span style="font-size: 9px; color: #888;">预览</span>
+                                    </div>
+                                </div>
+                                <div style="font-size: 9px; color: #888; margin-top: 5px;">推荐: ID 15 (单块草皮)</div>
+                            </div>
+
+                            <!-- 道路 -->
+                            <div style="background: #1a1a2e; padding: 10px; border-radius: 5px;">
+                                <label style="color: #8B4513; font-size: 12px; display: block; margin-bottom: 5px;">
+                                    🛤️ 道路 (B)
+                                </label>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <input type="number" id="tileId_B" min="0" max="48" value="6"
+                                           style="width: 50px; padding: 5px; background: #0f3460; border: 1px solid #4ecca3;
+                                                  color: #eee; border-radius: 3px; text-align: center;">
+                                    <button onclick="startTileSelection('B')" style="padding: 5px 10px; font-size: 11px;
+                                            background: #9b59b6; border-radius: 3px; border: none; color: white; cursor: pointer;"
+                                            title="从图集中选择">
+                                        🖼️ 选择
+                                    </button>
+                                    <button onclick="showEdgePreview('B')" style="padding: 5px 10px; font-size: 11px;
+                                            background: #e67e22; border-radius: 3px; border: none; color: white; cursor: pointer;"
+                                            title="查看边缘预览">
+                                        🔲 边缘
+                                    </button>
+                                    <div id="preview_B" style="width: 32px; height: 32px; border: 1px solid #4ecca3;
+                                                           border-radius: 3px; display: flex; align-items: center;
+                                                           justify-content: center; background: #1a1a2e;">
+                                        <span style="font-size: 9px; color: #888;">预览</span>
+                                    </div>
+                                </div>
+                                <div style="font-size: 9px; color: #888; margin-top: 5px;">推荐: ID 6 (顶部泥土)</div>
+                            </div>
+
+                            <!-- 河流 -->
+                            <div style="background: #1a1a2e; padding: 10px; border-radius: 5px;">
+                                <label style="color: #4169E1; font-size: 12px; display: block; margin-bottom: 5px;">
+                                    🌊 河流 (C)
+                                </label>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <input type="number" id="tileId_C" min="0" max="48" value="30"
+                                           style="width: 50px; padding: 5px; background: #0f3460; border: 1px solid #4ecca3;
+                                                  color: #eee; border-radius: 3px; text-align: center;">
+                                    <button onclick="startTileSelection('C')" style="padding: 5px 10px; font-size: 11px;
+                                            background: #9b59b6; border-radius: 3px; border: none; color: white; cursor: pointer;"
+                                            title="从图集中选择">
+                                        🖼️ 选择
+                                    </button>
+                                    <button onclick="showEdgePreview('C')" style="padding: 5px 10px; font-size: 11px;
+                                            background: #e67e22; border-radius: 3px; border: none; color: white; cursor: pointer;"
+                                            title="查看边缘预览">
+                                        🔲 边缘
+                                    </button>
+                                    <div id="preview_C" style="width: 32px; height: 32px; border: 1px solid #4ecca3;
+                                                           border-radius: 3px; display: flex; align-items: center;
+                                                           justify-content: center; background: #1a1a2e;">
+                                        <span style="font-size: 9px; color: #888;">预览</span>
+                                    </div>
+                                </div>
+                                <div style="font-size: 9px; color: #888; margin-top: 5px;">推荐: ID 30 (带孔洞泥土)</div>
+                            </div>
+
+                            <!-- 高坡 -->
+                            <div style="background: #1a1a2e; padding: 10px; border-radius: 5px;">
+                                <label style="color: #DEB887; font-size: 12px; display: block; margin-bottom: 5px;">
+                                    ⛰️ 高坡 (E)
+                                </label>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <input type="number" id="tileId_E" min="0" max="48" value="13"
+                                           style="width: 50px; padding: 5px; background: #0f3460; border: 1px solid #4ecca3;
+                                                  color: #eee; border-radius: 3px; text-align: center;">
+                                    <button onclick="startTileSelection('E')" style="padding: 5px 10px; font-size: 11px;
+                                            background: #9b59b6; border-radius: 3px; border: none; color: white; cursor: pointer;"
+                                            title="从图集中选择">
+                                        🖼️ 选择
+                                    </button>
+                                    <button onclick="showEdgePreview('E')" style="padding: 5px 10px; font-size: 11px;
+                                            background: #e67e22; border-radius: 3px; border: none; color: white; cursor: pointer;"
+                                            title="查看边缘预览">
+                                        🔲 边缘
+                                    </button>
+                                    <div id="preview_E" style="width: 32px; height: 32px; border: 1px solid #4ecca3;
+                                                           border-radius: 3px; display: flex; align-items: center;
+                                                           justify-content: center; background: #1a1a2e;">
+                                        <span style="font-size: 9px; color: #888;">预览</span>
+                                    </div>
+                                </div>
+                                <div style="font-size: 9px; color: #888; margin-top: 5px;">推荐: ID 13 (垂直悬崖)</div>
+                            </div>
+
+                            <!-- 密林 -->
+                            <div style="background: #1a1a2e; padding: 10px; border-radius: 5px;">
+                                <label style="color: #228B22; font-size: 12px; display: block; margin-bottom: 5px;">
+                                    🌲 密林 (F)
+                                </label>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <input type="number" id="tileId_F" min="0" max="48" value="0"
+                                           style="width: 50px; padding: 5px; background: #0f3460; border: 1px solid #4ecca3;
+                                                  color: #eee; border-radius: 3px; text-align: center;">
+                                    <button onclick="startTileSelection('F')" style="padding: 5px 10px; font-size: 11px;
+                                            background: #9b59b6; border-radius: 3px; border: none; color: white; cursor: pointer;"
+                                            title="从图集中选择">
+                                        🖼️ 选择
+                                    </button>
+                                    <button onclick="showEdgePreview('F')" style="padding: 5px 10px; font-size: 11px;
+                                            background: #e67e22; border-radius: 3px; border: none; color: white; cursor: pointer;"
+                                            title="查看边缘预览">
+                                        🔲 边缘
+                                    </button>
+                                    <div id="preview_F" style="width: 32px; height: 32px; border: 1px solid #4ecca3;
+                                                           border-radius: 3px; display: flex; align-items: center;
+                                                           justify-content: center; background: #1a1a2e;">
+                                        <span style="font-size: 9px; color: #888;">预览</span>
+                                    </div>
+                                </div>
+                                <div style="font-size: 9px; color: #888; margin-top: 5px;">推荐: ID 0 (草丛装饰)</div>
+                            </div>
+
+                        </div>
+
+                        <!-- 智能边缘选项 -->
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #2a3f5f;">
+                            <label style="color: #4ecca3; font-size: 12px; display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="useSmartEdges" checked style="width: auto;">
+                                启用智能边缘检测（根据周围地形自动选择变体图块）
+                            </label>
+                            <div style="font-size: 10px; color: #888; margin-top: 5px; margin-left: 20px;">
+                                启用后，草地、高坡等地形会根据相邻地块自动使用边缘、转角等变体图块
+                            </div>
+                        </div>
+
+                        <!-- 操作按钮 -->
+                        <div style="display: flex; gap: 10px; margin-top: 15px;">
+                            <button onclick="applyTileConfig()" style="flex: 1; background: #27ae60; font-size: 12px;
+                                    padding: 8px; border-radius: 5px; border: none; color: white; cursor: pointer;">
+                                ✅ 应用配置
+                            </button>
+                            <button onclick="saveTileConfig()" style="flex: 1; background: #e67e22; font-size: 12px;
+                                    padding: 8px; border-radius: 5px; border: none; color: white; cursor: pointer;">
+                                💾 保存配置
+                            </button>
+                            <button onclick="resetTileConfig()" style="flex: 1; background: #e74c3c; font-size: 12px;
+                                    padding: 8px; border-radius: 5px; border: none; color: white; cursor: pointer;">
+                                🔄 重置
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                    <!-- 当前素材映射显示 -->
+                    <div class="asset-mapping-display" id="mappingDisplay" style="display: none;">
+                        <strong style="color: #4ecca3; display: block; margin-bottom: 8px;">当前素材映射：</strong>
+                        <div id="mappingList"></div>
+                    </div>
+
+                    <!-- 自定义提取按钮 -->
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #2a3f5f;">
+                        <p style="color: #bbb; font-size: 12px; margin: 0 0 10px 0;">
+                            如果自动提取的素材不正确，可以手动指定每个地形的位置：
+                        </p>
+                        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-bottom: 10px;">
+                            <button onclick="showCustomExtractDialog('A')" style="padding: 5px; font-size: 11px; margin: 0;">草地</button>
+                            <button onclick="showCustomExtractDialog('B')" style="padding: 5px; font-size: 11px; margin: 0;">道路</button>
+                            <button onclick="showCustomExtractDialog('C')" style="padding: 5px; font-size: 11px; margin: 0;">河流</button>
+                            <button onclick="showCustomExtractDialog('D')" style="padding: 5px; font-size: 11px; margin: 0;">岩石</button>
+                            <button onclick="showCustomExtractDialog('E')" style="padding: 5px; font-size: 11px; margin: 0;">高坡</button>
+                            <button onclick="showCustomExtractDialog('F')" style="padding: 5px; font-size: 11px; margin: 0;">密林</button>
+                        </div>
+                        <button onclick="extractDefaultAssets()" style="background: #3498db; font-size: 12px; padding: 8px; margin-top: 5px;">
+                            🔄 重新提取素材
+                        </button>
+                    </div>
+                </div>
+
+                <div class="asset-upload">
+                    <div class="upload-section">
+                        <h4 style="color: #bbb; margin-bottom: 10px; font-size: 14px;">手动上传地形素材 (可选)</h4>
+                        <div class="upload-grid">
+                            <div class="upload-item">
+                                <label>草地 (A)</label>
+                                <input type="file" accept="image/*" onchange="loadAsset('A', this)">
+                                <div class="asset-preview" id="preview-A">
+                                    <span class="placeholder">未上传</span>
+                                </div>
+                            </div>
+                            <div class="upload-item">
+                                <label>道路 (B)</label>
+                                <input type="file" accept="image/*" onchange="loadAsset('B', this)">
+                                <div class="asset-preview" id="preview-B">
+                                    <span class="placeholder">未上传</span>
+                                </div>
+                            </div>
+                            <div class="upload-item">
+                                <label>河流 (C)</label>
+                                <input type="file" accept="image/*" onchange="loadAsset('C', this)">
+                                <div class="asset-preview" id="preview-C">
+                                    <span class="placeholder">未上传</span>
+                                </div>
+                            </div>
+                            <div class="upload-item">
+                                <label>岩石 (D)</label>
+                                <input type="file" accept="image/*" onchange="loadAsset('D', this)">
+                                <div class="asset-preview" id="preview-D">
+                                    <span class="placeholder">未上传</span>
+                                </div>
+                            </div>
+                            <div class="upload-item">
+                                <label>高坡 (E)</label>
+                                <input type="file" accept="image/*" onchange="loadAsset('E', this)">
+                                <div class="asset-preview" id="preview-E">
+                                    <span class="placeholder">未上传</span>
+                                </div>
+                            </div>
+                            <div class="upload-item">
+                                <label>密林 (F)</label>
+                                <input type="file" accept="image/*" onchange="loadAsset('F', this)">
+                                <div class="asset-preview" id="preview-F">
+                                    <span class="placeholder">未上传</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h4 style="color: #bbb; margin-bottom: 10px; font-size: 14px;">图片设置</h4>
+                        <div class="setting-item">
+                            <label>每个地块大小（像素）: <span id="tileSizeValue">32</span></label>
+                            <input type="range" id="tileSize" min="16" max="128" value="32" step="16" oninput="updateValue('tileSize')">
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="showGrid">
+                                显示网格线
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>网格颜色</label>
+                            <input type="color" id="gridColor" value="#000000">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 地图图片生成按钮 -->
+                <div style="margin-top: 20px;">
+                    <h4 style="color: #bbb; margin-bottom: 10px; font-size: 14px;">生成地图图片</h4>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <button onclick="generateMapImage()" class="btn-generate" style="padding: 12px 20px; font-size: 14px;">
+                            🎨 生成地图图片
+                        </button>
+                        <button onclick="downloadMapImage()" class="btn-download" style="padding: 12px 20px; font-size: 14px;">
+                            💾 下载地图图片
+                        </button>
+                    </div>
+                    <!-- 地图图片预览区域 -->
+                    <div id="mapImagePreview" style="display: none; background: #0f3460; padding: 15px; border-radius: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="color: #4ecca3; font-size: 13px; font-weight: bold;">地图预览</span>
+                            <span id="mapImageSize" style="color: #888; font-size: 11px;"></span>
+                        </div>
+                        <div id="mapImageContainer" style="overflow: auto; max-height: 400px; background: #1a1a2e; border-radius: 5px; padding: 10px;">
+                            <img id="mapImageResult" style="image-rendering: pixelated; max-width: 100%; display: block; margin: 0 auto;">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 边缘预览弹窗 -->
+    <div id="edgePreviewModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                                     background: rgba(0, 0, 0, 0.8); z-index: 10000; align-items: center; justify-content: center;">
+        <div style="background: #1a3a5c; padding: 25px; border-radius: 15px; max-width: 800px; max-height: 90vh; overflow-y: auto;
+                        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="color: #4ecca3; margin: 0; font-size: 20px;" id="edgePreviewTitle">边缘预览</h2>
+                <button onclick="closeEdgePreview()" style="background: #e74c3c; border: none; color: white; padding: 8px 15px;
+                        border-radius: 5px; cursor: pointer; font-size: 16px;">✕</button>
+            </div>
+
+            <p style="color: #bbb; font-size: 13px; margin-bottom: 15px;">
+                为不同边缘情况配置图块。中心块是当前地形，周围8个方向可以配置不同的图块。
+            </p>
+
+            <!-- 边缘配置网格 -->
+            <div style="background: #0f3460; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <div id="edgeConfigGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+                                                max-width: 400px; margin: 0 auto;">
+                    <!-- 动态生成 -->
+                </div>
+            </div>
+
+            <!-- 当前配置总结 -->
+            <div style="background: #0f3460; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                <h3 style="color: #4ecca3; margin: 0 0 10px 0; font-size: 14px;">当前边缘配置</h3>
+                <div id="edgeConfigSummary" style="font-size: 11px; color: #bbb; line-height: 1.8;">
+                    <!-- 动态生成 -->
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button onclick="applyEdgeConfig()" style="flex: 1; background: #27ae60; padding: 12px 20px; border-radius: 8px;
+                        border: none; color: white; font-size: 14px; cursor: pointer; font-weight: bold;">
+                    ✅ 应用配置
+                </button>
+                <button onclick="resetEdgeConfig()" style="flex: 1; background: #e74c3c; padding: 12px 20px; border-radius: 8px;
+                        border: none; color: white; font-size: 14px; cursor: pointer; font-weight: bold;">
+                    🔄 重置为基础图块
+                </button>
+            </div>
+
+            <div style="margin-top: 15px; font-size: 11px; color: #888; text-align: center;">
+                提示：点击任意边缘块可以从图集选择器中选择不同的图块
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 噪声类 ====================
+        class SimpleNoise {
+            constructor(seed) {
+                this.seed = seed;
+                this.permutation = this.generatePermutation();
+            }
+
+            generatePermutation() {
+                const p = [];
+                for (let i = 0; i < 256; i++) {
+                    p[i] = i;
+                }
+
+                let random = this.seededRandom(this.seed);
+                for (let i = 255; i > 0; i--) {
+                    const j = Math.floor(random() * (i + 1));
+                    [p[i], p[j]] = [p[j], p[i]];
+                }
+
+                return [...p, ...p];
+            }
+
+            seededRandom(seed) {
+                return function() {
+                    seed = (seed * 9301 + 49297) % 233280;
+                    return seed / 233280;
+                };
+            }
+
+            fade(t) {
+                return t * t * t * (t * (t * 6 - 15) + 10);
+            }
+
+            lerp(a, b, t) {
+                return a + t * (b - a);
+            }
+
+            grad(hash, x, y) {
+                const h = hash & 3;
+                const u = h < 2 ? x : y;
+                const v = h < 2 ? y : x;
+                return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
+            }
+
+            noise(x, y) {
+                const X = Math.floor(x) & 255;
+                const Y = Math.floor(y) & 255;
+
+                x -= Math.floor(x);
+                y -= Math.floor(y);
+
+                const u = this.fade(x);
+                const v = this.fade(y);
+
+                const p = this.permutation;
+                const A = p[X] + Y;
+                const B = p[X + 1] + Y;
+
+                return this.lerp(
+                    this.lerp(this.grad(p[A], x, y), this.grad(p[B], x - 1, y), u),
+                    this.lerp(this.grad(p[A + 1], x, y - 1), this.grad(p[B + 1], x - 1, y - 1), u),
+                    v
+                );
+            }
+
+            fbm(x, y, octaves = 4) {
+                let value = 0;
+                let amplitude = 1;
+                let frequency = 1;
+                let maxValue = 0;
+
+                for (let i = 0; i < octaves; i++) {
+                    value += amplitude * this.noise(x * frequency, y * frequency);
+                    maxValue += amplitude;
+                    amplitude *= 0.5;
+                    frequency *= 2;
+                }
+
+                return value / maxValue;
+            }
+        }
+
+        // ==================== 分层地图生成系统 ====================
+        // 新的生成逻辑：
+        // 1. 先生成一个充满地图的土地层（基础层）
+        // 2. 在土地层上生成草地，并根据周围地形自动使用边缘图块
+        // 3. 在上面再绘制其他图块（道路、河流、岩石、高坡、密林）
+
+        class LayeredMapGenerator {
+            constructor(width, height, seed, config = {}) {
+                this.width = width;
+                this.height = height;
+                this.seed = seed;
+                this.config = {
+                    // 基础设置
+                    noiseScale: config.noiseScale || 30,
+
+                    // 树林规则
+                    forestCover: (config.forestCover !== undefined ? config.forestCover : 35) / 100,
+                    forestPatches: config.forestPatches !== undefined ? config.forestPatches : 8,
+                    forestRiverBuffer: config.forestRiverBuffer !== undefined ? config.forestRiverBuffer : 2,
+                    forestAvoidRoads: config.forestAvoidRoads !== undefined ? config.forestAvoidRoads : true,
+                    forestDistribution: config.forestDistribution || 'clustered',
+
+                    // 河流规则
+                    riverCount: config.riverCount !== undefined ? config.riverCount : 1,
+                    riverWidth: config.riverWidth || '2',
+                    riverCurvature: (config.riverCurvature !== undefined ? config.riverCurvature : 50) / 100,
+                    riverBranching: config.riverBranching || false,
+                    riverCrossMap: config.riverCrossMap !== undefined ? config.riverCrossMap : true,
+
+                    // 道路规则
+                    roadCount: config.roadCount !== undefined ? config.roadCount : 2,
+                    roadType: config.roadType || 'cross',
+                    roadCurvature: (config.roadCurvature !== undefined ? config.roadCurvature : 30) / 100,
+                    roadCrossRiver: config.roadCrossRiver || false,
+                    roadAvoidForest: config.roadAvoidForest !== undefined ? config.roadAvoidForest : true,
+
+                    // 岩石规则
+                    rockDensity: (config.rockDensity !== undefined ? config.rockDensity : 2) / 100,
+                    rockDistribution: config.rockDistribution || 'mixed',
+                    rockAvoidPathways: config.rockAvoidPathways !== undefined ? config.rockAvoidPathways : true,
+
+                    // 高坡规则
+                    hillDensity: (config.hillDensity !== undefined ? config.hillDensity : 3) / 100,
+                    hillMinRadius: config.hillMinRadius !== undefined ? config.hillMinRadius : 2,
+                    hillMaxRadius: config.hillMaxRadius !== undefined ? config.hillMaxRadius : 6,
+                    hillAvoidPathways: config.hillAvoidPathways !== undefined ? config.hillAvoidPathways : true
+                };
+
+                this.noise = new SimpleNoise(seed);
+                this.layers = {
+                    ground: [],     // 土地层（基础层）
+                    grass: [],      // 草地层（包含边缘）
+                    features: []    // 特征层（道路、河流、岩石、高坡、密林）
+                };
+            }
+
+            generate() {
+                console.log('开始分层生成地图...');
+
+                // 第1层：生成土地层（铺满整个地图）
+                this.generateGroundLayer();
+
+                // 第2层：生成草地层（带边缘处理）
+                this.generateGrassLayer();
+
+                // 第3层：生成特征层（道路、河流、岩石、高坡、密林）
+                this.generateFeatureLayer();
+
+                // 合并所有图层生成最终地图
+                return this.mergeLayers();
+            }
+
+            // 第1层：生成土地层
+            generateGroundLayer() {
+                console.log('生成第1层：土地层');
+                this.layers.ground = [];
+                for (let y = 0; y < this.height; y++) {
+                    const row = [];
+                    for (let x = 0; x < this.width; x++) {
+                        row.push('G'); // G = Ground（土地）
+                    }
+                    this.layers.ground.push(row);
+                }
+            }
+
+            // 第2层：生成草地层（简单生成，边缘处理在渲染时进行）
+            generateGrassLayer() {
+                console.log('生成第2层：草地层');
+                this.layers.grass = [];
+
+                // 生成基础的草地分布
+                const scale = this.config.noiseScale;
+
+                for (let y = 0; y < this.height; y++) {
+                    const row = [];
+                    for (let x = 0; x < this.width; x++) {
+                        const noiseValue = this.noise.fbm(x / scale, y / scale, 4);
+                        const normalizedValue = (noiseValue + 1) / 2;
+
+                        // 根据噪声值决定是否是草地
+                        const isGrass = normalizedValue < this.config.forestCover;
+                        row.push(isGrass ? 'A' : null); // A = Grass
+                    }
+                    this.layers.grass.push(row);
+                }
+            }
+
+            // 获取草地的边缘图块
+            getGrassEdgeTile(grassMap, x, y) {
+                // 检查周围8个方向
+                const getTerrain = (dx, dy) => {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx < 0 || nx >= this.width || ny < 0 || ny >= this.height) return null;
+                    return grassMap[ny][nx];
+                };
+
+                const topLeft = getTerrain(-1, -1);
+                const top = getTerrain(0, -1);
+                const topRight = getTerrain(1, -1);
+                const left = getTerrain(-1, 0);
+                const right = getTerrain(1, 0);
+                const bottomLeft = getTerrain(-1, 1);
+                const bottom = getTerrain(0, 1);
+                const bottomRight = getTerrain(1, 1);
+
+                // 检查是否与非草地相邻
+                const isNotGrass = (t) => t !== 'A' && t !== 'F' && t !== null;
+                const adjPositions = [];
+                if (isNotGrass(topLeft)) adjPositions.push('top_left');
+                if (isNotGrass(top)) adjPositions.push('top');
+                if (isNotGrass(topRight)) adjPositions.push('top_right');
+                if (isNotGrass(left)) adjPositions.push('left');
+                if (isNotGrass(right)) adjPositions.push('right');
+                if (isNotGrass(bottomLeft)) adjPositions.push('bottom_left');
+                if (isNotGrass(bottom)) adjPositions.push('bottom');
+                if (isNotGrass(bottomRight)) adjPositions.push('bottom_right');
+
+                // 获取草地边缘配置
+                const edgeConfig = edgeConfigs['A'] || {};
+                const baseTileId = defaultAssetMapping['A']?.tileId || 15;
+
+                // 调试：显示边缘配置
+                if (adjPositions.length > 0 && Object.keys(edgeConfig).length > 0) {
+                    console.log(`位置 (${x}, ${y}): 相邻位置=${adjPositions.join(', ')}, 边缘配置=`, edgeConfig);
+                }
+
+                // 如果没有相邻的非草地，使用基础图块
+                if (adjPositions.length === 0) {
+                    return 'A'; // 使用草地基础图块
+                }
+
+                // 有相邻的非草地，应用边缘配置
+                // 优先级：转角 > 边缘 > 基础
+
+                // 检查转角情况（2个相邻）
+                if (adjPositions.length === 2) {
+                    const cornerConfigs = [
+                        { positions: ['top', 'left'], configKey: 'top_left' },
+                        { positions: ['top', 'right'], configKey: 'top_right' },
+                        { positions: ['bottom', 'left'], configKey: 'bottom_left' },
+                        { positions: ['bottom', 'right'], configKey: 'bottom_right' }
+                    ];
+
+                    for (const corner of cornerConfigs) {
+                        if (adjPositions.includes(corner.positions[0]) && adjPositions.includes(corner.positions[1])) {
+                            if (edgeConfig[corner.configKey] && edgeConfig[corner.configKey].tileId !== undefined) {
+                                // 返回特殊标记表示使用边缘图块
+                                const marker = `A_EDGE_${corner.configKey}_${edgeConfig[corner.configKey].tileId}`;
+                                console.log(`  → 使用转角配置: ${corner.configKey}, 图块ID=${edgeConfig[corner.configKey].tileId}, 标记=${marker}`);
+                                return marker;
+                            }
+                        }
+                    }
+                }
+
+                // 检查边缘情况（1个相邻）
+                if (adjPositions.length === 1) {
+                    const position = adjPositions[0];
+                    if (edgeConfig[position] && edgeConfig[position].tileId !== undefined) {
+                        const marker = `A_EDGE_${position}_${edgeConfig[position].tileId}`;
+                        console.log(`  → 使用边缘配置: ${position}, 图块ID=${edgeConfig[position].tileId}, 标记=${marker}`);
+                        return marker;
+                    }
+                }
+
+                // 默认使用基础图块
+                console.log(`  → 使用基础图块 (无匹配的边缘配置)`);
+                return 'A';
+            }
+
+            // 第3层：生成特征层
+            generateFeatureLayer() {
+                console.log('生成第3层：特征层');
+                this.layers.features = [];
+
+                // 初始化为空
+                for (let y = 0; y < this.height; y++) {
+                    const row = [];
+                    for (let x = 0; x < this.width; x++) {
+                        row.push(null);
+                    }
+                    this.layers.features.push(row);
+                }
+
+                // 生成河流
+                this.generateRivers();
+
+                // 生成道路
+                this.generateRoads();
+
+                // 添加岩石
+                this.addRocks();
+
+                // 添加高坡
+                this.addHills();
+
+                // 添加树林斑块
+                this.addForestPatches();
+            }
+
+            // 生成河流（在特征层）
+            generateRivers() {
+                const count = this.config.riverCount;
+                const widthMode = parseInt(this.config.riverWidth);
+                const curvature = this.config.riverCurvature;
+                const mustCrossMap = this.config.riverCrossMap;
+
+                for (let r = 0; r < count; r++) {
+                    // 选择起点（边缘）
+                    let startX, startY;
+                    const side = Math.floor(Math.random() * 4);
+
+                    switch (side) {
+                        case 0: startX = Math.floor(Math.random() * this.width); startY = 0; break;
+                        case 1: startX = this.width - 1; startY = Math.floor(Math.random() * this.height); break;
+                        case 2: startX = Math.floor(Math.random() * this.width); startY = this.height - 1; break;
+                        case 3: startX = 0; startY = Math.floor(Math.random() * this.height); break;
+                    }
+
+                    let x = startX;
+                    let y = startY;
+                    const maxLength = mustCrossMap ? this.width + this.height : Math.max(this.width, this.height) * 0.7;
+                    let length = 0;
+
+                    while (length < maxLength) {
+                        // 标记河流
+                        this.markRiver(x, y, widthMode);
+
+                        // 决定流向（受弯曲度影响）
+                        let dx = 0, dy = 1;
+                        const noiseValue = this.noise.fbm(x / 20, y / 20, 2);
+
+                        // 基础流向
+                        if (side === 0 || side === 2) {
+                            if (noiseValue < -0.5 + curvature) { dx = -1; dy = 0; }
+                            else if (noiseValue < 0 + curvature) { dx = -1; dy = 1; }
+                            else if (noiseValue < 0.5 + curvature) { dx = 1; dy = 1; }
+                            else { dx = 1; dy = 0; }
+                        } else {
+                            if (noiseValue < -0.5 + curvature) { dx = 0; dy = -1; }
+                            else if (noiseValue < 0 + curvature) { dx = 1; dy = -1; }
+                            else if (noiseValue < 0.5 + curvature) { dx = 1; dy = 1; }
+                            else { dx = 0; dy = 1; }
+                        }
+
+                        x += dx;
+                        y += dy;
+                        length++;
+
+                        if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
+                            break;
+                        }
+                    }
+
+                    // 河流分支
+                    if (this.config.riverBranching && Math.random() < 0.3) {
+                        this.generateRiverBranch(x, y, widthMode);
+                    }
+                }
+            }
+
+            markRiver(x, y, widthMode) {
+                if (y >= 0 && y < this.height && x >= 0 && x < this.width) {
+                    this.layers.features[y][x] = 'C';
+                    this.riverCells.add(`${x},${y}`);
+
+                    // 河流宽度
+                    if (widthMode >= 2) {
+                        const neighbors = this.getNeighbors(x, y);
+                        neighbors.forEach(n => {
+                            if (Math.random() < 0.6) {
+                                this.layers.features[n.y][n.x] = 'C';
+                                this.riverCells.add(`${n.x},${n.y}`);
+                            }
+                        });
+                    }
+
+                    if (widthMode >= 3) {
+                        const neighbors2 = this.getNeighbors(x, y);
+                        neighbors2.forEach(n => {
+                            const neighbors3 = this.getNeighbors(n.x, n.y);
+                            neighbors3.forEach(n2 => {
+                                if (Math.random() < 0.3 && !this.riverCells.has(`${n2.x},${n2.y}`)) {
+                                    this.layers.features[n2.y][n2.x] = 'C';
+                                    this.riverCells.add(`${n2.x},${n2.y}`);
+                                }
+                            });
+                        });
+                    }
+                }
+            }
+
+            // 生成道路（在特征层）
+            generateRoads() {
+                const count = this.config.roadCount;
+                const type = this.config.roadType;
+                const curvature = this.config.roadCurvature;
+
+                for (let r = 0; r < count; r++) {
+                    let startPos, endPos;
+
+                    if (type === 'cross') {
+                        const startEdge = Math.floor(Math.random() * 4);
+                        const endEdge = (startEdge + 2) % 4;
+                        startPos = this.getEdgePosition(startEdge);
+                        endPos = this.getEdgePosition(endEdge);
+                    } else if (type === 'random') {
+                        startPos = this.getEdgePosition(Math.floor(Math.random() * 4));
+                        endPos = this.getEdgePosition(Math.floor(Math.random() * 4));
+                    } else if (type === 'network') {
+                        if (r % 2 === 0) {
+                            startPos = { x: 0, y: Math.floor(this.height / 2) };
+                            endPos = { x: this.width - 1, y: Math.floor(this.height / 2) };
+                        } else {
+                            startPos = { x: Math.floor(this.width / 2), y: 0 };
+                            endPos = { x: Math.floor(this.width / 2), y: this.height - 1 };
+                        }
+                    }
+
+                    this.createPath(startPos.x, startPos.y, endPos.x, endPos.y, 'B', curvature);
+                }
+            }
+
+            createPath(startX, startY, endX, endY, char, curvature) {
+                let x = startX;
+                let y = startY;
+                const maxSteps = this.width + this.height;
+                let steps = 0;
+                const visited = new Set();
+
+                while (steps < maxSteps) {
+                    if (y >= 0 && y < this.height && x >= 0 && x < this.width) {
+                        const key = `${x},${y}`;
+
+                        // 检查是否可以在此处放置道路
+                        const canPlace = this.config.roadCrossRiver || this.layers.features[y][x] !== 'C';
+                        const avoidForest = !this.config.roadAvoidForest || this.layers.grass[y][x] !== 'F';
+
+                        if (canPlace && avoidForest && !visited.has(key)) {
+                            this.layers.features[y][x] = char;
+                            this.roadCells.add(key);
+                            visited.add(key);
+                        }
+                    }
+
+                    if (Math.abs(x - endX) < 2 && Math.abs(y - endY) < 2) {
+                        break;
+                    }
+
+                    // 计算方向
+                    let dx = endX - x;
+                    let dy = endY - y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist > 0) {
+                        dx = Math.round(dx / dist);
+                        dy = Math.round(dy / dist);
+                    }
+
+                    // 添加弯曲
+                    if (Math.random() < curvature * 0.5) {
+                        if (Math.random() < 0.5) {
+                            const temp = dx;
+                            dx = dy;
+                            dy = temp;
+                        } else {
+                            dx = -dx;
+                        }
+                    }
+
+                    x += dx;
+                    y += dy;
+                    steps++;
+
+                    if (x < 0) x = 0;
+                    if (x >= this.width) x = this.width - 1;
+                    if (y < 0) y = 0;
+                    if (y >= this.height) y = this.height - 1;
+                }
+            }
+
+            // 其他方法保持不变...
+            addRocks() {
+                const density = this.config.rockDensity;
+                const totalCells = this.width * this.height;
+                const rockCount = Math.floor(totalCells * density);
+
+                for (let i = 0; i < rockCount; i++) {
+                    const x = Math.floor(Math.random() * this.width);
+                    const y = Math.floor(Math.random() * this.height);
+                    const key = `${x},${y}`;
+
+                    const canPlace = !this.config.rockAvoidPathways ||
+                        (!this.riverCells.has(key) && !this.roadCells.has(key));
+
+                    if (canPlace && this.layers.features[y][x] !== 'C' && this.layers.features[y][x] !== 'B') {
+                        this.layers.features[y][x] = 'D';
+                    }
+                }
+            }
+
+            addHills() {
+                const density = this.config.hillDensity;
+                const totalCells = this.width * this.height;
+                const hillCount = Math.floor(totalCells * density);
+
+                for (let i = 0; i < hillCount; i++) {
+                    const centerX = Math.floor(Math.random() * this.width);
+                    const centerY = Math.floor(Math.random() * this.height);
+                    const radius = this.config.hillMinRadius +
+                        Math.floor(Math.random() * (this.config.hillMaxRadius - this.config.hillMinRadius));
+
+                    for (let dy = -radius; dy <= radius; dy++) {
+                        for (let dx = -radius; dx <= radius; dx++) {
+                            const x = centerX + dx;
+                            const y = centerY + dy;
+                            const key = `${x},${y}`;
+
+                            if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
+                                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                                if (dist <= radius && Math.random() < 0.7) {
+                                    const canPlace = !this.config.hillAvoidPathways ||
+                                        (!this.riverCells.has(key) && !this.roadCells.has(key));
+
+                                    if (canPlace && this.layers.features[y][x] !== 'C' && this.layers.features[y][x] !== 'B') {
+                                        this.layers.features[y][x] = 'E';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            addForestPatches() {
+                const patches = this.config.forestPatches;
+                const buffer = this.config.forestRiverBuffer;
+                const avoidRoads = this.config.forestAvoidRoads;
+                const distribution = this.config.forestDistribution;
+
+                for (let i = 0; i < patches; i++) {
+                    let centerX, centerY;
+                    const radius = 1 + Math.floor(Math.random() * 4);
+
+                    if (distribution === 'perimeter') {
+                        if (Math.random() < 0.5) {
+                            centerX = Math.random() < 0.5 ?
+                                Math.floor(Math.random() * 5) :
+                                this.width - 1 - Math.floor(Math.random() * 5);
+                            centerY = Math.floor(Math.random() * this.height);
+                        } else {
+                            centerX = Math.floor(Math.random() * this.width);
+                            centerY = Math.random() < 0.5 ?
+                                Math.floor(Math.random() * 5) :
+                                this.height - 1 - Math.floor(Math.random() * 5);
+                        }
+                    } else {
+                        centerX = Math.floor(Math.random() * this.width);
+                        centerY = Math.floor(Math.random() * this.height);
+                    }
+
+                    for (let dy = -radius; dy <= radius; dy++) {
+                        for (let dx = -radius; dx <= radius; dx++) {
+                            const x = centerX + dx;
+                            const y = centerY + dy;
+
+                            if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
+                                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                                if (dist <= radius && this.layers.grass[y][x] === 'A') {
+                                    this.layers.grass[y][x] = 'F';
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 合并所有图层
+            mergeLayers() {
+                console.log('合并图层...');
+                const finalMap = [];
+
+                for (let y = 0; y < this.height; y++) {
+                    const row = [];
+                    for (let x = 0; x < this.width; x++) {
+                        // 优先级：特征层 > 草地层 > 土地层
+                        const feature = this.layers.features[y][x];
+                        const grass = this.layers.grass[y][x];
+                        const ground = this.layers.ground[y][x];
+
+                        if (feature) {
+                            // 特征层有内容
+                            row.push(feature);
+                        } else if (grass) {
+                            // 草地层有内容
+                            row.push(grass);
+                        } else {
+                            // 土地层
+                            row.push(ground);
+                        }
+                    }
+                    finalMap.push(row);
+                }
+
+                console.log('图层合并完成');
+                return finalMap;
+            }
+
+            getNeighbors(x, y) {
+                const neighbors = [];
+                const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+                for (const [dx, dy] of dirs) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
+                        neighbors.push({ x: nx, y: ny });
+                    }
+                }
+                return neighbors;
+            }
+
+            getEdgePosition(edge) {
+                switch (edge) {
+                    case 0: return { x: Math.floor(Math.random() * this.width), y: 0 };
+                    case 1: return { x: this.width - 1, y: Math.floor(Math.random() * this.height) };
+                    case 2: return { x: Math.floor(Math.random() * this.width), y: this.height - 1 };
+                    case 3: return { x: 0, y: Math.floor(Math.random() * this.height) };
+                }
+            }
+
+            // 添加辅助方法
+            get riverCells() {
+                if (!this._riverCells) {
+                    this._riverCells = new Set();
+                }
+                return this._riverCells;
+            }
+
+            set riverCells(value) {
+                this._riverCells = value;
+            }
+
+            get roadCells() {
+                if (!this._roadCells) {
+                    this._roadCells = new Set();
+                }
+                return this._roadCells;
+            }
+
+            set roadCells(value) {
+                this._roadCells = value;
+            }
+
+            generateRiverBranch(startX, startY, widthMode) {
+                let x = startX, y = startY;
+                const branchLength = Math.floor(this.width * 0.3);
+
+                for (let i = 0; i < branchLength; i++) {
+                    const dx = Math.random() < 0.5 ? -1 : 1;
+                    const dy = Math.random() < 0.5 ? -1 : 1;
+
+                    x += dx;
+                    y += dy;
+
+                    if (x < 0 || x >= this.width || y < 0 || y >= this.height) break;
+
+                    this.markRiver(x, y, Math.max(1, widthMode - 1));
+                }
+            }
+        }
+
+        // ==================== 原始地图生成器（保留兼容）====================
+        class ForestMapGenerator {
+            constructor(width, height, seed, config = {}) {
+                this.width = width;
+                this.height = height;
+                this.seed = seed;
+                this.config = {
+                    // 基础设置
+                    noiseScale: config.noiseScale || 30,
+
+                    // 树林规则
+                    forestCover: (config.forestCover !== undefined ? config.forestCover : 35) / 100,
+                    forestPatches: config.forestPatches !== undefined ? config.forestPatches : 8,
+                    forestRiverBuffer: config.forestRiverBuffer !== undefined ? config.forestRiverBuffer : 2,
+                    forestAvoidRoads: config.forestAvoidRoads !== undefined ? config.forestAvoidRoads : true,
+                    forestDistribution: config.forestDistribution || 'clustered',
+
+                    // 河流规则
+                    riverCount: config.riverCount !== undefined ? config.riverCount : 1,
+                    riverWidth: config.riverWidth || '2',
+                    riverCurvature: (config.riverCurvature !== undefined ? config.riverCurvature : 50) / 100,
+                    riverBranching: config.riverBranching || false,
+                    riverCrossMap: config.riverCrossMap !== undefined ? config.riverCrossMap : true,
+
+                    // 道路规则
+                    roadCount: config.roadCount !== undefined ? config.roadCount : 2,
+                    roadType: config.roadType || 'cross',
+                    roadCurvature: (config.roadCurvature !== undefined ? config.roadCurvature : 30) / 100,
+                    roadCrossRiver: config.roadCrossRiver || false,
+                    roadAvoidForest: config.roadAvoidForest !== undefined ? config.roadAvoidForest : true,
+
+                    // 岩石规则
+                    rockDensity: (config.rockDensity !== undefined ? config.rockDensity : 2) / 100,
+                    rockDistribution: config.rockDistribution || 'mixed',
+                    rockAvoidPathways: config.rockAvoidPathways !== undefined ? config.rockAvoidPathways : true,
+
+                    // 高坡规则
+                    hillDensity: (config.hillDensity !== undefined ? config.hillDensity : 3) / 100,
+                    hillMinRadius: config.hillMinRadius !== undefined ? config.hillMinRadius : 2,
+                    hillMaxRadius: config.hillMaxRadius !== undefined ? config.hillMaxRadius : 6,
+                    hillAvoidPathways: config.hillAvoidPathways !== undefined ? config.hillAvoidPathways : true
+                };
+
+                this.noise = new SimpleNoise(seed);
+                this.map = [];
+                this.riverCells = new Set(); // 记录河流位置
+                this.roadCells = new Set();  // 记录道路位置
+            }
+
+            generate() {
+                // 初始化地图
+                this.map = Array(this.height).fill(null).map(() =>
+                    Array(this.width).fill('A')
+                );
+                this.riverCells.clear();
+                this.roadCells.clear();
+
+                // 1. 生成基础地形
+                this.generateBaseTerrain();
+
+                // 2. 生成河流
+                this.generateRivers();
+
+                // 3. 生成道路
+                this.generateRoads();
+
+                // 4. 添加岩石
+                this.addRocks();
+
+                // 5. 添加高坡
+                this.addHills();
+
+                // 6. 添加树林斑块
+                this.addForestPatches();
+
+                return this.map;
+            }
+
+            generateBaseTerrain() {
+                const scale = this.config.noiseScale;
+                const coverThreshold = 1 - this.config.forestCover; // 反转，因为值越小越可能是森林
+
+                for (let y = 0; y < this.height; y++) {
+                    for (let x = 0; x < this.width; x++) {
+                        const noiseValue = this.noise.fbm(x / scale, y / scale, 4);
+                        const normalizedValue = (noiseValue + 1) / 2;
+
+                        // 根据配置的树林覆盖率决定地形
+                        if (normalizedValue < this.config.forestCover) {
+                            this.map[y][x] = 'F'; // 密林
+                        } else {
+                            this.map[y][x] = 'A'; // 草地
+                        }
+                    }
+                }
+            }
+
+            generateRivers() {
+                const count = this.config.riverCount;
+                const widthMode = parseInt(this.config.riverWidth);
+                const curvature = this.config.riverCurvature;
+                const mustCrossMap = this.config.riverCrossMap;
+
+                for (let r = 0; r < count; r++) {
+                    // 选择起点（边缘）
+                    let startX, startY;
+                    const side = Math.floor(Math.random() * 4);
+
+                    switch (side) {
+                        case 0: startX = Math.floor(Math.random() * this.width); startY = 0; break;
+                        case 1: startX = this.width - 1; startY = Math.floor(Math.random() * this.height); break;
+                        case 2: startX = Math.floor(Math.random() * this.width); startY = this.height - 1; break;
+                        case 3: startX = 0; startY = Math.floor(Math.random() * this.height); break;
+                    }
+
+                    let x = startX;
+                    let y = startY;
+                    const maxLength = mustCrossMap ? this.width + this.height : Math.max(this.width, this.height) * 0.7;
+                    let length = 0;
+
+                    while (length < maxLength) {
+                        // 标记河流
+                        this.markRiver(x, y, widthMode);
+
+                        // 决定流向（受弯曲度影响）
+                        let dx = 0, dy = 1;
+                        const noiseValue = this.noise.fbm(x / 20, y / 20, 2);
+
+                        // 基础流向
+                        if (side === 0 || side === 2) { // 上下边缘起点
+                            if (noiseValue < -0.5 + curvature) { dx = -1; dy = 0; }
+                            else if (noiseValue < 0 + curvature) { dx = -1; dy = 1; }
+                            else if (noiseValue < 0.5 + curvature) { dx = 1; dy = 1; }
+                            else { dx = 1; dy = 0; }
+                        } else { // 左右边缘起点
+                            if (noiseValue < -0.5 + curvature) { dx = 0; dy = -1; }
+                            else if (noiseValue < 0 + curvature) { dx = 1; dy = -1; }
+                            else if (noiseValue < 0.5 + curvature) { dx = 1; dy = 1; }
+                            else { dx = 0; dy = 1; }
+                        }
+
+                        x += dx;
+                        y += dy;
+                        length++;
+
+                        if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
+                            break;
+                        }
+                    }
+
+                    // 河流分支
+                    if (this.config.riverBranching && Math.random() < 0.3) {
+                        this.generateRiverBranch(x, y, widthMode);
+                    }
+                }
+            }
+
+            markRiver(x, y, widthMode) {
+                if (y >= 0 && y < this.height && x >= 0 && x < this.width) {
+                    this.map[y][x] = 'C';
+                    this.riverCells.add(`${x},${y}`);
+
+                    // 河流宽度
+                    if (widthMode >= 2) {
+                        const neighbors = this.getNeighbors(x, y);
+                        neighbors.forEach(n => {
+                            if (Math.random() < 0.6) {
+                                this.map[n.y][n.x] = 'C';
+                                this.riverCells.add(`${n.x},${n.y}`);
+                            }
+                        });
+                    }
+
+                    if (widthMode >= 3) {
+                        const neighbors2 = this.getNeighbors(x, y);
+                        neighbors2.forEach(n => {
+                            const neighbors3 = this.getNeighbors(n.x, n.y);
+                            neighbors3.forEach(n2 => {
+                                if (Math.random() < 0.3 && !this.riverCells.has(`${n2.x},${n2.y}`)) {
+                                    this.map[n2.y][n2.x] = 'C';
+                                    this.riverCells.add(`${n2.x},${n2.y}`);
+                                }
+                            });
+                        });
+                    }
+                }
+            }
+
+            generateRiverBranch(startX, startY, widthMode) {
+                let x = startX, y = startY;
+                const branchLength = Math.floor(this.width * 0.3);
+
+                for (let i = 0; i < branchLength; i++) {
+                    const dx = Math.random() < 0.5 ? -1 : 1;
+                    const dy = Math.random() < 0.5 ? -1 : 1;
+
+                    x += dx;
+                    y += dy;
+
+                    if (x < 0 || x >= this.width || y < 0 || y >= this.height) break;
+
+                    this.markRiver(x, y, Math.max(1, widthMode - 1));
+                }
+            }
+
+            generateRoads() {
+                const count = this.config.roadCount;
+                const type = this.config.roadType;
+                const curvature = this.config.roadCurvature;
+
+                for (let r = 0; r < count; r++) {
+                    let startPos, endPos;
+
+                    if (type === 'cross') {
+                        // 穿越道路：连接对边
+                        const startEdge = Math.floor(Math.random() * 4);
+                        const endEdge = (startEdge + 2) % 4;
+                        startPos = this.getEdgePosition(startEdge);
+                        endPos = this.getEdgePosition(endEdge);
+                    } else if (type === 'random') {
+                        // 随机道路
+                        startPos = this.getEdgePosition(Math.floor(Math.random() * 4));
+                        endPos = this.getEdgePosition(Math.floor(Math.random() * 4));
+                    } else if (type === 'network') {
+                        // 网络道路：横竖各一条
+                        if (r % 2 === 0) {
+                            startPos = { x: 0, y: Math.floor(this.height / 2) };
+                            endPos = { x: this.width - 1, y: Math.floor(this.height / 2) };
+                        } else {
+                            startPos = { x: Math.floor(this.width / 2), y: 0 };
+                            endPos = { x: Math.floor(this.width / 2), y: this.height - 1 };
+                        }
+                    }
+
+                    this.createPath(startPos.x, startPos.y, endPos.x, endPos.y, 'B', curvature);
+                }
+            }
+
+            createPath(startX, startY, endX, endY, char, curvature) {
+                let x = startX;
+                let y = startY;
+                const maxSteps = this.width + this.height;
+                let steps = 0;
+                const visited = new Set();
+
+                while (steps < maxSteps) {
+                    if (y >= 0 && y < this.height && x >= 0 && x < this.width) {
+                        const key = `${x},${y}`;
+
+                        // 检查是否可以在此处放置道路
+                        const canPlace = this.config.roadCrossRiver || this.map[y][x] !== 'C';
+                        const avoidForest = !this.config.roadAvoidForest || this.map[y][x] !== 'F';
+
+                        if (canPlace && avoidForest && !visited.has(key)) {
+                            this.map[y][x] = char;
+                            this.roadCells.add(key);
+                            visited.add(key);
+                        }
+                    }
+
+                    if (Math.abs(x - endX) < 2 && Math.abs(y - endY) < 2) {
+                        break;
+                    }
+
+                    // 计算方向
+                    let dx = endX - x;
+                    let dy = endY - y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist > 0) {
+                        dx = Math.round(dx / dist);
+                        dy = Math.round(dy / dist);
+                    }
+
+                    // 添加弯曲
+                    if (Math.random() < curvature * 0.5) {
+                        if (Math.random() < 0.5) {
+                            const temp = dx;
+                            dx = dy;
+                            dy = temp;
+                        } else {
+                            dx = -dx;
+                        }
+                    }
+
+                    x += dx;
+                    y += dy;
+                    steps++;
+
+                    // 边界检查
+                    if (x < 0) x = 0;
+                    if (x >= this.width) x = this.width - 1;
+                    if (y < 0) y = 0;
+                    if (y >= this.height) y = this.height - 1;
+                }
+            }
+
+            addRocks() {
+                const density = this.config.rockDensity;
+                const totalCells = this.width * this.height;
+                const rockCount = Math.floor(totalCells * density);
+
+                for (let i = 0; i < rockCount; i++) {
+                    const x = Math.floor(Math.random() * this.width);
+                    const y = Math.floor(Math.random() * this.height);
+                    const key = `${x},${y}`;
+
+                    // 检查是否可以放置岩石
+                    const canPlace = !this.config.rockAvoidPathways ||
+                        (!this.riverCells.has(key) && !this.roadCells.has(key));
+
+                    if (canPlace && this.map[y][x] !== 'C' && this.map[y][x] !== 'B') {
+                        this.map[y][x] = 'D';
+
+                        // 根据分布模式决定是否成群
+                        if (this.config.rockDistribution === 'clustered' ||
+                            (this.config.rockDistribution === 'mixed' && Math.random() < 0.4)) {
+
+                            const neighbors = this.getNeighbors(x, y);
+                            const clusterSize = 1 + Math.floor(Math.random() * 3);
+
+                            for (let j = 0; j < clusterSize && neighbors.length > 0; j++) {
+                                const idx = Math.floor(Math.random() * neighbors.length);
+                                const n = neighbors[idx];
+                                const nKey = `${n.x},${n.y}`;
+
+                                if (this.map[n.y][n.x] !== 'C' && this.map[n.y][n.x] !== 'B') {
+                                    this.map[n.y][n.x] = 'D';
+                                }
+                                neighbors.splice(idx, 1);
+                            }
+                        }
+                    }
+                }
+            }
+
+            addHills() {
+                const density = this.config.hillDensity;
+                const totalCells = this.width * this.height;
+                const hillCount = Math.floor(totalCells * density);
+
+                for (let i = 0; i < hillCount; i++) {
+                    const centerX = Math.floor(Math.random() * this.width);
+                    const centerY = Math.floor(Math.random() * this.height);
+                    const radius = this.config.hillMinRadius +
+                        Math.floor(Math.random() * (this.config.hillMaxRadius - this.config.hillMinRadius));
+
+                    // 创建圆形高坡
+                    for (let dy = -radius; dy <= radius; dy++) {
+                        for (let dx = -radius; dx <= radius; dx++) {
+                            const x = centerX + dx;
+                            const y = centerY + dy;
+                            const key = `${x},${y}`;
+
+                            if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
+                                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                                if (dist <= radius && Math.random() < 0.7) {
+                                    // 检查是否可以放置高坡
+                                    const canPlace = !this.config.hillAvoidPathways ||
+                                        (!this.riverCells.has(key) && !this.roadCells.has(key));
+
+                                    if (canPlace && this.map[y][x] !== 'C' && this.map[y][x] !== 'B') {
+                                        this.map[y][x] = 'E';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            addForestPatches() {
+                const patches = this.config.forestPatches;
+                const buffer = this.config.forestRiverBuffer;
+                const avoidRoads = this.config.forestAvoidRoads;
+                const distribution = this.config.forestDistribution;
+
+                for (let i = 0; i < patches; i++) {
+                    let centerX, centerY;
+                    const radius = 1 + Math.floor(Math.random() * 4);
+
+                    // 根据分布模式选择中心点
+                    if (distribution === 'perimeter') {
+                        // 边缘分布
+                        if (Math.random() < 0.5) {
+                            centerX = Math.random() < 0.5 ?
+                                Math.floor(Math.random() * 5) :
+                                this.width - 1 - Math.floor(Math.random() * 5);
+                            centerY = Math.floor(Math.random() * this.height);
+                        } else {
+                            centerX = Math.floor(Math.random() * this.width);
+                            centerY = Math.random() < 0.5 ?
+                                Math.floor(Math.random() * 5) :
+                                this.height - 1 - Math.floor(Math.random() * 5);
+                        }
+                    } else {
+                        centerX = Math.floor(Math.random() * this.width);
+                        centerY = Math.floor(Math.random() * this.height);
+                    }
+
+                    // 添加树林斑块
+                    for (let dy = -radius; dy <= radius; dy++) {
+                        for (let dx = -radius; dx <= radius; dx++) {
+                            const x = centerX + dx;
+                            const y = centerY + dy;
+                            const key = `${x},${y}`;
+
+                            if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
+                                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                                if (dist <= radius && this.map[y][x] === 'A') {
+                                    // 检查是否避开河边
+                                    let nearRiver = false;
+                                    if (buffer > 0) {
+                                        for (let by = -buffer; by <= buffer; by++) {
+                                            for (let bx = -buffer; bx <= buffer; bx++) {
+                                                const checkX = x + bx;
+                                                const checkY = y + by;
+                                                if (checkX >= 0 && checkX < this.width &&
+                                                    checkY >= 0 && checkY < this.height) {
+                                                    if (this.map[checkY][checkX] === 'C') {
+                                                        nearRiver = true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // 检查是否避开道路
+                                    const nearRoad = avoidRoads && this.roadCells.has(key);
+
+                                    if (!nearRiver && !nearRoad) {
+                                        if (distribution === 'scattered' && Math.random() < 0.3) {
+                                            // 分散模式：降低密度
+                                        } else {
+                                            this.map[y][x] = 'F';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            getNeighbors(x, y) {
+                const neighbors = [];
+                const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+                for (const [dx, dy] of dirs) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
+                        neighbors.push({ x: nx, y: ny });
+                    }
+                }
+
+                return neighbors;
+            }
+
+            getEdgePosition(edge) {
+                switch (edge) {
+                    case 0: return { x: Math.floor(Math.random() * this.width), y: 0 };
+                    case 1: return { x: this.width - 1, y: Math.floor(Math.random() * this.height) };
+                    case 2: return { x: Math.floor(Math.random() * this.width), y: this.height - 1 };
+                    case 3: return { x: 0, y: Math.floor(Math.random() * this.height) };
+                }
+            }
+        }
+
+        // ==================== UI 函数 ====================
+        function updateValue(type) {
+            const inputs = {
+                width: { id: 'mapWidth', display: 'widthValue' },
+                height: { id: 'mapHeight', display: 'heightValue' },
+                scale: { id: 'noiseScale', display: 'scaleValue' },
+                seed: { id: 'seed', display: 'seedValue' },
+                tileSize: { id: 'tileSize', display: 'tileSizeValue' },
+                forestCover: { id: 'forestCover', display: 'forestCoverValue', suffix: '%' },
+                forestPatches: { id: 'forestPatches', display: 'forestPatchesValue' },
+                forestRiverBuffer: { id: 'forestRiverBuffer', display: 'forestRiverBufferValue' },
+                riverCount: { id: 'riverCount', display: 'riverCountValue' },
+                riverCurvature: { id: 'riverCurvature', display: 'riverCurvatureValue', suffix: '%' },
+                roadCount: { id: 'roadCount', display: 'roadCountValue' },
+                roadCurvature: { id: 'roadCurvature', display: 'roadCurvatureValue', suffix: '%' },
+                rockDensity: { id: 'rockDensity', display: 'rockDensityValue', suffix: '%' },
+                hillDensity: { id: 'hillDensity', display: 'hillDensityValue', suffix: '%' },
+                hillMinRadius: { id: 'hillMinRadius', display: 'hillMinRadiusValue' },
+                hillMaxRadius: { id: 'hillMaxRadius', display: 'hillMaxRadiusValue' }
+            };
+
+            const input = document.getElementById(inputs[type].id);
+            const display = document.getElementById(inputs[type].display);
+            let value = parseInt(input.value);
+
+            if (inputs[type].suffix) {
+                display.textContent = value + inputs[type].suffix;
+            } else {
+                display.textContent = value;
+            }
+        }
+
+        function getConfig() {
+            return {
+                noiseScale: parseInt(document.getElementById('noiseScale').value),
+                forestCover: parseInt(document.getElementById('forestCover').value),
+                forestPatches: parseInt(document.getElementById('forestPatches').value),
+                forestRiverBuffer: parseInt(document.getElementById('forestRiverBuffer').value),
+                forestAvoidRoads: document.getElementById('forestAvoidRoads').checked,
+                forestDistribution: document.getElementById('forestDistribution').value,
+                riverCount: parseInt(document.getElementById('riverCount').value),
+                riverWidth: document.getElementById('riverWidth').value,
+                riverCurvature: parseInt(document.getElementById('riverCurvature').value),
+                riverBranching: document.getElementById('riverBranching').checked,
+                riverCrossMap: document.getElementById('riverCrossMap').checked,
+                roadCount: parseInt(document.getElementById('roadCount').value),
+                roadType: document.getElementById('roadType').value,
+                roadCurvature: parseInt(document.getElementById('roadCurvature').value),
+                roadCrossRiver: document.getElementById('roadCrossRiver').checked,
+                roadAvoidForest: document.getElementById('roadAvoidForest').checked,
+                rockDensity: parseInt(document.getElementById('rockDensity').value),
+                rockDistribution: document.getElementById('rockDistribution').value,
+                rockAvoidPathways: document.getElementById('rockAvoidPathways').checked,
+                hillDensity: parseInt(document.getElementById('hillDensity').value),
+                hillMinRadius: parseInt(document.getElementById('hillMinRadius').value),
+                hillMaxRadius: parseInt(document.getElementById('hillMaxRadius').value),
+                hillAvoidPathways: document.getElementById('hillAvoidPathways').checked
+            };
+        }
+
+        function generateMap() {
+            const width = parseInt(document.getElementById('mapWidth').value);
+            const height = parseInt(document.getElementById('mapHeight').value);
+            const seed = parseInt(document.getElementById('seed').value);
+            const config = getConfig();
+
+            // 使用新的分层生成器
+            const generator = new LayeredMapGenerator(width, height, seed, config);
+            const map = generator.generate();
+            const output = document.getElementById('mapOutput');
+
+            // 地形颜色映射
+            const terrainColors = {
+                'A': '#90EE90',
+                'B': '#8B4513',
+                'C': '#4169E1',
+                'D': '#808080',
+                'E': '#DEB887',
+                'F': '#228B22',
+                'G': '#DEB887'  // 土地层颜色
+            };
+
+            // 生成带颜色的地图
+            const mapHTML = map.map(row => {
+                const coloredRow = row.map(cell => {
+                    const color = terrainColors[cell] || '#FFFFFF';
+                    return `<span style="color: ${color};">${cell}</span>`;
+                }).join(' ');
+                return '<div class="map-row">' + coloredRow + '</div>';
+            }).join('');
+            output.innerHTML = mapHTML;
+
+            updateRulesSummary(config);
+        }
+
+        function copyMap() {
+            const width = parseInt(document.getElementById('mapWidth').value);
+            const height = parseInt(document.getElementById('mapHeight').value);
+            const seed = parseInt(document.getElementById('seed').value);
+            const config = getConfig();
+
+            const generator = new ForestMapGenerator(width, height, seed, config);
+            const map = generator.generate();
+
+            const compactMap = map.map(row => row.join('')).join('\n');
+            navigator.clipboard.writeText(compactMap).then(() => {
+                alert('地图已复制到剪贴板！（紧凑格式，无空格）');
+            }).catch(err => {
+                alert('复制失败，请手动复制');
+            });
+        }
+
+        function exportConfig() {
+            const config = getConfig();
+            const configStr = JSON.stringify(config, null, 2);
+            navigator.clipboard.writeText(configStr).then(() => {
+                alert('配置已导出到剪贴板！');
+            }).catch(err => {
+                alert('导出失败，请手动复制');
+            });
+        }
+
+        function updateRulesSummary(config) {
+            const summary = document.getElementById('rulesSummary');
+            const rules = [];
+
+            // 树林规则
+            rules.push(`🌲 树林: ${config.forestCover}% 覆盖率, ${config.forestPatches} 个斑块`);
+            if (config.forestAvoidRoads) rules.push(`  - 避开道路`);
+            if (config.forestRiverBuffer > 0) rules.push(`  - 距离河边 ${config.forestRiverBuffer} 格`);
+
+            // 河流规则
+            rules.push(`🌊 河流: ${config.riverCount} 条, 弯曲度 ${config.riverCurvature * 100}%`);
+            if (config.riverCrossMap) rules.push(`  - 必须穿过地图`);
+            if (config.riverBranching) rules.push(`  - 允许分支`);
+
+            // 道路规则
+            const roadTypeNames = {
+                'cross': '穿越道路',
+                'random': '随机道路',
+                'network': '网络道路'
+            };
+            rules.push(`🛤️ 道路: ${config.roadCount} 条 ${roadTypeNames[config.roadType]}`);
+            if (config.roadCrossRiver) rules.push(`  - 可以跨河`);
+            if (config.roadAvoidForest) rules.push(`  - 优先避开树林`);
+
+            // 岩石和高坡
+            rules.push(`🪨 岩石: ${config.rockDensity * 100}% 密度, ${config.rockDistribution === 'scattered' ? '分散' : config.rockDistribution === 'clustered' ? '聚集' : '混合'}`);
+            rules.push(`⛰️ 高坡: ${config.hillDensity * 100}% 密度, 半径 ${config.hillMinRadius}-${config.hillMaxRadius}`);
+
+            summary.innerHTML = rules.map(r => `<li>${r}</li>`).join('');
+        }
+
+        // 预设配置
+        const presets = {
+            plains: {
+                forestCover: 10, forestPatches: 3, forestRiverBuffer: 1,
+                riverCount: 1, riverCurvature: 30,
+                roadCount: 2, roadCurvature: 20,
+                rockDensity: 1, hillDensity: 0
+            },
+            forest: {
+                forestCover: 70, forestPatches: 15, forestRiverBuffer: 3,
+                riverCount: 2, riverCurvature: 70,
+                roadCount: 1, roadCurvature: 50,
+                rockDensity: 2, hillDensity: 2
+            },
+            mountains: {
+                forestCover: 20, forestPatches: 5,
+                riverCount: 3, riverCurvature: 80,
+                roadCount: 1, roadCurvature: 70,
+                rockDensity: 8, rockDistribution: 'clustered',
+                hillDensity: 8, hillMinRadius: 4, hillMaxRadius: 10
+            },
+            swamp: {
+                forestCover: 40, forestPatches: 10, forestRiverBuffer: 0,
+                riverCount: 4, riverWidth: '3', riverCurvature: 90,
+                roadCount: 0,
+                rockDensity: 1, hillDensity: 0
+            },
+            crossing: {
+                forestCover: 25, forestPatches: 5,
+                riverCount: 1, riverCurvature: 20,
+                roadCount: 3, roadType: 'cross', roadCrossRiver: true,
+                rockDensity: 2, hillDensity: 2
+            },
+            isolated: {
+                forestCover: 60, forestPatches: 12,
+                riverCount: 0,
+                roadCount: 0,
+                rockDensity: 5, hillDensity: 5
+            }
+        };
+
+        function applyPreset(presetName) {
+            const preset = presets[presetName];
+            if (!preset) return;
+
+            // 应用预设值
+            Object.keys(preset).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    if (element.type === 'checkbox') {
+                        element.checked = preset[key];
+                    } else {
+                        element.value = preset[key];
+                    }
+
+                    // 更新显示值
+                    const displayElement = document.getElementById(key + 'Value');
+                    if (displayElement) {
+                        let value = preset[key];
+                        if (key === 'forestCover' || key === 'riverCurvature' ||
+                            key === 'roadCurvature' || key === 'rockDensity' ||
+                            key === 'hillDensity') {
+                            displayElement.textContent = value + '%';
+                        } else {
+                            displayElement.textContent = value;
+                        }
+                    }
+                }
+            });
+
+            // 自动生成地图
+            generateMap();
+        }
+
+        // ==================== 图片转换功能 ====================
+        // 存储加载的素材图片
+        const terrainAssets = {
+            'A': null, // 草地
+            'B': null, // 道路
+            'C': null, // 河流
+            'D': null, // 岩石
+            'E': null, // 高坡
+            'F': null  // 密林
+        };
+
+        // 当前生成的地图数据
+        let currentMapData = null;
+
+        // ==================== 自动素材提取系统 ====================
+        // 预设sprite sheet路径（项目本地文件）
+        const PRESET_SPRITE_SHEETS = [
+            'ground_grasss.png',  // 第一个图集：地形图块
+            'Trees_rocks.png'     // 第二个图集：树木（前景）、岩石
+        ];
+
+        // 瓦片配置（用户可配置）
+        let tilesetConfig = {
+            width: 16,      // 瓦片宽度（像素）
+            height: 16,     // 瓦片高度（像素）
+            columns: 24     // 列数
+        };
+
+        // 不同sprite sheet的瓦片尺寸（ Trees_rocks.png 固定为32x32）
+        const SPRITE_SHEET_TILE_SIZES = [
+            { width: 16, height: 16 },  // ground_grasss.png 瓦片尺寸（会根据用户配置更新）
+            { width: 32, height: 32 }     // Trees_rocks.png 瓦片尺寸（固定）
+        ];
+
+        // 根据图块ID计算其位置（x, y）
+        // 使用用户配置的列数
+        function getTilePositionById(tileId) {
+            const columns = tilesetConfig.columns; // 使用用户配置的列数
+            const row = Math.floor(tileId / columns);
+            const col = tileId % columns;
+            return { x: col, y: row };
+        }
+
+        // 默认素材映射（简化版 - 基础地形）
+        // 使用getTilePositionById动态计算坐标
+        const defaultAssetMapping = {
+            'A': { sheet: 0, tileId: 15 },       // 草地 - 使用单块草皮 (id: 15)
+            'B': { sheet: 0, tileId: 6 },        // 道路 - 使用顶部泥土 (id: 6)
+            'C': { sheet: 0, tileId: 30 },       // 河流 - 使用带孔洞的泥土块 (id: 30)
+            'D': { sheet: 1, x: 0, y: 3 },       // 岩石 - Trees_rocks.png (0,3)
+            'E': { sheet: 0, tileId: 13 },       // 高坡 - 使用垂直悬崖 (id: 13)
+            'F': { sheet: 0, tileId: 0 }         // 密林基础 - 使用草丛装饰 (id: 0)
+        };
+
+        // 树木前景物映射（密林F会额外绘制树木）
+        const treeForegroundMapping = {
+            'F': { sheet: 1, x: 0, y: 0 }       // 树木前景 - Trees_rocks.png (0,0)
+        };
+
+        // 存储sprite sheet图片
+        const spriteSheets = [null, null];
+        const TILE_SIZE = 32; // 输出tile大小（所有地形统一缩放到32x32）
+        const ASSETS_LOADED = { 0: false, 1: false }; // 跟踪加载状态
+
+        // 地形图块元数据（用于智能边缘选择）
+        const terrainMetadata = {
+            'A': { type: 'grass', isWalkable: true, isForeground: false },
+            'B': { type: 'dirt', isWalkable: true, isForeground: false },
+            'C': { type: 'water', isWalkable: false, isForeground: false },
+            'D': { type: 'rock', isWalkable: false, isForeground: true },
+            'E': { type: 'cliff', isWalkable: false, isForeground: false },
+            'F': { type: 'forest', isWalkable: true, isForeground: true }
+        };
+
+        // 加载sprite sheet
+        function loadSpriteSheet(index, input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    spriteSheets[index] = img;
+                    updateSpriteSheetPreview(index, img);
+                    extractDefaultAssets();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 更新sprite sheet预览
+        function updateSpriteSheetPreview(index, img) {
+            const preview = document.getElementById(`spriteSheetPreview${index}`);
+            if (preview) {
+                preview.innerHTML = `<img src="${img.src}" style="max-width: 100%; max-height: 200px; object-fit: contain;">`;
+                document.getElementById(`spriteSheetStatus${index}`).textContent = '✓ 已加载';
+            }
+        }
+
+        // 从sprite sheets中提取默认素材（基于用户手动配置）
+        function extractDefaultAssets() {
+            console.log('开始提取素材（基于用户配置）...');
+            console.log('当前瓦片配置:', tilesetConfig);
+
+            // 检查sprite sheets加载状态
+            if (!spriteSheets[0]) {
+                console.error('ground_grasss.png 未加载！');
+                const autoStatus = document.getElementById('autoExtractStatus');
+                if (autoStatus) {
+                    autoStatus.innerHTML = '<span style="color: #e74c3c;">✗ 地形图集未加载</span>';
+                }
+                return;
+            }
+
+            console.log('地形图集已加载，开始提取...');
+            console.log('当前配置:', defaultAssetMapping);
+
+            // 使用canvas提取tile（统一输出为32x32）
+            const canvas = document.createElement('canvas');
+            canvas.width = TILE_SIZE;
+            canvas.height = TILE_SIZE;
+            const ctx = canvas.getContext('2d');
+
+            // 从页面输入框读取用户配置的图块ID
+            const terrainTypes = ['A', 'B', 'C', 'E', 'F'];
+            let extractedCount = 0;
+
+            terrainTypes.forEach(terrainType => {
+                const tileIdInput = document.getElementById(`tileId_${terrainType}`);
+                if (!tileIdInput) {
+                    console.warn(`找不到输入框: tileId_${terrainType}`);
+                    return;
+                }
+
+                const tileId = parseInt(tileIdInput.value);
+                const totalTiles = getTotalTiles();
+
+                if (isNaN(tileId) || tileId < 0 || tileId >= totalTiles) {
+                    console.warn(`无效的图块ID: ${terrainType} = ${tileId}，有效范围: 0-${totalTiles - 1}`);
+                    return;
+                }
+
+                // 更新默认素材映射（确保同步）
+                defaultAssetMapping[terrainType] = { sheet: 0, tileId: tileId };
+
+                const sheet = spriteSheets[0];
+                if (!sheet) {
+                    console.error(`Sprite sheet未加载`);
+                    return;
+                }
+
+                // 使用用户配置的瓦片尺寸
+                const srcTileWidth = tilesetConfig.width;
+                const srcTileHeight = tilesetConfig.height;
+
+                // 计算源位置
+                const pos = getTilePositionById(tileId);
+                const srcX = pos.x * srcTileWidth;
+                const srcY = pos.y * srcTileHeight;
+
+                console.log(`提取 ${terrainType}: ID ${tileId}, 位置 (${pos.x}, ${pos.y}), 源尺寸: ${srcTileWidth}x${srcTileHeight}`);
+
+                // 清除canvas
+                ctx.clearRect(0, 0, TILE_SIZE, TILE_SIZE);
+
+                // 从sprite sheet中提取对应的tile
+                ctx.drawImage(
+                    sheet,
+                    srcX, srcY, srcTileWidth, srcTileHeight,
+                    0, 0, TILE_SIZE, TILE_SIZE
+                );
+
+                // 创建新的图片对象存储提取的tile
+                const extractedImg = new Image();
+                extractedImg.src = canvas.toDataURL();
+                extractedImg.onload = function() {
+                    terrainAssets[terrainType] = extractedImg;
+                    updateAssetPreview(terrainType, extractedImg);
+                    extractedCount++;
+                    console.log(`地形 ${terrainType} 提取完成 (${extractedCount}/${terrainTypes.length})`);
+                };
+                extractedImg.onerror = function() {
+                    console.error(`地形 ${terrainType} 图片创建失败`);
+                };
+            });
+
+            // 更新UI状态
+            const autoStatus = document.getElementById('autoExtractStatus');
+            if (autoStatus) {
+                const edgeStatus = isSmartEdgesEnabled() ? '（智能边缘已启用）' : '（智能边缘已禁用）';
+                autoStatus.innerHTML = `<span style="color: #4ecca3;">✓ 已提取配置的图块 ${edgeStatus}</span>`;
+            }
+
+            // 显示映射信息
+            updateMappingDisplay();
+
+            console.log('素材提取完成！最终配置:', defaultAssetMapping);
+            console.log('瓦片配置:', tilesetConfig);
+        }
+
+        // 更新素材映射显示（包括智能边缘检测信息）
+        function updateMappingDisplay() {
+            const mappingDisplay = document.getElementById('mappingDisplay');
+            const mappingList = document.getElementById('mappingList');
+
+            const terrainNames = {
+                'A': '草地', 'B': '道路', 'C': '河流',
+                'D': '岩石', 'E': '高坡', 'F': '密林'
+            };
+
+            // 瓦片配置信息
+            let mappingHTML = '<div style="margin-bottom: 10px; color: #4ecca3;">瓦片配置：</div>';
+            mappingHTML += `<div style="font-size: 10px; color: #bbb; margin-bottom: 12px;">`;
+            mappingHTML += `尺寸: ${tilesetConfig.width}×${tilesetConfig.height}px | `;
+            mappingHTML += `列数: ${tilesetConfig.columns} | `;
+            mappingHTML += `总图块: ${getTotalTiles()}`;
+            mappingHTML += `</div>`;
+
+            // 基础映射信息
+            mappingHTML += '<div style="margin-bottom: 10px; color: #4ecca3;">基础素材映射：</div>';
+            mappingHTML += Object.entries(defaultAssetMapping).map(([type, mapping]) => {
+                let posText = '';
+                if (mapping.tileId !== undefined) {
+                    const pos = getTilePositionById(mapping.tileId);
+                    posText = `ID:${mapping.tileId} → (${pos.x}, ${pos.y})`;
+                } else {
+                    posText = `(${mapping.x}, ${mapping.y})`;
+                }
+
+                return `
+                    <div class="mapping-item">
+                        <span class="mapping-label">${terrainNames[type]} (${type})</span>
+                        <span>图集 ${mapping.sheet + 1}</span>
+                        <span class="mapping-position">${posText}</span>
+                    </div>
+                `;
+            }).join('');
+
+            // 智能边缘检测信息
+            mappingHTML += '<div style="margin-top: 15px; margin-bottom: 10px; color: #4ecca3;">智能边缘检测系统：</div>';
+            const edgeStatus = isSmartEdgesEnabled() ? '已启用' : '已禁用';
+            mappingHTML += `<div style="font-size: 10px; color: #bbb;">状态: ${edgeStatus}</div>`;
+
+            mappingList.innerHTML = mappingHTML;
+            mappingDisplay.style.display = 'block';
+        }
+
+        // 自定义素材映射
+        function customExtractAsset(terrainType, sheetIndex, tileX, tileY) {
+            const sheet = spriteSheets[sheetIndex];
+            if (!sheet) {
+                alert(`请先上传地形图集 ${sheetIndex + 1}！`);
+                return;
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = TILE_SIZE;
+            canvas.height = TILE_SIZE;
+            const ctx = canvas.getContext('2d');
+
+            const srcX = tileX * TILE_SIZE;
+            const srcY = tileY * TILE_SIZE;
+
+            ctx.drawImage(
+                sheet,
+                srcX, srcY, TILE_SIZE, TILE_SIZE,
+                0, 0, TILE_SIZE, TILE_SIZE
+            );
+
+            const extractedImg = new Image();
+            extractedImg.src = canvas.toDataURL();
+            extractedImg.onload = function() {
+                terrainAssets[terrainType] = extractedImg;
+                updateAssetPreview(terrainType, extractedImg);
+
+                // 更新映射配置
+                defaultAssetMapping[terrainType] = { sheet: sheetIndex, x: tileX, y: tileY };
+                updateMappingDisplay();
+            };
+        }
+
+        // 显示自定义提取对话框
+        function showCustomExtractDialog(terrainType) {
+            const terrainNames = {
+                'A': '草地', 'B': '道路', 'C': '河流',
+                'D': '岩石', 'E': '高坡', 'F': '密林'
+            };
+
+            const sheetIndex = prompt(`为 ${terrainNames[terrainType]} (${terrainType}) 选择图集:\n输入 0 或 1`, '0');
+            if (sheetIndex === null) return;
+
+            const tileX = prompt(`输入 X 位置 (从0开始)`, '0');
+            if (tileX === null) return;
+
+            const tileY = prompt(`输入 Y 位置 (从0开始)`, '0');
+            if (tileY === null) return;
+
+            customExtractAsset(terrainType, parseInt(sheetIndex), parseInt(tileX), parseInt(tileY));
+        }
+
+        // 加载素材图片
+        function loadAsset(terrainType, input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    terrainAssets[terrainType] = img;
+                    updateAssetPreview(terrainType, img);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 更新素材预览
+        function updateAssetPreview(terrainType, img) {
+            const preview = document.getElementById(`preview-${terrainType}`);
+            preview.innerHTML = `<img src="${img.src}" alt="${terrainType}">`;
+        }
+
+        // 修改原有的 generateMap 函数，保存地图数据
+        const originalGenerateMap = generateMap;
+        generateMap = function() {
+            // 获取并保存地图数据
+            const width = parseInt(document.getElementById('mapWidth').value);
+            const height = parseInt(document.getElementById('mapHeight').value);
+            const seed = parseInt(document.getElementById('seed').value);
+            const config = getConfig();
+
+            const generator = new LayeredMapGenerator(width, height, seed, config);
+            currentMapData = generator.generate();
+
+            // 调用原始函数来显示地图
+            originalGenerateMap();
+        };
+
+        // ==================== 手动图块配置系统 ====================
+        // 当前正在编辑的地形类型
+        let currentEditingTerrain = 'A';
+        let currentEditingEdgePosition = null; // 当前正在编辑的边缘位置
+        const terrainNames = {
+            'A': '草地 (A)', 'B': '道路 (B)', 'C': '河流 (C)',
+            'E': '高坡 (E)', 'F': '密林 (F)'
+        };
+
+        // 边缘配置存储（为每个地形类型存储不同边缘情况下的图块）
+        const edgeConfigs = {
+            'A': {}, // 草地的边缘配置
+            'B': {}, // 道路的边缘配置
+            'C': {}, // 河流的边缘配置
+            'E': {}, // 高坡的边缘配置
+            'F': {}  // 密林的边缘配置
+        };
+
+        // 边缘位置定义
+        const edgePositions = [
+            { key: 'top_left', label: '左上', dx: -1, dy: -1 },
+            { key: 'top', label: '上', dx: 0, dy: -1 },
+            { key: 'top_right', label: '右上', dx: 1, dy: -1 },
+            { key: 'left', label: '左', dx: -1, dy: 0 },
+            { key: 'center', label: '中心', dx: 0, dy: 0 },
+            { key: 'right', label: '右', dx: 1, dy: 0 },
+            { key: 'bottom_left', label: '左下', dx: -1, dy: 1 },
+            { key: 'bottom', label: '下', dx: 0, dy: 1 },
+            { key: 'bottom_right', label: '右下', dx: 1, dy: 1 }
+        ];
+
+        // 显示边缘预览弹窗
+        function showEdgePreview(terrainType) {
+            currentEditingTerrain = terrainType;
+            const modal = document.getElementById('edgePreviewModal');
+            const title = document.getElementById('edgePreviewTitle');
+
+            title.textContent = `边缘预览 - ${terrainNames[terrainType]}`;
+            title.style.color = getTerrainColor(terrainType);
+
+            // 生成边缘配置网格
+            generateEdgeConfigGrid(terrainType);
+
+            // 更新配置总结
+            updateEdgeConfigSummary(terrainType);
+
+            // 显示弹窗
+            modal.style.display = 'flex';
+        }
+
+        // 关闭边缘预览弹窗
+        function closeEdgePreview() {
+            document.getElementById('edgePreviewModal').style.display = 'none';
+        }
+
+        // 生成边缘配置网格
+        function generateEdgeConfigGrid(terrainType) {
+            const grid = document.getElementById('edgeConfigGrid');
+            const baseTileId = parseInt(document.getElementById(`tileId_${terrainType}`).value) || 0;
+
+            let html = '';
+
+            edgePositions.forEach((pos, index) => {
+                const isCenter = pos.key === 'center';
+                const edgeConfig = edgeConfigs[terrainType][pos.key] || {};
+                const tileId = edgeConfig.tileId !== undefined ? edgeConfig.tileId : baseTileId;
+
+                html += `
+                    <div class="edge-cell ${isCenter ? 'center' : ''}"
+                         onclick="${isCenter ? '' : `selectEdgeTile('${pos.key}')`}">
+                        <div class="edge-cell-preview">
+                            <img src="" id="edge_preview_${pos.key}" style="width: 48px; height: 48px; image-rendering: pixelated;">
+                        </div>
+                        <div class="edge-cell-tile-id">ID: <span id="edge_tile_id_${pos.key}">${tileId}</span></div>
+                        <div class="edge-direction-label">${pos.label}</div>
+                        ${!isCenter ? '<div style="font-size: 9px; color: #4ecca3; margin-top: 3px;">点击配置</div>' : ''}
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+
+            // 预览所有图块
+            setTimeout(() => {
+                edgePositions.forEach(pos => {
+                    const tileId = parseInt(document.getElementById(`edge_tile_id_${pos.key}`).textContent);
+                    previewEdgeTile(tileId, pos.key);
+                });
+            }, 100);
+        }
+
+        // 预览边缘图块
+        function previewEdgeTile(tileId, positionKey) {
+            const sheet = spriteSheets[0];
+            if (!sheet) return;
+
+            const pos = getTilePositionById(tileId);
+            const srcTileSize = SPRITE_SHEET_TILE_SIZES[0];
+            const srcX = pos.x * srcTileSize.width;
+            const srcY = pos.y * srcTileSize.height;
+
+            // 创建预览canvas
+            const previewCanvas = document.createElement('canvas');
+            previewCanvas.width = 48;
+            previewCanvas.height = 48;
+            const previewCtx = previewCanvas.getContext('2d');
+
+            // 绘制图块
+            previewCtx.drawImage(
+                sheet,
+                srcX, srcY, srcTileSize.width, srcTileSize.height,
+                0, 0, 48, 48
+            );
+
+            // 更新预览图片
+            const previewImg = document.getElementById(`edge_preview_${positionKey}`);
+            if (previewImg) {
+                previewImg.src = previewCanvas.toDataURL();
+            }
+        }
+
+        // 选择边缘图块
+        function selectEdgeTile(positionKey) {
+            currentEditingEdgePosition = positionKey;
+
+            // 切换到图集选择器
+            const modal = document.getElementById('edgePreviewModal');
+            modal.style.display = 'none';
+
+            // 滚动到图集选择器
+            document.getElementById('tileSelectorContainer').scrollIntoView({ behavior: 'smooth' });
+
+            // 提示用户
+            alert(`正在配置 ${terrainNames[currentEditingTerrain]} 的 ${edgePositions.find(p => p.key === positionKey).label} 位置图块\n\n请在上方图块选择器中点击想要的图块`);
+        }
+
+        // 应用边缘配置
+        function applyEdgeConfig() {
+            // 保存当前边缘配置
+            edgePositions.forEach(pos => {
+                if (pos.key === 'center') return;
+
+                const tileIdElement = document.getElementById(`edge_tile_id_${pos.key}`);
+                if (tileIdElement) {
+                    const tileId = parseInt(tileIdElement.textContent);
+                    edgeConfigs[currentEditingTerrain][pos.key] = { tileId: tileId };
+                }
+            });
+
+            // 标记边缘配置为已启用
+            edgeConfigs[currentEditingTerrain].enabled = true;
+
+            console.log(`已应用 ${currentEditingTerrain} 的边缘配置:`, edgeConfigs[currentEditingTerrain]);
+
+            // 更新智能边缘检测启用状态
+            document.getElementById('useSmartEdges').checked = true;
+
+            alert(`✅ 已应用 ${terrainNames[currentEditingTerrain]} 的边缘配置！\n\n智能边缘检测已自动启用，生成图片时会根据周围地形使用对应的边缘图块。`);
+
+            closeEdgePreview();
+        }
+
+        // 重置边缘配置
+        function resetEdgeConfig() {
+            edgePositions.forEach(pos => {
+                if (pos.key === 'center') return;
+
+                const tileIdElement = document.getElementById(`edge_tile_id_${pos.key}`);
+                if (tileIdElement) {
+                    const baseTileId = parseInt(document.getElementById(`tileId_${currentEditingTerrain}`).value) || 0;
+                    tileIdElement.textContent = baseTileId;
+                    previewEdgeTile(baseTileId, pos.key);
+                }
+            });
+
+            alert('🔄 已重置所有边缘位置使用基础图块！\n\n点击"应用配置"保存更改。');
+        }
+
+        // 更新边缘配置总结
+        function updateEdgeConfigSummary(terrainType) {
+            const summary = document.getElementById('edgeConfigSummary');
+            const baseTileId = parseInt(document.getElementById(`tileId_${terrainType}`).value) || 0;
+
+            let html = `<strong>基础图块:</strong> ID ${baseTileId}<br>`;
+            html += `<strong>已配置的边缘:</strong><br>`;
+
+            let configuredCount = 0;
+            edgePositions.forEach(pos => {
+                if (pos.key === 'center') return;
+
+                const config = edgeConfigs[terrainType][pos.key];
+                if (config && config.tileId !== undefined) {
+                    configuredCount++;
+                    html += `• ${pos.label}: ID ${config.tileId}<br>`;
+                }
+            });
+
+            if (configuredCount === 0) {
+                html += `<span style="color: #888;">未配置，所有位置使用基础图块</span>`;
+            } else {
+                html += `<span style="color: #4ecca3;">共配置 ${configuredCount} 个边缘位置</span>`;
+            }
+
+            summary.innerHTML = html;
+        }
+
+        // 从输入框更新图块配置（无需用户点击应用）
+        function updateTileConfigFromInputs() {
+            const terrainTypes = ['A', 'B', 'C', 'E', 'F'];
+            terrainTypes.forEach(type => {
+                const tileIdInput = document.getElementById(`tileId_${type}`);
+                if (tileIdInput) {
+                    const tileId = parseInt(tileIdInput.value);
+                    if (!isNaN(tileId) && tileId >= 0 && tileId <= 48) {
+                        // 更新默认素材映射
+                        defaultAssetMapping[type] = { sheet: 0, tileId: tileId };
+                    }
+                }
+            });
+            console.log('配置已从输入框更新:', defaultAssetMapping);
+        }
+
+        // 初始化交互式图块选择器（使用用户配置的瓦片参数）
+        function initTileSelector() {
+            const canvas = document.getElementById('tileSelectorCanvas');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const sheet = spriteSheets[0];
+
+            if (!sheet) {
+                // 如果sprite sheet还没加载，显示等待消息
+                canvas.width = 400;
+                canvas.height = 100;
+                ctx.fillStyle = '#1a1a2e';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#888';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('正在加载地形图集...', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            // 计算图集的实际行列数
+            const maxTilesX = Math.floor(sheet.width / tilesetConfig.width);
+            const maxTilesY = Math.floor(sheet.height / tilesetConfig.height);
+            const TILE_COLS = tilesetConfig.columns; // 使用用户配置的列数
+            const TILE_ROWS = maxTilesY; // 实际行数
+            const DISPLAY_TILE_SIZE = 32; // 显示尺寸
+
+            canvas.width = TILE_COLS * DISPLAY_TILE_SIZE;
+            canvas.height = TILE_ROWS * DISPLAY_TILE_SIZE;
+
+            // 绘制sprite sheet
+            for (let row = 0; row < TILE_ROWS; row++) {
+                for (let col = 0; col < TILE_COLS; col++) {
+                    const tileId = row * TILE_COLS + col;
+
+                    const srcX = col * tilesetConfig.width;
+                    const srcY = row * tilesetConfig.height;
+                    const destX = col * DISPLAY_TILE_SIZE;
+                    const destY = row * DISPLAY_TILE_SIZE;
+
+                    ctx.drawImage(
+                        sheet,
+                        srcX, srcY, tilesetConfig.width, tilesetConfig.height,
+                        destX, destY, DISPLAY_TILE_SIZE, DISPLAY_TILE_SIZE
+                    );
+                }
+            }
+
+            // 绘制网格线和图块ID
+            ctx.strokeStyle = 'rgba(78, 204, 163, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            for (let row = 0; row < TILE_ROWS; row++) {
+                for (let col = 0; col < TILE_COLS; col++) {
+                    const tileId = row * TILE_COLS + col;
+
+                    const x = col * DISPLAY_TILE_SIZE;
+                    const y = row * DISPLAY_TILE_SIZE;
+
+                    // 绘制网格
+                    ctx.strokeRect(x, y, DISPLAY_TILE_SIZE, DISPLAY_TILE_SIZE);
+
+                    // 绘制图块ID
+                    ctx.fillText(tileId.toString(), x + DISPLAY_TILE_SIZE / 2, y + DISPLAY_TILE_SIZE / 2);
+                }
+            }
+
+            // 更新图集信息显示
+            const totalTiles = TILE_COLS * TILE_ROWS;
+            document.getElementById('tilesetInfo').textContent =
+                `图集: ${TILE_COLS}列 × ${TILE_ROWS}行 | 每块: ${tilesetConfig.width}×${tilesetConfig.height}px | 总计: ${totalTiles}个图块`;
+
+            // 添加点击事件监听
+            canvas.onclick = function(e) {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const col = Math.floor(x / DISPLAY_TILE_SIZE);
+                const row = Math.floor(y / DISPLAY_TILE_SIZE);
+                const tileId = row * TILE_COLS + col;
+
+                if (tileId >= 0 && tileId < totalTiles) {
+                    selectTile(tileId);
+                }
+            };
+
+            // 添加鼠标悬停效果
+            canvas.onmousemove = function(e) {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const col = Math.floor(x / DISPLAY_TILE_SIZE);
+                const row = Math.floor(y / DISPLAY_TILE_SIZE);
+                const tileId = row * TILE_COLS + col;
+
+                if (tileId >= 0 && tileId < totalTiles) {
+                    const pos = getTilePositionById(tileId);
+                    canvas.title = `图块 ID: ${tileId} | 位置: (${pos.x}, ${pos.y})`;
+                }
+            };
+
+            canvas.style.cursor = 'pointer';
+
+            // 更新输入框的最大值
+            updateTileIdInputMax(totalTiles - 1);
+        }
+
+        // 更新图块ID输入框的最大值
+        function updateTileIdInputMax(maxId) {
+            const terrainTypes = ['A', 'B', 'C', 'E', 'F'];
+            terrainTypes.forEach(type => {
+                const input = document.getElementById(`tileId_${type}`);
+                if (input) {
+                    input.max = maxId;
+                    // 如果当前值超过最大值，调整到最大值
+                    if (parseInt(input.value) > maxId) {
+                        input.value = maxId;
+                    }
+                }
+            });
+        }
+
+        // 开始为指定地形类型选择图块
+        function startTileSelection(terrainType) {
+            currentEditingTerrain = terrainType;
+            document.getElementById('currentEditingTerrain').textContent = terrainNames[terrainType];
+            document.getElementById('currentEditingTerrain').style.color = getTerrainColor(terrainType);
+
+            // 滚动到选择器
+            const container = document.getElementById('tileSelectorContainer');
+            if (container) {
+                container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            // 高亮当前选中的图块
+            highlightCurrentTile();
+        }
+
+        // 获取地形类型对应的颜色
+        function getTerrainColor(terrainType) {
+            const colors = {
+                'A': '#90EE90', 'B': '#8B4513', 'C': '#4169E1',
+                'E': '#DEB887', 'F': '#228B22'
+            };
+            return colors[terrainType] || '#4ecca3';
+        }
+
+        // 选中图块
+        function selectTile(tileId) {
+            const totalTiles = getTotalTiles();
+            if (tileId < 0 || tileId >= totalTiles) {
+                console.warn(`无效的图块ID: ${tileId}，有效范围: 0-${totalTiles - 1}`);
+                return;
+            }
+
+            // 如果正在配置边缘位置
+            if (currentEditingEdgePosition) {
+                // 保存到边缘配置
+                edgeConfigs[currentEditingTerrain][currentEditingEdgePosition] = { tileId: tileId };
+
+                console.log(`已为 ${currentEditingTerrain} 的边缘位置 ${currentEditingEdgePosition} 选择图块: ID ${tileId}`);
+
+                // 重新打开边缘预览弹窗
+                showEdgePreview(currentEditingTerrain);
+
+                // 重置边缘编辑状态
+                currentEditingEdgePosition = null;
+
+                return;
+            }
+
+            // 正常的基础图块选择
+            // 更新输入框
+            const input = document.getElementById(`tileId_${currentEditingTerrain}`);
+            if (input) {
+                input.value = tileId;
+            }
+
+            // 更新预览
+            previewTile(0, currentEditingTerrain);
+
+            // 显示选中信息
+            const pos = getTilePositionById(tileId);
+            const infoDiv = document.getElementById('selectedTileInfo');
+            document.getElementById('selectedTileId').textContent = `ID ${tileId}`;
+            document.getElementById('selectedTilePos').textContent = `位置 (${pos.x}, ${pos.y})`;
+            infoDiv.style.display = 'block';
+
+            // 闪烁效果
+            infoDiv.style.backgroundColor = '#4ecca3';
+            setTimeout(() => {
+                infoDiv.style.backgroundColor = '#1a1a2e';
+            }, 200);
+
+            console.log(`已为 ${currentEditingTerrain} 选择基础图块: ID ${tileId}, 位置 (${pos.x}, ${pos.y})`);
+
+            // 高亮选中的图块
+            highlightTile(tileId);
+        }
+
+        // 高亮指定图块
+        function highlightTile(tileId) {
+            const canvas = document.getElementById('tileSelectorCanvas');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const TILE_COLS = tilesetConfig.columns;
+            const DISPLAY_TILE_SIZE = 32;
+
+            // 重新绘制
+            initTileSelector();
+
+            // 等待绘制完成后再高亮
+            setTimeout(() => {
+                const pos = getTilePositionById(tileId);
+
+                const x = pos.x * DISPLAY_TILE_SIZE;
+                const y = pos.y * DISPLAY_TILE_SIZE;
+
+                // 绘制高亮边框
+                ctx.strokeStyle = getTerrainColor(currentEditingTerrain);
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x + 1, y + 1, DISPLAY_TILE_SIZE - 2, DISPLAY_TILE_SIZE - 2);
+
+                // 绘制半透明背景
+                ctx.fillStyle = getTerrainColor(currentEditingTerrain) + '40';
+                ctx.fillRect(x, y, DISPLAY_TILE_SIZE, DISPLAY_TILE_SIZE);
+            }, 50);
+        }
+
+        // 高亮当前地形类型已选中的图块
+        function highlightCurrentTile() {
+            const input = document.getElementById(`tileId_${currentEditingTerrain}`);
+            if (input) {
+                const tileId = parseInt(input.value);
+                if (!isNaN(tileId)) {
+                    highlightTile(tileId);
+                }
+            }
+        }
+
+        // 应用瓦片配置
+        function applyTilesetConfig() {
+            const width = parseInt(document.getElementById('tileWidth').value);
+            const height = parseInt(document.getElementById('tileHeight').value);
+            const columns = parseInt(document.getElementById('tileColumns').value);
+
+            // 验证输入
+            if (width < 8 || width > 128 || height < 8 || height > 128 || columns < 1 || columns > 64) {
+                alert('请输入有效的配置值！\n瓦片宽高: 8-128像素\n列数: 1-64');
+                return;
+            }
+
+            // 更新配置
+            tilesetConfig.width = width;
+            tilesetConfig.height = height;
+            tilesetConfig.columns = columns;
+
+            // 更新sprite sheet瓦片尺寸
+            SPRITE_SHEET_TILE_SIZES[0] = { width: width, height: height };
+
+            console.log('瓦片配置已更新:', tilesetConfig);
+
+            // 重新初始化图块选择器
+            initTileSelector();
+
+            // 重新高亮当前选中的图块
+            highlightCurrentTile();
+
+            // 显示成功消息
+            const totalTiles = getTotalTiles();
+            alert(`✅ 瓦片配置已应用！\n\n瓦片尺寸: ${width}×${height}像素\n列数: ${columns}\n总图块数: ${totalTiles}\n\n图块选择器已更新，请选择新的图块。`);
+        }
+
+        // 重置瓦片配置
+        function resetTilesetConfig() {
+            // 重置为默认值
+            document.getElementById('tileWidth').value = 16;
+            document.getElementById('tileHeight').value = 16;
+            document.getElementById('tileColumns').value = 24;
+
+            // 应用默认配置
+            applyTilesetConfig();
+        }
+
+        // 预览指定ID的图块
+        function previewTile(sheetIndex, terrainType) {
+            const tileIdInput = document.getElementById(`tileId_${terrainType}`);
+            const tileId = parseInt(tileIdInput.value);
+
+            const totalTiles = getTotalTiles();
+            if (isNaN(tileId) || tileId < 0 || tileId >= totalTiles) {
+                console.warn(`无效的图块ID: ${tileId}，有效范围: 0-${totalTiles - 1}`);
+                return;
+            }
+
+            const sheet = spriteSheets[sheetIndex];
+            if (!sheet) {
+                console.warn('地形图集尚未加载完成');
+                return;
+            }
+
+            // 计算图块位置
+            const pos = getTilePositionById(tileId);
+            const srcTileSize = SPRITE_SHEET_TILE_SIZES[sheetIndex];
+            const srcX = pos.x * srcTileSize.width;
+            const srcY = pos.y * srcTileSize.height;
+
+            // 创建预览canvas
+            const previewCanvas = document.createElement('canvas');
+            previewCanvas.width = 32;
+            previewCanvas.height = 32;
+            const previewCtx = previewCanvas.getContext('2d');
+
+            // 绘制图块
+            previewCtx.drawImage(
+                sheet,
+                srcX, srcY, srcTileSize.width, srcTileSize.height,
+                0, 0, 32, 32
+            );
+
+            // 更新预览区域
+            const previewDiv = document.getElementById(`preview_${terrainType}`);
+            previewDiv.innerHTML = `<img src="${previewCanvas.toDataURL()}" style="width: 32px; height: 32px; image-rendering: pixelated;">`;
+
+            console.log(`预览图块: ${terrainType}, ID: ${tileId}, 位置: (${pos.x}, ${pos.y})`);
+        }
+
+        // 应用用户配置的图块ID
+        function applyTileConfig() {
+            // 从输入框更新配置
+            updateTileConfigFromInputs();
+
+            // 预览所有地形图块
+            const terrainTypes = ['A', 'B', 'C', 'E', 'F'];
+            terrainTypes.forEach(type => {
+                previewTile(0, type);
+            });
+
+            // 重新提取素材
+            extractDefaultAssets();
+
+            alert('✅ 图块配置已应用！现在可以生成图片地图了。\n\n提示：即使不点击"应用配置"，生成图片时也会自动使用输入框中的最新配置。');
+        }
+
+        // 保存配置到localStorage
+        function saveTileConfig() {
+            const config = {};
+            const terrainTypes = ['A', 'B', 'C', 'E', 'F'];
+
+            terrainTypes.forEach(type => {
+                const tileIdInput = document.getElementById(`tileId_${type}`);
+                config[type] = parseInt(tileIdInput.value);
+            });
+
+            // 保存瓦片配置
+            config.tileset = {
+                width: tilesetConfig.width,
+                height: tilesetConfig.height,
+                columns: tilesetConfig.columns
+            };
+
+            // 保存边缘配置
+            config.edgeConfigs = edgeConfigs;
+
+            config.useSmartEdges = document.getElementById('useSmartEdges').checked;
+            config.timestamp = new Date().toISOString();
+
+            localStorage.setItem('mapGeneratorTileConfig', JSON.stringify(config));
+            alert('💾 配置已保存到浏览器本地存储！\n\n包括：瓦片配置、地形映射、边缘配置、智能边缘设置');
+        }
+
+        // 重置配置为默认值
+        function resetTileConfig() {
+            const defaults = {
+                'A': 15,  // 草地
+                'B': 6,   // 道路
+                'C': 30,  // 河流
+                'E': 13,  // 高坡
+                'F': 0    // 密林
+            };
+
+            Object.entries(defaults).forEach(([type, tileId]) => {
+                const input = document.getElementById(`tileId_${type}`);
+                if (input) {
+                    input.value = tileId;
+                }
+            });
+
+            document.getElementById('useSmartEdges').checked = true;
+
+            alert('🔄 配置已重置为默认值！点击"应用配置"来应用。');
+        }
+
+        // 从localStorage加载保存的配置
+        function loadSavedConfig() {
+            const saved = localStorage.getItem('mapGeneratorTileConfig');
+            if (saved) {
+                try {
+                    const config = JSON.parse(saved);
+                    console.log('加载保存的配置:', config);
+
+                    // 加载瓦片配置
+                    if (config.tileset) {
+                        document.getElementById('tileWidth').value = config.tileset.width;
+                        document.getElementById('tileHeight').value = config.tileset.height;
+                        document.getElementById('tileColumns').value = config.tileset.columns;
+
+                        // 应用瓦片配置
+                        tilesetConfig.width = config.tileset.width;
+                        tilesetConfig.height = config.tileset.height;
+                        tilesetConfig.columns = config.tileset.columns;
+                        SPRITE_SHEET_TILE_SIZES[0] = {
+                            width: config.tileset.width,
+                            height: config.tileset.height
+                        };
+
+                        console.log('✓ 已加载瓦片配置:', config.tileset);
+                    }
+
+                    // 加载边缘配置
+                    if (config.edgeConfigs) {
+                        Object.assign(edgeConfigs, config.edgeConfigs);
+                        console.log('✓ 已加载边缘配置');
+                    }
+
+                    // 加载地形映射
+                    Object.entries(config).forEach(([key, value]) => {
+                        if (key === 'useSmartEdges' || key === 'timestamp' || key === 'tileset' || key === 'edgeConfigs') return;
+
+                        const input = document.getElementById(`tileId_${key}`);
+                        if (input && typeof value === 'number') {
+                            input.value = value;
+                        }
+                    });
+
+                    if (config.useSmartEdges !== undefined) {
+                        document.getElementById('useSmartEdges').checked = config.useSmartEdges;
+                    }
+
+                    console.log('✓ 已加载保存的配置');
+                } catch (e) {
+                    console.error('加载配置失败:', e);
+                }
+            }
+        }
+
+        // 检查是否启用智能边缘检测
+        function isSmartEdgesEnabled() {
+            return document.getElementById('useSmartEdges')?.checked ?? true;
+        }
+
+        // 页面加载时生成示例地图
+        window.onload = function() {
+            // 加载保存的配置
+            loadSavedConfig();
+            // 自动加载预设素材
+            loadPresetAssets();
+            // 生成地图
+            generateMap();
+        };
+
+        // 在sprite sheet加载完成后，自动预览所有图块并初始化选择器
+        const originalLoadImage = loadImage;
+        loadImage = function(sheetIndex, filename) {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = function() {
+                spriteSheets[sheetIndex] = img;
+                ASSETS_LOADED[sheetIndex] = true;
+                updateSpriteSheetPreview(sheetIndex, img);
+
+                // 更新加载状态提示
+                const statusElement = document.getElementById(`spriteSheetStatus${sheetIndex}`);
+                if (statusElement) {
+                    const info = sheetIndex === 0 ? '地形图集' : '树木岩石图集';
+                    statusElement.textContent = `✓ ${info}已加载`;
+                    statusElement.style.color = '#4ecca3';
+                }
+
+                // 地形图集加载完成后，初始化图块选择器并预览所有配置的图块
+                if (sheetIndex === 0) {
+                    setTimeout(() => {
+                        // 初始化交互式图块选择器
+                        initTileSelector();
+
+                        // 预览所有配置的图块
+                        const terrainTypes = ['A', 'B', 'C', 'E', 'F'];
+                        terrainTypes.forEach(type => {
+                            previewTile(0, type);
+                        });
+                    }, 500);
+                }
+
+                // 两个sprite sheet都加载完成后，自动提取素材
+                if (ASSETS_LOADED[0] && ASSETS_LOADED[1]) {
+                    console.log('预设素材加载完成，正在自动提取地形...');
+                    extractDefaultAssets();
+                }
+            };
+            img.onerror = function() {
+                console.error(`无法加载预设素材: ${filename}`);
+                const statusElement = document.getElementById(`spriteSheetStatus${sheetIndex}`);
+                if (statusElement) {
+                    statusElement.textContent = '✗ 加载失败';
+                    statusElement.style.color = '#e74c3c';
+                }
+
+                // 检查是否所有sprite sheet都加载失败
+                const allFailed = Object.values(ASSETS_LOADED).every(loaded => loaded === false);
+                if (allFailed) {
+                    const autoStatus = document.getElementById('autoExtractStatus');
+                    if (autoStatus) {
+                        autoStatus.innerHTML = '<span style="color: #e74c3c;">✗ 素材加载失败</span>';
+                    }
+                }
+            };
+            img.src = filename;
+        };
+
+        // ==================== 预设素材自动加载 ====================
+        function loadPresetAssets() {
+            console.log('正在加载预设地形素材...');
+
+            // 直接加载sprite sheet图片（不再依赖JSON文件）
+            loadImage(0, PRESET_SPRITE_SHEETS[0]);
+            loadImage(1, PRESET_SPRITE_SHEETS[1]);
+        }
+
+        function loadImage(sheetIndex, filename) {
+            const img = new Image();
+            img.crossOrigin = 'anonymous'; // 防止跨域问题
+            img.onload = function() {
+                spriteSheets[sheetIndex] = img;
+                ASSETS_LOADED[sheetIndex] = true;
+                updateSpriteSheetPreview(sheetIndex, img);
+
+                // 更新加载状态提示
+                const statusElement = document.getElementById(`spriteSheetStatus${sheetIndex}`);
+                if (statusElement) {
+                    const info = sheetIndex === 0 ? '地形图集' : '树木岩石图集';
+                    statusElement.textContent = `✓ ${info}已加载`;
+                    statusElement.style.color = '#4ecca3';
+                }
+
+                // 两个sprite sheet都加载完成后，自动提取素材
+                if (ASSETS_LOADED[0] && ASSETS_LOADED[1]) {
+                    console.log('预设素材加载完成，正在自动提取地形...');
+                    extractDefaultAssets();
+                    const autoStatus = document.getElementById('autoExtractStatus');
+                    if (autoStatus) {
+                        autoStatus.innerHTML = '<span style="color: #4ecca3;">✓ 预设素材已自动加载</span>';
+                    }
+                }
+            };
+            img.onerror = function() {
+                console.error(`无法加载预设素材: ${filename}`);
+                const statusElement = document.getElementById(`spriteSheetStatus${sheetIndex}`);
+                if (statusElement) {
+                    statusElement.textContent = '✗ 加载失败';
+                    statusElement.style.color = '#e74c3c';
+                }
+
+                // 检查是否所有sprite sheet都加载失败
+                const allFailed = Object.values(ASSETS_LOADED).every(loaded => loaded === false);
+                if (allFailed) {
+                    const autoStatus = document.getElementById('autoExtractStatus');
+                    if (autoStatus) {
+                        autoStatus.innerHTML = '<span style="color: #e74c3c;">✗ 素材加载失败</span>';
+                    }
+                }
+            };
+            img.src = filename;
+        }
+
+        // 根据图块ID获取其在sprite sheet中的位置
+        // 使用用户配置的列数和瓦片尺寸
+        function getTilePositionById(tileId) {
+            const columns = tilesetConfig.columns; // 使用用户配置的列数
+            const row = Math.floor(tileId / columns);
+            const col = tileId % columns;
+
+            return { x: col, y: row };
+        }
+
+        // 获取总图块数
+        function getTotalTiles() {
+            // 根据图片实际大小和瓦片尺寸计算
+            const sheet = spriteSheets[0];
+            if (sheet) {
+                const maxTilesX = Math.floor(sheet.width / tilesetConfig.width);
+                const maxTilesY = Math.floor(sheet.height / tilesetConfig.height);
+                return maxTilesX * maxTilesY;
+            }
+            // 默认值
+            return tilesetConfig.columns * 2; // 假设2行
+        }
+
+        // ==================== 地图图片生成功能 ====================
+        let generatedMapCanvas = null;
+
+        // 根据周围地形获取边缘图块ID
+        function getEdgeTile(terrainType, x, y, map) {
+            const edgeConfig = edgeConfigs[terrainType];
+            if (!edgeConfig || !edgeConfig.enabled) {
+                // 没有启用边缘配置，使用基础图块
+                return parseInt(document.getElementById(`tileId_${terrainType}`)?.value) || 0;
+            }
+
+            // 获取周围8个方向的地形
+            const getTerrain = (dx, dy) => {
+                const nx = x + dx;
+                const ny = y + dy;
+                if (ny >= 0 && ny < map.length && nx >= 0 && nx < map[0].length) {
+                    return map[ny][nx];
+                }
+                return null;
+            };
+
+            const center = getTerrain(0, 0);
+            const topLeft = getTerrain(-1, -1);
+            const top = getTerrain(0, -1);
+            const topRight = getTerrain(1, -1);
+            const left = getTerrain(-1, 0);
+            const right = getTerrain(1, 0);
+            const bottomLeft = getTerrain(-1, 1);
+            const bottom = getTerrain(0, 1);
+            const bottomRight = getTerrain(1, 1);
+
+            // 检查是否有相邻的同类地形
+            const hasSameTerrain = (t) => t === terrainType;
+            const hasAdjacentSame = hasSameTerrain(top) || hasSameTerrain(bottom) ||
+                                    hasSameTerrain(left) || hasSameTerrain(right);
+
+            // 如果周围没有同类地形，使用基础图块
+            if (!hasAdjacentSame) {
+                return parseInt(document.getElementById(`tileId_${terrainType}`)?.value) || 0;
+            }
+
+            // 检测边缘情况并返回对应的图块ID
+            // 简化版本：只检查是否是边缘位置
+            const isEdge = !hasSameTerrain(top) || !hasSameTerrain(bottom) ||
+                          !hasSameTerrain(left) || !hasSameTerrain(right);
+
+            if (isEdge) {
+                // 根据具体边缘情况选择图块
+                if (!hasSameTerrain(top) && edgeConfig.top) return edgeConfig.top.tileId;
+                if (!hasSameTerrain(bottom) && edgeConfig.bottom) return edgeConfig.bottom.tileId;
+                if (!hasSameTerrain(left) && edgeConfig.left) return edgeConfig.left.tileId;
+                if (!hasSameTerrain(right) && edgeConfig.right) return edgeConfig.right.tileId;
+                if (!hasSameTerrain(topLeft) && edgeConfig.top_left) return edgeConfig.top_left.tileId;
+                if (!hasSameTerrain(topRight) && edgeConfig.top_right) return edgeConfig.top_right.tileId;
+                if (!hasSameTerrain(bottomLeft) && edgeConfig.bottom_left) return edgeConfig.bottom_left.tileId;
+                if (!hasSameTerrain(bottomRight) && edgeConfig.bottom_right) return edgeConfig.bottom_right.tileId;
+            }
+
+            // 使用基础图块
+            return parseInt(document.getElementById(`tileId_${terrainType}`)?.value) || 0;
+        }
+
+        // 生成地图图片
+        function generateMapImage() {
+            if (!currentMapData) {
+                alert('请先生成地图！点击"生成地图"按钮创建地图。');
+                return;
+            }
+
+            const tileSize = parseInt(document.getElementById('tileSize').value) || 32;
+            const showGrid = document.getElementById('showGrid').checked;
+            const gridColor = document.getElementById('gridColor').value;
+            const useSmartEdges = document.getElementById('useSmartEdges').checked;
+
+            const map = currentMapData;
+            const mapWidth = map[0].length;
+            const mapHeight = map.length;
+
+            // 创建canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = mapWidth * tileSize;
+            canvas.height = mapHeight * tileSize;
+            const ctx = canvas.getContext('2d');
+
+            // 获取sprite sheet
+            const sheet = spriteSheets[0];
+            if (!sheet) {
+                alert('请先加载地形图集！确保 ground_grasss.png 文件存在。');
+                return;
+            }
+
+            // 绘制地图
+            for (let y = 0; y < mapHeight; y++) {
+                for (let x = 0; x < mapWidth; x++) {
+                    const terrainType = map[y][x];
+
+                    // 获取对应的图块ID
+                    let tileId;
+                    if (useSmartEdges && edgeConfigs[terrainType]?.enabled) {
+                        tileId = getEdgeTile(terrainType, x, y, map);
+                    } else {
+                        tileId = parseInt(document.getElementById(`tileId_${terrainType}`)?.value) || 0;
+                    }
+
+                    // 如果该地形类型有手动上传的素材，使用手动素材
+                    if (terrainAssets[terrainType]) {
+                        ctx.drawImage(terrainAssets[terrainType], x * tileSize, y * tileSize, tileSize, tileSize);
+                    } else {
+                        // 从sprite sheet中绘制
+                        const srcTileSize = SPRITE_SHEET_TILE_SIZES[0];
+                        const pos = getTilePositionById(tileId);
+                        const srcX = pos.x * srcTileSize.width;
+                        const srcY = pos.y * srcTileSize.height;
+
+                        ctx.drawImage(
+                            sheet,
+                            srcX, srcY, srcTileSize.width, srcTileSize.height,
+                            x * tileSize, y * tileSize, tileSize, tileSize
+                        );
+                    }
+
+                    // 绘制网格
+                    if (showGrid) {
+                        ctx.strokeStyle = gridColor;
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                    }
+                }
+            }
+
+            // 保存生成的canvas
+            generatedMapCanvas = canvas;
+
+            // 显示预览
+            const preview = document.getElementById('mapImagePreview');
+            const imgResult = document.getElementById('mapImageResult');
+            const sizeLabel = document.getElementById('mapImageSize');
+
+            imgResult.src = canvas.toDataURL('image/png');
+            sizeLabel.textContent = `尺寸: ${canvas.width} × ${canvas.height} 像素 | 格: ${mapWidth} × ${mapHeight}`;
+            preview.style.display = 'block';
+        }
+
+        // 下载地图图片
+        function downloadMapImage() {
+            if (!generatedMapCanvas) {
+                alert('请先生成地图图片！点击"生成地图图片"按钮。');
+                return;
+            }
+
+            const link = document.createElement('a');
+            link.download = `map_${currentMapData[0].length}x${currentMapData.length}_${Date.now()}.png`;
+            link.href = generatedMapCanvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // 根据手动输入的矩阵字符串生成地图图片
+        function generateMapFromMatrix(matrixString) {
+            // 解析矩阵字符串
+            const rows = matrixString.trim().split('\n');
+            const map = rows.map(row => row.trim().split(''));
+
+            currentMapData = map;
+
+            // 更新地图显示
+            const output = document.getElementById('mapOutput');
+            const terrainColors = {
+                'A': '#90EE90', 'B': '#8B4513', 'C': '#4169E1',
+                'D': '#808080', 'E': '#DEB887', 'F': '#228B22', 'G': '#DEB887'
+            };
+
+            const mapHTML = map.map(row => {
+                const coloredRow = row.map(cell => {
+                    const color = terrainColors[cell] || '#FFFFFF';
+                    return `<span style="color: ${color};">${cell}</span>`;
+                }).join(' ');
+                return '<div class="map-row">' + coloredRow + '</div>';
+            }).join('');
+            output.innerHTML = mapHTML;
+
+            return map;
+        }
+
+        // 从文本框导入地图并生成图片
+        function importAndGenerateMap() {
+            const matrixText = prompt('请粘贴地图矩阵字符串（每行代表一行，用字符表示地形类型）:\n\nA=草地, B=道路, C=河流, D=岩石, E=高坡, F=密林\n\n例如:\nAAABAAA\nAACCAAA\nAAABAAA');
+
+            if (!matrixText) return;
+
+            try {
+                const map = generateMapFromMatrix(matrixText);
+                alert(`地图导入成功！尺寸: ${map[0].length} × ${map.length}\n\n现在可以点击"生成地图图片"来生成图片。`);
+            } catch (e) {
+                alert('地图格式错误！请确保每行字符数一致。');
+            }
+        }
+    </script>
+</body>
+</html>

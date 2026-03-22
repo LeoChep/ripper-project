@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>森林地图生成器</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a2e;
+            color: #eee;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #4ecca3;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .controls {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 300px;
+        }
+        .output {
+            flex: 1;
+            min-width: 600px;
+        }
+        .map-output {
+            background: #0f3460;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            min-height: 400px;
+        }
+        .map-row {
+            white-space: pre;
+            font-family: Consolas, Monaco, "Courier New", monospace;
+            font-size: 16px;
+            line-height: 1.6;
+            letter-spacing: 4px;
+            font-weight: bold;
+        }
+        .map-row span {
+            display: inline-block;
+            min-width: 1ch;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        pre {
+            font-size: 14px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            font-family: Consolas, Monaco, "Courier New", monospace;
+            letter-spacing: 2px;
+            font-weight: bold;
+            word-break: break-all;
+            overflow-wrap: break-word;
+        }
+        .control-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #4ecca3;
+        }
+        input[type="range"] {
+            width: 100%;
+        }
+        input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            background: #1a1a2e;
+            border: 1px solid #4ecca3;
+            color: #eee;
+            border-radius: 5px;
+        }
+        button {
+            background: #4ecca3;
+            color: #1a1a2e;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #45b393;
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background: #0f3460;
+            border-radius: 10px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-box {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+        .value-display {
+            color: #4ecca3;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌲 森林地图生成器 🌲</h1>
+
+    <div class="container">
+        <div class="controls">
+            <div class="control-group">
+                <label>地图宽度: <span id="widthValue" class="value-display">60</span></label>
+                <input type="range" id="mapWidth" min="20" max="100" value="60" oninput="updateValue('width')">
+            </div>
+
+            <div class="control-group">
+                <label>地图高度: <span id="heightValue" class="value-display">40</span></label>
+                <input type="range" id="mapHeight" min="20" max="80" value="40" oninput="updateValue('height')">
+            </div>
+
+            <div class="control-group">
+                <label>噪声缩放: <span id="scaleValue" class="value-display">30</span></label>
+                <input type="range" id="noiseScale" min="10" max="100" value="30" oninput="updateValue('scale')">
+                <small>越小越细节，越大越平滑</small>
+            </div>
+
+            <div class="control-group">
+                <label>道路数量: <span id="roadsValue" class="value-display">2</span></label>
+                <input type="range" id="roadCount" min="0" max="5" value="2" oninput="updateValue('roads')">
+            </div>
+
+            <div class="control-group">
+                <label>岩石密度: <span id="rocksValue" class="value-display">0.02</span></label>
+                <input type="range" id="rockDensity" min="0" max="10" value="2" oninput="updateValue('rocks')">
+            </div>
+
+            <div class="control-group">
+                <label>高坡密度: <span id="hillsValue" class="value-display">0.03</span></label>
+                <input type="range" id="hillDensity" min="0" max="10" value="3" oninput="updateValue('hills')">
+            </div>
+
+            <div class="control-group">
+                <label>随机种子: <span id="seedValue" class="value-display">12345</span></label>
+                <input type="range" id="seed" min="1" max="99999" value="12345" oninput="updateValue('seed')">
+            </div>
+
+            <button onclick="generateMap()">🎲 生成地图</button>
+            <button onclick="copyMap()">📋 复制紧凑格式</button>
+
+            <p style="margin-top: 15px; font-size: 12px; color: #888;">
+                💡 预览显示带空格以便阅读，复制功能输出紧凑格式
+            </p>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #90EE90;">A</div>
+                    <span>草地</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #8B4513;">B</div>
+                    <span>道路</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #4169E1;">C</div>
+                    <span>河流</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #808080;">D</div>
+                    <span>岩石</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #8B4513; color: #DEB887;">E</div>
+                    <span>高坡</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #228B22;">F</div>
+                    <span>密林</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="output">
+            <div class="map-output">
+                <div id="mapOutput">点击"生成地图"开始...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 简化的噪声实现（基于值噪声）
+        class SimpleNoise {
+            constructor(seed) {
+                this.seed = seed;
+                this.permutation = this.generatePermutation();
+            }
+
+            generatePermutation() {
+                const p = [];
+                for (let i = 0; i < 256; i++) {
+                    p[i] = i;
+                }
+
+                // 使用种子进行洗牌
+                let random = this.seededRandom(this.seed);
+                for (let i = 255; i > 0; i--) {
+                    const j = Math.floor(random() * (i + 1));
+                    [p[i], p[j]] = [p[j], p[i]];
+                }
+
+                // 复制一份以避免溢出
+                return [...p, ...p];
+            }
+
+            seededRandom(seed) {
+                return function() {
+                    seed = (seed * 9301 + 49297) % 233280;
+                    return seed / 233280;
+                };
+            }
+
+            fade(t) {
+                return t * t * t * (t * (t * 6 - 15) + 10);
+            }
+
+            lerp(a, b, t) {
+                return a + t * (b - a);
+            }
+
+            grad(hash, x, y) {
+                const h = hash & 3;
+                const u = h < 2 ? x : y;
+                const v = h < 2 ? y : x;
+                return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
+            }
+
+            noise(x, y) {
+                const X = Math.floor(x) & 255;
+                const Y = Math.floor(y) & 255;
+
+                x -= Math.floor(x);
+                y -= Math.floor(y);
+
+                const u = this.fade(x);
+                const v = this.fade(y);
+
+                const p = this.permutation;
+                const A = p[X] + Y;
+                const B = p[X + 1] + Y;
+
+                return this.lerp(
+                    this.lerp(this.grad(p[A], x, y), this.grad(p[B], x - 1, y), u),
+                    this.lerp(this.grad(p[A + 1], x, y - 1), this.grad(p[B + 1], x - 1, y - 1), u),
+                    v
+                );
+            }
+
+            // 分形布朗运动 - 叠加多层噪声
+            fbm(x, y, octaves = 4) {
+                let value = 0;
+                let amplitude = 1;
+                let frequency = 1;
+                let maxValue = 0;
+
+                for (let i = 0; i < octaves; i++) {
+                    value += amplitude * this.noise(x * frequency, y * frequency);
+                    maxValue += amplitude;
+                    amplitude *= 0.5;
+                    frequency *= 2;
+                }
+
+                return value / maxValue;
+            }
+        }
+
+        // 地图生成器
+        class ForestMapGenerator {
+            constructor(width, height, seed, params = {}) {
+                this.width = width;
+                this.height = height;
+                this.seed = seed;
+                this.params = {
+                    noiseScale: params.noiseScale !== undefined ? params.noiseScale : 30,
+                    roadCount: params.roadCount !== undefined ? params.roadCount : 2,
+                    rockDensity: params.rockDensity !== undefined ? params.rockDensity : 0.02,
+                    hillDensity: params.hillDensity !== undefined ? params.hillDensity : 0.03
+                };
+
+                this.noise = new SimpleNoise(seed);
+                this.map = [];
+            }
+
+            generate() {
+                // 初始化地图
+                this.map = Array(this.height).fill(null).map(() =>
+                    Array(this.width).fill('A')
+                );
+
+                // 1. 生成基础地形（使用噪声）
+                this.generateBaseTerrain();
+
+                // 2. 生成河流
+                this.generateRivers();
+
+                // 3. 生成道路
+                this.generateRoads();
+
+                // 4. 添加岩石
+                this.addRocks();
+
+                // 5. 添加高坡
+                this.addHills();
+
+                // 6. 添加密林
+                this.addDenseForest();
+
+                return this.map;
+            }
+
+            generateBaseTerrain() {
+                const scale = this.params.noiseScale;
+
+                for (let y = 0; y < this.height; y++) {
+                    for (let x = 0; x < this.width; x++) {
+                        // 使用FBM生成自然地形
+                        const noiseValue = this.noise.fbm(x / scale, y / scale, 4);
+                        const normalizedValue = (noiseValue + 1) / 2; // 归一化到 0-1
+
+                        // 根据噪声值确定地形
+                        if (normalizedValue < 0.35) {
+                            this.map[y][x] = 'F'; // 密林
+                        } else if (normalizedValue < 0.65) {
+                            this.map[y][x] = 'A'; // 草地
+                        } else {
+                            this.map[y][x] = 'A'; // 草地（大部分是草地）
+                        }
+                    }
+                }
+            }
+
+            generateRivers() {
+                // 使用梯度下降法生成河流
+                const riverCount = 1 + Math.floor(Math.random() * 2);
+
+                for (let r = 0; r < riverCount; r++) {
+                    // 随机选择起点（通常在边缘）
+                    let startX, startY;
+                    const side = Math.floor(Math.random() * 4);
+
+                    switch (side) {
+                        case 0: // 上边
+                            startX = Math.floor(Math.random() * this.width);
+                            startY = 0;
+                            break;
+                        case 1: // 右边
+                            startX = this.width - 1;
+                            startY = Math.floor(Math.random() * this.height);
+                            break;
+                        case 2: // 下边
+                            startX = Math.floor(Math.random() * this.width);
+                            startY = this.height - 1;
+                            break;
+                        case 3: // 左边
+                            startX = 0;
+                            startY = Math.floor(Math.random() * this.height);
+                            break;
+                    }
+
+                    // 河流路径
+                    let x = startX;
+                    let y = startY;
+                    const maxLength = this.width + this.height;
+                    let length = 0;
+
+                    while (length < maxLength) {
+                        // 标记河流
+                        if (y >= 0 && y < this.height && x >= 0 && x < this.width) {
+                            this.map[y][x] = 'C';
+
+                            // 河流宽度（有时加宽）
+                            if (Math.random() < 0.3) {
+                                const neighbors = this.getNeighbors(x, y);
+                                neighbors.forEach(n => {
+                                    if (this.map[n.y][n.x] !== 'C') {
+                                        this.map[n.y][n.x] = 'C';
+                                    }
+                                });
+                            }
+                        }
+
+                        // 使用噪声决定河流方向
+                        const noiseValue = this.noise.fbm(x / 20, y / 20, 2);
+
+                        // 向低处流动
+                        let dx = 0, dy = 1; // 默认向下
+                        if (noiseValue < -0.3) { dx = -1; dy = 0; } // 向左
+                        else if (noiseValue < 0) { dx = -1; dy = 1; } // 向左下
+                        else if (noiseValue < 0.3) { dx = 1; dy = 1; } // 向右下
+                        else { dx = 1; dy = 0; } // 向右
+
+                        x += dx;
+                        y += dy;
+                        length++;
+
+                        // 检查是否到达边缘
+                        if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            generateRoads() {
+                for (let r = 0; r < this.params.roadCount; r++) {
+                    // 随机选择道路起点和终点
+                    const startEdge = Math.floor(Math.random() * 4);
+                    const endEdge = (startEdge + 2 + Math.floor(Math.random() * 2)) % 4;
+
+                    const startPos = this.getEdgePosition(startEdge);
+                    const endPos = this.getEdgePosition(endEdge);
+
+                    // 使用噪声创建弯曲的道路
+                    this.createPath(startPos.x, startPos.y, endPos.x, endPos.y, 'B');
+                }
+            }
+
+            getEdgePosition(edge) {
+                switch (edge) {
+                    case 0: return { x: Math.floor(Math.random() * this.width), y: 0 };
+                    case 1: return { x: this.width - 1, y: Math.floor(Math.random() * this.height) };
+                    case 2: return { x: Math.floor(Math.random() * this.width), y: this.height - 1 };
+                    case 3: return { x: 0, y: Math.floor(Math.random() * this.height) };
+                }
+            }
+
+            createPath(startX, startY, endX, endY, char) {
+                let x = startX;
+                let y = startY;
+
+                const maxSteps = this.width + this.height;
+                let steps = 0;
+
+                while (steps < maxSteps) {
+                    // 标记道路
+                    if (y >= 0 && y < this.height && x >= 0 && x < this.width) {
+                        this.map[y][x] = char;
+                    }
+
+                    // 到达终点附近
+                    if (Math.abs(x - endX) < 3 && Math.abs(y - endY) < 3) {
+                        break;
+                    }
+
+                    // 计算方向
+                    let dx = endX - x;
+                    let dy = endY - y;
+
+                    // 归一化
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist > 0) {
+                        dx = Math.round(dx / dist);
+                        dy = Math.round(dy / dist);
+                    }
+
+                    // 添加随机弯曲（使用噪声）
+                    const noiseValue = this.noise.fbm(x / 15, y / 15, 2);
+                    if (Math.abs(noiseValue) > 0.3) {
+                        if (Math.random() < 0.5) {
+                            const temp = dx;
+                            dx = dy;
+                            dy = temp;
+                        }
+                    }
+
+                    x += dx;
+                    y += dy;
+                    steps++;
+
+                    // 边界检查
+                    if (x < 0) x = 0;
+                    if (x >= this.width) x = this.width - 1;
+                    if (y < 0) y = 0;
+                    if (y >= this.height) y = this.height - 1;
+                }
+            }
+
+            addRocks() {
+                const rockCount = Math.floor(this.width * this.height * this.params.rockDensity);
+
+                for (let i = 0; i < rockCount; i++) {
+                    const x = Math.floor(Math.random() * this.width);
+                    const y = Math.floor(Math.random() * this.height);
+
+                    // 岩石不出现在河流或道路上
+                    if (this.map[y][x] === 'A' || this.map[y][x] === 'F') {
+                        this.map[y][x] = 'D';
+
+                        // 有时形成岩石群
+                        if (Math.random() < 0.4) {
+                            const neighbors = this.getNeighbors(x, y);
+                            const randomNeighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
+                            if (this.map[randomNeighbor.y][randomNeighbor.x] !== 'C' &&
+                                this.map[randomNeighbor.y][randomNeighbor.x] !== 'B') {
+                                this.map[randomNeighbor.y][randomNeighbor.x] = 'D';
+                            }
+                        }
+                    }
+                }
+            }
+
+            addHills() {
+                const hillCount = Math.floor(this.width * this.height * this.params.hillDensity);
+
+                for (let i = 0; i < hillCount; i++) {
+                    const centerX = Math.floor(Math.random() * this.width);
+                    const centerY = Math.floor(Math.random() * this.height);
+                    const radius = 2 + Math.floor(Math.random() * 4);
+
+                    // 创建圆形高坡区域
+                    for (let dy = -radius; dy <= radius; dy++) {
+                        for (let dx = -radius; dx <= radius; dx++) {
+                            const x = centerX + dx;
+                            const y = centerY + dy;
+
+                            if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
+                                const dist = Math.sqrt(dx * dx + dy * dy);
+                                if (dist <= radius && Math.random() < 0.7) {
+                                    // 高坡不覆盖河流和道路
+                                    if (this.map[y][x] !== 'C' && this.map[y][x] !== 'B') {
+                                        this.map[y][x] = 'E';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            addDenseForest() {
+                // 在草地上随机添加一些密林斑块
+                const patchCount = 5 + Math.floor(Math.random() * 10);
+
+                for (let i = 0; i < patchCount; i++) {
+                    const centerX = Math.floor(Math.random() * this.width);
+                    const centerY = Math.floor(Math.random() * this.height);
+                    const radius = 1 + Math.floor(Math.random() * 3);
+
+                    for (let dy = -radius; dy <= radius; dy++) {
+                        for (let dx = -radius; dx <= radius; dx++) {
+                            const x = centerX + dx;
+                            const y = centerY + dy;
+
+                            if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
+                                const dist = Math.sqrt(dx * dx + dy * dy);
+                                if (dist <= radius && this.map[y][x] === 'A') {
+                                    this.map[y][x] = 'F';
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            getNeighbors(x, y) {
+                const neighbors = [];
+                const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+                for (const [dx, dy] of dirs) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
+                        neighbors.push({ x: nx, y: ny });
+                    }
+                }
+
+                return neighbors;
+            }
+
+            toString() {
+                // 返回带换行符的矩阵字符串
+                return this.map.map(row => row.join(' ')).join('\n');
+            }
+
+            // 获取纯文本格式（用于复制）
+            toCompactString() {
+                return this.map.map(row => row.join('')).join('\n');
+            }
+        }
+
+        // 更新显示值
+        function updateValue(type) {
+            const inputs = {
+                width: { id: 'mapWidth', display: 'widthValue' },
+                height: { id: 'mapHeight', display: 'heightValue' },
+                scale: { id: 'noiseScale', display: 'scaleValue' },
+                roads: { id: 'roadCount', display: 'roadsValue' },
+                rocks: { id: 'rockDensity', display: 'rocksValue', factor: 0.01 },
+                hills: { id: 'hillDensity', display: 'hillsValue', factor: 0.01 },
+                seed: { id: 'seed', display: 'seedValue' }
+            };
+
+            const input = document.getElementById(inputs[type].id);
+            const display = document.getElementById(inputs[type].display);
+            let value = parseInt(input.value);
+
+            if (inputs[type].factor) {
+                display.textContent = (value * inputs[type].factor).toFixed(2);
+            } else {
+                display.textContent = value;
+            }
+        }
+
+        // 生成地图
+        function generateMap() {
+            const width = parseInt(document.getElementById('mapWidth').value);
+            const height = parseInt(document.getElementById('mapHeight').value);
+            const scale = parseInt(document.getElementById('noiseScale').value);
+            const roadCount = parseInt(document.getElementById('roadCount').value);
+            const rockDensity = parseInt(document.getElementById('rockDensity').value) * 0.01;
+            const hillDensity = parseInt(document.getElementById('hillDensity').value) * 0.01;
+            const seed = parseInt(document.getElementById('seed').value);
+
+            const generator = new ForestMapGenerator(width, height, seed, {
+                noiseScale: scale,
+                roadCount: roadCount,
+                rockDensity: rockDensity,
+                hillDensity: hillDensity
+            });
+
+            const map = generator.generate();
+            const output = document.getElementById('mapOutput');
+
+            // 地形颜色映射
+            const terrainColors = {
+                'A': '#90EE90', // 草地 - 浅绿
+                'B': '#8B4513', // 道路 - 棕色
+                'C': '#4169E1', // 河流 - 蓝色
+                'D': '#808080', // 岩石 - 灰色
+                'E': '#DEB887', // 高坡 - 浅棕
+                'F': '#228B22'  // 密林 - 深绿
+            };
+
+            // 生成带颜色的地图
+            const mapHTML = map.map(row => {
+                const coloredRow = row.map(cell => {
+                    const color = terrainColors[cell] || '#FFFFFF';
+                    return `<span style="color: ${color};">${cell}</span>`;
+                }).join(' ');
+                return '<div class="map-row">' + coloredRow + '</div>';
+            }).join('');
+            output.innerHTML = mapHTML;
+        }
+
+        // 复制到剪贴板（紧凑格式）
+        function copyMap() {
+            // 重新生成地图并获取紧凑格式
+            const width = parseInt(document.getElementById('mapWidth').value);
+            const height = parseInt(document.getElementById('mapHeight').value);
+            const scale = parseInt(document.getElementById('noiseScale').value);
+            const roadCount = parseInt(document.getElementById('roadCount').value);
+            const rockDensity = parseInt(document.getElementById('rockDensity').value) * 0.01;
+            const hillDensity = parseInt(document.getElementById('hillDensity').value) * 0.01;
+            const seed = parseInt(document.getElementById('seed').value);
+
+            const generator = new ForestMapGenerator(width, height, seed, {
+                noiseScale: scale,
+                roadCount: roadCount,
+                rockDensity: rockDensity,
+                hillDensity: hillDensity
+            });
+
+            const map = generator.generate();
+
+            // 构建紧凑格式的字符串（每行直接连接）
+            const compactMap = map.map(row => row.join('')).join('\n');
+
+            navigator.clipboard.writeText(compactMap).then(() => {
+                alert('地图已复制到剪贴板！（紧凑格式，无空格）');
+            }).catch(err => {
+                alert('复制失败，请手动复制');
+            });
+        }
+
+        // 页面加载时生成一个示例地图
+        window.onload = function() {
+            generateMap();
+        };
+    </script>
+</body>
+</html>
