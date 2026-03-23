@@ -1091,51 +1091,230 @@
     <!-- 边缘预览弹窗 -->
     <div id="edgePreviewModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
                                      background: rgba(0, 0, 0, 0.8); z-index: 10000; align-items: center; justify-content: center;">
-        <div style="background: #1a3a5c; padding: 25px; border-radius: 15px; max-width: 800px; max-height: 90vh; overflow-y: auto;
+        <div style="background: #1a3a5c; padding: 25px; border-radius: 15px; max-width: 900px; max-height: 90vh; overflow-y: auto;
                         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="color: #4ecca3; margin: 0; font-size: 20px;" id="edgePreviewTitle">边缘预览</h2>
+                <h2 style="color: #4ecca3; margin: 0; font-size: 20px;" id="edgePreviewTitle">边缘配置</h2>
                 <button onclick="closeEdgePreview()" style="background: #e74c3c; border: none; color: white; padding: 8px 15px;
                         border-radius: 5px; cursor: pointer; font-size: 16px;">✕</button>
             </div>
 
             <p style="color: #bbb; font-size: 13px; margin-bottom: 15px;">
-                为不同边缘情况配置图块。中心块是当前地形，周围8个方向可以配置不同的图块。
+                配置各种边缘情况下的图块。🟩=当前地形，⬛=其他地形。点击图块可以从图集选择器中选择。
             </p>
 
-            <!-- 边缘配置网格 -->
-            <div style="background: #0f3460; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-                <div id="edgeConfigGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-                                                max-width: 400px; margin: 0 auto;">
-                    <!-- 动态生成 -->
+            <!-- 基础和单一边缘 -->
+            <div style="background: #0f3460; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                <h4 style="color: #4ecca3; margin: 0 0 10px 0; font-size: 13px;">基础块和单一边缘</h4>
+                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;">
+                    <div class="edge-config-item" data-type="base" onclick="selectEdgeTile('base')">
+                        <div class="edge-visual" data-pattern="111/111/111"></div>
+                        <div class="edge-cell-preview"><img id="preview_base" src="" style="width: 40px; height: 40px;"></div>
+                        <div class="edge-cell-tile-id" id="tile_id_base">-</div>
+                    </div>
+                    <div class="edge-config-item" data-type="top" onclick="selectEdgeTile('top')">
+                        <div class="edge-visual" data-pattern="011/111/111"></div>
+                        <div class="edge-cell-preview"><img id="preview_top" src="" style="width: 40px; height: 40px;"></div>
+                        <div class="edge-cell-tile-id" id="tile_id_top">-</div>
+                    </div>
+                    <div class="edge-config-item" data-type="bottom" onclick="selectEdgeTile('bottom')">
+                        <div class="edge-visual" data-pattern="111/111/110"></div>
+                        <div class="edge-cell-preview"><img id="preview_bottom" src="" style="width: 40px; height: 40px;"></div>
+                        <div class="edge-cell-tile-id" id="tile_id_bottom">-</div>
+                    </div>
+                    <div class="edge-config-item" data-type="left" onclick="selectEdgeTile('left')">
+                        <div class="edge-visual" data-pattern="101/111/111"></div>
+                        <div class="edge-cell-preview"><img id="preview_left" src="" style="width: 40px; height: 40px;"></div>
+                        <div class="edge-cell-tile-id" id="tile_id_left">-</div>
+                    </div>
+                    <div class="edge-config-item" data-type="right" onclick="selectEdgeTile('right')">
+                        <div class="edge-visual" data-pattern="111/111/101"></div>
+                        <div class="edge-cell-preview"><img id="preview_right" src="" style="width: 40px; height: 40px;"></div>
+                        <div class="edge-cell-tile-id" id="tile_id_right">-</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- 当前配置总结 -->
-            <div style="background: #0f3460; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                <h3 style="color: #4ecca3; margin: 0 0 10px 0; font-size: 14px;">当前边缘配置</h3>
-                <div id="edgeConfigSummary" style="font-size: 11px; color: #bbb; line-height: 1.8;">
-                    <!-- 动态生成 -->
+            <!-- 外凸转角 -->
+            <div style="background: #0f3460; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                <h4 style="color: #4ecca3; margin: 0 0 10px 0; font-size: 13px;">外凸转角（延伸到不同地形）</h4>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+                    <div class="edge-config-item" data-type="top_left" onclick="selectEdgeTile('top_left')">
+                        top-left
+                        <div class="edge-visual" data-pattern="001/011/111"></div>
+                        <div class="edge-cell-preview"><img id="preview_top_left" src="" style="width: 40px; height: 40px;"></div>
+                        <div class="edge-cell-tile-id" id="tile_id_top_left">-</div>
+                    </div>
+                    <div class="edge-config-item" data-type="top_right" onclick="selectEdgeTile('top_right')">
+                        top-right
+                        <div class="edge-visual" data-pattern="010/011/111"></div>
+                        <div class="edge-cell-preview"><img id="preview_top_right" src="" style="width: 40px; height: 40px;"></div>
+                        <div class="edge-cell-tile-id" id="tile_id_top_right">-</div>
+                    </div>
+                    <div class="edge-config-item" data-type="bottom_left" onclick="selectEdgeTile('bottom_left')">
+                       bottom-left
+                        <div class="edge-visual" data-pattern="111/011/001"></div>
+                        <div class="edge-cell-preview"><img id="preview_bottom_left" src="" style="width: 40px; height: 40px;"></div>
+                        <div class="edge-cell-tile-id" id="tile_id_bottom_left">-</div>
+                    </div>
+                    <div class="edge-config-item" data-type="bottom_right" onclick="selectEdgeTile('bottom_right')">
+                        bottom-right
+                        <div class="edge-visual" data-pattern="111/011/010"></div>
+                        <div class="edge-cell-preview"><img id="preview_bottom_right" src="" style="width: 40px; height: 40px;"></div>
+                        <div class="edge-cell-tile-id" id="tile_id_bottom_right">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 内凹转角 -->
+            <div style="background: #0f3460; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                <h4 style="color: #4ecca3; margin: 0 0 10px 0; font-size: 13px;">内凹转角（被不同地形包围的角落）</h4>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+                    <div class="edge-config-item" data-type="inner_top_left" onclick="selectEdgeTile('inner_top_left')">
+                        top-left
+                        <div class="edge-visual" data-pattern="101/111/111"></div>
+                        <div class="edge-cell-preview"><img id="preview_inner_top_left" src="" style="width: 40px; height: 40px;"></div>
+                        <div class="edge-cell-tile-id" id="tile_id_inner_top_left">-</div>
+                    </div>
+                    <div class="edge-config-item" data-type="inner_top_right" onclick="selectEdgeTile('inner_top_right')">
+                      top-right
+                        <div class="edge-visual" data-pattern="111/111/101"></div>
+                        <div class="edge-cell-preview"><img id="preview_inner_top_right" src="" style="width: 40px; height: 40px;"></div>
+                        <div class="edge-cell-tile-id" id="tile_id_inner_top_right">-</div>
+                    </div>
+                    <div class="edge-config-item" data-type="inner_bottom_left" onclick="selectEdgeTile('inner_bottom_left')">
+                      bottom-left
+                        <div class="edge-visual" data-pattern="111/111/101"></div>
+                        <div class="edge-cell-preview"><img id="preview_inner_bottom_left" src="" style="width: 40px; height: 40px;"></div>
+                        <div class="edge-cell-tile-id" id="tile_id_inner_bottom_left">-</div>
+                    </div>
+                    <div class="edge-config-item" data-type="inner_bottom_right" onclick="selectEdgeTile('inner_bottom_right')">
+                        bottom-right
+                        <div class="edge-visual" data-pattern="101/111/111"></div>
+                        <div class="edge-cell-preview"><img id="preview_inner_bottom_right" src="" style="width: 40px; height: 40px;"></div>
+                        <div class="edge-cell-tile-id" id="tile_id_inner_bottom_right">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 特殊情况 -->
+            <div style="background: #0f3460; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                <h4 style="color: #4ecca3; margin: 0 0 10px 0; font-size: 13px;">特殊情况</h4>
+                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;">
+                    <div class="edge-config-item" data-type="diagonal_nw" onclick="selectEdgeTile('diagonal_nw')">
+                        <div class="edge-visual" data-pattern="001/010/100"></div>
+                        <div class="edge-cell-preview"><img id="preview_diagonal_nw" src="" style="width: 40px; height: 40px;"></div>
+                        <div class="edge-cell-tile-id" id="tile_id_diagonal_nw">-</div>
+                    </div>
+                    <div class="edge-config-item" data-type="diagonal_ne" onclick="selectEdgeTile('diagonal_ne')">
+                        <div class="edge-visual" data-pattern="010/001/100"></div>
+                        <div class="edge-cell-preview"><img id="preview_diagonal_ne" src="" style="width: 40px; height: 40px;"></div>
+                        <div class="edge-cell-tile-id" id="tile_id_diagonal_ne">-</div>
+                    </div>
+                    <div class="edge-config-item" data-type="diagonal_se" onclick="selectEdgeTile('diagonal_se')">
+                        <div class="edge-visual" data-pattern="100/010/001"></div>
+                        <div class="edge-cell-preview"><img id="preview_diagonal_se" src="" style="width: 40px; height: 40px;"></div>
+                        <div class="edge-cell-tile-id" id="tile_id_diagonal_se">-</div>
+                    </div>
+                    <div class="edge-config-item" data-type="diagonal_sw" onclick="selectEdgeTile('diagonal_sw')">
+                        <div class="edge-visual" data-pattern="100/001/010"></div>
+                        <div class="edge-cell-preview"><img id="preview_diagonal_sw" src="" style="width: 40px; height: 40px;"></div>
+                        <div class="edge-cell-tile-id" id="tile_id_diagonal_sw">-</div>
+                    </div>
+                    <div class="edge-config-item" data-type="single" onclick="selectEdgeTile('single')">
+                        <div class="edge-visual" data-pattern="010/010/010"></div>
+                        <div class="edge-cell-preview"><img id="preview_single" src="" style="width: 40px; height: 40px;"></div>
+                        <div class="edge-cell-tile-id" id="tile_id_single">-</div>
+                    </div>
                 </div>
             </div>
 
             <!-- 操作按钮 -->
-            <div style="display: flex; gap: 10px; justify-content: center;">
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
                 <button onclick="applyEdgeConfig()" style="flex: 1; background: #27ae60; padding: 12px 20px; border-radius: 8px;
                         border: none; color: white; font-size: 14px; cursor: pointer; font-weight: bold;">
                     ✅ 应用配置
                 </button>
-                <button onclick="resetEdgeConfig()" style="flex: 1; background: #e74c3c; padding: 12px 20px; border-radius: 8px;
+                <button onclick="resetEdgeConfigFull()" style="flex: 1; background: #e74c3c; padding: 12px 20px; border-radius: 8px;
                         border: none; color: white; font-size: 14px; cursor: pointer; font-weight: bold;">
-                    🔄 重置为基础图块
+                    🔄 重置全部
                 </button>
             </div>
 
             <div style="margin-top: 15px; font-size: 11px; color: #888; text-align: center;">
-                提示：点击任意边缘块可以从图集选择器中选择不同的图块
+                提示：点击任意图块可以从图集选择器中选择不同的图块
             </div>
         </div>
     </div>
+
+    <!-- 边缘配置项样式 -->
+    <style>
+        .edge-config-item {
+            background: #1a1a2e;
+            border: 2px solid #4ecca3;
+            border-radius: 5px;
+            padding: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .edge-config-item:hover {
+            background: #2a3f5f;
+            transform: scale(1.05);
+        }
+        .edge-config-item .edge-visual {
+            display: grid;
+            grid-template-columns: repeat(3, 10px);
+            grid-template-rows: repeat(3, 10px);
+            gap: 1px;
+            margin: 0 auto 8px;
+            justify-content: center;
+        }
+        .edge-config-item .edge-visual::before {
+            content: '';
+            grid-column: 1 / -1;
+            grid-row: 1 / -1;
+            padding: 2px;
+        }
+        /* 动态生成格子 */
+        .edge-config-item .edge-cell-preview {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 5px;
+            background: #0f3460;
+            border-radius: 3px;
+        }
+        .edge-config-item .edge-cell-preview img {
+            image-rendering: pixelated;
+        }
+        .edge-config-item .edge-cell-tile-id {
+            font-size: 10px;
+            color: #4ecca3;
+            font-weight: bold;
+        }
+    </style>
+
+    <script>
+        // 根据pattern生成边缘可视化格子
+        function generateEdgeVisuals() {
+            document.querySelectorAll('.edge-visual').forEach(el => {
+                const pattern = el.getAttribute('data-pattern');
+                if (!pattern) return;
+
+                const rows = pattern.split('/');
+                let html = '';
+                rows.forEach(row => {
+                    for (let i = 0; i < 3; i++) {
+                        const isTerrain = row[i] === '1';
+                        const color = isTerrain ? '#4ecca3' : '#333';
+                        html += `<div style="background: ${color}; width: 10px; height: 10px;"></div>`;
+                    }
+                });
+                el.innerHTML = html;
+            });
+        }
+    </script>
 
     <script>
         // ==================== 噪声类 ====================
@@ -1305,26 +1484,223 @@
                 }
             }
 
-            // 第2层：生成草地层（简单生成，边缘处理在渲染时进行）
+            // 第2层：生成草地层（以片为单位生成方形或L型草地）
             generateGrassLayer() {
-                console.log('生成第2层：草地层');
+                console.log('生成第2层：草地层（片状生成）');
                 this.layers.grass = [];
 
-                // 生成基础的草地分布
-                const scale = this.config.noiseScale;
-
+                // 初始化空层
                 for (let y = 0; y < this.height; y++) {
                     const row = [];
                     for (let x = 0; x < this.width; x++) {
-                        const noiseValue = this.noise.fbm(x / scale, y / scale, 4);
-                        const normalizedValue = (noiseValue + 1) / 2;
-
-                        // 根据噪声值决定是否是草地
-                        const isGrass = normalizedValue < this.config.forestCover;
-                        row.push(isGrass ? 'A' : null); // A = Grass
+                        row.push(null);
                     }
                     this.layers.grass.push(row);
                 }
+
+                // 计算草地覆盖率（约等于forestCover）
+                const targetCoverage = this.config.forestCover;
+                const totalTiles = this.width * this.height;
+                const targetGrassTiles = Math.floor(totalTiles * targetCoverage);
+
+                // 生成草地片
+                let grassTilesCount = 0;
+                let attempts = 0;
+                const maxAttempts = 1000;
+
+                while (grassTilesCount < targetGrassTiles && attempts < maxAttempts) {
+                    attempts++;
+
+                    // 随机选择草地片类型：60%方形，40% L型
+                    const patchType = Math.random() < 0.6 ? 'rectangle' : 'L-shape';
+
+                    // 随机生成尺寸（每条边至少2个瓦片）
+                    let patchTiles = [];
+
+                    if (patchType === 'rectangle') {
+                        patchTiles = this.generateRectanglePatch();
+                    } else {
+                        patchTiles = this.generateLShapePatch();
+                    }
+
+                    // 检查是否可以放置（不与现有草地重叠太多）
+                    if (this.canPlaceGrassPatch(patchTiles)) {
+                        // 放置草地片
+                        for (const tile of patchTiles) {
+                            if (this.layers.grass[tile.y][tile.x] === null) {
+                                this.layers.grass[tile.y][tile.x] = 'A';
+                                grassTilesCount++;
+                            }
+                        }
+                    }
+                }
+
+                console.log(`草地生成完成：${attempts} 次尝试，共 ${grassTilesCount} 个草地瓦片`);
+            }
+
+            // 生成方形草地片
+            generateRectanglePatch() {
+                // 宽度和高度都在2-6之间（确保每条边至少2个瓦片，避免单行单列）
+                let width, height;
+                do {
+                    width = Math.floor(Math.random() * 5) + 2; // 2-6
+                    height = Math.floor(Math.random() * 5) + 2; // 2-6
+                } while (width < 2 || height < 2); // 双重确保
+
+                // 随机位置
+                const startX = Math.floor(Math.random() * Math.max(1, (this.width - width + 1)));
+                const startY = Math.floor(Math.random() * Math.max(1, (this.height - height + 1)));
+
+                const tiles = [];
+                for (let y = startY; y < startY + height && y < this.height; y++) {
+                    for (let x = startX; x < startX + width && x < this.width; x++) {
+                        tiles.push({ x, y });
+                    }
+                }
+
+                return tiles;
+            }
+
+            // 生成L型草地片
+            generateLShapePatch() {
+                // L型由两个垂直的矩形组成
+                // 每个臂都必须：长度≥2，厚度≥2（避免单行单列）
+                let horizontalLength, horizontalThickness, verticalLength, verticalThickness;
+
+                // 确保所有尺寸都至少为2
+                do {
+                    horizontalLength = Math.floor(Math.random() * 5) + 2; // 横向长度 2-6
+                    horizontalThickness = Math.floor(Math.random() * 4) + 2; // 横向厚度 2-5
+                    verticalLength = Math.floor(Math.random() * 5) + 2; // 纵向长度 2-6
+                    verticalThickness = Math.floor(Math.random() * 4) + 2; // 纵向厚度 2-5
+                } while (horizontalLength < 2 || horizontalThickness < 2 ||
+                         verticalLength < 2 || verticalThickness < 2);
+
+                // 随机L型方向：0=┌，1=┐，2=└，3=┘
+                const orientation = Math.floor(Math.random() * 4);
+
+                // 随机位置（确保L型在地图内）
+                const startX = Math.floor(Math.random() * Math.max(1, (this.width - horizontalLength - verticalThickness)));
+                const startY = Math.floor(Math.random() * Math.max(1, (this.height - verticalLength - horizontalThickness)));
+
+                const tiles = [];
+
+                // 根据方向生成L型
+                if (orientation === 0) {
+                    // ┌ 型：横向臂在右下方，纵向臂在左上方
+                    // 横向臂：从连接点向右延伸
+                    for (let y = startY; y < startY + horizontalThickness && y < this.height; y++) {
+                        for (let x = startX; x < startX + horizontalLength && x < this.width; x++) {
+                            tiles.push({ x, y });
+                        }
+                    }
+                    // 纵向臂：从连接点向下延伸
+                    for (let y = startY; y < startY + verticalLength && y < this.height; y++) {
+                        for (let x = startX - verticalThickness; x < startX && x >= 0; x++) {
+                            tiles.push({ x, y });
+                        }
+                    }
+                } else if (orientation === 1) {
+                    // ┐ 型：横向臂在左下方，纵向臂在右上方
+                    // 横向臂：从连接点向左延伸
+                    for (let y = startY; y < startY + horizontalThickness && y < this.height; y++) {
+                        for (let x = startX - horizontalLength; x < startX; x++) {
+                            if (x >= 0) tiles.push({ x, y });
+                        }
+                    }
+                    // 纵向臂：从连接点向下延伸
+                    for (let y = startY; y < startY + verticalLength && y < this.height; y++) {
+                        for (let x = startX; x < startX + verticalThickness && x < this.width; x++) {
+                            tiles.push({ x, y });
+                        }
+                    }
+                } else if (orientation === 2) {
+                    // └ 型：横向臂在右上方，纵向臂在左下方
+                    // 横向臂：从连接点向右延伸
+                    for (let y = startY - horizontalThickness; y < startY && y >= 0; y++) {
+                        for (let x = startX; x < startX + horizontalLength && x < this.width; x++) {
+                            tiles.push({ x, y });
+                        }
+                    }
+                    // 纵向臂：从连接点向上延伸
+                    for (let y = startY - verticalLength; y < startY && y >= 0; y++) {
+                        for (let x = startX - verticalThickness; x < startX && x >= 0; x++) {
+                            tiles.push({ x, y });
+                        }
+                    }
+                } else {
+                    // ┘ 型：横向臂在左上方，纵向臂在右下方
+                    // 横向臂：从连接点向左延伸
+                    for (let y = startY - horizontalThickness; y < startY && y >= 0; y++) {
+                        for (let x = startX - horizontalLength; x < startX; x++) {
+                            if (x >= 0) tiles.push({ x, y });
+                        }
+                    }
+                    // 纵向臂：从连接点向上延伸
+                    for (let y = startY - verticalLength; y < startY && y >= 0; y++) {
+                        for (let x = startX; x < startX + verticalThickness && x < this.width; x++) {
+                            tiles.push({ x, y });
+                        }
+                    }
+                }
+
+                // 过滤掉超出边界的瓦片
+                return tiles.filter(tile => tile.x >= 0 && tile.x < this.width && tile.y >= 0 && tile.y < this.height);
+            }
+
+            // 检查是否可以放置草地片
+            canPlaceGrassPatch(patchTiles) {
+                // 创建一个Set，快速查找草地片中的瓦片
+                const patchSet = new Set();
+                const validTiles = [];
+
+                for (const tile of patchTiles) {
+                    // 检查瓦片是否在边界内
+                    if (tile.x < 0 || tile.x >= this.width || tile.y < 0 || tile.y >= this.height) {
+                        continue;
+                    }
+                    validTiles.push(tile);
+                    patchSet.add(`${tile.x},${tile.y}`);
+                }
+
+                // 至少要有一些有效瓦片
+                if (validTiles.length < 4) return false;
+
+                // 检查是否与现有草地重叠或边缘相邻
+                let overlapOrAdjacentCount = 0;
+
+                for (const tile of validTiles) {
+                    // 检查这个瓦片本身是否重叠
+                    if (this.layers.grass[tile.y][tile.x] === 'A') {
+                        overlapOrAdjacentCount++;
+                        continue;
+                    }
+
+                    // 检查8个相邻方向是否有草地
+                    // 如果相邻位置有草地，但该位置不在新的草地片中，就是边缘相邻
+                    const directions = [
+                        [-1, -1], [0, -1], [1, -1],
+                        [-1, 0],          [1, 0],
+                        [-1, 1],  [0, 1],  [1, 1]
+                    ];
+
+                    for (const [dx, dy] of directions) {
+                        const nx = tile.x + dx;
+                        const ny = tile.y + dy;
+
+                        // 检查相邻位置是否在地图内
+                        if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
+                            // 如果相邻位置是草地，但不在新的草地片中
+                            if (this.layers.grass[ny][nx] === 'A' && !patchSet.has(`${nx},${ny}`)) {
+                                // 发现边缘相邻，拒绝放置
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                // 完全不允许重叠
+                return overlapOrAdjacentCount === 0;
             }
 
             // 获取草地的边缘图块
@@ -1346,74 +1722,105 @@
                 const bottom = getTerrain(0, 1);
                 const bottomRight = getTerrain(1, 1);
 
-                // 检查是否与非草地相邻
+                // 检查是否是草地
+                const isGrass = (t) => t === 'A' || t === 'F';
+                // 检查是否是非草地
                 const isNotGrass = (t) => t !== 'A' && t !== 'F' && t !== null;
-                const adjPositions = [];
-                if (isNotGrass(topLeft)) adjPositions.push('top_left');
-                if (isNotGrass(top)) adjPositions.push('top');
-                if (isNotGrass(topRight)) adjPositions.push('top_right');
-                if (isNotGrass(left)) adjPositions.push('left');
-                if (isNotGrass(right)) adjPositions.push('right');
-                if (isNotGrass(bottomLeft)) adjPositions.push('bottom_left');
-                if (isNotGrass(bottom)) adjPositions.push('bottom');
-                if (isNotGrass(bottomRight)) adjPositions.push('bottom_right');
 
                 // 获取草地边缘配置
                 const edgeConfig = edgeConfigs['A'] || {};
-                const baseTileId = defaultAssetMapping['A']?.tileId || 15;
-
-                // 调试：显示边缘配置
-                if (adjPositions.length > 0 && Object.keys(edgeConfig).length > 0) {
-                    console.log(`位置 (${x}, ${y}): 相邻位置=${adjPositions.join(', ')}, 边缘配置=`, edgeConfig);
-                }
 
                 // 如果没有相邻的非草地，使用基础图块
-                if (adjPositions.length === 0) {
-                    return 'A'; // 使用草地基础图块
+                if (!isNotGrass(top) && !isNotGrass(bottom) && !isNotGrass(left) && !isNotGrass(right) &&
+                    !isNotGrass(topLeft) && !isNotGrass(topRight) && !isNotGrass(bottomLeft) && !isNotGrass(bottomRight)) {
+                    return 'A';
                 }
 
-                // 有相邻的非草地，应用边缘配置
-                // 优先级：转角 > 边缘 > 基础
+                // ===== 优先级1：外拐角（凸角） =====
+                // 特征：两个相邻正交方向都是非草地
+                // 示例：top和left都是非草地
+                const outerCorners = [
+                    { ortho1: top, ortho2: left, configKey: 'top_left' },
+                    { ortho1: top, ortho2: right, configKey: 'top_right' },
+                    { ortho1: bottom, ortho2: left, configKey: 'bottom_left' },
+                    { ortho1: bottom, ortho2: right, configKey: 'bottom_right' }
+                ];
 
-                // 检查转角情况（2个相邻）
-                if (adjPositions.length === 2) {
-                    const cornerConfigs = [
-                        { positions: ['top', 'left'], configKey: 'top_left' },
-                        { positions: ['top', 'right'], configKey: 'top_right' },
-                        { positions: ['bottom', 'left'], configKey: 'bottom_left' },
-                        { positions: ['bottom', 'right'], configKey: 'bottom_right' }
-                    ];
-
-                    for (const corner of cornerConfigs) {
-                        if (adjPositions.includes(corner.positions[0]) && adjPositions.includes(corner.positions[1])) {
-                            if (edgeConfig[corner.configKey] && edgeConfig[corner.configKey].tileId !== undefined) {
-                                // 返回特殊标记表示使用边缘图块
-                                const marker = `A_EDGE_${corner.configKey}_${edgeConfig[corner.configKey].tileId}`;
-                                console.log(`  → 使用转角配置: ${corner.configKey}, 图块ID=${edgeConfig[corner.configKey].tileId}, 标记=${marker}`);
-                                return marker;
-                            }
+                for (const corner of outerCorners) {
+                    if (isNotGrass(corner.ortho1) && isNotGrass(corner.ortho2)) {
+                        if (edgeConfig[corner.configKey] && edgeConfig[corner.configKey].tileId !== undefined) {
+                            return `A_EDGE_${corner.configKey}_${edgeConfig[corner.configKey].tileId}`;
                         }
                     }
                 }
 
-                // 检查边缘情况（1个相邻）
-                if (adjPositions.length === 1) {
-                    const position = adjPositions[0];
-                    if (edgeConfig[position] && edgeConfig[position].tileId !== undefined) {
-                        const marker = `A_EDGE_${position}_${edgeConfig[position].tileId}`;
-                        console.log(`  → 使用边缘配置: ${position}, 图块ID=${edgeConfig[position].tileId}, 标记=${marker}`);
-                        return marker;
+                // ===== 优先级2：单边缘 =====
+                // 特征：只有一个正交方向是非草地
+                if (isNotGrass(top) && !isNotGrass(bottom) && !isNotGrass(left) && !isNotGrass(right)) {
+                    if (edgeConfig.top && edgeConfig.top.tileId !== undefined) {
+                        return `A_EDGE_top_${edgeConfig.top.tileId}`;
+                    }
+                }
+                if (isNotGrass(bottom) && !isNotGrass(top) && !isNotGrass(left) && !isNotGrass(right)) {
+                    if (edgeConfig.bottom && edgeConfig.bottom.tileId !== undefined) {
+                        return `A_EDGE_bottom_${edgeConfig.bottom.tileId}`;
+                    }
+                }
+                if (isNotGrass(left) && !isNotGrass(right) && !isNotGrass(top) && !isNotGrass(bottom)) {
+                    if (edgeConfig.left && edgeConfig.left.tileId !== undefined) {
+                        return `A_EDGE_left_${edgeConfig.left.tileId}`;
+                    }
+                }
+                if (isNotGrass(right) && !isNotGrass(left) && !isNotGrass(top) && !isNotGrass(bottom)) {
+                    if (edgeConfig.right && edgeConfig.right.tileId !== undefined) {
+                        return `A_EDGE_right_${edgeConfig.right.tileId}`;
+                    }
+                }
+
+                // ===== 优先级3：斜线边缘/内拐角（凹角） =====
+                // 特征：对角线方向是非草地，但相邻的两个正交方向都是草地
+                // 示例：topLeft是非草地，但top和left都是草地
+                const diagonalEdges = [
+                    { diagonal: topLeft, ortho1: top, ortho2: left, configKey: 'top_left' },
+                    { diagonal: topRight, ortho1: top, ortho2: right, configKey: 'top_right' },
+                    { diagonal: bottomLeft, ortho1: bottom, ortho2: left, configKey: 'bottom_left' },
+                    { diagonal: bottomRight, ortho1: bottom, ortho2: right, configKey: 'bottom_right' }
+                ];
+
+                for (const edge of diagonalEdges) {
+                    // 对角线是非草地，且两个相邻正交方向都是草地
+                    if (isNotGrass(edge.diagonal) && isGrass(edge.ortho1) && isGrass(edge.ortho2)) {
+                        // 尝试使用对应的斜线边缘配置
+                        if (edgeConfig[edge.configKey] && edgeConfig[edge.configKey].tileId !== undefined) {
+                            return `A_EDGE_${edge.configKey}_${edgeConfig[edge.configKey].tileId}`;
+                        }
+                    }
+                }
+
+                // ===== 优先级4：混合边缘情况 =====
+                // 当同时有正交和对角线方向是非草地时，优先使用正交边缘配置
+                const singleEdges = [
+                    { pos: 'top', value: top },
+                    { pos: 'bottom', value: bottom },
+                    { pos: 'left', value: left },
+                    { pos: 'right', value: right }
+                ];
+
+                for (const edge of singleEdges) {
+                    if (isNotGrass(edge.value)) {
+                        if (edgeConfig[edge.pos] && edgeConfig[edge.pos].tileId !== undefined) {
+                            return `A_EDGE_${edge.pos}_${edgeConfig[edge.pos].tileId}`;
+                        }
                     }
                 }
 
                 // 默认使用基础图块
-                console.log(`  → 使用基础图块 (无匹配的边缘配置)`);
                 return 'A';
             }
 
             // 第3层：生成特征层
             generateFeatureLayer() {
-                console.log('生成第3层：特征层');
+                console.log('生成第3层：特征层（已跳过道路、河流、岩石、高坡、密林）');
                 this.layers.features = [];
 
                 // 初始化为空
@@ -1425,20 +1832,21 @@
                     this.layers.features.push(row);
                 }
 
-                // 生成河流
-                this.generateRivers();
+                // 暂时跳过所有特征生成，只保留草地和土地
+                // // 生成河流
+                // this.generateRivers();
 
-                // 生成道路
-                this.generateRoads();
+                // // 生成道路
+                // this.generateRoads();
 
-                // 添加岩石
-                this.addRocks();
+                // // 添加岩石
+                // this.addRocks();
 
-                // 添加高坡
-                this.addHills();
+                // // 添加高坡
+                // this.addHills();
 
-                // 添加树林斑块
-                this.addForestPatches();
+                // // 添加树林斑块
+                // this.addForestPatches();
             }
 
             // 生成河流（在特征层）
@@ -1722,7 +2130,7 @@
 
             // 合并所有图层
             mergeLayers() {
-                console.log('合并图层...');
+                console.log('合并图层并应用边缘处理...');
                 const finalMap = [];
 
                 for (let y = 0; y < this.height; y++) {
@@ -1737,8 +2145,9 @@
                             // 特征层有内容
                             row.push(feature);
                         } else if (grass) {
-                            // 草地层有内容
-                            row.push(grass);
+                            // 草地层有内容，应用边缘处理
+                            const edgeTile = this.getGrassEdgeTile(this.layers.grass, x, y);
+                            row.push(edgeTile);
                         } else {
                             // 土地层
                             row.push(ground);
@@ -1747,7 +2156,7 @@
                     finalMap.push(row);
                 }
 
-                console.log('图层合并完成');
+                console.log('图层合并完成，已应用边缘图块');
                 return finalMap;
             }
 
@@ -1893,22 +2302,164 @@
             }
 
             generateBaseTerrain() {
-                const scale = this.config.noiseScale;
-                const coverThreshold = 1 - this.config.forestCover; // 反转，因为值越小越可能是森林
-
+                // 初始化地图为全土层
                 for (let y = 0; y < this.height; y++) {
                     for (let x = 0; x < this.width; x++) {
-                        const noiseValue = this.noise.fbm(x / scale, y / scale, 4);
-                        const normalizedValue = (noiseValue + 1) / 2;
-
-                        // 根据配置的树林覆盖率决定地形
-                        if (normalizedValue < this.config.forestCover) {
-                            this.map[y][x] = 'F'; // 密林
-                        } else {
-                            this.map[y][x] = 'A'; // 草地
-                        }
+                        this.map[y][x] = 'G'; // 土地
                     }
                 }
+
+                // 使用"片"为单位生成草地
+                this.generateGrassPatches();
+            }
+
+            // ==================== 新的草地生成逻辑：以"片"为单位 ====================
+            generateGrassPatches() {
+                const coverThreshold = this.config.forestCover; // 草地覆盖率
+                const totalCells = this.width * this.height;
+                const grassCells = Math.floor(totalCells * coverThreshold);
+
+                // 计算需要多少片草地（每片平均4个瓦片）
+                const patchCount = Math.ceil(grassCells / 4);
+
+                for (let i = 0; i < patchCount; i++) {
+                    const patch = this.generateGrassPatch();
+
+                    // 放置草地片到地图上
+                    this.placeGrassPatch(patch);
+                }
+            }
+
+            // 生成一个草地片（方形或L型）
+            generateGrassPatch() {
+                // 随机选择形状类型：0=方形，1=L型
+                const shapeType = Math.random() < 0.6 ? 'square' : 'L';
+
+                if (shapeType === 'square') {
+                    // 方形片：最小2x2，最大6x6
+                    const size = 2 + Math.floor(Math.random() * 5);
+                    return {
+                        type: 'square',
+                        width: size,
+                        height: size
+                    };
+                } else {
+                    // L型片：由两个矩形组成
+                    // 第一个矩形：至少2x2
+                    const w1 = 2 + Math.floor(Math.random() * 4); // 2-5
+                    const h1 = 2 + Math.floor(Math.random() * 4); // 2-5
+                    // 第二个矩形：至少2x2，与第一个矩形共享一条边
+                    const side = Math.floor(Math.random() * 4); // 0=上,1=右,2=下,3=左
+                    let w2, h2;
+
+                    if (side === 0) { // 上方延伸
+                        w2 = 2 + Math.floor(Math.random() * 3);
+                        h2 = 2 + Math.floor(Math.random() * 3);
+                        return {
+                            type: 'L',
+                            rect1: { x: 0, y: 0, w: w1, h: h1 },
+                            rect2: { x: 0, y: -h2, w: w1, h: h2 }
+                        };
+                    } else if (side === 1) { // 右方延伸
+                        w2 = 2 + Math.floor(Math.random() * 3);
+                        h2 = 2 + Math.floor(Math.random() * 3);
+                        return {
+                            type: 'L',
+                            rect1: { x: 0, y: 0, w: w1, h: h1 },
+                            rect2: { x: w1, y: 0, w: w2, h: Math.min(h1, h2) }
+                        };
+                    } else if (side === 2) { // 下方延伸
+                        w2 = 2 + Math.floor(Math.random() * 3);
+                        h2 = 2 + Math.floor(Math.random() * 3);
+                        return {
+                            type: 'L',
+                            rect1: { x: 0, y: 0, w: w1, h: h1 },
+                            rect2: { x: 0, y: h1, w: Math.min(w1, w2), h: h2 }
+                        };
+                    } else { // 左方延伸
+                        w2 = 2 + Math.floor(Math.random() * 3);
+                        h2 = 2 + Math.floor(Math.random() * 3);
+                        return {
+                            type: 'L',
+                            rect1: { x: 0, y: 0, w: w1, h: h1 },
+                            rect2: { x: -w2, y: 0, w: w2, h: Math.min(h1, h2) }
+                        };
+                    }
+                }
+            }
+
+            // 放置草地片到地图上
+            placeGrassPatch(patch) {
+                // 尝试多次找到一个合适的位置
+                const maxAttempts = 20;
+
+                for (let attempt = 0; attempt < maxAttempts; attempt++) {
+                    let originX, originY;
+                    let cells = [];
+
+                    if (patch.type === 'square') {
+                        // 方形片
+                        const maxX = this.width - patch.width + 1;
+                        const maxY = this.height - patch.height + 1;
+                        if (maxX <= 0 || maxY <= 0) return;
+
+                        originX = Math.floor(Math.random() * maxX);
+                        originY = Math.floor(Math.random() * maxY);
+
+                        // 收集方形片的所有瓦片
+                        for (let dy = 0; dy < patch.height; dy++) {
+                            for (let dx = 0; dx < patch.width; dx++) {
+                                cells.push({ x: originX + dx, y: originY + dy });
+                            }
+                        }
+                    } else {
+                        // L型片
+                        const maxX = this.width - 10;
+                        const maxY = this.height - 10;
+                        if (maxX <= 0 || maxY <= 0) return;
+
+                        originX = 5 + Math.floor(Math.random() * maxX);
+                        originY = 5 + Math.floor(Math.random() * maxY);
+
+                        // 收集L型片的所有瓦片
+                        // rect1
+                        for (let dy = 0; dy < patch.rect1.h; dy++) {
+                            for (let dx = 0; dx < patch.rect1.w; dx++) {
+                                cells.push({ x: originX + dx, y: originY + dy });
+                            }
+                        }
+                        // rect2
+                        for (let dy = 0; dy < patch.rect2.h; dy++) {
+                            for (let dx = 0; dx < patch.rect2.w; dx++) {
+                                cells.push({ x: originX + patch.rect2.x + dx, y: originY + patch.rect2.y + dy });
+                            }
+                        }
+                    }
+
+                    // 检查所有瓦片是否可用（不是河流、道路等）
+                    let canPlace = true;
+                    for (const cell of cells) {
+                        if (cell.x < 0 || cell.x >= this.width || cell.y < 0 || cell.y >= this.height) {
+                            canPlace = false;
+                            break;
+                        }
+                        const current = this.map[cell.y][cell.x];
+                        // 只能在土层(G)上放置草地，不能覆盖河流(C)、道路(B)、岩石(D)、高坡(E)、密林(F)
+                        if (current !== 'G') {
+                            canPlace = false;
+                            break;
+                        }
+                    }
+
+                    if (canPlace) {
+                        // 放置草地
+                        for (const cell of cells) {
+                            this.map[cell.y][cell.x] = 'A';
+                        }
+                        return; // 成功放置，退出
+                    }
+                }
+                // 放置失败，尝试下一个位置
             }
 
             generateRivers() {
@@ -2863,6 +3414,21 @@
         };
 
         // 边缘配置存储（为每个地形类型存储不同边缘情况下的图块）
+        // 配置键说明：
+        // - base: 基础块（四周都是相同地形）
+        // - top, bottom, left, right: 单一边缘
+        // - top_left, top_right, bottom_left, bottom_right: 外凸转角
+        // - inner_top_left, inner_top_right, inner_bottom_left, inner_bottom_right: 内凹转角
+        // - diagonal: 斜线连接（对角连接但相邻不是）
+        // - single: 孤立块（四周都不同）
+        const edgeConfigKeys = [
+            'base', 'top', 'bottom', 'left', 'right',
+            'top_left', 'top_right', 'bottom_left', 'bottom_right',
+            'inner_top_left', 'inner_top_right', 'inner_bottom_left', 'inner_bottom_right',
+            'diagonal_ne', 'diagonal_nw', 'diagonal_se', 'diagonal_sw',
+            'single'
+        ];
+
         const edgeConfigs = {
             'A': {}, // 草地的边缘配置
             'B': {}, // 道路的边缘配置
@@ -2890,14 +3456,14 @@
             const modal = document.getElementById('edgePreviewModal');
             const title = document.getElementById('edgePreviewTitle');
 
-            title.textContent = `边缘预览 - ${terrainNames[terrainType]}`;
+            title.textContent = `边缘配置 - ${terrainNames[terrainType]}`;
             title.style.color = getTerrainColor(terrainType);
+
+            // 生成边缘可视化格子
+            generateEdgeVisuals();
 
             // 生成边缘配置网格
             generateEdgeConfigGrid(terrainType);
-
-            // 更新配置总结
-            updateEdgeConfigSummary(terrainType);
 
             // 显示弹窗
             modal.style.display = 'flex';
@@ -2910,38 +3476,53 @@
 
         // 生成边缘配置网格
         function generateEdgeConfigGrid(terrainType) {
-            const grid = document.getElementById('edgeConfigGrid');
             const baseTileId = parseInt(document.getElementById(`tileId_${terrainType}`).value) || 0;
+            const edgeConfig = edgeConfigs[terrainType] || {};
 
-            let html = '';
+            // 更新所有边缘配置项的预览和ID
+            edgeConfigKeys.forEach(key => {
+                const config = edgeConfig[key];
+                const tileId = config ? config.tileId : baseTileId;
 
-            edgePositions.forEach((pos, index) => {
-                const isCenter = pos.key === 'center';
-                const edgeConfig = edgeConfigs[terrainType][pos.key] || {};
-                const tileId = edgeConfig.tileId !== undefined ? edgeConfig.tileId : baseTileId;
+                // 更新ID显示
+                const idElement = document.getElementById(`tile_id_${key}`);
+                if (idElement) {
+                    idElement.textContent = tileId;
+                }
 
-                html += `
-                    <div class="edge-cell ${isCenter ? 'center' : ''}"
-                         onclick="${isCenter ? '' : `selectEdgeTile('${pos.key}')`}">
-                        <div class="edge-cell-preview">
-                            <img src="" id="edge_preview_${pos.key}" style="width: 48px; height: 48px; image-rendering: pixelated;">
-                        </div>
-                        <div class="edge-cell-tile-id">ID: <span id="edge_tile_id_${pos.key}">${tileId}</span></div>
-                        <div class="edge-direction-label">${pos.label}</div>
-                        ${!isCenter ? '<div style="font-size: 9px; color: #4ecca3; margin-top: 3px;">点击配置</div>' : ''}
-                    </div>
-                `;
+                // 更新预览
+                previewEdgeTileById(tileId, key);
             });
+        }
 
-            grid.innerHTML = html;
+        // 根据图块ID预览边缘图块
+        function previewEdgeTileById(tileId, positionKey) {
+            const sheet = spriteSheets[0];
+            if (!sheet) return;
 
-            // 预览所有图块
-            setTimeout(() => {
-                edgePositions.forEach(pos => {
-                    const tileId = parseInt(document.getElementById(`edge_tile_id_${pos.key}`).textContent);
-                    previewEdgeTile(tileId, pos.key);
-                });
-            }, 100);
+            const pos = getTilePositionById(tileId);
+            const srcTileSize = SPRITE_SHEET_TILE_SIZES[0];
+            const srcX = pos.x * srcTileSize.width;
+            const srcY = pos.y * srcTileSize.height;
+
+            // 创建预览canvas
+            const previewCanvas = document.createElement('canvas');
+            previewCanvas.width = 40;
+            previewCanvas.height = 40;
+            const previewCtx = previewCanvas.getContext('2d');
+
+            // 绘制图块
+            previewCtx.drawImage(
+                sheet,
+                srcX, srcY, srcTileSize.width, srcTileSize.height,
+                0, 0, 40, 40
+            );
+
+            // 更新预览图片
+            const previewImg = document.getElementById(`preview_${positionKey}`);
+            if (previewImg) {
+                previewImg.src = previewCanvas.toDataURL();
+            }
         }
 
         // 预览边缘图块
@@ -2992,13 +3573,13 @@
         // 应用边缘配置
         function applyEdgeConfig() {
             // 保存当前边缘配置
-            edgePositions.forEach(pos => {
-                if (pos.key === 'center') return;
-
-                const tileIdElement = document.getElementById(`edge_tile_id_${pos.key}`);
+            edgeConfigKeys.forEach(key => {
+                const tileIdElement = document.getElementById(`tile_id_${key}`);
                 if (tileIdElement) {
                     const tileId = parseInt(tileIdElement.textContent);
-                    edgeConfigs[currentEditingTerrain][pos.key] = { tileId: tileId };
+                    if (tileId !== 0 && !isNaN(tileId)) {
+                        edgeConfigs[currentEditingTerrain][key] = { tileId: tileId };
+                    }
                 }
             });
 
@@ -3015,48 +3596,25 @@
             closeEdgePreview();
         }
 
-        // 重置边缘配置
-        function resetEdgeConfig() {
-            edgePositions.forEach(pos => {
-                if (pos.key === 'center') return;
+        // 完全重置边缘配置
+        function resetEdgeConfigFull() {
+            const baseTileId = parseInt(document.getElementById(`tileId_${currentEditingTerrain}`).value) || 0;
 
-                const tileIdElement = document.getElementById(`edge_tile_id_${pos.key}`);
+            // 重置所有配置
+            edgeConfigKeys.forEach(key => {
+                const tileIdElement = document.getElementById(`tile_id_${key}`);
                 if (tileIdElement) {
-                    const baseTileId = parseInt(document.getElementById(`tileId_${currentEditingTerrain}`).value) || 0;
                     tileIdElement.textContent = baseTileId;
-                    previewEdgeTile(baseTileId, pos.key);
+                    previewEdgeTileById(baseTileId, key);
                 }
             });
 
             alert('🔄 已重置所有边缘位置使用基础图块！\n\n点击"应用配置"保存更改。');
         }
 
-        // 更新边缘配置总结
-        function updateEdgeConfigSummary(terrainType) {
-            const summary = document.getElementById('edgeConfigSummary');
-            const baseTileId = parseInt(document.getElementById(`tileId_${terrainType}`).value) || 0;
-
-            let html = `<strong>基础图块:</strong> ID ${baseTileId}<br>`;
-            html += `<strong>已配置的边缘:</strong><br>`;
-
-            let configuredCount = 0;
-            edgePositions.forEach(pos => {
-                if (pos.key === 'center') return;
-
-                const config = edgeConfigs[terrainType][pos.key];
-                if (config && config.tileId !== undefined) {
-                    configuredCount++;
-                    html += `• ${pos.label}: ID ${config.tileId}<br>`;
-                }
-            });
-
-            if (configuredCount === 0) {
-                html += `<span style="color: #888;">未配置，所有位置使用基础图块</span>`;
-            } else {
-                html += `<span style="color: #4ecca3;">共配置 ${configuredCount} 个边缘位置</span>`;
-            }
-
-            summary.innerHTML = html;
+        // 旧的重置函数（保持兼容性）
+        function resetEdgeConfig() {
+            resetEdgeConfigFull();
         }
 
         // 从输入框更新图块配置（无需用户点击应用）
@@ -3683,15 +4241,9 @@
         // ==================== 地图图片生成功能 ====================
         let generatedMapCanvas = null;
 
-        // 根据周围地形获取边缘图块ID
-        function getEdgeTile(terrainType, x, y, map) {
-            const edgeConfig = edgeConfigs[terrainType];
-            if (!edgeConfig || !edgeConfig.enabled) {
-                // 没有启用边缘配置，使用基础图块
-                return parseInt(document.getElementById(`tileId_${terrainType}`)?.value) || 0;
-            }
-
-            // 获取周围8个方向的地形
+        // 获取周围8个方向的地形（九宫格）
+        // 返回包含所有8个相邻位置的对象
+        function getNeighborTerrains(x, y, map) {
             const getTerrain = (dx, dy) => {
                 const nx = x + dx;
                 const ny = y + dy;
@@ -3701,45 +4253,199 @@
                 return null;
             };
 
-            const center = getTerrain(0, 0);
-            const topLeft = getTerrain(-1, -1);
-            const top = getTerrain(0, -1);
-            const topRight = getTerrain(1, -1);
-            const left = getTerrain(-1, 0);
-            const right = getTerrain(1, 0);
-            const bottomLeft = getTerrain(-1, 1);
-            const bottom = getTerrain(0, 1);
-            const bottomRight = getTerrain(1, 1);
+            return {
+                // 四个主方向
+                top: getTerrain(0, -1),
+                bottom: getTerrain(0, 1),
+                left: getTerrain(-1, 0),
+                right: getTerrain(1, 0),
+                // 四个对角方向
+                topLeft: getTerrain(-1, -1),
+                topRight: getTerrain(1, -1),
+                bottomLeft: getTerrain(-1, 1),
+                bottomRight: getTerrain(1, 1)
+            };
+        }
 
-            // 检查是否有相邻的同类地形
-            const hasSameTerrain = (t) => t === terrainType;
-            const hasAdjacentSame = hasSameTerrain(top) || hasSameTerrain(bottom) ||
-                                    hasSameTerrain(left) || hasSameTerrain(right);
+        // 检查指定方向是否是"相同地形"
+        function isSameTerrain(neighbor, currentType) {
+            return neighbor === currentType;
+        }
 
-            // 如果周围没有同类地形，使用基础图块
-            if (!hasAdjacentSame) {
-                return parseInt(document.getElementById(`tileId_${terrainType}`)?.value) || 0;
+        // 检查指定方向是否是"不同地形"（排除null边界）
+        function isDifferentTerrain(neighbor, currentType) {
+            return neighbor !== null && neighbor !== currentType;
+        }
+
+        // ==================== 边缘检测函数 ====================
+
+        // 检查边缘是否连续（避免孤立突出的单个瓦片）
+        // 返回：true=边缘连续，false=孤立突出
+        function isEdgeContinuous(terrainType, x, y, map, diffTop, diffBottom, diffLeft, diffRight) {
+            // 检查边缘方向上是否有相邻的相同地形支持
+            // 例如：上边缘需要检查左右是否也有相同的地形
+
+            // 对于上边缘，检查左右是否至少有一边是相同地形
+            if (diffTop && !diffBottom) {
+                return sameLeft || sameRight;
+            }
+            // 对于下边缘，检查左右是否至少有一边是相同地形
+            if (diffBottom && !diffTop) {
+                return sameLeft || sameRight;
+            }
+            // 对于左边缘，检查上下是否至少有一边是相同地形
+            if (diffLeft && !diffRight) {
+                return sameTop || sameBottom;
+            }
+            // 对于右边缘，检查上下是否至少有一边是相同地形
+            if (diffRight && !diffLeft) {
+                return sameTop || sameBottom;
             }
 
-            // 检测边缘情况并返回对应的图块ID
-            // 简化版本：只检查是否是边缘位置
-            const isEdge = !hasSameTerrain(top) || !hasSameTerrain(bottom) ||
-                          !hasSameTerrain(left) || !hasSameTerrain(right);
+            // 对于转角，需要检查对应方向的支持
+            return true;
+        }
 
-            if (isEdge) {
-                // 根据具体边缘情况选择图块
-                if (!hasSameTerrain(top) && edgeConfig.top) return edgeConfig.top.tileId;
-                if (!hasSameTerrain(bottom) && edgeConfig.bottom) return edgeConfig.bottom.tileId;
-                if (!hasSameTerrain(left) && edgeConfig.left) return edgeConfig.left.tileId;
-                if (!hasSameTerrain(right) && edgeConfig.right) return edgeConfig.right.tileId;
-                if (!hasSameTerrain(topLeft) && edgeConfig.top_left) return edgeConfig.top_left.tileId;
-                if (!hasSameTerrain(topRight) && edgeConfig.top_right) return edgeConfig.top_right.tileId;
-                if (!hasSameTerrain(bottomLeft) && edgeConfig.bottom_left) return edgeConfig.bottom_left.tileId;
-                if (!hasSameTerrain(bottomRight) && edgeConfig.bottom_right) return edgeConfig.bottom_right.tileId;
+        // 根据周围地形获取边缘图块ID
+        function getEdgeTile(terrainType, x, y, map) {
+            const edgeConfig = edgeConfigs[terrainType];
+            const baseTileId = parseInt(document.getElementById(`tileId_${terrainType}`)?.value) || 0;
+
+            // 结果变量，默认使用基础图块
+            let resultTileId = baseTileId;
+
+            // 如果没有启用智能边缘，直接返回基础图块
+            const useSmartEdges = document.getElementById('useSmartEdges')?.checked;
+            if (!useSmartEdges) {
+                return resultTileId;
             }
 
-            // 使用基础图块
-            return parseInt(document.getElementById(`tileId_${terrainType}`)?.value) || 0;
+            const neighbors = getNeighborTerrains(x, y, map);
+
+            // 检查各方向是否有相同地形
+            const sameTop = isSameTerrain(neighbors.top, terrainType);
+            const sameRight = isSameTerrain(neighbors.right, terrainType);
+            const sameBottom = isSameTerrain(neighbors.bottom, terrainType);
+            const sameLeft = isSameTerrain(neighbors.left, terrainType);
+            const sameTopLeft = isSameTerrain(neighbors.topLeft, terrainType);
+            const sameTopRight = isSameTerrain(neighbors.topRight, terrainType);
+            const sameBottomLeft = isSameTerrain(neighbors.bottomLeft, terrainType);
+            const sameBottomRight = isSameTerrain(neighbors.bottomRight, terrainType);
+
+            // 如果用户配置了边缘图块，使用用户配置
+            if (edgeConfig && edgeConfig.enabled) {
+                // 统计不同方向的数量
+                const diffTop = !sameTop;
+                const diffRight = !sameRight;
+                const diffBottom = !sameBottom;
+                const diffLeft = !sameLeft;
+                const diffCount = (diffTop ? 1 : 0) + (diffRight ? 1 : 0) + (diffBottom ? 1 : 0) + (diffLeft ? 1 : 0);
+
+                // ===== 1. 基础块：四周都是相同地形 =====
+                if (diffCount === 0&&sameBottomLeft&&sameBottomRight&&sameTopLeft&&sameTopRight) {
+                    if (edgeConfig.base) resultTileId = edgeConfig.base.tileId;
+                    else resultTileId = baseTileId;
+                }
+                // ===== 2. 孤立块：四周都是不同地形 =====
+                // else if (diffCount === 4) {
+                //     if (edgeConfig.single) resultTileId = edgeConfig.single.tileId;
+                //     else resultTileId = baseTileId;
+                // }
+                // ===== 3. 斜线连接：对角相同但相邻不同 =====
+                // 左上-右下斜线 (NW-SE) - pattern: 001/010/100
+                else if (sameTopLeft && sameBottomRight && !sameBottomLeft && !sameTopRight) {
+                    if (edgeConfig.diagonal_nw) resultTileId = edgeConfig.diagonal_nw.tileId;
+                    else if (edgeConfig.diagonal_se) resultTileId = edgeConfig.diagonal_se.tileId;
+                    else resultTileId = baseTileId;
+                }
+                // 右上-左下斜线 (NE-SW) - pattern: 010/001/100
+                else if (sameTopRight && sameBottomLeft && !sameBottomRight && !sameTopLeft) {
+                    if (edgeConfig.diagonal_ne) resultTileId = edgeConfig.diagonal_ne.tileId;
+                    else if (edgeConfig.diagonal_sw) resultTileId = edgeConfig.diagonal_sw.tileId;
+                    else resultTileId = baseTileId;
+                }
+              
+                // ===== 5. 外凸转角：两个相邻方向不同，且对角也不同 =====
+                // 左上外凸：上方和左方不同，对角也不同 (pattern: 001/011/111)
+                // 检查：需要右侧或下方有足够的地形支持（边缘至少2个瓦片宽）
+                else if (diffTop && diffLeft && !sameTopLeft && (sameBottom || sameRight)) {
+                    if (edgeConfig.top_left) resultTileId = edgeConfig.top_left.tileId;
+                    else if (edgeConfig.top) resultTileId = edgeConfig.top.tileId;
+                    else if (edgeConfig.left) resultTileId = edgeConfig.left.tileId;
+                    else resultTileId = baseTileId;
+                }
+                // 右上外凸：上方和右方不同，对角也不同 (pattern: 010/011/111)
+                else if (diffTop && diffRight && !sameTopRight && (sameBottom || sameLeft)) {
+                    if (edgeConfig.top_right) resultTileId = edgeConfig.top_right.tileId;
+                    else if (edgeConfig.top) resultTileId = edgeConfig.top.tileId;
+                    else if (edgeConfig.right) resultTileId = edgeConfig.right.tileId;
+                    else resultTileId = baseTileId;
+                }
+                // 左下外凸：下方和左方不同，对角也不同 (pattern: 111/011/001)
+                else if (diffBottom && diffLeft && !sameBottomLeft && (sameTop || sameRight)) {
+                    if (edgeConfig.bottom_left) resultTileId = edgeConfig.bottom_left.tileId;
+                    else if (edgeConfig.bottom) resultTileId = edgeConfig.bottom.tileId;
+                    else if (edgeConfig.left) resultTileId = edgeConfig.left.tileId;
+                    else resultTileId = baseTileId;
+                }
+                // 右下外凸：下方和右方不同，对角也不同 (pattern: 111/011/010)
+                else if (diffBottom && diffRight && !sameBottomRight && (sameTop || sameLeft)) {
+                    if (edgeConfig.bottom_right) resultTileId = edgeConfig.bottom_right.tileId;
+                    else if (edgeConfig.bottom) resultTileId = edgeConfig.bottom.tileId;
+                    else if (edgeConfig.right) resultTileId = edgeConfig.right.tileId;
+                    else resultTileId = baseTileId;
+                }
+                //内凹角
+                else if (!sameTopRight&&diffCount==0){
+                    if (edgeConfig.inner_top_right) {
+                        resultTileId = edgeConfig.inner_top_right.tileId;
+                        console.log('内凹resultTileId',edgeConfig.inner_top_right.tileId)
+                    }
+                    else resultTileId = baseTileId;
+                }
+                else if (!sameTopLeft&&diffCount==0){
+                    console.log('内凹resultTileId',edgeConfig.inner_top_left.tileId)
+                    if (edgeConfig.inner_top_left) resultTileId = edgeConfig.inner_top_left.tileId;
+                    else resultTileId = baseTileId;
+                }
+                    else if (!sameBottomLeft&&diffCount==0){
+                          console.log('内凹resultTileId',edgeConfig.inner_top_left.tileId)
+                    if (edgeConfig.inner_bottom_left) resultTileId = edgeConfig.inner_bottom_left.tileId;
+                    else resultTileId = baseTileId;
+                }
+                    else if (!sameBottomRight&&diffCount==0){
+                          console.log('内凹resultTileId',edgeConfig.inner_bottom_right.tileId)
+                    if (edgeConfig.inner_bottom_right) resultTileId = edgeConfig.inner_bottom_right.tileId;
+                    else resultTileId = baseTileId;
+                }
+                // ===== 6. 单一边缘 (只有1个主方向不同) =====
+                // 上边缘 (pattern: 011/111/111) - 需要检查水平连续性
+                else if (diffTop && sameRight && sameBottom && sameLeft) {
+                    if (edgeConfig.top) resultTileId = edgeConfig.top.tileId;
+                    else resultTileId = baseTileId;
+                }                // 下边缘 (pattern: 111/111/110)
+                else if (sameTop && sameRight && diffBottom && sameLeft) {
+                    if (edgeConfig.bottom) resultTileId = edgeConfig.bottom.tileId;
+                    else resultTileId = baseTileId;
+                }
+                // 左边缘 (pattern: 101/111/111)
+                else if (sameTop && diffRight && sameBottom && sameLeft) {
+                    if (edgeConfig.left) resultTileId = edgeConfig.left.tileId;
+                    else resultTileId = baseTileId;
+                }
+                // 右边缘 (pattern: 111/111/101)
+                else if (sameTop && sameRight && sameBottom && diffLeft) {
+                    if (edgeConfig.right) resultTileId = edgeConfig.right.tileId;
+                    else resultTileId = baseTileId;
+                }
+                
+                // 其他情况使用基础图块
+                else {
+                    resultTileId = baseTileId;
+                }
+            }
+
+            return resultTileId;
         }
 
         // 生成地图图片
@@ -3778,16 +4484,16 @@
 
                     // 获取对应的图块ID
                     let tileId;
-                    if (useSmartEdges && edgeConfigs[terrainType]?.enabled) {
+                    if (useSmartEdges) {
+                        // 使用智能边缘检测
                         tileId = getEdgeTile(terrainType, x, y, map);
                     } else {
+                        // 直接使用基础图块
                         tileId = parseInt(document.getElementById(`tileId_${terrainType}`)?.value) || 0;
                     }
 
                     // 如果该地形类型有手动上传的素材，使用手动素材
-                    if (terrainAssets[terrainType]) {
-                        ctx.drawImage(terrainAssets[terrainType], x * tileSize, y * tileSize, tileSize, tileSize);
-                    } else {
+                     {
                         // 从sprite sheet中绘制
                         const srcTileSize = SPRITE_SHEET_TILE_SIZES[0];
                         const pos = getTilePositionById(tileId);
