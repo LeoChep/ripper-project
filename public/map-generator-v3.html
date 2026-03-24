@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>森林地图生成器 - 规则版</title>
+    <title>草地地图生成器 - v3（道路分割版）</title>
     <style>
         body {
             font-family: 'Microsoft YaHei', Arial, sans-serif;
@@ -412,8 +412,8 @@
     </style>
 </head>
 <body>
-    <h1>🌲 森林地图生成器 - 规则配置版 🌲</h1>
-    <p class="subtitle">完全可控的地形生成规则系统</p>
+    <h1>🌿 草地地图生成器 - v3（道路分割版） 🛤️</h1>
+    <p class="subtitle">先铺满草地，然后用道路分割草地 | 智能边缘图块系统</p>
 
     <div class="container">
         <div class="controls">
@@ -424,14 +424,14 @@
                 <div class="control-group">
                     <label>地图宽度: <span id="widthValue" class="value-display">60</span></label>
                     <div class="control-row">
-                        <input type="range" id="mapWidth" min="20" max="100" value="60" oninput="updateValue('width')">
+                        <input type="range" id="mapWidth" min="20" max="100" value="60" oninput="updateValue('width'); updateRoadDialogBounds()">
                     </div>
                 </div>
 
                 <div class="control-group">
                     <label>地图高度: <span id="heightValue" class="value-display">40</span></label>
                     <div class="control-row">
-                        <input type="range" id="mapHeight" min="20" max="80" value="40" oninput="updateValue('height')">
+                        <input type="range" id="mapHeight" min="20" max="80" value="40" oninput="updateValue('height'); updateRoadDialogBounds()">
                     </div>
                 </div>
 
@@ -451,37 +451,16 @@
                 </div>
             </div>
 
-            <!-- 树林规则 -->
+            <!-- 草地和道路规则（V3） -->
             <div class="control-section">
-                <div class="section-title">🌲 树林生成规则</div>
+                <div class="section-title">🌿 草地和道路生成规则（V3）</div>
 
                 <div class="control-group">
                     <label>基础树林覆盖率: <span id="forestCoverValue" class="value-display">35%</span></label>
                     <div class="control-row">
                         <input type="range" id="forestCover" min="0" max="80" value="35" oninput="updateValue('forestCover')">
                     </div>
-                </div>
-
-                <div class="control-group">
-                    <label>草地片数量: <span id="grassPatchCountValue" class="value-display">15</span></label>
-                    <div class="control-row">
-                        <input type="range" id="grassPatchCount" min="1" max="50" value="15" oninput="updateValue('grassPatchCount')">
-                    </div>
-                    <small style="color: #888;">生成的草地片数量（可略微浮动）</small>
-                </div>
-
-                <div class="control-group">
-                    <label>草地片最小尺寸: <span id="grassMinSizeValue" class="value-display">2</span></label>
-                    <div class="control-row">
-                        <input type="range" id="grassMinSize" min="2" max="5" value="2" oninput="updateValue('grassMinSize')">
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label>草地片最大尺寸: <span id="grassMaxSizeValue" class="value-display">6</span></label>
-                    <div class="control-row">
-                        <input type="range" id="grassMaxSize" min="3" max="10" value="6" oninput="updateValue('grassMaxSize')">
-                    </div>
+                    <small style="color: #888;">V3: 此设置暂未使用（草地铺满全图）</small>
                 </div>
 
                 <div class="control-group">
@@ -489,6 +468,7 @@
                     <div class="control-row">
                         <input type="range" id="forestPatches" min="0" max="20" value="8" oninput="updateValue('forestPatches')">
                     </div>
+                    <small style="color: #888;">V3: 此设置暂未使用</small>
                 </div>
 
                 <div class="control-group">
@@ -561,7 +541,10 @@
 
             <!-- 道路规则 -->
             <div class="control-section">
-                <div class="section-title">🛤️ 道路生成规则</div>
+                <div class="section-title">🛤️ 道路生成规则（V3：切割草地）</div>
+                <div style="background: #0f3460; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                    <p style="color: #4ecca3; font-size: 12px; margin: 0;">✨ V3新逻辑：草地铺满全图，道路会切割草地并显示为地面</p>
+                </div>
 
                 <div class="control-group">
                     <label>道路数量: <span id="roadCountValue" class="value-display">2</span></label>
@@ -577,6 +560,14 @@
                         <option value="random">随机道路（任意连接）</option>
                         <option value="network">网络道路（网格状）</option>
                     </select>
+                </div>
+
+                <div class="control-group">
+                    <label>道路期望宽度: <span id="roadWidthValue" class="value-display">2</span> 格</label>
+                    <div class="control-row">
+                        <input type="range" id="roadWidth" min="1" max="5" value="2" oninput="updateValue('roadWidth')">
+                    </div>
+                    <small style="color: #888;">生成时可在局部浮动 ±1 格</small>
                 </div>
 
                 <div class="control-group">
@@ -598,6 +589,158 @@
                         <input type="checkbox" id="roadAvoidForest" checked>
                         道路优先避开树林
                     </label>
+                </div>
+
+                <div class="control-group">
+                    <button type="button" class="button-tertiary" onclick="showManualRoadDialog()">➕ 手动添加道路</button>
+                    <button type="button" class="button-tertiary" onclick="showRoadManager()" style="margin-top: 5px;">⚙️ 管理所有道路</button>
+                </div>
+
+                <div class="control-group">
+                    <label>手动配置道路列表:</label>
+                    <div id="roadListDisplay" style="background: #0f3460; padding: 10px; border-radius: 5px; min-height: 50px; max-height: 150px; overflow-y: auto; font-size: 11px;">
+                        <div style="color: #888;">暂无手动配置的道路</div>
+                    </div>
+                    <button type="button" class="button-secondary" onclick="clearManualRoads()" style="margin-top: 5px; padding: 8px;">清空手动道路</button>
+                </div>
+            </div>
+
+            <!-- 道路管理窗口 -->
+            <div id="roadManagerDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
+                <div style="background: #16213e; padding: 25px; border-radius: 10px; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                    <h3 style="color: #4ecca3; margin: 0 0 20px 0;">⚙️ 道路管理 - <span id="roadManagerTitle">所有道路</span></h3>
+
+                    <div id="allRoadsList" style="background: #0f3460; padding: 15px; border-radius: 8px; min-height: 200px; max-height: 400px; overflow-y: auto;">
+                        <div style="color: #888; text-align: center; padding: 20px;">暂无道路信息，请先生成地图</div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button onclick="applyRoadChanges()" style="flex: 1;">✅ 应用修改并重新生成</button>
+                        <button onclick="closeRoadManager()" class="button-secondary" style="flex: 1;">关闭</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 编辑道路对话框 -->
+            <div id="editRoadDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1001; align-items: center; justify-content: center;">
+                <div style="background: #16213e; padding: 25px; border-radius: 10px; max-width: 500px; width: 90%;">
+                    <h3 style="color: #4ecca3; margin: 0 0 20px 0;">✏️ 编辑道路</h3>
+
+                    <input type="hidden" id="editRoadIndex">
+
+                    <div class="control-group">
+                        <label>道路类型:</label>
+                        <div id="editRoadType" style="color: #4ecca3; font-weight: bold;"></div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>起点 X: <span id="editStartXValue">0</span></label>
+                        <div class="control-row">
+                            <input type="range" id="editStartX" min="0" max="99" value="0" oninput="updateEditRoadValue('startX')">
+                            <input type="number" id="editStartXInput" min="0" max="99" value="0" style="width: 60px;" onchange="syncEditRoadInput('startX')">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>起点 Y: <span id="editStartYValue">0</span></label>
+                        <div class="control-row">
+                            <input type="range" id="editStartY" min="0" max="79" value="0" oninput="updateEditRoadValue('startY')">
+                            <input type="number" id="editStartYInput" min="0" max="79" value="0" style="width: 60px;" onchange="syncEditRoadInput('startY')">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>终点 X: <span id="editEndXValue">0</span></label>
+                        <div class="control-row">
+                            <input type="range" id="editEndX" min="0" max="99" value="0" oninput="updateEditRoadValue('endX')">
+                            <input type="number" id="editEndXInput" min="0" max="99" value="0" style="width: 60px;" onchange="syncEditRoadInput('endX')">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>终点 Y: <span id="editEndYValue">0</span></label>
+                        <div class="control-row">
+                            <input type="range" id="editEndY" min="0" max="79" value="0" oninput="updateEditRoadValue('endY')">
+                            <input type="number" id="editEndYInput" min="0" max="79" value="0" style="width: 60px;" onchange="syncEditRoadInput('endY')">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>道路宽度: <span id="editRoadWidthValue">2</span></label>
+                        <div class="control-row">
+                            <input type="range" id="editRoadWidth" min="1" max="5" value="2" oninput="updateEditRoadValue('width')">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>道路弯曲度: <span id="editRoadCurvatureValue">30%</span></label>
+                        <div class="control-row">
+                            <input type="range" id="editRoadCurvature" min="0" max="100" value="30" oninput="updateEditRoadValue('curvature')">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button onclick="saveRoadEdit()" style="flex: 1;">保存修改</button>
+                        <button onclick="closeEditRoadDialog()" class="button-secondary" style="flex: 1;">取消</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 手动道路添加对话框 -->
+            <div id="manualRoadDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
+                <div style="background: #16213e; padding: 25px; border-radius: 10px; max-width: 500px; width: 90%;">
+                    <h3 style="color: #4ecca3; margin: 0 0 20px 0;">➕ 手动添加道路</h3>
+
+                    <div class="control-group">
+                        <label>起点 X: <span id="startXValue" class="value-display">0</span></label>
+                        <div class="control-row">
+                            <input type="range" id="startX" min="0" max="99" value="0" oninput="updateValue('startX')">
+                            <input type="number" id="startXInput" min="0" max="99" value="0" style="width: 60px;" onchange="syncRoadInput('startX')">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>起点 Y: <span id="startYValue" class="value-display">0</span></label>
+                        <div class="control-row">
+                            <input type="range" id="startY" min="0" max="79" value="0" oninput="updateValue('startY')">
+                            <input type="number" id="startYInput" min="0" max="79" value="0" style="width: 60px;" onchange="syncRoadInput('startY')">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>终点 X: <span id="endXValue" class="value-display">59</span></label>
+                        <div class="control-row">
+                            <input type="range" id="endX" min="0" max="99" value="59" oninput="updateValue('endX')">
+                            <input type="number" id="endXInput" min="0" max="99" value="59" style="width: 60px;" onchange="syncRoadInput('endX')">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>终点 Y: <span id="endYValue" class="value-display">39</span></label>
+                        <div class="control-row">
+                            <input type="range" id="endY" min="0" max="79" value="39" oninput="updateValue('endY')">
+                            <input type="number" id="endYInput" min="0" max="79" value="39" style="width: 60px;" onchange="syncRoadInput('endY')">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>道路宽度: <span id="manualRoadWidthValue" class="value-display">2</span></label>
+                        <div class="control-row">
+                            <input type="range" id="manualRoadWidth" min="1" max="5" value="2" oninput="updateValue('manualRoadWidth')">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>道路弯曲度: <span id="manualRoadCurvatureValue" class="value-display">30%</span></label>
+                        <div class="control-row">
+                            <input type="range" id="manualRoadCurvature" min="0" max="100" value="30" oninput="updateValue('manualRoadCurvature')">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button onclick="addManualRoad()" style="flex: 1;">添加道路</button>
+                        <button onclick="closeManualRoadDialog()" class="button-secondary" style="flex: 1;">取消</button>
+                    </div>
                 </div>
             </div>
 
@@ -1067,7 +1210,6 @@
 
             </div>
         </div>
-    </div>
 
     <!-- 边缘预览弹窗 -->
     <div id="edgePreviewModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -1395,10 +1537,10 @@
                     // 基础设置
                     noiseScale: config.noiseScale || 30,
 
-                    // 草地规则
-                    grassPatchCount: config.grassPatchCount !== undefined ? config.grassPatchCount : 15,
-                    grassMinSize: config.grassMinSize !== undefined ? config.grassMinSize : 2,
-                    grassMaxSize: config.grassMaxSize !== undefined ? config.grassMaxSize : 6,
+                    // V3: 草地规则（不需要草地片配置，草地铺满全图）
+                    grassPatchCount: 0, // V3: 不使用
+                    grassMinSize: 2,   // V3: 不使用，但保留默认值避免错误
+                    grassMaxSize: 6,   // V3: 不使用，但保留默认值避免错误
 
                     // 树林规则
                     forestCover: (config.forestCover !== undefined ? config.forestCover : 35) / 100,
@@ -1417,9 +1559,13 @@
                     // 道路规则
                     roadCount: config.roadCount !== undefined ? config.roadCount : 2,
                     roadType: config.roadType || 'cross',
+                    roadWidth: config.roadWidth !== undefined ? config.roadWidth : 2,
                     roadCurvature: (config.roadCurvature !== undefined ? config.roadCurvature : 30) / 100,
                     roadCrossRiver: config.roadCrossRiver || false,
                     roadAvoidForest: config.roadAvoidForest !== undefined ? config.roadAvoidForest : true,
+                    manualRoads: config.manualRoads || [], // 手动配置的道路列表
+                    useSavedRoads: config.useSavedRoads || false, // 使用保存的道路信息（不重新生成）
+                    savedRoadsInfo: config.savedRoadsInfo || [], // 保存的完整道路信息
 
                     // 岩石规则
                     rockDensity: (config.rockDensity !== undefined ? config.rockDensity : 2) / 100,
@@ -1439,6 +1585,15 @@
                     grass: [],      // 草地层（包含边缘）
                     features: []    // 特征层（道路、河流、岩石、高坡、密林）
                 };
+
+                // V3: 初始化道路单元格记录（用于道路切割）
+                this.roadCells = new Set();
+                this.generatedRoads = []; // 记录生成的道路信息
+            }
+
+            // 获取生成的道路信息
+            getGeneratedRoads() {
+                return this.generatedRoads;
             }
 
             generate() {
@@ -1470,62 +1625,22 @@
                 }
             }
 
-            // 第2层：生成草地层（以片为单位生成方形或L型草地）
+            // 第2层：生成草地层（V3：铺满整个地图）
             generateGrassLayer() {
-                console.log('生成第2层：草地层（片状生成）');
+                console.log('生成第2层：草地层（铺满整个地图）');
                 this.layers.grass = [];
 
-                // 初始化空层
+                // V3逻辑：铺满整个地图为草地
                 for (let y = 0; y < this.height; y++) {
                     const row = [];
                     for (let x = 0; x < this.width; x++) {
-                        row.push(null);
+                        row.push('A'); // 全部标记为草地
                     }
                     this.layers.grass.push(row);
                 }
 
-                // 使用配置的草地片数量（可以略微浮动 ±20%）
-                const basePatchCount = this.config.grassPatchCount;
-                const patchCount = Math.floor(
-                    basePatchCount * (0.8 + Math.random() * 0.4) // 0.8-1.2倍浮动
-                );
-
-                console.log(`目标草地片数量: ${patchCount}（基础${basePatchCount}，可浮动±20%）`);
-
-                // 生成草地片
-                let patchesCreated = 0;
-                let attempts = 0;
-                const maxAttempts = patchCount * 10; // 允许足够的尝试次数
-
-                while (patchesCreated < patchCount && attempts < maxAttempts) {
-                    attempts++;
-
-                    // 随机选择草地片类型：60%方形，40% L型
-                    const patchType = Math.random() < 0.6 ? 'rectangle' : 'L-shape';
-
-                    // 使用配置的尺寸范围生成草地片
-                    let patchTiles = [];
-
-                    if (patchType === 'rectangle') {
-                        patchTiles = this.generateRectanglePatch();
-                    } else {
-                        patchTiles = this.generateLShapePatch();
-                    }
-
-                    // 检查是否可以放置（不与现有草地重叠或边缘相邻）
-                    if (this.canPlaceGrassPatch(patchTiles)) {
-                        // 放置草地片
-                        for (const tile of patchTiles) {
-                            if (this.layers.grass[tile.y][tile.x] === null) {
-                                this.layers.grass[tile.y][tile.x] = 'A';
-                            }
-                        }
-                        patchesCreated++;
-                    }
-                }
-
-                const grassTilesCount = this.layers.grass.flat().filter(tile => tile === 'A').length;
-                console.log(`草地生成完成：创建${patchesCreated}片草地，共${grassTilesCount}个草地瓦片`);
+                const grassTilesCount = this.width * this.height;
+                console.log(`草地生成完成：铺满整个地图，共${grassTilesCount}个草地瓦片`);
             }
 
             // 生成方形草地片
@@ -1815,12 +1930,18 @@
                 return 'A';
             }
 
-            // 第3层：生成特征层
+            // 第3层：生成特征层（V3：道路切割草地）
             generateFeatureLayer() {
-                console.log('生成第3层：特征层（已跳过道路、河流、岩石、高坡、密林）');
-                this.layers.features = [];
+                console.log('生成第3层：特征层（道路切割草地）');
 
-                // 初始化为空
+                // V3逻辑：生成道路，将道路部分设为地面（G），切割草地
+                this.generateRoads();
+
+                // 清理草地区域，移除小于2格宽或2格高的突出部分
+                this.cleanGrassAreas();
+
+                // 特征层保持为空（不需要）
+                this.layers.features = [];
                 for (let y = 0; y < this.height; y++) {
                     const row = [];
                     for (let x = 0; x < this.width; x++) {
@@ -1828,22 +1949,93 @@
                     }
                     this.layers.features.push(row);
                 }
+            }
 
-                // 暂时跳过所有特征生成，只保留草地和土地
-                // // 生成河流
-                // this.generateRivers();
+            // 清理草地区域，移除细小的突出部分
+            cleanGrassAreas() {
+                console.log('清理草地区域，移除小于2格宽或2格高的突出部分...');
+                let removedCount = 0;
 
-                // // 生成道路
-                // this.generateRoads();
+                // 多次迭代，确保所有小突出部分都被清理
+                let changed = true;
+                let iterations = 0;
+                const maxIterations = 10;
 
-                // // 添加岩石
-                // this.addRocks();
+                while (changed && iterations < maxIterations) {
+                    changed = false;
+                    iterations++;
 
-                // // 添加高坡
-                // this.addHills();
+                    for (let y = 0; y < this.height; y++) {
+                        for (let x = 0; x < this.width; x++) {
+                            // 只检查草地瓦片
+                            if (this.layers.grass[y][x] !== 'A') continue;
 
-                // // 添加树林斑块
-                // this.addForestPatches();
+                            // 检查是否应该移除这个草地瓦片
+                            if (this.shouldRemoveGrass(x, y)) {
+                                this.layers.grass[y][x] = 'G';
+                                removedCount++;
+                                changed = true;
+                            }
+                        }
+                    }
+                }
+
+                console.log(`草地区域清理完成，移除了${removedCount}个细小的突出部分，迭代${iterations}次`);
+            }
+
+            // 检查指定位置的草地瓦片是否应该被移除
+            shouldRemoveGrass(x, y) {
+                // 计算水平和垂直方向的连续草地长度
+                const horizontalLength = this.countContinuousGrass(x, y, true);
+                const verticalLength = this.countContinuousGrass(x, y, false);
+
+                // 如果任一方向小于2，则应该移除
+                return horizontalLength < 2 || verticalLength < 2;
+            }
+
+            // 计算指定位置在水平或垂直方向上的连续草地长度
+            countContinuousGrass(x, y, horizontal) {
+                let count = 0;
+
+                if (horizontal) {
+                    // 水平方向：向左右延伸
+                    // 向左
+                    for (let checkX = x; checkX >= 0; checkX--) {
+                        if (this.layers.grass[y][checkX] === 'A') {
+                            count++;
+                        } else {
+                            break;
+                        }
+                    }
+                    // 向右
+                    for (let checkX = x + 1; checkX < this.width; checkX++) {
+                        if (this.layers.grass[y][checkX] === 'A') {
+                            count++;
+                        } else {
+                            break;
+                        }
+                    }
+                } else {
+                    // 垂直方向：向上下延伸
+                    // 向上
+                    for (let checkY = y; checkY >= 0; checkY--) {
+                        if (this.layers.grass[checkY][x] === 'A') {
+                            count++;
+                        } else {
+                            break;
+                        }
+                    }
+                    // 向下
+                    for (let checkY = y + 1; checkY < this.height; checkY++) {
+                        if (this.layers.grass[checkY][x] === 'A') {
+                            count++;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+
+                return count;
             }
 
             // 生成河流（在特征层）
@@ -1938,12 +2130,65 @@
                 }
             }
 
-            // 生成道路（在特征层）
+            // 生成道路（V3：切割草地，改为地面G）
             generateRoads() {
+                console.log('V3: 生成道路，切割草地');
+
+                // 清空之前的道路记录
+                this.generatedRoads = [];
+
+                // 检查是否使用保存的道路信息（应用修改模式）
+                if (this.config.useSavedRoads && this.config.savedRoadsInfo && this.config.savedRoadsInfo.length > 0) {
+                    console.log(`使用保存的道路信息生成 ${this.config.savedRoadsInfo.length} 条道路`);
+
+                    this.config.savedRoadsInfo.forEach((road, index) => {
+                        console.log(`保存的道路 #${index + 1}: (${road.start.x},${road.start.y}) → (${road.end.x},${road.end.y}), 宽度:${road.width}, 弯曲度:${road.curvature}`);
+                        this.createPathV3(road.start.x, road.start.y, road.end.x, road.end.y, road.curvature, road.width);
+
+                        // 记录道路信息
+                        this.generatedRoads.push({
+                            id: road.id || `saved_${index}`,
+                            type: road.type || '手动',
+                            start: { ...road.start },
+                            end: { ...road.end },
+                            width: road.width,
+                            curvature: road.curvature
+                        });
+                    });
+
+                    console.log(`V3: 使用保存信息生成道路完成，共${this.generatedRoads.length}条道路`);
+                    console.log('生成的道路信息:', this.generatedRoads);
+                    return;
+                }
+
+                // 正常模式：生成本地配置的道路
                 const count = this.config.roadCount;
                 const type = this.config.roadType;
                 const curvature = this.config.roadCurvature;
+                const roadWidth = this.config.roadWidth;
 
+                // 首先生成手动配置的道路
+                if (this.config.manualRoads && this.config.manualRoads.length > 0) {
+                    console.log(`生成 ${this.config.manualRoads.length} 条手动配置的道路`);
+                    this.config.manualRoads.forEach((road, index) => {
+                        console.log(`手动道路 #${index + 1}: (${road.start.x},${road.start.y}) → (${road.end.x},${road.end.y}), 宽度:${road.width}, 弯曲度:${road.curvature}`);
+                        this.createPathV3(road.start.x, road.start.y, road.end.x, road.end.y, road.curvature, road.width);
+
+                        // 记录道路信息
+                        this.generatedRoads.push({
+                            id: `manual_${index}`,
+                            type: '手动',
+                            start: { ...road.start },
+                            end: { ...road.end },
+                            width: road.width,
+                            curvature: road.curvature
+                        });
+                    });
+                } else {
+                    console.log('没有手动配置的道路');
+                }
+
+                // 然后生成自动道路
                 for (let r = 0; r < count; r++) {
                     let startPos, endPos;
 
@@ -1965,11 +2210,27 @@
                         }
                     }
 
-                    this.createPath(startPos.x, startPos.y, endPos.x, endPos.y, 'B', curvature);
+                    // V3：在草地层创建道路，将草地改为地面（G），带宽度控制
+                    this.createPathV3(startPos.x, startPos.y, endPos.x, endPos.y, curvature, roadWidth);
+
+                    // 记录自动生成的道路信息
+                    this.generatedRoads.push({
+                        id: `auto_${r}`,
+                        type: '自动',
+                        start: { ...startPos },
+                        end: { ...endPos },
+                        width: roadWidth,
+                        curvature: curvature
+                    });
                 }
+
+                const totalRoads = (this.config.manualRoads?.length || 0) + count;
+                console.log(`V3: 道路生成完成，共${totalRoads}条道路（手动:${this.config.manualRoads?.length || 0}, 自动:${count}）`);
+                console.log('生成的道路信息:', this.generatedRoads);
             }
 
-            createPath(startX, startY, endX, endY, char, curvature) {
+            // V3：在草地层创建道路路径（带宽度控制）
+            createPathV3(startX, startY, endX, endY, curvature, targetWidth = 2) {
                 let x = startX;
                 let y = startY;
                 const maxSteps = this.width + this.height;
@@ -1978,52 +2239,88 @@
 
                 while (steps < maxSteps) {
                     if (y >= 0 && y < this.height && x >= 0 && x < this.width) {
-                        const key = `${x},${y}`;
+                        // 计算当前位置的局部宽度（在期望宽度基础上浮动）
+                        const localWidth = this.calculateLocalWidth(x, y, targetWidth);
 
-                        // 检查是否可以在此处放置道路
-                        const canPlace = this.config.roadCrossRiver || this.layers.features[y][x] !== 'C';
-                        const avoidForest = !this.config.roadAvoidForest || this.layers.grass[y][x] !== 'F';
+                        // 使用钻石形状扩展道路宽度
+                        this.expandRoadWidth(x, y, localWidth, visited);
+                    }
 
-                        if (canPlace && avoidForest && !visited.has(key)) {
-                            this.layers.features[y][x] = char;
-                            this.roadCells.add(key);
-                            visited.add(key);
+                    // 向目标移动
+                    const dx = endX - x;
+                    const dy = endY - y;
+
+                    if (dx === 0 && dy === 0) break;
+
+                    // 添加随机性（受弯曲度影响）
+                    let moveX = 0, moveY = 0;
+
+                    const noiseValue = this.noise.fbm(x / 30, y / 30, 2);
+                    const randomFactor = (noiseValue + 1) / 2 * curvature;
+
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        moveX = dx > 0 ? 1 : -1;
+                        if (Math.random() < randomFactor && dy !== 0) {
+                            moveY = dy > 0 ? 1 : -1;
+                            moveX = 0;
                         }
+                    } else {
+                        moveY = dy > 0 ? 1 : -1;
+                        if (Math.random() < randomFactor && dx !== 0) {
+                            moveX = dx > 0 ? 1 : -1;
+                            moveY = 0;
+                        }
+                    }
+
+                    x += moveX;
+                    y += moveY;
+                    steps++;
+
+                    if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
+                        break;
                     }
 
                     if (Math.abs(x - endX) < 2 && Math.abs(y - endY) < 2) {
                         break;
                     }
+                }
+            }
 
-                    // 计算方向
-                    let dx = endX - x;
-                    let dy = endY - y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
+            // 计算局部道路宽度（在期望宽度基础上浮动）
+            calculateLocalWidth(x, y, targetWidth) {
+                // 使用噪声函数创建自然的宽度变化
+                const noiseValue = this.noise.fbm(x / 15, y / 15, 1);
+                const normalizedNoise = (noiseValue + 1) / 2; // 归一化到 [0, 1]
 
-                    if (dist > 0) {
-                        dx = Math.round(dx / dist);
-                        dy = Math.round(dy / dist);
-                    }
+                // 宽度浮动：±1 格，但不小于1，不大于 targetWidth + 1
+                const variation = Math.round((normalizedNoise - 0.5) * 2); // -1, 0, 或 1
+                const localWidth = Math.max(1, Math.min(targetWidth + 1, targetWidth + variation));
 
-                    // 添加弯曲
-                    if (Math.random() < curvature * 0.5) {
-                        if (Math.random() < 0.5) {
-                            const temp = dx;
-                            dx = dy;
-                            dy = temp;
-                        } else {
-                            dx = -dx;
+                return localWidth;
+            }
+
+            // 以指定位置为中心，按钻石形状扩展道路宽度
+            expandRoadWidth(centerX, centerY, width, visited) {
+                // 钻石形状的曼哈顿距离扩展
+                for (let dy = -(width - 1); dy <= width - 1; dy++) {
+                    for (let dx = -(width - 1); dx <= width - 1; dx++) {
+                        // 曼哈顿距离 <= width - 1
+                        if (Math.abs(dx) + Math.abs(dy) <= width - 1) {
+                            const nx = centerX + dx;
+                            const ny = centerY + dy;
+
+                            if (ny >= 0 && ny < this.height && nx >= 0 && nx < this.width) {
+                                const key = `${nx},${ny}`;
+
+                                // V3：将草地改为地面（G）
+                                if (this.layers.grass[ny][nx] === 'A' && !visited.has(key)) {
+                                    this.layers.grass[ny][nx] = 'G'; // 道路为地面
+                                    this.roadCells.add(key);
+                                    visited.add(key);
+                                }
+                            }
                         }
                     }
-
-                    x += dx;
-                    y += dy;
-                    steps++;
-
-                    if (x < 0) x = 0;
-                    if (x >= this.width) x = this.width - 1;
-                    if (y < 0) y = 0;
-                    if (y >= this.height) y = this.height - 1;
                 }
             }
 
@@ -2125,35 +2422,31 @@
                 }
             }
 
-            // 合并所有图层
+            // 合并所有图层（V3：简化版，只使用草地层）
             mergeLayers() {
-                console.log('合并图层并应用边缘处理...');
+                console.log('V3: 合并图层（只存储基础地形类型，边缘处理将在渲染时进行）...');
                 const finalMap = [];
 
                 for (let y = 0; y < this.height; y++) {
                     const row = [];
                     for (let x = 0; x < this.width; x++) {
-                        // 优先级：特征层 > 草地层 > 土地层
-                        const feature = this.layers.features[y][x];
                         const grass = this.layers.grass[y][x];
-                        const ground = this.layers.ground[y][x];
 
-                        if (feature) {
-                            // 特征层有内容
-                            row.push(feature);
-                        } else if (grass) {
-                            // 草地层有内容，应用边缘处理
-                            const edgeTile = this.getGrassEdgeTile(this.layers.grass, x, y);
-                            row.push(edgeTile);
+                        if (grass === 'A') {
+                            // 草地：直接存储基础地形类型'A'，边缘处理将在渲染时进行
+                            row.push('A');
+                        } else if (grass === 'G') {
+                            // 地面（道路）：直接使用G
+                            row.push('G');
                         } else {
-                            // 土地层
-                            row.push(ground);
+                            // 其他情况：使用G
+                            row.push('G');
                         }
                     }
                     finalMap.push(row);
                 }
 
-                console.log('图层合并完成，已应用边缘图块');
+                console.log('图层合并完成，地图数据仅包含基础地形类型');
                 return finalMap;
             }
 
@@ -2842,15 +3135,24 @@
                 seed: { id: 'seed', display: 'seedValue' },
                 tileSize: { id: 'tileSize', display: 'tileSizeValue' },
                 forestCover: { id: 'forestCover', display: 'forestCoverValue', suffix: '%' },
-                grassPatchCount: { id: 'grassPatchCount', display: 'grassPatchCountValue' },
-                grassMinSize: { id: 'grassMinSize', display: 'grassMinSizeValue' },
-                grassMaxSize: { id: 'grassMaxSize', display: 'grassMaxSizeValue' },
+                // V3: 草地片配置不需要
+                // grassPatchCount: { id: 'grassPatchCount', display: 'grassPatchCountValue' },
+                // grassMinSize: { id: 'grassMinSize', display: 'grassMinSizeValue' },
+                // grassMaxSize: { id: 'grassMaxSize', display: 'grassMaxSizeValue' },
                 forestPatches: { id: 'forestPatches', display: 'forestPatchesValue' },
                 forestRiverBuffer: { id: 'forestRiverBuffer', display: 'forestRiverBufferValue' },
                 riverCount: { id: 'riverCount', display: 'riverCountValue' },
                 riverCurvature: { id: 'riverCurvature', display: 'riverCurvatureValue', suffix: '%' },
                 roadCount: { id: 'roadCount', display: 'roadCountValue' },
+                roadWidth: { id: 'roadWidth', display: 'roadWidthValue' },
                 roadCurvature: { id: 'roadCurvature', display: 'roadCurvatureValue', suffix: '%' },
+                // 手动道路对话框输入
+                startX: { id: 'startX', display: 'startXValue', numberInput: 'startXInput' },
+                startY: { id: 'startY', display: 'startYValue', numberInput: 'startYInput' },
+                endX: { id: 'endX', display: 'endXValue', numberInput: 'endXInput' },
+                endY: { id: 'endY', display: 'endYValue', numberInput: 'endYInput' },
+                manualRoadWidth: { id: 'manualRoadWidth', display: 'manualRoadWidthValue' },
+                manualRoadCurvature: { id: 'manualRoadCurvature', display: 'manualRoadCurvatureValue', suffix: '%' },
                 rockDensity: { id: 'rockDensity', display: 'rockDensityValue', suffix: '%' },
                 hillDensity: { id: 'hillDensity', display: 'hillDensityValue', suffix: '%' },
                 hillMinRadius: { id: 'hillMinRadius', display: 'hillMinRadiusValue' },
@@ -2863,18 +3165,29 @@
 
             if (inputs[type].suffix) {
                 display.textContent = value + inputs[type].suffix;
+            } else if (type === 'roadWidth' || type === 'manualRoadWidth') {
+                display.textContent = value + ' 格';
             } else {
                 display.textContent = value;
+            }
+
+            // 如果有对应的数字输入框，同步更新
+            if (inputs[type].numberInput) {
+                const numberInput = document.getElementById(inputs[type].numberInput);
+                if (numberInput) {
+                    numberInput.value = value;
+                }
             }
         }
 
         function getConfig() {
             return {
                 noiseScale: parseInt(document.getElementById('noiseScale').value),
+                // V3: 草地铺满全图，不需要这些配置
+                // grassPatchCount: parseInt(document.getElementById('grassPatchCount').value),
+                // grassMinSize: parseInt(document.getElementById('grassMinSize').value),
+                // grassMaxSize: parseInt(document.getElementById('grassMaxSize').value),
                 forestCover: parseInt(document.getElementById('forestCover').value),
-                grassPatchCount: parseInt(document.getElementById('grassPatchCount').value),
-                grassMinSize: parseInt(document.getElementById('grassMinSize').value),
-                grassMaxSize: parseInt(document.getElementById('grassMaxSize').value),
                 forestPatches: parseInt(document.getElementById('forestPatches').value),
                 forestRiverBuffer: parseInt(document.getElementById('forestRiverBuffer').value),
                 forestAvoidRoads: document.getElementById('forestAvoidRoads').checked,
@@ -2886,9 +3199,11 @@
                 riverCrossMap: document.getElementById('riverCrossMap').checked,
                 roadCount: parseInt(document.getElementById('roadCount').value),
                 roadType: document.getElementById('roadType').value,
+                roadWidth: parseInt(document.getElementById('roadWidth').value),
                 roadCurvature: parseInt(document.getElementById('roadCurvature').value),
                 roadCrossRiver: document.getElementById('roadCrossRiver').checked,
                 roadAvoidForest: document.getElementById('roadAvoidForest').checked,
+                manualRoads: manualRoads, // 添加手动配置的道路
                 rockDensity: parseInt(document.getElementById('rockDensity').value),
                 rockDistribution: document.getElementById('rockDistribution').value,
                 rockAvoidPathways: document.getElementById('rockAvoidPathways').checked,
@@ -2900,39 +3215,66 @@
         }
 
         function generateMap() {
-            const width = parseInt(document.getElementById('mapWidth').value);
-            const height = parseInt(document.getElementById('mapHeight').value);
-            const seed = parseInt(document.getElementById('seed').value);
-            const config = getConfig();
+            console.log('=== generateMap 开始 ===');
 
-            // 使用新的分层生成器
-            const generator = new LayeredMapGenerator(width, height, seed, config);
-            const map = generator.generate();
-            const output = document.getElementById('mapOutput');
+            try {
+                const width = parseInt(document.getElementById('mapWidth').value);
+                const height = parseInt(document.getElementById('mapHeight').value);
+                const seed = parseInt(document.getElementById('seed').value);
 
-            // 地形颜色映射
-            const terrainColors = {
-                'A': '#90EE90',
-                'B': '#8B4513',
-                'C': '#4169E1',
-                'D': '#808080',
-                'E': '#DEB887',
-                'F': '#228B22',
-                'G': '#D2691E',
-                'G': '#DEB887'  // 土地层颜色
-            };
+                console.log('地图参数:', { width, height, seed });
 
-            // 生成带颜色的地图
-            const mapHTML = map.map(row => {
-                const coloredRow = row.map(cell => {
-                    const color = terrainColors[cell] || '#FFFFFF';
-                    return `<span style="color: ${color};">${cell}</span>`;
-                }).join(' ');
-                return '<div class="map-row">' + coloredRow + '</div>';
-            }).join('');
-            output.innerHTML = mapHTML;
+                const config = getConfig();
 
-            updateRulesSummary(config);
+                // 确保第一次生成时不使用保存的道路信息
+                config.useSavedRoads = false;
+                config.savedRoadsInfo = [];
+
+                console.log('配置:', config);
+
+                // 使用新的分层生成器
+                const generator = new LayeredMapGenerator(width, height, seed, config);
+                const map = generator.generate();
+
+                console.log('地图生成完成，尺寸:', map.length, 'x', map[0].length);
+
+                // 保存到全局变量供图片生成使用
+                currentMapData = map;
+
+                // 保存生成的道路信息（清空之前的记录）
+                generatedRoads = generator.getGeneratedRoads();
+                console.log('已保存生成的道路信息:', generatedRoads);
+
+                const output = document.getElementById('mapOutput');
+
+                // 地形颜色映射
+                const terrainColors = {
+                    'A': '#90EE90',
+                    'B': '#8B4513',
+                    'C': '#4169E1',
+                    'D': '#808080',
+                    'E': '#DEB887',
+                    'F': '#228B22',
+                    'G': '#D2691E'   // 地面颜色（V3：道路显示为地面）
+                };
+
+                // 生成带颜色的地图（地图数据已只包含基础地形类型）
+                const mapHTML = map.map(row => {
+                    const coloredRow = row.map(cell => {
+                        const color = terrainColors[cell] || '#FFFFFF';
+                        return `<span style="color: ${color};">${cell}</span>`;
+                    }).join(' ');
+                    return '<div class="map-row">' + coloredRow + '</div>';
+                }).join('');
+                output.innerHTML = mapHTML;
+
+                updateRulesSummary(config);
+
+                console.log('=== generateMap 完成 ===');
+            } catch (error) {
+                console.error('generateMap 出错:', error);
+                alert('生成地图时出错：' + error.message);
+            }
         }
 
         function copyMap() {
@@ -2966,16 +3308,29 @@
             const summary = document.getElementById('rulesSummary');
             const rules = [];
 
-            // 草地规则
-            rules.push(`🌿 草地: ${config.grassPatchCount} 片, 尺寸 ${config.grassMinSize}-${config.grassMaxSize}`);
+            // V3: 草地规则（铺满全图，道路切割）
+            rules.push(`🌿 草地: 铺满全图，由道路切割`);
+
+            // 显示道路信息
+            if (config.useSavedRoads) {
+                rules.push(`🛤️ 道路: 使用保存的道路信息 (${config.savedRoadsInfo?.length || 0} 条)`);
+                rules.push(`  - 包含手动和自动道路，所有参数都已精确控制`);
+            } else {
+                // 显示手动和自动道路信息
+                const manualRoadCount = config.manualRoads?.length || 0;
+                const autoRoadCount = config.roadCount;
+                const totalRoadCount = manualRoadCount + autoRoadCount;
+                rules.push(`🛤️ 道路: ${totalRoadCount} 条 (手动:${manualRoadCount}, 自动:${autoRoadCount})`);
+                rules.push(`  - 期望宽度: ${config.roadWidth || 2} 格（可在局部浮动 ±1 格）`);
+            }
 
             // 树林规则
-            rules.push(`🌲 树林: ${config.forestCover}% 覆盖率, ${config.forestPatches} 个斑块`);
+            rules.push(`🌲 树林: ${config.forestCover}% 覆盖率, ${config.forestPatches} 个斑块 (V3暂未使用)`);
             if (config.forestAvoidRoads) rules.push(`  - 避开道路`);
             if (config.forestRiverBuffer > 0) rules.push(`  - 距离河边 ${config.forestRiverBuffer} 格`);
 
             // 河流规则
-            rules.push(`🌊 河流: ${config.riverCount} 条, 弯曲度 ${config.riverCurvature * 100}%`);
+            rules.push(`🌊 河流: ${config.riverCount} 条, 弯曲度 ${config.riverCurvature * 100}% (V3暂未使用)`);
             if (config.riverCrossMap) rules.push(`  - 必须穿过地图`);
             if (config.riverBranching) rules.push(`  - 允许分支`);
 
@@ -2985,35 +3340,475 @@
                 'random': '随机道路',
                 'network': '网络道路'
             };
-            rules.push(`🛤️ 道路: ${config.roadCount} 条 ${roadTypeNames[config.roadType]}`);
-            if (config.roadCrossRiver) rules.push(`  - 可以跨河`);
-            if (config.roadAvoidForest) rules.push(`  - 优先避开树林`);
+            rules.push(`🛤️ 自动道路类型: ${roadTypeNames[config.roadType]}, 弯曲度 ${config.roadCurvature * 100}%`);
 
             // 岩石和高坡
-            rules.push(`🪨 岩石: ${config.rockDensity * 100}% 密度, ${config.rockDistribution === 'scattered' ? '分散' : config.rockDistribution === 'clustered' ? '聚集' : '混合'}`);
-            rules.push(`⛰️ 高坡: ${config.hillDensity * 100}% 密度, 半径 ${config.hillMinRadius}-${config.hillMaxRadius}`);
+            rules.push(`🪨 岩石: ${config.rockDensity * 100}% 密度, ${config.rockDistribution === 'scattered' ? '分散' : config.rockDistribution === 'clustered' ? '聚集' : '混合'} (V3暂未使用)`);
+            rules.push(`⛰️ 高坡: ${config.hillDensity * 100}% 密度, 半径 ${config.hillMinRadius}-${config.hillMaxRadius} (V3暂未使用)`);
+
+            // 如果有生成的道路信息，显示详细信息
+            if (generatedRoads && generatedRoads.length > 0) {
+                rules.push(`<div style="margin-top: 10px; color: #4ecca3;">📍 当前道路详情:</div>`);
+                generatedRoads.forEach((road, index) => {
+                    const typeColor = road.type === '手动' ? '#4ecca3' : '#f39c12';
+                    rules.push(`<span style="color: ${typeColor};">#${index + 1} ${road.type}</span>: (${road.start.x},${road.start.y}) → (${road.end.x},${road.end.y}) | 宽:${road.width} 弯:${Math.round(road.curvature * 100)}%`);
+                });
+            }
 
             summary.innerHTML = rules.map(r => `<li>${r}</li>`).join('');
+
+            // 延迟更新道路列表显示（确保函数已定义）
+            setTimeout(() => {
+                if (typeof updateRoadListDisplay === 'function') {
+                    updateRoadListDisplay();
+                }
+            }, 0);
         }
 
-        // 预设配置
+        // ==================== 手动道路对话框控制 ====================
+
+        function updateRoadListDisplay() {
+            const display = document.getElementById('roadListDisplay');
+
+            if (manualRoads.length === 0) {
+                display.innerHTML = '<div style="color: #888;">暂无手动配置的道路</div>';
+                return;
+            }
+
+            let html = `<div style="color: #4ecca3; margin-bottom: 8px;">已配置 ${manualRoads.length} 条手动道路:</div>`;
+
+            manualRoads.forEach((road, index) => {
+                html += `
+                    <div style="background: #1a1a2e; padding: 5px 8px; margin-bottom: 5px; border-radius: 3px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <span style="color: #4ecca3;">#${index + 1}</span>
+                            (${road.start.x},${road.start.y}) → (${road.end.x},${road.end.y})
+                            <span style="color: #888;">| 宽:${road.width} 弯:${Math.round(road.curvature * 100)}%</span>
+                        </div>
+                        <button onclick="removeManualRoad(${index})" style="background: #e74c3c; color: white; border: none; padding: 2px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; width: auto; margin: 0;">×</button>
+                    </div>
+                `;
+            });
+
+            display.innerHTML = html;
+        }
+
+        function showManualRoadDialog() {
+            const width = parseInt(document.getElementById('mapWidth').value);
+            const height = parseInt(document.getElementById('mapHeight').value);
+
+            // 更新范围限制
+            document.getElementById('startX').max = width - 1;
+            document.getElementById('startY').max = height - 1;
+            document.getElementById('endX').max = width - 1;
+            document.getElementById('endY').max = height - 1;
+
+            document.getElementById('startXInput').max = width - 1;
+            document.getElementById('startYInput').max = height - 1;
+            document.getElementById('endXInput').max = width - 1;
+            document.getElementById('endYInput').max = height - 1;
+
+            // 重置为默认值
+            document.getElementById('startX').value = 0;
+            document.getElementById('startY').value = 0;
+            document.getElementById('endX').value = Math.floor(width / 2);
+            document.getElementById('endY').value = height - 1;
+            document.getElementById('manualRoadWidth').value = 2;
+            document.getElementById('manualRoadCurvature').value = 30;
+
+            // 同步显示
+            updateValue('startX');
+            updateValue('startY');
+            updateValue('endX');
+            updateValue('endY');
+            updateValue('manualRoadWidth');
+            updateValue('manualRoadCurvature');
+
+            // 显示对话框
+            document.getElementById('manualRoadDialog').style.display = 'flex';
+        }
+
+        function closeManualRoadDialog() {
+            document.getElementById('manualRoadDialog').style.display = 'none';
+        }
+
+        function syncRoadInput(id) {
+            const rangeInput = document.getElementById(id);
+            const numberInput = document.getElementById(id + 'Input');
+
+            // 从数字输入框同步到滑块
+            rangeInput.value = numberInput.value;
+            updateValue(id);
+        }
+
+        function addManualRoad() {
+            const startX = parseInt(document.getElementById('startX').value);
+            const startY = parseInt(document.getElementById('startY').value);
+            const endX = parseInt(document.getElementById('endX').value);
+            const endY = parseInt(document.getElementById('endY').value);
+            const width = parseInt(document.getElementById('manualRoadWidth').value);
+            const curvature = parseInt(document.getElementById('manualRoadCurvature').value);
+
+            // 添加到手动道路列表
+            manualRoads.push({
+                start: { x: startX, y: startY },
+                end: { x: endX, y: endY },
+                width: width,
+                curvature: curvature / 100
+            });
+
+            console.log('添加手动道路:', manualRoads[manualRoads.length - 1]);
+
+            // 更新显示
+            updateRoadListDisplay();
+
+            // 关闭对话框
+            closeManualRoadDialog();
+        }
+
+        function clearManualRoads() {
+            if (manualRoads.length === 0) {
+                alert('当前没有手动配置的道路');
+                return;
+            }
+
+            if (confirm(`确定要清空所有 ${manualRoads.length} 条手动配置的道路吗？`)) {
+                manualRoads = [];
+                updateRoadListDisplay();
+                console.log('已清空所有手动道路');
+            }
+        }
+
+        function removeManualRoad(index) {
+            manualRoads.splice(index, 1);
+            updateRoadListDisplay();
+            console.log(`已删除手动道路 #${index + 1}`);
+        }
+
+        function updateRoadDialogBounds() {
+            const width = parseInt(document.getElementById('mapWidth').value);
+            const height = parseInt(document.getElementById('mapHeight').value);
+
+            // 更新手动道路对话框的范围限制
+            const startXInput = document.getElementById('startX');
+            const startYInput = document.getElementById('startY');
+            const endXInput = document.getElementById('endX');
+            const endYInput = document.getElementById('endY');
+
+            const startXNumber = document.getElementById('startXInput');
+            const startYNumber = document.getElementById('startYInput');
+            const endXNumber = document.getElementById('endXInput');
+            const endYNumber = document.getElementById('endYInput');
+
+            if (startXInput) startXInput.max = width - 1;
+            if (startYInput) startYInput.max = height - 1;
+            if (endXInput) endXInput.max = width - 1;
+            if (endYInput) endYInput.max = height - 1;
+
+            if (startXNumber) startXNumber.max = width - 1;
+            if (startYNumber) startYNumber.max = height - 1;
+            if (endXNumber) endXNumber.max = width - 1;
+            if (endYNumber) endYNumber.max = height - 1;
+        }
+
+        // ==================== 道路管理功能 ====================
+
+        function showRoadManager() {
+            // 更新地图尺寸范围
+            const width = parseInt(document.getElementById('mapWidth').value);
+            const height = parseInt(document.getElementById('mapHeight').value);
+
+            // 更新编辑对话框的范围限制
+            const editInputs = ['editStartX', 'editStartY', 'editEndX', 'editEndY'];
+            editInputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.max = id.includes('X') ? width - 1 : height - 1;
+                }
+            });
+
+            // 更新道路列表显示
+            updateAllRoadsDisplay();
+
+            // 显示对话框
+            document.getElementById('roadManagerDialog').style.display = 'flex';
+        }
+
+        function closeRoadManager() {
+            document.getElementById('roadManagerDialog').style.display = 'none';
+        }
+
+        function updateAllRoadsDisplay() {
+            const display = document.getElementById('allRoadsList');
+
+            if (generatedRoads.length === 0) {
+                display.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">暂无道路信息，请先生成地图</div>';
+                return;
+            }
+
+            let html = `<div style="color: #4ecca3; margin-bottom: 15px; font-weight: bold;">共 ${generatedRoads.length} 条道路</div>`;
+
+            generatedRoads.forEach((road, index) => {
+                const typeColor = road.type === '手动' ? '#4ecca3' : '#f39c12';
+                html += `
+                    <div style="background: #1a1a2e; padding: 12px; margin-bottom: 10px; border-radius: 5px; border-left: 3px solid ${typeColor};">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <div>
+                                <span style="color: ${typeColor}; font-weight: bold;">#${index + 1} ${road.type}</span>
+                                <span style="color: #888; font-size: 11px;">(${road.id})</span>
+                            </div>
+                            <div>
+                                <button onclick="editRoad(${index})" style="background: #3498db; color: white; border: none; padding: 4px 10px; border-radius: 3px; cursor: pointer; font-size: 11px; margin-right: 5px;">✏️ 编辑</button>
+                                <button onclick="deleteRoad(${index})" style="background: #e74c3c; color: white; border: none; padding: 4px 10px; border-radius: 3px; cursor: pointer; font-size: 11px;">🗑️ 删除</button>
+                            </div>
+                        </div>
+                        <div style="color: #bbb; font-size: 12px; line-height: 1.6;">
+                            <div>📍 路径: (${road.start.x}, ${road.start.y}) → (${road.end.x}, ${road.end.y})</div>
+                            <div>📏 宽度: ${road.width} 格 | 🌀 弯曲度: ${Math.round(road.curvature * 100)}%</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            display.innerHTML = html;
+        }
+
+        function editRoad(index) {
+            const road = generatedRoads[index];
+            if (!road) return;
+
+            // 设置当前编辑的道路索引
+            document.getElementById('editRoadIndex').value = index;
+
+            // 显示道路类型
+            document.getElementById('editRoadType').textContent = `${road.type}道路 (${road.id})`;
+
+            // 设置起点和终点
+            document.getElementById('editStartX').value = road.start.x;
+            document.getElementById('editStartY').value = road.start.y;
+            document.getElementById('editEndX').value = road.end.x;
+            document.getElementById('editEndY').value = road.end.y;
+
+            // 设置宽度和弯曲度
+            document.getElementById('editRoadWidth').value = road.width;
+            document.getElementById('editRoadCurvature').value = Math.round(road.curvature * 100);
+
+            // 更新显示值
+            updateEditRoadValue('startX');
+            updateEditRoadValue('startY');
+            updateEditRoadValue('endX');
+            updateEditRoadValue('endY');
+            updateEditRoadValue('width');
+            updateEditRoadValue('curvature');
+
+            // 同步数字输入框
+            document.getElementById('editStartXInput').value = road.start.x;
+            document.getElementById('editStartYInput').value = road.start.y;
+            document.getElementById('editEndXInput').value = road.end.x;
+            document.getElementById('editEndYInput').value = road.end.y;
+
+            // 显示编辑对话框
+            document.getElementById('editRoadDialog').style.display = 'flex';
+        }
+
+        function closeEditRoadDialog() {
+            document.getElementById('editRoadDialog').style.display = 'none';
+        }
+
+        function updateEditRoadValue(type) {
+            const mappings = {
+                'startX': { id: 'editStartX', display: 'editStartXValue', numberInput: 'editStartXInput' },
+                'startY': { id: 'editStartY', display: 'editStartYValue', numberInput: 'editStartYInput' },
+                'endX': { id: 'editEndX', display: 'editEndXValue', numberInput: 'editEndXInput' },
+                'endY': { id: 'editEndY', display: 'editEndYValue', numberInput: 'editEndYInput' },
+                'width': { id: 'editRoadWidth', display: 'editRoadWidthValue', suffix: ' 格' },
+                'curvature': { id: 'editRoadCurvature', display: 'editRoadCurvatureValue', suffix: '%' }
+            };
+
+            const mapping = mappings[type];
+            if (!mapping) return;
+
+            const input = document.getElementById(mapping.id);
+            const display = document.getElementById(mapping.display);
+            let value = parseInt(input.value);
+
+            if (mapping.suffix) {
+                display.textContent = value + mapping.suffix;
+            } else {
+                display.textContent = value;
+            }
+
+            // 同步数字输入框
+            if (mapping.numberInput) {
+                const numberInput = document.getElementById(mapping.numberInput);
+                if (numberInput) {
+                    numberInput.value = value;
+                }
+            }
+        }
+
+        function syncEditRoadInput(type) {
+            const mappings = {
+                'startX': { id: 'editStartX', display: 'editStartXValue', numberInput: 'editStartXInput' },
+                'startY': { id: 'editStartY', display: 'editStartYValue', numberInput: 'editStartYInput' },
+                'endX': { id: 'editEndX', display: 'editEndXValue', numberInput: 'editEndXInput' },
+                'endY': { id: 'editEndY', display: 'editEndYValue', numberInput: 'editEndYInput' }
+            };
+
+            const mapping = mappings[type];
+            if (!mapping) return;
+
+            const numberInput = document.getElementById(mapping.numberInput);
+            const rangeInput = document.getElementById(mapping.id);
+            const display = document.getElementById(mapping.display);
+
+            if (numberInput && rangeInput && display) {
+                rangeInput.value = numberInput.value;
+                display.textContent = numberInput.value;
+            }
+        }
+
+        function saveRoadEdit() {
+            const index = parseInt(document.getElementById('editRoadIndex').value);
+            if (isNaN(index) || index < 0 || index >= generatedRoads.length) {
+                alert('无效的道路索引');
+                return;
+            }
+
+            const road = generatedRoads[index];
+
+            // 更新道路信息
+            road.start.x = parseInt(document.getElementById('editStartX').value);
+            road.start.y = parseInt(document.getElementById('editStartY').value);
+            road.end.x = parseInt(document.getElementById('editEndX').value);
+            road.end.y = parseInt(document.getElementById('editEndY').value);
+            road.width = parseInt(document.getElementById('editRoadWidth').value);
+            road.curvature = parseInt(document.getElementById('editRoadCurvature').value) / 100;
+
+            console.log(`已更新道路 #${index + 1}:`, road);
+
+            // 更新显示
+            updateAllRoadsDisplay();
+
+            // 关闭编辑对话框
+            closeEditRoadDialog();
+
+            // 显示成功提示
+            alert(`道路 #${index + 1} 修改成功！点击"应用修改并重新生成"来查看效果`);
+        }
+
+        function deleteRoad(index) {
+            if (confirm(`确定要删除道路 #${index + 1} 吗？`)) {
+                const road = generatedRoads.splice(index, 1)[0];
+                console.log(`已删除道路 #${index + 1}:`, road);
+
+                // 如果删除的是手动道路，也要从manualRoads中删除
+                if (road.type === '手动' && road.id.startsWith('manual_')) {
+                    const manualIndex = parseInt(road.id.split('_')[1]);
+                    if (!isNaN(manualIndex) && manualIndex < manualRoads.length) {
+                        manualRoads.splice(manualIndex, 1);
+                    }
+                }
+
+                updateAllRoadsDisplay();
+                updateRoadListDisplay();
+            }
+        }
+
+        function applyRoadChanges() {
+            console.log('应用道路修改并重新生成地图...');
+
+            // 关闭道路管理窗口
+            closeRoadManager();
+
+            // 根据当前的道路信息重新生成地图
+            regenerateMapFromRoads();
+        }
+
+        function regenerateMapFromRoads() {
+            try {
+                const width = parseInt(document.getElementById('mapWidth').value);
+                const height = parseInt(document.getElementById('mapHeight').value);
+                const seed = parseInt(document.getElementById('seed').value);
+
+                // 获取当前配置
+                let config = getConfig();
+
+                console.log('当前生成的道路信息:', generatedRoads);
+
+                // 将所有道路（包括修改后的自动道路）转换为保存的格式
+                const savedRoadsInfo = generatedRoads.map(road => ({
+                    id: road.id,
+                    type: road.type,
+                    start: { ...road.start },
+                    end: { ...road.end },
+                    width: road.width,
+                    curvature: road.curvature
+                }));
+
+                // 更新配置，使用保存的道路信息
+                config.useSavedRoads = true;
+                config.savedRoadsInfo = savedRoadsInfo;
+
+                console.log('使用保存的道路信息重新生成:', savedRoadsInfo);
+
+                // 重新生成地图
+                const generator = new LayeredMapGenerator(width, height, seed, config);
+                const map = generator.generate();
+
+                // 保存结果
+                currentMapData = map;
+                generatedRoads = generator.getGeneratedRoads();
+
+                // 更新显示
+                const output = document.getElementById('mapOutput');
+                const terrainColors = {
+                    'A': '#90EE90',
+                    'B': '#8B4513',
+                    'C': '#4169E1',
+                    'D': '#808080',
+                    'E': '#DEB887',
+                    'F': '#228B22',
+                    'G': '#D2691E'
+                };
+
+                const mapHTML = map.map(row => {
+                    const coloredRow = row.map(cell => {
+                        const color = terrainColors[cell] || '#FFFFFF';
+                        return `<span style="color: ${color};">${cell}</span>`;
+                    }).join(' ');
+                    return '<div class="map-row">' + coloredRow + '</div>';
+                }).join('');
+                output.innerHTML = mapHTML;
+
+                updateRulesSummary(config);
+                updateRoadListDisplay();
+
+                console.log('地图重新生成完成，使用了修改后的道路信息');
+                alert('地图已根据修改的道路信息重新生成！\n所有道路都按照您修改的参数生成。');
+            } catch (error) {
+                console.error('重新生成地图时出错:', error);
+                alert('重新生成地图时出错：' + error.message);
+            }
+        }
+
+        // 预设配置（V3：移除草地片配置）
         const presets = {
             plains: {
-                grassPatchCount: 10, grassMinSize: 2, grassMaxSize: 5,
+                // V3: 草地铺满全图，不需要这些配置
+                // grassPatchCount: 10, grassMinSize: 2, grassMaxSize: 5,
                 forestCover: 10, forestPatches: 3, forestRiverBuffer: 1,
                 riverCount: 1, riverCurvature: 30,
                 roadCount: 2, roadCurvature: 20,
                 rockDensity: 1, hillDensity: 0
             },
             forest: {
-                grassPatchCount: 25, grassMinSize: 3, grassMaxSize: 8,
                 forestCover: 70, forestPatches: 15, forestRiverBuffer: 3,
                 riverCount: 2, riverCurvature: 70,
                 roadCount: 1, roadCurvature: 50,
                 rockDensity: 2, hillDensity: 2
             },
             mountains: {
-                grassPatchCount: 8, grassMinSize: 2, grassMaxSize: 4,
                 forestCover: 20, forestPatches: 5,
                 riverCount: 3, riverCurvature: 80,
                 roadCount: 1, roadCurvature: 70,
@@ -3021,21 +3816,18 @@
                 hillDensity: 8, hillMinRadius: 4, hillMaxRadius: 10
             },
             swamp: {
-                grassPatchCount: 20, grassMinSize: 2, grassMaxSize: 6,
                 forestCover: 40, forestPatches: 10, forestRiverBuffer: 0,
                 riverCount: 4, riverWidth: '3', riverCurvature: 90,
                 roadCount: 0,
                 rockDensity: 1, hillDensity: 0
             },
             crossing: {
-                grassPatchCount: 12, grassMinSize: 2, grassMaxSize: 5,
                 forestCover: 25, forestPatches: 5,
                 riverCount: 1, riverCurvature: 20,
                 roadCount: 3, roadType: 'cross', roadCrossRiver: true,
                 rockDensity: 2, hillDensity: 2
             },
             isolated: {
-                grassPatchCount: 18, grassMinSize: 3, grassMaxSize: 7,
                 forestCover: 60, forestPatches: 12,
                 riverCount: 0,
                 roadCount: 0,
@@ -3044,8 +3836,15 @@
         };
 
         function applyPreset(presetName) {
+            console.log('应用预设:', presetName);
+
             const preset = presets[presetName];
-            if (!preset) return;
+            if (!preset) {
+                console.error('预设不存在:', presetName);
+                return;
+            }
+
+            console.log('预设配置:', preset);
 
             // 应用预设值
             Object.keys(preset).forEach(key => {
@@ -3066,15 +3865,20 @@
                             key === 'hillDensity') {
                             displayElement.textContent = value + '%';
                         } else if (key === 'grassPatchCount' || key === 'grassMinSize' || key === 'grassMaxSize') {
-                            displayElement.textContent = value;
+                            // V3: 跳过草地片配置，UI中不存在这些元素
+                            console.log('跳过草地片配置:', key);
+                            return;
                         } else {
                             displayElement.textContent = value;
                         }
                     }
+                } else {
+                    console.warn('找不到UI元素:', key);
                 }
             });
 
             // 自动生成地图
+            console.log('开始自动生成地图...');
             generateMap();
         }
 
@@ -3091,6 +3895,9 @@
 
         // 当前生成的地图数据
         let currentMapData = null;
+        let manualRoads = []; // 存储手动配置的道路
+        let generatedRoads = []; // 存储所有生成的道路信息（包括自动生成的）
+        let generatedMapCanvas = null;
 
         // ==================== 自动素材提取系统 ====================
         // 预设sprite sheet路径（项目本地文件）
@@ -4116,14 +4923,29 @@
             return document.getElementById('useSmartEdges')?.checked ?? true;
         }
 
-        // 页面加载时生成示例地图
+        // 页面加载时初始化
         window.onload = function() {
-            // 加载保存的配置
-            loadSavedConfig();
-            // 自动加载预设素材
-            loadPresetAssets();
-            // 生成地图
-            generateMap();
+            console.log('=== 页面加载完成，开始初始化 ===');
+
+            try {
+                // 初始化手动道路对话框的范围限制
+                updateRoadDialogBounds();
+                console.log('✓ 手动道路对话框初始化完成');
+
+                // 加载保存的配置
+                loadSavedConfig();
+                console.log('✓ 配置加载完成');
+
+                // 自动加载预设素材
+                loadPresetAssets();
+                console.log('✓ 素材加载完成');
+
+                // V3: 暂时不自动生成地图，等待用户点击按钮
+                console.log('✓ 页面初始化完成（等待用户点击"生成地图"按钮）');
+            } catch (error) {
+                console.error('初始化过程中出错:', error);
+                alert('页面初始化失败：' + error.message);
+            }
         };
 
         // 在sprite sheet加载完成后，自动预览所有图块并初始化选择器
@@ -4263,7 +5085,6 @@
         }
 
         // ==================== 地图图片生成功能 ====================
-        let generatedMapCanvas = null;
 
         // 获取周围8个方向的地形（九宫格）
         // 返回包含所有8个相邻位置的对象
@@ -4474,10 +5295,14 @@
 
         // 生成地图图片
         function generateMapImage() {
+            console.log('generateMapImage 被调用');
+
             if (!currentMapData) {
                 alert('请先生成地图！点击"生成地图"按钮创建地图。');
                 return;
             }
+
+            console.log('currentMapData 存在，尺寸:', currentMapData.length, 'x', currentMapData[0].length);
 
             const tileSize = parseInt(document.getElementById('tileSize').value) || 32;
             const showGrid = document.getElementById('showGrid').checked;
@@ -4487,6 +5312,8 @@
             const map = currentMapData;
             const mapWidth = map[0].length;
             const mapHeight = map.length;
+
+            console.log('开始生成图片，地图尺寸:', mapWidth, 'x', mapHeight, '瓦片大小:', tileSize);
 
             // 创建canvas
             const canvas = document.createElement('canvas');
@@ -4506,6 +5333,8 @@
                 alert('请先加载地形图集！确保 ground_grasss.png 文件存在。');
                 return;
             }
+
+            console.log('开始绘制地图...');
 
             // 绘制地图
             for (let y = 0; y < mapHeight; y++) {
@@ -4605,10 +5434,18 @@
                 'D': '#808080', 'E': '#DEB887', 'F': '#228B22', 'G': '#DEB887'
             };
 
+            // 辅助函数：从复杂的边缘图块名称中提取基础地形类型
+            const getBaseTerrain = (cell) => {
+                if (cell.length === 1) return cell;
+                if (cell.includes('_')) return cell.charAt(0);
+                return cell;
+            };
+
             const mapHTML = map.map(row => {
                 const coloredRow = row.map(cell => {
-                    const color = terrainColors[cell] || '#FFFFFF';
-                    return `<span style="color: ${color};">${cell}</span>`;
+                    const baseTerrain = getBaseTerrain(cell);
+                    const color = terrainColors[baseTerrain] || '#FFFFFF';
+                    return `<span style="color: ${color};">${baseTerrain}</span>`;
                 }).join(' ');
                 return '<div class="map-row">' + coloredRow + '</div>';
             }).join('');
