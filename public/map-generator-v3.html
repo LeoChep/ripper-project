@@ -5088,14 +5088,20 @@
 
         // 获取周围8个方向的地形（九宫格）
         // 返回包含所有8个相邻位置的对象
+        // 对于界外瓦片，默认返回与当前地形相同的类型
         function getNeighborTerrains(x, y, map) {
+            // 获取当前位置的地形类型
+            const currentType = (y >= 0 && y < map.length && x >= 0 && x < map[0].length)
+                ? map[y][x] : null;
+
             const getTerrain = (dx, dy) => {
                 const nx = x + dx;
                 const ny = y + dy;
                 if (ny >= 0 && ny < map.length && nx >= 0 && nx < map[0].length) {
                     return map[ny][nx];
                 }
-                return null;
+                // 界外瓦片默认返回与当前地形相同的类型
+                return currentType;
             };
 
             return {
