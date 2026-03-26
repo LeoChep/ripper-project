@@ -222,8 +222,51 @@
                 <div class="front-obj-info">
                     <strong>{{ obj.name || '未命名' }}</strong>
                     <p style="font-size: 11px; color: #888; margin: 2px 0;">
-                        {{ obj.width }}x{{ obj.height }} | 遮挡高度: {{ obj.occlusionHeight || 0 }}
+                        {{ obj.width }}x{{ obj.height }} | 遮挡: {{ obj.occlusionHeight || 0 }}
                     </p>
+                    <p style="font-size: 11px; color: #00aaaa; margin: 2px 0;">
+                        锚点: ({{ obj.anchor?.x || 0 }}, {{ obj.anchor?.y || 0 }})
+                    </p>
+                    <p style="font-size: 10px; color: #666; margin: 2px 0;" v-if="obj.blockSlot && obj.blockSlot.length > 0">
+                        占据空间: {{ obj.blockSlot.length }} 个多边形
+                    </p>
+                </div>
+            </div>
+
+            <!-- 缩放控制 -->
+            <div class="scale-controls" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #444;">
+                <h4 style="margin: 10px 0; font-size: 14px;">缩放设置</h4>
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; margin-bottom: 5px; font-size: 12px;">
+                        当前缩放: <strong>{{ Math.round(currentScale * 100) }}%</strong>
+                    </label>
+                    <input type="range" v-model.number="currentScale" min="0.1" max="3" step="0.1"
+                           style="width: 100%; margin-bottom: 5px;" />
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: #888;">
+                        <span>10%</span>
+                        <span>300%</span>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; margin-bottom: 5px; font-size: 12px;">
+                        <input type="checkbox" v-model="enableScaleVariation" style="margin-right: 5px;" />
+                        <strong>启用随机缩放</strong>（批量填充时）
+                    </label>
+                </div>
+
+                <div v-if="enableScaleVariation" style="margin-left: 10px; margin-bottom: 10px;">
+                    <label style="display: block; margin-bottom: 3px; font-size: 11px;">
+                        最小缩放: <strong>{{ Math.round(minScale * 100) }}%</strong>
+                    </label>
+                    <input type="range" v-model.number="minScale" min="0.1" max="2" step="0.1"
+                           style="width: 100%; margin-bottom: 5px;" />
+
+                    <label style="display: block; margin-bottom: 3px; font-size: 11px;">
+                        最大缩放: <strong>{{ Math.round(maxScale * 100) }}%</strong>
+                    </label>
+                    <input type="range" v-model.number="maxScale" min="0.1" max="3" step="0.1"
+                           style="width: 100%;" />
                 </div>
             </div>
         </div>
@@ -265,7 +308,35 @@
                         <strong>对齐网格中心点</strong>（取消勾选则完全随机放置）
                     </label>
 
-                    <button @click="randomFillArea" class="btn btn-primary" style="width: 100%;">
+                    <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #444;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">
+                            缩放设置:
+                        </label>
+                        <label style="display: block; margin-bottom: 5px; font-size: 12px;">
+                            当前缩放: {{ Math.round(currentScale * 100) }}%
+                        </label>
+                        <input type="range" v-model.number="currentScale" min="0.1" max="3" step="0.1"
+                               style="width: 100%; margin-bottom: 10px;" />
+
+                        <label style="display: block; margin-bottom: 5px; font-size: 12px;">
+                            <input type="checkbox" v-model="enableScaleVariation" style="margin-right: 5px;" />
+                            <strong>启用随机缩放</strong>（填充时随机大小）
+                        </label>
+                        <div v-if="enableScaleVariation" style="margin-left: 20px; margin-bottom: 10px;">
+                            <label style="display: block; margin-bottom: 3px; font-size: 11px;">
+                                最小缩放: {{ Math.round(minScale * 100) }}%
+                            </label>
+                            <input type="range" v-model.number="minScale" min="0.1" max="2" step="0.1"
+                                   style="width: 100%; margin-bottom: 5px;" />
+                            <label style="display: block; margin-bottom: 3px; font-size: 11px;">
+                                最大缩放: {{ Math.round(maxScale * 100) }}%
+                            </label>
+                            <input type="range" v-model.number="maxScale" min="0.1" max="3" step="0.1"
+                                   style="width: 100%;" />
+                        </div>
+                    </div>
+
+                    <button @click="randomFillArea" class="btn btn-primary" style="width: 100%; margin-top: 15px;">
                         随机填充选中前景物
                     </button>
                 </div>
@@ -298,6 +369,10 @@
                 <label>
                     遮挡高度:
                     <input v-model.number="editingFrontObjOcclusionHeight" type="number" class="input-text" />
+                </label>
+                <label>
+                    缩放比例 ({{ Math.round(editingFrontObjScale * 100) }}%):
+                    <input v-model.number="editingFrontObjScale" type="number" class="input-text" min="0.1" max="3" step="0.1" />
                 </label>
                 <button @click="applyFrontObjPropertyChanges" class="btn btn-primary"
                     style="margin-top: 10px; width: 100%;">应用更改</button>
@@ -415,6 +490,12 @@ const randomFillDensity = ref(10); // 随机填充密度（每100格放置的数
 const fillMode = ref<1 | 2>(1); // 填充模式：1-锚点不超边界，2-整体不超边界
 const alignToGrid = ref(true); // 是否对齐网格中心点
 
+// 前景物缩放相关
+const currentScale = ref(1); // 当前选中的前景物的缩放比例
+const enableScaleVariation = ref(false); // 是否启用缩放变化
+const minScale = ref(0.5); // 最小缩放比例
+const maxScale = ref(1.5); // 最大缩放比例
+
 // 鼠标位置
 const mouseX = ref(0);
 const mouseY = ref(0);
@@ -438,6 +519,14 @@ const selectedObject = ref<any>(null);
 const selectedContainer = ref<PIXI.Container | null>(null);
 const isDragging = ref(false);
 const dragOffset = { x: 0, y: 0 };
+// 批量移动时记录每个对象的初始位置
+const batchDragStartPositions = new Map<string, { x: number, y: number }>();
+
+// 批量选择相关
+const selectedObjects = ref<any[]>([]); // 批量选中的对象列表
+const isSelecting = ref(false); // 是否正在进行框选
+const selectionStart = ref<{ x: number, y: number } | null>(null); // 框选起始点
+const selectionGraphics = ref<PIXI.Graphics | null>(null); // 框选矩形图形
 
 // 文件输入
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -458,6 +547,7 @@ const frontObjObjects = ref<any[]>([]);
 // 编辑选中前景物的属性
 const editingFrontObjName = ref('');
 const editingFrontObjOcclusionHeight = ref(0);
+const editingFrontObjScale = ref(1);
 
 // 计算对象总数
 const objectCount = computed(() => {
@@ -881,23 +971,60 @@ const handlePointerMove = (event: PIXI.FederatedPointerEvent) => {
     mouseY.value = Math.round(pos.y);
 
     // 如果正在拖动对象
-    if (isDragging.value && selectedContainer.value && selectedObject.value) {
-        // 单位对齐网格，墙体/门/前景物自由移动
-        let newX, newY;
+    if (isDragging.value) {
+        // 检查是否是批量拖动（有多个对象被选中）
+        if (selectedObjects.value.length > 1 && batchDragStartPositions.size > 0) {
+            // 批量移动所有选中的对象
+            const deltaX = pos.x - dragOffset.x;
+            const deltaY = pos.y - dragOffset.y;
 
-        if (selectedObject.value.type === 'unit') {
-            // 单位：对齐到网格
-            newX = Math.floor((pos.x - dragOffset.x) / gridSize) * gridSize;
-            newY = Math.floor((pos.y - dragOffset.y) / gridSize) * gridSize;
-        } else {
-            // 墙体、门和前景物：自由移动
-            newX = pos.x - dragOffset.x;
-            newY = pos.y - dragOffset.y;
+            for (const child of objectsContainer.children) {
+                const container = child as PIXI.Container;
+                const userData = (container as any).userData;
+                if (!userData) continue;
+
+                const isSelected = selectedObjects.value.some(obj => obj.id === userData.id);
+                if (!isSelected) continue;
+
+                const startPos = batchDragStartPositions.get(userData.id);
+                if (!startPos) continue;
+
+                let newX, newY;
+                if (userData.type === 'unit') {
+                    // 单位：对齐到网格
+                    newX = Math.floor((startPos.x + deltaX) / gridSize) * gridSize;
+                    newY = Math.floor((startPos.y + deltaY) / gridSize) * gridSize;
+                } else {
+                    // 墙体、门和前景物：自由移动
+                    newX = startPos.x + deltaX;
+                    newY = startPos.y + deltaY;
+                }
+
+                container.position.set(newX, newY);
+                // 更新数据中的位置
+                if (userData.data) {
+                    userData.data.x = newX;
+                    userData.data.y = newY;
+                }
+            }
+        } else if (selectedContainer.value && selectedObject.value) {
+            // 单个对象移动
+            let newX, newY;
+
+            if (selectedObject.value.type === 'unit') {
+                // 单位：对齐到网格
+                newX = Math.floor((pos.x - dragOffset.x) / gridSize) * gridSize;
+                newY = Math.floor((pos.y - dragOffset.y) / gridSize) * gridSize;
+            } else {
+                // 墙体、门和前景物：自由移动
+                newX = pos.x - dragOffset.x;
+                newY = pos.y - dragOffset.y;
+            }
+
+            selectedContainer.value.position.set(newX, newY);
+            selectedObject.value.x = newX;
+            selectedObject.value.y = newY;
         }
-
-        selectedContainer.value.position.set(newX, newY);
-        selectedObject.value.x = newX;
-        selectedObject.value.y = newY;
         return;
     }
 
@@ -983,9 +1110,12 @@ const updatePreview = async (x: number, y: number) => {
         // 显示前景物放置预览
         if (selectedFrontObjIndex.value >= 0 && frontObjTemplates.value[selectedFrontObjIndex.value] && frontObjImage.value) {
             const template = frontObjTemplates.value[selectedFrontObjIndex.value];
-            // 鼠标位置即为左上角（与 FrontObjAnimSprite 一致）
-            const previewX = x;
-            const previewY = y;
+            const anchor = template.anchor || { x: 0, y: 0 };
+            const scale = currentScale.value;
+
+            // 鼠标位置即为锚点位置，对象位置 = 鼠标位置 - 锚点偏移
+            const previewX = x - anchor.x;
+            const previewY = y - anchor.y;
 
             // 更新预览精灵
             if (previewSprite) {
@@ -1004,12 +1134,33 @@ const updatePreview = async (x: number, y: number) => {
                 previewSprite.texture = texture;
                 previewSprite.x = previewX;
                 previewSprite.y = previewY;
+                previewSprite.scale.set(scale, scale); // 应用缩放
                 previewSprite.visible = true;
             }
 
-            // 绘制边框
-            previewGraphics.rect(previewX, previewY, template.width, template.height);
+            // 绘制边框（考虑缩放后的尺寸）
+            const scaledWidth = template.width * scale;
+            const scaledHeight = template.height * scale;
+            previewGraphics.rect(previewX, previewY, scaledWidth, scaledHeight);
             previewGraphics.stroke({ color: 0xff00ff, width: 2 });
+
+            // 绘制锚点标记（显示鼠标位置）
+            previewGraphics.circle(x, y, 4);
+            previewGraphics.fill({ color: 0x00ffff });
+            previewGraphics.moveTo(x - 8, y);
+            previewGraphics.lineTo(x + 8, y);
+            previewGraphics.moveTo(x, y - 8);
+            previewGraphics.lineTo(x, y + 8);
+            previewGraphics.stroke({ color: 0x00ffff, width: 2 });
+
+            // 显示缩放信息（用颜色和大小表示）
+            if (scale !== 1) {
+                // 在边框右上角显示缩放指示器
+                const indicatorSize = Math.min(20, scaledWidth);
+                previewGraphics.rect(previewX + scaledWidth - indicatorSize, previewY, indicatorSize, indicatorSize);
+                previewGraphics.fill({ color: scale > 1 ? 0xff0000 : 0xffff00, alpha: 0.3 });
+                previewGraphics.stroke({ color: 0xffff00, width: 1 });
+            }
         } else {
             // 隐藏预览精灵
             if (previewSprite) {
@@ -1089,12 +1240,105 @@ const handlePointerDown = (event: PIXI.FederatedPointerEvent) => {
     } else if (currentMode.value === 'areaSelect') {
         addAreaSelectPoint(pos.x, pos.y);
     } else if (currentMode.value === 'select') {
-        const hitContainer = selectObject(pos.x, pos.y);
-        if (hitContainer) {
-            // 开始拖动
-            isDragging.value = true;
-            dragOffset.x = pos.x - hitContainer.position.x;
-            dragOffset.y = pos.y - hitContainer.position.y;
+        if (!isSelecting.value && !event.shiftKey) {
+            // 检查是否点击了已选中的对象之一
+            let clickedSelectedContainer = null;
+            for (const child of objectsContainer.children) {
+                const container = child as PIXI.Container;
+                const userData = (container as any).userData;
+                if (!userData) continue;
+
+                const isSelected = selectedObjects.value.some(obj => obj.id === userData.id);
+                if (!isSelected) continue;
+
+                // 检查是否点击了这个对象
+                let isHit = false;
+                if (userData.type === 'unit') {
+                    const localBounds = container.getLocalBounds();
+                    const left = container.position.x + localBounds.x;
+                    const top = container.position.y + localBounds.y;
+                    const right = left + localBounds.width;
+                    const bottom = top + localBounds.height;
+                    isHit = pos.x >= left && pos.x <= right && pos.y >= top && pos.y <= bottom;
+                } else if (userData.type === 'frontObj' && userData.data) {
+                    const data = userData.data;
+                    const scale = data.scale || 1;
+                    const scaledWidth = data.width * scale;
+                    const scaledHeight = data.height * scale;
+                    const left = container.position.x;
+                    const top = container.position.y;
+                    const right = left + scaledWidth;
+                    const bottom = top + scaledHeight;
+                    isHit = pos.x >= left && pos.x <= right && pos.y >= top && pos.y <= bottom;
+                } else if ((userData.type === 'wall' || userData.type === 'door') && userData.data) {
+                    isHit = isNearPolyline(pos.x, pos.y, userData.data, container.position.x, container.position.y, 10);
+                }
+
+                if (isHit) {
+                    clickedSelectedContainer = container;
+                    break;
+                }
+            }
+
+            if (clickedSelectedContainer) {
+                // 点击了已选中的对象，开始批量拖动
+                isDragging.value = true;
+                dragOffset.x = pos.x;
+                dragOffset.y = pos.y;
+
+                // 记录所有选中对象的初始位置
+                batchDragStartPositions.clear();
+                for (const child of objectsContainer.children) {
+                    const container = child as PIXI.Container;
+                    const userData = (container as any).userData;
+                    if (!userData) continue;
+
+                    const isSelected = selectedObjects.value.some(obj => obj.id === userData.id);
+                    if (isSelected) {
+                        batchDragStartPositions.set(userData.id, {
+                            x: container.position.x,
+                            y: container.position.y
+                        });
+                    }
+                }
+            } else {
+                // 普通点击选择单个对象
+                const hitContainer = selectObject(pos.x, pos.y);
+                if (hitContainer) {
+                    // 开始拖动单个对象
+                    isDragging.value = true;
+                    dragOffset.x = pos.x - hitContainer.position.x;
+                    dragOffset.y = pos.y - hitContainer.position.y;
+                } else if (!isSelecting.value) {
+                    // 点击空白处开始框选
+                    isSelecting.value = true;
+                    selectionStart.value = { x: pos.x, y: pos.y };
+                    // 创建框选图形
+                    if (!selectionGraphics.value) {
+                        selectionGraphics.value = new PIXI.Graphics();
+                        objectsContainer.addChild(selectionGraphics.value as any);
+                    }
+                }
+            }
+        } else if (isSelecting.value) {
+            // 正在框选，更新框选矩形
+            if (selectionGraphics.value && selectionStart.value) {
+                selectionGraphics.value.clear();
+                selectionGraphics.value.setStrokeStyle({ width: 2, color: 0x00ff00, alpha: 0.8 });
+                const x = Math.min(selectionStart.value.x, pos.x);
+                const y = Math.min(selectionStart.value.y, pos.y);
+                const width = Math.abs(pos.x - selectionStart.value.x);
+                const height = Math.abs(pos.y - selectionStart.value.y);
+                selectionGraphics.value.rect(x, y, width, height);
+                selectionGraphics.value.stroke();
+                selectionGraphics.value.fill({ color: 0x00ff00, alpha: 0.1 });
+            }
+        } else if (event.shiftKey) {
+            // Shift+点击 添加/移除选择
+            const hitContainer = selectObject(pos.x, pos.y);
+            if (hitContainer) {
+                toggleSelection(hitContainer);
+            }
         }
     }
 };
@@ -1104,7 +1348,33 @@ const handlePointerUp = () => {
     // 如果刚完成拖动，保存历史记录
     if (isDragging.value) {
         isDragging.value = false;
+        batchDragStartPositions.clear(); // 清理批量拖动的状态
         saveHistory();
+    }
+
+    // 如果刚完成框选
+    if (isSelecting.value && selectionStart.value) {
+        isSelecting.value = false;
+
+        // 使用当前鼠标位置
+        const currentPos = { x: mouseX.value, y: mouseY.value };
+
+        const x = Math.min(selectionStart.value.x, currentPos.x);
+        const y = Math.min(selectionStart.value.y, currentPos.y);
+        const width = Math.abs(currentPos.x - selectionStart.value.x);
+        const height = Math.abs(currentPos.y - selectionStart.value.y);
+
+        // 如果框选区域足够大，清除之前的选择并选择新区域内的对象
+        if (width > 5 && height > 5) {
+            clearSelection();
+            selectObjectsInArea(x, y, width, height);
+        }
+
+        // 清除框选图形
+        if (selectionGraphics.value) {
+            selectionGraphics.value.clear();
+        }
+        selectionStart.value = null;
     }
 };
 
@@ -1447,26 +1717,70 @@ const randomFillArea = () => {
 
     if (alignToGrid.value) {
         // 模式1：对齐网格中心点
+        const anchor = template.anchor || { x: 0, y: 0 };
+
+        // 首先收集所有符合区域条件的位置
+        const validPositions: { x: number, y: number, anchorX: number, anchorY: number }[] = [];
+
         for (let gx = gridXStart; gx < gridXEnd; gx++) {
             for (let gy = gridYStart; gy < gridYEnd; gy++) {
                 const centerX = gx * gridSize + gridSize / 2;
                 const centerY = gy * gridSize + gridSize / 2;
-                const posX = centerX - template.width / 2;
-                const posY = centerY - template.height / 2;
+
+                // 使用真实的锚点来计算放置位置
+                // 我们希望锚点在网格中心位置
+                const anchorX = centerX;  // 锚点在网格中心
+                const anchorY = centerY;  // 锚点在网格中心
+                const posX = anchorX - anchor.x;  // 对象X = 锚点X - 锚点偏移
+                const posY = anchorY - anchor.y;  // 对象Y = 锚点Y - 锚点偏移
 
                 // 根据填充模式检查是否可以放置
                 let canPlace = false;
                 if (fillMode.value === 1) {
                     // 模式1：锚点在选区内（内容可超出边界）
-                    canPlace = isPointInPolygon(centerX, centerY, areaSelectPoints.value);
+                    canPlace = isPointInPolygon(anchorX, anchorY, areaSelectPoints.value);
                 } else {
                     // 模式2：整体在选区内（内容不可超出）
                     canPlace = isRectangleInPolygon(posX, posY, template.width, template.height, areaSelectPoints.value);
                 }
 
                 if (canPlace) {
-                    candidates.push({ x: posX, y: posY });
+                    validPositions.push({ x: posX, y: posY, anchorX, anchorY });
                 }
+            }
+        }
+
+        // 如果没有有效位置，提前返回
+        if (validPositions.length === 0) {
+            alert('网格对齐模式下没有找到符合条件的放置位置');
+            return;
+        }
+
+        // 从有效位置中随机选择，避免重叠
+        const shuffled = validPositions.sort(() => Math.random() - 0.5);
+        for (const pos of shuffled) {
+            if (candidates.length >= placeCount) break;
+
+            // 检查是否与已有候选点太近（避免重叠）
+            let tooClose = false;
+            for (const existing of candidates) {
+                const existingAnchorX = existing.x + anchor.x;
+                const existingAnchorY = existing.y + anchor.y;
+
+                const dist = Math.sqrt(Math.pow(pos.anchorX - existingAnchorX, 2) + Math.pow(pos.anchorY - existingAnchorY, 2));
+
+                // 考虑缩放后的实际尺寸进行重叠检测
+                const actualScale = enableScaleVariation.value ? Math.max(currentScale.value, maxScale.value) : currentScale.value;
+                const scaledThreshold = Math.min(template.width, template.height) * 0.8 * actualScale;
+
+                if (dist < scaledThreshold) {
+                    tooClose = true;
+                    break;
+                }
+            }
+
+            if (!tooClose) {
+                candidates.push({ x: pos.x, y: pos.y });
             }
         }
     } else {
@@ -1479,17 +1793,20 @@ const randomFillArea = () => {
         while (foundCount < placeCount && attempts < maxAttempts) {
             attempts++;
 
-            // 在边界框内生成随机点
-            const randomX = bounds.minX + Math.random() * (bounds.maxX - bounds.minX);
-            const randomY = bounds.minY + Math.random() * (bounds.maxY - bounds.minY);
-            const posX = randomX - template.width / 2;
-            const posY = randomY - template.height / 2;
+            // 在边界框内生成随机点作为锚点位置
+            const anchor = template.anchor || { x: 0, y: 0 };
+            const anchorX = bounds.minX + Math.random() * (bounds.maxX - bounds.minX);
+            const anchorY = bounds.minY + Math.random() * (bounds.maxY - bounds.minY);
+
+            // 计算对象位置
+            const posX = anchorX - anchor.x;  // 对象X = 锚点X - 锚点偏移
+            const posY = anchorY - anchor.y;  // 对象Y = 锚点Y - 锚点偏移
 
             // 根据填充模式检查是否可以放置
             let canPlace = false;
             if (fillMode.value === 1) {
                 // 模式1：锚点在选区内（内容可超出边界）
-                canPlace = isPointInPolygon(randomX, randomY, areaSelectPoints.value);
+                canPlace = isPointInPolygon(anchorX, anchorY, areaSelectPoints.value);
             } else {
                 // 模式2：整体在选区内（内容不可超出）
                 canPlace = isRectangleInPolygon(posX, posY, template.width, template.height, areaSelectPoints.value);
@@ -1497,10 +1814,22 @@ const randomFillArea = () => {
 
             if (canPlace) {
                 // 检查是否与已有候选点太近（避免重叠）
+                // 基于锚点位置进行距离判断，而不是对象位置
                 let tooClose = false;
                 for (const existing of candidates) {
-                    const dist = Math.sqrt(Math.pow(posX - existing.x, 2) + Math.pow(posY - existing.y, 2));
-                    if (dist < Math.min(template.width, template.height) * 0.8) {
+                    // 计算两个候选点的锚点位置
+                    const existingAnchorX = existing.x + anchor.x;
+                    const existingAnchorY = existing.y + anchor.y;
+                    const currentAnchorX = posX + anchor.x;
+                    const currentAnchorY = posY + anchor.y;
+
+                    const dist = Math.sqrt(Math.pow(currentAnchorX - existingAnchorX, 2) + Math.pow(currentAnchorY - existingAnchorY, 2));
+
+                    // 考虑缩放后的实际尺寸进行重叠检测
+                    const actualScale = enableScaleVariation.value ? Math.max(currentScale.value, maxScale.value) : currentScale.value;
+                    const scaledThreshold = Math.min(template.width, template.height) * 0.8 * actualScale;
+
+                    if (dist < scaledThreshold) {
                         tooClose = true;
                         break;
                     }
@@ -1526,6 +1855,15 @@ const randomFillArea = () => {
 
     // 放置前景物
     for (const pos of selectedPositions) {
+        // pos 已经是计算好的对象位置（已经考虑了锚点偏移）
+        // 计算随机缩放比例
+        let scale = currentScale.value;
+        if (enableScaleVariation.value) {
+            const minS = Math.min(minScale.value, maxScale.value);
+            const maxS = Math.max(minScale.value, maxScale.value);
+            scale = minS + Math.random() * (maxS - minS);
+        }
+
         const obj = {
             id: nextObjectId++,
             x: pos.x,
@@ -1536,11 +1874,32 @@ const randomFillArea = () => {
             type: 'frontObj',
             visible: true,
             rotation: 0,
+            scale: scale, // 添加缩放属性
             properties: [
                 {
                     name: 'frontObjName',
                     type: 'string',
                     value: template.name
+                },
+                {
+                    name: 'occlusionHeight',
+                    type: 'number',
+                    value: template.occlusionHeight || 0
+                },
+                {
+                    name: 'anchor',
+                    type: 'object',
+                    value: template.anchor || { x: 0, y: 0 }
+                },
+                {
+                    name: 'blockSlot',
+                    type: 'array',
+                    value: template.blockSlot || []
+                },
+                {
+                    name: 'scale',
+                    type: 'number',
+                    value: scale
                 }
             ]
         };
@@ -1697,7 +2056,11 @@ const selectObject = (x: number, y: number): PIXI.Container | null => {
         } else if (userData.type === 'frontObj') {
             // 前景物：矩形边框
             const data = userData.data;
-            selectionBorder.rect(0, -data.height, data.width, data.height);
+            const scale = data.scale || 1;
+            const scaledWidth = data.width * scale;
+            const scaledHeight = data.height * scale;
+            // 容器位置已经在 obj.x, obj.y，精灵从容器内 (0,0) 开始
+            selectionBorder.rect(0, 0, scaledWidth, scaledHeight);
             selectionBorder.stroke({ color: 0xff00ff, width: 3 });
         } else if (userData.type === 'wall' || userData.type === 'door') {
             // 墙体/门：沿折线高亮
@@ -1749,10 +2112,173 @@ const selectObject = (x: number, y: number): PIXI.Container | null => {
         editingUnitHidden.value = false;
         editingFrontObjName.value = '';
         editingFrontObjOcclusionHeight.value = 0;
+        editingFrontObjScale.value = 1;
         editingOnlyVisition.value = false;
         editingOnlyBlock.value = false;
         return null;
     }
+};
+
+// 绘制折线边框的辅助函数
+const drawPolylineBorder = (graphics: PIXI.Graphics, polyline: Array<{x: number, y: number}>, color: number) => {
+    if (!polyline || polyline.length < 2) return;
+    for (let i = 0; i < polyline.length - 1; i++) {
+        const p1 = polyline[i];
+        const p2 = polyline[i + 1];
+        graphics.moveTo(p1.x, p1.y);
+        graphics.lineTo(p2.x, p2.y);
+    }
+    graphics.stroke({ color, width: 5, alpha: 0.8 });
+};
+
+// 切换对象的选中状态（用于 Shift+点击）
+const toggleSelection = (container: PIXI.Container) => {
+    const userData = (container as any).userData;
+    if (!userData) return;
+
+    const existingIndex = selectedObjects.value.findIndex(obj => obj.id === userData.id);
+
+    if (existingIndex >= 0) {
+        // 已选中，移除选择
+        selectedObjects.value.splice(existingIndex, 1);
+        // 移除选中边框
+        const border = container.children.find(child => (child as any).isSelectionBorder);
+        if (border) {
+            container.removeChild(border as any);
+        }
+    } else {
+        // 未选中，添加到选择列表
+        selectedObjects.value.push(userData.data || userData);
+        // 添加选中边框
+        const selectionBorder = new PIXI.Graphics();
+        (selectionBorder as any).isSelectionBorder = true;
+
+        if (userData.type === 'unit') {
+            const localBounds = container.getLocalBounds();
+            const width = localBounds.width || gridSize;
+            const height = localBounds.height || gridSize;
+            selectionBorder.rect(localBounds.x, localBounds.y, width, height);
+            selectionBorder.stroke({ color: 0xffff00, width: 3 });
+        } else if (userData.type === 'frontObj') {
+            const data = userData.data;
+            const scale = data.scale || 1;
+            const scaledWidth = data.width * scale;
+            const scaledHeight = data.height * scale;
+            // 容器位置已经在 obj.x, obj.y，精灵从容器内 (0,0) 开始
+            selectionBorder.rect(0, 0, scaledWidth, scaledHeight);
+            selectionBorder.stroke({ color: 0xff00ff, width: 3 });
+        } else if (userData.type === 'wall' || userData.type === 'door') {
+            const polyline = userData.data?.polyline;
+            if (polyline) {
+                drawPolylineBorder(selectionBorder, polyline, 0xffff00);
+            }
+        }
+
+        container.addChild(selectionBorder);
+    }
+};
+
+// 选择矩形区域内的所有对象
+const selectObjectsInArea = (x: number, y: number, width: number, height: number) => {
+    const left = Math.min(x, x + width);
+    const right = Math.max(x, x + width);
+    const top = Math.min(y, y + height);
+    const bottom = Math.max(y, y + height);
+
+    // 遍历所有对象，检查是否在选择区域内
+    for (const child of objectsContainer.children) {
+        const container = child as PIXI.Container;
+        const userData = (container as any).userData;
+
+        if (!userData) continue;
+
+        let isInArea = false;
+
+        if (userData.type === 'unit') {
+            // 单位：检查容器位置
+            const localBounds = container.getLocalBounds();
+            const objLeft = container.position.x + localBounds.x;
+            const objTop = container.position.y + localBounds.y;
+            const objRight = objLeft + localBounds.width;
+            const objBottom = objTop + localBounds.height;
+
+            // 检查矩形是否相交
+            isInArea = !(objRight < left || objLeft > right || objBottom < top || objTop > bottom);
+        } else if (userData.type === 'frontObj' && userData.data) {
+            // 前景物：检查矩形范围
+            const data = userData.data;
+            const scale = data.scale || 1;
+            const scaledWidth = data.width * scale;
+            const scaledHeight = data.height * scale;
+            // 容器位置在 obj.x, obj.y，精灵从容器内 (0,0) 开始
+            const objLeft = container.position.x;
+            const objTop = container.position.y;
+            const objRight = objLeft + scaledWidth;
+            const objBottom = objTop + scaledHeight;
+
+            isInArea = !(objRight < left || objLeft > right || objBottom < top || objTop > bottom);
+        } else if ((userData.type === 'wall' || userData.type === 'door') && userData.data) {
+            // 墙体/门：检查任意点是否在区域内
+            const polyline = userData.data.polyline;
+            if (polyline) {
+                for (const point of polyline) {
+                    if (point.x >= left && point.x <= right && point.y >= top && point.y <= bottom) {
+                        isInArea = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (isInArea) {
+            // 添加到选择列表（如果尚未选中）
+            const existingIndex = selectedObjects.value.findIndex(obj => obj.id === userData.id);
+            if (existingIndex < 0) {
+                selectedObjects.value.push(userData.data || userData);
+                // 添加选中边框
+                const selectionBorder = new PIXI.Graphics();
+                (selectionBorder as any).isSelectionBorder = true;
+
+                if (userData.type === 'unit') {
+                    const localBounds = container.getLocalBounds();
+                    const objWidth = localBounds.width || gridSize;
+                    const objHeight = localBounds.height || gridSize;
+                    selectionBorder.rect(localBounds.x, localBounds.y, objWidth, objHeight);
+                    selectionBorder.stroke({ color: 0xffff00, width: 3 });
+                } else if (userData.type === 'frontObj') {
+                    const data = userData.data;
+                    const scale = data.scale || 1;
+                    const scaledWidth = data.width * scale;
+                    const scaledHeight = data.height * scale;
+                    // 容器位置已经在 obj.x, obj.y，精灵从容器内 (0,0) 开始
+                    selectionBorder.rect(0, 0, scaledWidth, scaledHeight);
+                    selectionBorder.stroke({ color: 0xff00ff, width: 3 });
+                } else if (userData.type === 'wall' || userData.type === 'door') {
+                    const polyline = userData.data?.polyline;
+                    if (polyline) {
+                        drawPolylineBorder(selectionBorder, polyline, 0xffff00);
+                    }
+                }
+
+                container.addChild(selectionBorder);
+            }
+        }
+    }
+};
+
+// 清除所有选择
+const clearSelection = () => {
+    // 移除所有选中边框
+    for (const child of objectsContainer.children) {
+        const container = child as PIXI.Container;
+        const border = container.children.find(c => (c as any).isSelectionBorder);
+        if (border) {
+            container.removeChild(border as any);
+        }
+    }
+    selectedObjects.value = [];
+    selectedObject.value = null;
+    selectedContainer.value = null;
 };
 
 // 加载单位精灵数据
@@ -1854,7 +2380,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
         }
     } else if (event.key === 'Delete' || event.key === 'Backspace') {
         // 删除选中的对象
-        if (selectedObject.value && selectedContainer.value) {
+        if (selectedObjects.value.length>0|| (selectedObject.value && selectedContainer.value)) {
             deleteSelectedObject();
         }
     }
@@ -1862,6 +2388,87 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
 // 删除选中的对象
 const deleteSelectedObject = () => {
+    console.log('delete 尝试删除')
+    // 如果有批量选择的对象，删除所有选中的对象
+    if (selectedObjects.value.length > 0) {
+        console.log(`批量删除 ${selectedObjects.value.length} 个对象`);
+
+        // 收集要删除的容器和对应的用户数据
+        const containersToDelete: Array<{ container: PIXI.Container, userData: any }> = [];
+
+        for (const child of objectsContainer.children) {
+            const container = child as PIXI.Container;
+            const userData = (container as any).userData;
+            if (!userData) continue;
+
+            const isSelected = selectedObjects.value.some(obj => obj.id === userData.id);
+            if (isSelected) {
+                containersToDelete.push({ container, userData });
+            }
+        }
+
+        // 删除所有选中的对象
+        for (const { container, userData } of containersToDelete) {
+            if (userData.type === 'unit') {
+                const index = placedUnits.value.findIndex(u => u.id === userData.id);
+                if (index !== -1) {
+                    placedUnits.value.splice(index, 1);
+                }
+                objectsContainer.removeChild(container as any);
+                container.destroy({ children: true });
+                console.log(`  已删除单位: ${userData.data?.name || userData.id}`);
+            } else if (userData.type === 'wall') {
+                const index = wallObjects.value.findIndex(w => w.id === userData.id);
+                if (index !== -1) {
+                    wallObjects.value.splice(index, 1);
+                }
+                objectsContainer.removeChild(container as any);
+                container.destroy({ children: true });
+                console.log(`  已删除墙体: ${userData.id}`);
+            } else if (userData.type === 'door') {
+                const index = doorObjects.value.findIndex(d => d.id === userData.id);
+                if (index !== -1) {
+                    doorObjects.value.splice(index, 1);
+                }
+                objectsContainer.removeChild(container as any);
+                container.destroy({ children: true });
+                console.log(`  已删除门: ${userData.id}`);
+            } else if (userData.type === 'frontObj') {
+                const index = frontObjObjects.value.findIndex(o => o.id === userData.id);
+                if (index !== -1) {
+                    frontObjObjects.value.splice(index, 1);
+                }
+                objectsContainer.removeChild(container as any);
+                container.destroy({ children: true });
+                console.log(`  已删除前景物: ${userData.data?.name || userData.id}`);
+            }
+        }
+
+        // 清空所有选择状态
+        selectedObjects.value = [];
+        selectedObject.value = null;
+        selectedContainer.value = null;
+        // 清空编辑器
+        editingUnitName.value = '';
+        editingUnitParty.value = 'player';
+        editingUnitDirection.value = 2;
+        editingUnitFriendly.value = false;
+        editingUnitSelectionGroup.value = '';
+        editingUnitHidden.value = false;
+        editingFrontObjName.value = '';
+        editingFrontObjOcclusionHeight.value = 0;
+        editingFrontObjScale.value = 1;
+        editingOnlyVisition.value = false;
+        editingOnlyBlock.value = false;
+
+        // 保存历史记录
+        saveHistory();
+        // 自动保存编辑状态
+        saveEditorState();
+        return;
+    }
+
+    // 如果没有批量选择，按原来的逻辑删除单个对象
     if (!selectedObject.value || !selectedContainer.value) return;
 
     const userData = (selectedContainer.value as any).userData;
@@ -1927,6 +2534,7 @@ const deleteSelectedObject = () => {
     editingUnitHidden.value = false;
     editingFrontObjName.value = '';
     editingFrontObjOcclusionHeight.value = 0;
+    editingFrontObjScale.value = 1;
     editingOnlyVisition.value = false;
     editingOnlyBlock.value = false;
 
@@ -2045,6 +2653,7 @@ const syncFrontObjPropertiesToEditor = (obj: any) => {
     // 从 properties 数组中提取属性
     const frontObjNameProp = obj.properties?.find((p: any) => p.name === 'frontObjName');
     const occlusionHeightProp = obj.properties?.find((p: any) => p.name === 'occlusionHeight');
+    const scaleProp = obj.properties?.find((p: any) => p.name === 'scale');
 
     if (frontObjNameProp) {
         editingFrontObjName.value = frontObjNameProp.value;
@@ -2053,6 +2662,11 @@ const syncFrontObjPropertiesToEditor = (obj: any) => {
         editingFrontObjOcclusionHeight.value = occlusionHeightProp.value;
     } else {
         editingFrontObjOcclusionHeight.value = 0;
+    }
+    if (scaleProp) {
+        editingFrontObjScale.value = scaleProp.value;
+    } else {
+        editingFrontObjScale.value = obj.scale || 1;
     }
 };
 
@@ -2198,6 +2812,7 @@ const restoreFromHistory = async (state: any) => {
     editingUnitHidden.value = false;
     editingFrontObjName.value = '';
     editingFrontObjOcclusionHeight.value = 0;
+    editingFrontObjScale.value = 1;
     editingOnlyVisition.value = false;
     editingOnlyBlock.value = false;
 
@@ -2960,22 +3575,47 @@ const placeFrontObj = (x: number, y: number) => {
     if (selectedFrontObjIndex.value === -1) return;
 
     const template = frontObjTemplates.value[selectedFrontObjIndex.value];
-    // 鼠标点击位置即为左上角（与 FrontObjAnimSprite 一致）
+    const anchor = template.anchor || { x: 0, y: 0 };
+    const scale = currentScale.value;
+
+    // 根据锚点计算对象的实际位置
+    // 鼠标点击位置是锚点位置，对象位置 = 鼠标位置 - 锚点偏移
     const obj = {
         id: nextObjectId++,
-        x: x,
-        y: y,
+        x: x - anchor.x,
+        y: y - anchor.y,
         width: template.width,
         height: template.height,
         name: template.name,
         type: 'frontObj',
         visible: true,
         rotation: 0,
+        scale: scale, // 添加缩放属性
         properties: [
             {
                 name: 'frontObjName',
                 type: 'string',
                 value: template.name
+            },
+            {
+                name: 'occlusionHeight',
+                type: 'number',
+                value: template.occlusionHeight || 0
+            },
+            {
+                name: 'anchor',
+                type: 'object',
+                value: anchor
+            },
+            {
+                name: 'blockSlot',
+                type: 'array',
+                value: template.blockSlot || []
+            },
+            {
+                name: 'scale',
+                type: 'number',
+                value: scale
             }
         ]
     };
@@ -3011,16 +3651,23 @@ const createFrontObjVisual = (obj: any, template: any) => {
     const sprite = new PIXI.Sprite(texture);
 
     // 精灵位置相对于容器设为 0（容器已经在世界坐标 obj.x, obj.y）
+    // obj.x 和 obj.y 已经在 placeFrontObj 中根据锚点计算好了
     sprite.x = 0;
     sprite.y = 0;
 
     // 锚点设置为左上角（与 FrontObjAnimSprite 一致）
     sprite.anchor.set(0, 0);
 
+    // 应用缩放
+    const scale = obj.scale || 1;
+    sprite.scale.set(scale, scale);
+
     // 计算 zIndex（实现遮挡效果）
-    // zIndex = y + (height - occlusionHeight)
+    // 使用对象的底部Y坐标加上遮挡高度来计算
+    const anchor = template.anchor || { x: 0, y: 0 };
     const occlusionHeight = template.occlusionHeight || 0;
-    sprite.zIndex = obj.y + (obj.height - occlusionHeight);
+    const baseY = obj.y + anchor.y; // 锚点的Y坐标
+    sprite.zIndex = baseY + (template.height - occlusionHeight);
 
     sprite.eventMode = 'static';
 
@@ -3029,6 +3676,48 @@ const createFrontObjVisual = (obj: any, template: any) => {
     graphics.lineStyle(2, 0x00ff00, 0.8);
     graphics.rect(0, 0, obj.width, obj.height);
     graphics.stroke();
+
+    // 绘制锚点标记（用于调试和可视化）
+    if (anchor.x !== 0 || anchor.y !== 0) {
+        graphics.beginFill(0x00ffff, 0.6);
+        graphics.drawCircle(anchor.x, anchor.y, 5);
+        graphics.endFill();
+        graphics.lineStyle(1, 0x00ffff, 0.8);
+        graphics.moveTo(anchor.x - 8, anchor.y);
+        graphics.lineTo(anchor.x + 8, anchor.y);
+        graphics.moveTo(anchor.x, anchor.y - 8);
+        graphics.lineTo(anchor.x, anchor.y + 8);
+    }
+
+    // 绘制占据空间多边形（如果有）
+    const blockSlot = template.blockSlot || [];
+    if (blockSlot.length > 0) {
+        graphics.lineStyle(1, 0xff00ff, 0.3); // 紫色半透明
+        blockSlot.forEach((polygon: any[]) => {
+            if (polygon.length < 3) return;
+            graphics.beginFill(0xff00ff, 0.1);
+            graphics.moveTo(polygon[0].x, polygon[0].y);
+            for (let i = 1; i < polygon.length; i++) {
+                graphics.lineTo(polygon[i].x, polygon[i].y);
+            }
+            graphics.closePath();
+            graphics.fill();
+            graphics.stroke();
+        });
+    }
+
+    // 显示缩放信息（如果缩放不是1）
+    if (scale !== 1) {
+        // 创建文本显示缩放比例
+        const scaleText = new PIXI.Text(`${Math.round(scale * 100)}%`, {
+            fontSize: 10,
+            fill: 0xffff00,
+            stroke: { color: 0x000000, width: 1 }
+        });
+        scaleText.x = 5;
+        scaleText.y = 12;
+        container.addChild(scaleText);
+    }
 
     container.addChild(sprite);
     container.addChild(graphics);
@@ -3057,6 +3746,64 @@ const applyFrontObjPropertyChanges = () => {
         } else {
             occlusionHeightProp.value = editingFrontObjOcclusionHeight.value;
         }
+
+        // 处理缩放属性
+        obj.scale = editingFrontObjScale.value;
+        const scaleProp = obj.properties.find((p: any) => p.name === 'scale');
+        if (!scaleProp) {
+            obj.properties.push({
+                name: 'scale',
+                type: 'number',
+                value: editingFrontObjScale.value
+            });
+        } else {
+            scaleProp.value = editingFrontObjScale.value;
+        }
+
+        // 确保锚点和占据空间数据存在
+        const template = frontObjTemplates.value.find((t: any) => t.name === obj.name);
+        if (template) {
+            const anchorProp = obj.properties.find((p: any) => p.name === 'anchor');
+            if (!anchorProp) {
+                obj.properties.push({
+                    name: 'anchor',
+                    type: 'object',
+                    value: template.anchor || { x: 0, y: 0 }
+                });
+            }
+
+            const blockSlotProp = obj.properties.find((p: any) => p.name === 'blockSlot');
+            if (!blockSlotProp) {
+                obj.properties.push({
+                    name: 'blockSlot',
+                    type: 'array',
+                    value: template.blockSlot || []
+                });
+            }
+        }
+
+        // 重新创建视觉效果以应用缩放
+        if (selectedContainer.value) {
+            objectsContainer.removeChild(selectedContainer.value as any);
+            (selectedContainer.value as any).destroy();
+            selectedContainer.value = null;
+        }
+        const newTemplate = frontObjTemplates.value.find((t: any) => t.name === obj.name) || template;
+        createFrontObjVisual(obj, newTemplate);
+        // 重新选中
+        const newContainer = objectsContainer.children.find((child: any) => child.userData?.id === obj.id);
+        if (newContainer) {
+            selectedContainer.value = newContainer;
+            // 更新选中状态
+            const graphics = newContainer.children.find((child: any) => child instanceof PIXI.Graphics);
+            if (graphics) {
+                graphics.clear();
+                graphics.setStrokeStyle({ width: 2, color: 0x00ff00, alpha: 1 });
+                graphics.rect(0, 0, obj.width, obj.height);
+                graphics.stroke();
+            }
+        }
+
         saveHistory();
     }
 };
