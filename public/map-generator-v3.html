@@ -424,14 +424,14 @@
                 <div class="control-group">
                     <label>地图宽度: <span id="widthValue" class="value-display">60</span></label>
                     <div class="control-row">
-                        <input type="range" id="mapWidth" min="20" max="100" value="60" oninput="updateValue('width'); updateRoadDialogBounds()">
+                        <input type="range" id="mapWidth" min="20" max="500" value="60" oninput="updateValue('width'); updateRoadDialogBounds()">
                     </div>
                 </div>
 
                 <div class="control-group">
                     <label>地图高度: <span id="heightValue" class="value-display">40</span></label>
                     <div class="control-row">
-                        <input type="range" id="mapHeight" min="20" max="80" value="40" oninput="updateValue('height'); updateRoadDialogBounds()">
+                        <input type="range" id="mapHeight" min="20" max="500" value="40" oninput="updateValue('height'); updateRoadDialogBounds()">
                     </div>
                 </div>
 
@@ -567,7 +567,22 @@
                     <div class="control-row">
                         <input type="range" id="roadWidth" min="1" max="5" value="2" oninput="updateValue('roadWidth')">
                     </div>
-                    <small style="color: #888;">生成时可在局部浮动 ±1 格</small>
+                </div>
+
+                <div class="control-group">
+                    <label>道路浮动值: <span id="roadFluctuationValue" class="value-display">1</span> 格</label>
+                    <div class="control-row">
+                        <input type="range" id="roadFluctuation" min="0" max="3" value="1" oninput="updateValue('roadFluctuation')">
+                    </div>
+                    <small style="color: #888;">单侧最大浮动值（0表示无浮动）</small>
+                </div>
+
+                <div class="control-group">
+                    <label>道路浮动概率: <span id="roadFluctuationProbValue" class="value-display">50%</span></label>
+                    <div class="control-row">
+                        <input type="range" id="roadFluctuationProb" min="0" max="100" value="50" oninput="updateValue('roadFluctuationProb')">
+                    </div>
+                    <small style="color: #888;">每个位置应用浮动的概率</small>
                 </div>
 
                 <div class="control-group">
@@ -624,7 +639,8 @@
             <!-- 编辑道路对话框 -->
             <div id="editRoadDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1001; align-items: center; justify-content: center;">
                 <div style="background: #16213e; padding: 25px; border-radius: 10px; max-width: 500px; width: 90%;">
-                    <h3 style="color: #4ecca3; margin: 0 0 20px 0;">✏️ 编辑道路</h3>
+                    <h3 style="color: #4ecca3; margin: 0 0 20px 0;">✏️ 编辑道路属性</h3>
+                    <div style="color: #888; font-size: 12px; margin-bottom: 15px;">可以手动和自动道路的所有属性</div>
 
                     <input type="hidden" id="editRoadIndex">
 
@@ -680,8 +696,11 @@
                     </div>
 
                     <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button onclick="saveRoadEdit()" style="flex: 1;">保存修改</button>
+                        <button onclick="saveRoadEdit()" style="flex: 1;" title="保存修改后，点击应用修改并重新生成查看效果">💾 保存修改</button>
                         <button onclick="closeEditRoadDialog()" class="button-secondary" style="flex: 1;">取消</button>
+                    </div>
+                    <div style="color: #888; font-size: 11px; text-align: center; margin-top: 10px;">
+                        💡 保存后需点击应用修改并重新生成查看效果
                     </div>
                 </div>
             </div>
@@ -1560,6 +1579,8 @@
                     roadCount: config.roadCount !== undefined ? config.roadCount : 2,
                     roadType: config.roadType || 'cross',
                     roadWidth: config.roadWidth !== undefined ? config.roadWidth : 2,
+                    roadFluctuation: config.roadFluctuation !== undefined ? config.roadFluctuation : 1,
+                    roadFluctuationProb: config.roadFluctuationProb !== undefined ? config.roadFluctuationProb : 0.5,
                     roadCurvature: (config.roadCurvature !== undefined ? config.roadCurvature : 30) / 100,
                     roadCrossRiver: config.roadCrossRiver || false,
                     roadAvoidForest: config.roadAvoidForest !== undefined ? config.roadAvoidForest : true,
@@ -2174,14 +2195,15 @@
                         console.log(`手动道路 #${index + 1}: (${road.start.x},${road.start.y}) → (${road.end.x},${road.end.y}), 宽度:${road.width}, 弯曲度:${road.curvature}`);
                         this.createPathV3(road.start.x, road.start.y, road.end.x, road.end.y, road.curvature, road.width);
 
-                        // 记录道路信息
+                        // 记录道路信息，保留来源信息
                         this.generatedRoads.push({
                             id: `manual_${index}`,
                             type: '手动',
                             start: { ...road.start },
                             end: { ...road.end },
                             width: road.width,
-                            curvature: road.curvature
+                            curvature: road.curvature,
+                            fromGeneratedRoadId: road.fromGeneratedRoadId // 保留来源标记
                         });
                     });
                 } else {
@@ -2236,8 +2258,9 @@
                 const maxSteps = this.width + this.height;
                 let steps = 0;
                 const visited = new Set();
+                let reachedEnd = false;
 
-                while (steps < maxSteps) {
+                while (steps < maxSteps && !reachedEnd) {
                     if (y >= 0 && y < this.height && x >= 0 && x < this.width) {
                         // 计算当前位置的局部宽度（在期望宽度基础上浮动）
                         const localWidth = this.calculateLocalWidth(x, y, targetWidth);
@@ -2250,7 +2273,16 @@
                     const dx = endX - x;
                     const dy = endY - y;
 
-                    if (dx === 0 && dy === 0) break;
+                    // 检查是否到达终点（必须精确到达）
+                    if (dx === 0 && dy === 0) {
+                        reachedEnd = true;
+                        // 确保终点的完整宽度被绘制
+                        if (y >= 0 && y < this.height && x >= 0 && x < this.width) {
+                            const localWidth = this.calculateLocalWidth(x, y, targetWidth);
+                            this.expandRoadWidth(x, y, localWidth, visited);
+                        }
+                        break;
+                    }
 
                     // 添加随机性（受弯曲度影响）
                     let moveX = 0, moveY = 0;
@@ -2260,43 +2292,71 @@
 
                     if (Math.abs(dx) > Math.abs(dy)) {
                         moveX = dx > 0 ? 1 : -1;
-                        if (Math.random() < randomFactor && dy !== 0) {
+                        // 允许偏离，但不要太远
+                        if (Math.random() < randomFactor && dy !== 0 && Math.abs(dy) > 1) {
                             moveY = dy > 0 ? 1 : -1;
                             moveX = 0;
                         }
                     } else {
                         moveY = dy > 0 ? 1 : -1;
-                        if (Math.random() < randomFactor && dx !== 0) {
+                        // 允许偏离，但不要太远
+                        if (Math.random() < randomFactor && dx !== 0 && Math.abs(dx) > 1) {
                             moveX = dx > 0 ? 1 : -1;
                             moveY = 0;
                         }
                     }
 
-                    x += moveX;
-                    y += moveY;
+                    const newX = x + moveX;
+                    const newY = y + moveY;
+
+                    // 检查移动后是否超出边界
+                    if (newX < 0 || newX >= this.width || newY < 0 || newY >= this.height) {
+                        // 如果下一步会超出边界，但当前位置已经在边界附近
+                        // 且终点也在这个方向，就尝试向终点方向继续
+                        if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1) {
+                            // 很接近终点了，直接到达终点
+                            x = endX;
+                            y = endY;
+                            continue;
+                        }
+                        break;
+                    }
+
+                    x = newX;
+                    y = newY;
                     steps++;
-
-                    if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
-                        break;
-                    }
-
-                    if (Math.abs(x - endX) < 2 && Math.abs(y - endY) < 2) {
-                        break;
-                    }
                 }
             }
 
             // 计算局部道路宽度（在期望宽度基础上浮动）
             calculateLocalWidth(x, y, targetWidth) {
+                const fluctuation = this.config.roadFluctuation || 0;
+                const fluctuationProb = this.config.roadFluctuationProb !== undefined ? this.config.roadFluctuationProb : 0.5;
+
+                // 如果浮动值为0，直接返回目标宽度
+                if (fluctuation === 0) {
+                    return targetWidth;
+                }
+
                 // 使用噪声函数创建自然的宽度变化
-                const noiseValue = this.noise.fbm(x / 15, y / 15, 1);
+                // 使用更低的频率来保证连续性
+                const noiseValue = this.noise.fbm(x / 20, y / 20, 2);
                 const normalizedNoise = (noiseValue + 1) / 2; // 归一化到 [0, 1]
 
-                // 宽度浮动：±1 格，但不小于1，不大于 targetWidth + 1
-                const variation = Math.round((normalizedNoise - 0.5) * 2); // -1, 0, 或 1
-                const localWidth = Math.max(1, Math.min(targetWidth + 1, targetWidth + variation));
+                // 判断是否应用浮动（基于概率）
+                if (normalizedNoise < fluctuationProb) {
+                    // 应用浮动：基于噪声值的平滑浮动
+                    // 将噪声值映射到 [-fluctuation, fluctuation] 范围
+                    const adjustedNoise = (normalizedNoise - 0.5) * 2; // [-1, 1]
+                    const variation = Math.round(adjustedNoise * fluctuation);
 
-                return localWidth;
+                    // 浮动后的宽度，确保不小于1
+                    const localWidth = Math.max(1, targetWidth + variation);
+                    return localWidth;
+                } else {
+                    // 不应用浮动，返回目标宽度
+                    return targetWidth;
+                }
             }
 
             // 以指定位置为中心，按钻石形状扩展道路宽度
@@ -2540,6 +2600,9 @@
                     // 道路规则
                     roadCount: config.roadCount !== undefined ? config.roadCount : 2,
                     roadType: config.roadType || 'cross',
+                    roadWidth: config.roadWidth !== undefined ? config.roadWidth : 2,
+                    roadFluctuation: config.roadFluctuation !== undefined ? config.roadFluctuation : 1,
+                    roadFluctuationProb: config.roadFluctuationProb !== undefined ? config.roadFluctuationProb : 0.5,
                     roadCurvature: (config.roadCurvature !== undefined ? config.roadCurvature : 30) / 100,
                     roadCrossRiver: config.roadCrossRiver || false,
                     roadAvoidForest: config.roadAvoidForest !== undefined ? config.roadAvoidForest : true,
@@ -2899,8 +2962,9 @@
                 const maxSteps = this.width + this.height;
                 let steps = 0;
                 const visited = new Set();
+                let reachedEnd = false;
 
-                while (steps < maxSteps) {
+                while (steps < maxSteps && !reachedEnd) {
                     if (y >= 0 && y < this.height && x >= 0 && x < this.width) {
                         const key = `${x},${y}`;
 
@@ -2915,33 +2979,46 @@
                         }
                     }
 
-                    if (Math.abs(x - endX) < 2 && Math.abs(y - endY) < 2) {
+                    // 计算到终点的距离
+                    const dx = endX - x;
+                    const dy = endY - y;
+
+                    // 检查是否到达终点
+                    if (dx === 0 && dy === 0) {
+                        reachedEnd = true;
                         break;
                     }
 
+                    // 如果非常接近终点（1格距离），直接到达终点
+                    if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1) {
+                        x = endX;
+                        y = endY;
+                        continue;
+                    }
+
                     // 计算方向
-                    let dx = endX - x;
-                    let dy = endY - y;
+                    let dirX = dx;
+                    let dirY = dy;
                     const dist = Math.sqrt(dx * dx + dy * dy);
 
                     if (dist > 0) {
-                        dx = Math.round(dx / dist);
-                        dy = Math.round(dy / dist);
+                        dirX = Math.round(dx / dist);
+                        dirY = Math.round(dy / dist);
                     }
 
                     // 添加弯曲
                     if (Math.random() < curvature * 0.5) {
                         if (Math.random() < 0.5) {
-                            const temp = dx;
-                            dx = dy;
-                            dy = temp;
+                            const temp = dirX;
+                            dirX = dirY;
+                            dirY = temp;
                         } else {
-                            dx = -dx;
+                            dirX = -dirX;
                         }
                     }
 
-                    x += dx;
-                    y += dy;
+                    x += dirX;
+                    y += dirY;
                     steps++;
 
                     // 边界检查
@@ -3145,6 +3222,8 @@
                 riverCurvature: { id: 'riverCurvature', display: 'riverCurvatureValue', suffix: '%' },
                 roadCount: { id: 'roadCount', display: 'roadCountValue' },
                 roadWidth: { id: 'roadWidth', display: 'roadWidthValue' },
+                roadFluctuation: { id: 'roadFluctuation', display: 'roadFluctuationValue' },
+                roadFluctuationProb: { id: 'roadFluctuationProb', display: 'roadFluctuationProbValue', suffix: '%' },
                 roadCurvature: { id: 'roadCurvature', display: 'roadCurvatureValue', suffix: '%' },
                 // 手动道路对话框输入
                 startX: { id: 'startX', display: 'startXValue', numberInput: 'startXInput' },
@@ -3165,7 +3244,7 @@
 
             if (inputs[type].suffix) {
                 display.textContent = value + inputs[type].suffix;
-            } else if (type === 'roadWidth' || type === 'manualRoadWidth') {
+            } else if (type === 'roadWidth' || type === 'roadFluctuation' || type === 'manualRoadWidth') {
                 display.textContent = value + ' 格';
             } else {
                 display.textContent = value;
@@ -3200,6 +3279,8 @@
                 roadCount: parseInt(document.getElementById('roadCount').value),
                 roadType: document.getElementById('roadType').value,
                 roadWidth: parseInt(document.getElementById('roadWidth').value),
+                roadFluctuation: parseInt(document.getElementById('roadFluctuation').value),
+                roadFluctuationProb: parseInt(document.getElementById('roadFluctuationProb').value) / 100,
                 roadCurvature: parseInt(document.getElementById('roadCurvature').value),
                 roadCrossRiver: document.getElementById('roadCrossRiver').checked,
                 roadAvoidForest: document.getElementById('roadAvoidForest').checked,
@@ -3321,7 +3402,16 @@
                 const autoRoadCount = config.roadCount;
                 const totalRoadCount = manualRoadCount + autoRoadCount;
                 rules.push(`🛤️ 道路: ${totalRoadCount} 条 (手动:${manualRoadCount}, 自动:${autoRoadCount})`);
-                rules.push(`  - 期望宽度: ${config.roadWidth || 2} 格（可在局部浮动 ±1 格）`);
+
+                const roadWidth = config.roadWidth || 2;
+                const roadFluctuation = config.roadFluctuation !== undefined ? config.roadFluctuation : 1;
+                const roadFluctuationProb = config.roadFluctuationProb !== undefined ? Math.round(config.roadFluctuationProb * 100) : 50;
+
+                if (roadFluctuation > 0) {
+                    rules.push(`  - 期望宽度: ${roadWidth} 格（单侧浮动 ±${roadFluctuation} 格，${roadFluctuationProb}% 概率）`);
+                } else {
+                    rules.push(`  - 固定宽度: ${roadWidth} 格（无浮动）`);
+                }
             }
 
             // 树林规则
@@ -3378,12 +3468,14 @@
             let html = `<div style="color: #4ecca3; margin-bottom: 8px;">已配置 ${manualRoads.length} 条手动道路:</div>`;
 
             manualRoads.forEach((road, index) => {
+                const fromAuto = road.fromGeneratedRoadId ? `<span style="color: #9b59b6; font-size: 10px;">[来自自动]</span>` : '';
                 html += `
                     <div style="background: #1a1a2e; padding: 5px 8px; margin-bottom: 5px; border-radius: 3px; display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <span style="color: #4ecca3;">#${index + 1}</span>
                             (${road.start.x},${road.start.y}) → (${road.end.x},${road.end.y})
                             <span style="color: #888;">| 宽:${road.width} 弯:${Math.round(road.curvature * 100)}%</span>
+                            ${fromAuto}
                         </div>
                         <button onclick="removeManualRoad(${index})" style="background: #e74c3c; color: white; border: none; padding: 2px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; width: auto; margin: 0;">×</button>
                     </div>
@@ -3541,25 +3633,78 @@
         function updateAllRoadsDisplay() {
             const display = document.getElementById('allRoadsList');
 
-            if (generatedRoads.length === 0) {
-                display.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">暂无道路信息，请先生成地图</div>';
+            // 合并显示：已生成的道路 + 未生成的手动道路
+            let displayRoads = [];
+
+            // 1. 添加已生成的道路
+            if (generatedRoads.length > 0) {
+                displayRoads = [...generatedRoads];
+            }
+
+            // 2. 添加未生成但已配置的手动道路
+            // 找出在manualRoads中但不在generatedRoads中的道路
+            const generatedManualIds = generatedRoads
+                .filter(r => r.type === '手动' && r.id.startsWith('manual_'))
+                .map(r => parseInt(r.id.split('_')[1]));
+
+            manualRoads.forEach((road, index) => {
+                // 如果这条手动道路还没有在generatedRoads中，添加它
+                if (!generatedManualIds.includes(index)) {
+                    displayRoads.push({
+                        id: `manual_${index}`,
+                        type: '手动',
+                        start: { ...road.start },
+                        end: { ...road.end },
+                        width: road.width,
+                        curvature: road.curvature,
+                        fromGeneratedRoadId: road.fromGeneratedRoadId,
+                        isNotGenerated: true // 标记为未生成
+                    });
+                }
+            });
+
+            if (displayRoads.length === 0) {
+                display.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">暂无道路信息<br><small>请生成地图或添加手动道路</small></div>';
                 return;
             }
 
-            let html = `<div style="color: #4ecca3; margin-bottom: 15px; font-weight: bold;">共 ${generatedRoads.length} 条道路</div>`;
+            // 统计手动和自动道路数量
+            const manualCount = displayRoads.filter(r => r.type === '手动').length;
+            const autoCount = displayRoads.filter(r => r.type === '自动').length;
 
-            generatedRoads.forEach((road, index) => {
+            let html = `
+                <div style="color: #4ecca3; margin-bottom: 15px; font-weight: bold;">共 ${displayRoads.length} 条道路</div>
+                <div style="color: #888; font-size: 12px; margin-bottom: 10px;">
+                    <span style="color: #4ecca3;">●</span> 手动: ${manualCount} 条 |
+                    <span style="color: #f39c12;">●</span> 自动: ${autoCount} 条
+                </div>
+            `;
+
+            displayRoads.forEach((road, index) => {
                 const typeColor = road.type === '手动' ? '#4ecca3' : '#f39c12';
+                const isAutoGenerated = road.type === '自动';
+                const isFromAuto = road.fromGeneratedRoadId;
+                const isNotGenerated = road.isNotGenerated;
+
+                // 类型标签
+                let typeLabel = road.type;
+                if (isFromAuto) {
+                    typeLabel = '手动(来自自动)';
+                }
+
                 html += `
-                    <div style="background: #1a1a2e; padding: 12px; margin-bottom: 10px; border-radius: 5px; border-left: 3px solid ${typeColor};">
+                    <div style="background: #1a1a2e; padding: 12px; margin-bottom: 10px; border-radius: 5px; border-left: 3px solid ${typeColor}; ${isNotGenerated ? 'opacity: 0.7;' : ''}">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                             <div>
-                                <span style="color: ${typeColor}; font-weight: bold;">#${index + 1} ${road.type}</span>
+                                <span style="color: ${typeColor}; font-weight: bold;">#${index + 1} ${typeLabel}</span>
                                 <span style="color: #888; font-size: 11px;">(${road.id})</span>
+                                ${isFromAuto ? `<span style="color: #9b59b6; font-size: 10px; margin-left: 5px;">📌 已保留</span>` : ''}
+                                ${isNotGenerated ? `<span style="color: #f39c12; font-size: 10px; margin-left: 5px;">⚠️ 未生成</span>` : ''}
                             </div>
                             <div>
-                                <button onclick="editRoad(${index})" style="background: #3498db; color: white; border: none; padding: 4px 10px; border-radius: 3px; cursor: pointer; font-size: 11px; margin-right: 5px;">✏️ 编辑</button>
-                                <button onclick="deleteRoad(${index})" style="background: #e74c3c; color: white; border: none; padding: 4px 10px; border-radius: 3px; cursor: pointer; font-size: 11px;">🗑️ 删除</button>
+                                ${isAutoGenerated ? `<button onclick="convertToManualRoad(${index})" style="background: #9b59b6; color: white; border: none; padding: 4px 10px; border-radius: 3px; cursor: pointer; font-size: 11px; margin-right: 5px;" title="将此道路转为手动道路，重新生成时保留">📌 保留</button>` : ''}
+                                <button onclick="editRoad(${index})" style="background: #3498db; color: white; border: none; padding: 4px 10px; border-radius: 3px; cursor: pointer; font-size: 11px; margin-right: 5px;" title="编辑道路属性">✏️ 编辑</button>
+                                <button onclick="deleteRoad(${index})" style="background: #e74c3c; color: white; border: none; padding: 4px 10px; border-radius: 3px; cursor: pointer; font-size: 11px;" title="删除此道路">🗑️ 删除</button>
                             </div>
                         </div>
                         <div style="color: #bbb; font-size: 12px; line-height: 1.6;">
@@ -3574,14 +3719,63 @@
         }
 
         function editRoad(index) {
-            const road = generatedRoads[index];
-            if (!road) return;
+            // 首先从generatedRoads中查找
+            let road = generatedRoads[index];
+
+            // 如果在generatedRoads中没找到，可能是未生成的手动道路
+            // 需要合并查找
+            if (!road) {
+                // 创建一个合并的数组来查找
+                let displayRoads = [...generatedRoads];
+
+                // 添加未生成但已配置的手动道路
+                const generatedManualIds = generatedRoads
+                    .filter(r => r.type === '手动' && r.id.startsWith('manual_'))
+                    .map(r => parseInt(r.id.split('_')[1]));
+
+                manualRoads.forEach((road, idx) => {
+                    if (!generatedManualIds.includes(idx)) {
+                        displayRoads.push({
+                            id: `manual_${idx}`,
+                            type: '手动',
+                            start: { ...road.start },
+                            end: { ...road.end },
+                            width: road.width,
+                            curvature: road.curvature,
+                            fromGeneratedRoadId: road.fromGeneratedRoadId,
+                            isNotGenerated: true,
+                            manualIndex: idx // 保存原始的manualRoads索引
+                        });
+                    }
+                });
+
+                road = displayRoads[index];
+            }
+
+            if (!road) {
+                alert('找不到道路信息');
+                return;
+            }
 
             // 设置当前编辑的道路索引
             document.getElementById('editRoadIndex').value = index;
 
-            // 显示道路类型
-            document.getElementById('editRoadType').textContent = `${road.type}道路 (${road.id})`;
+            // 显示道路类型和详细信息
+            const typeColor = road.type === '手动' ? '#4ecca3' : '#f39c12';
+            let typeText = road.type;
+            if (road.fromGeneratedRoadId) {
+                typeText += ' (来自自动道路)';
+            }
+            if (road.isNotGenerated) {
+                typeText += ' (未生成)';
+            }
+
+            const editRoadTypeEl = document.getElementById('editRoadType');
+            editRoadTypeEl.innerHTML = `<span style="color: ${typeColor};">${typeText}</span>`;
+            editRoadTypeEl.innerHTML += `<div style="color: #888; font-size: 11px; margin-top: 5px;">ID: ${road.id}</div>`;
+            if (road.isNotGenerated) {
+                editRoadTypeEl.innerHTML += `<div style="color: #f39c12; font-size: 10px;">⚠️ 此道路尚未生成到地图中，请先生成地图</div>`;
+            }
 
             // 设置起点和终点
             document.getElementById('editStartX').value = road.start.x;
@@ -3670,49 +3864,231 @@
 
         function saveRoadEdit() {
             const index = parseInt(document.getElementById('editRoadIndex').value);
-            if (isNaN(index) || index < 0 || index >= generatedRoads.length) {
+            if (isNaN(index) || index < 0) {
                 alert('无效的道路索引');
                 return;
             }
 
-            const road = generatedRoads[index];
+            // 首先从generatedRoads中查找
+            let road = generatedRoads[index];
+            let isNotGenerated = false;
+            let manualIndex = -1;
 
-            // 更新道路信息
-            road.start.x = parseInt(document.getElementById('editStartX').value);
-            road.start.y = parseInt(document.getElementById('editStartY').value);
-            road.end.x = parseInt(document.getElementById('editEndX').value);
-            road.end.y = parseInt(document.getElementById('editEndY').value);
-            road.width = parseInt(document.getElementById('editRoadWidth').value);
-            road.curvature = parseInt(document.getElementById('editRoadCurvature').value) / 100;
+            // 如果在generatedRoads中没找到，可能是未生成的手动道路
+            if (!road) {
+                // 创建一个合并的数组来查找
+                let displayRoads = [...generatedRoads];
 
-            console.log(`已更新道路 #${index + 1}:`, road);
+                // 添加未生成但已配置的手动道路
+                const generatedManualIds = generatedRoads
+                    .filter(r => r.type === '手动' && r.id.startsWith('manual_'))
+                    .map(r => parseInt(r.id.split('_')[1]));
 
-            // 更新显示
-            updateAllRoadsDisplay();
+                manualRoads.forEach((r, idx) => {
+                    if (!generatedManualIds.includes(idx)) {
+                        displayRoads.push({
+                            id: `manual_${idx}`,
+                            type: '手动',
+                            start: { ...r.start },
+                            end: { ...r.end },
+                            width: r.width,
+                            curvature: r.curvature,
+                            fromGeneratedRoadId: r.fromGeneratedRoadId,
+                            isNotGenerated: true,
+                            manualIndex: idx
+                        });
+                    }
+                });
 
-            // 关闭编辑对话框
-            closeEditRoadDialog();
+                road = displayRoads[index];
+                isNotGenerated = road.isNotGenerated;
+                manualIndex = road.manualIndex;
+            }
 
-            // 显示成功提示
-            alert(`道路 #${index + 1} 修改成功！点击"应用修改并重新生成"来查看效果`);
-        }
+            if (!road) {
+                alert('找不到道路信息');
+                return;
+            }
 
-        function deleteRoad(index) {
-            if (confirm(`确定要删除道路 #${index + 1} 吗？`)) {
-                const road = generatedRoads.splice(index, 1)[0];
-                console.log(`已删除道路 #${index + 1}:`, road);
+            // 获取编辑后的值
+            const newStartX = parseInt(document.getElementById('editStartX').value);
+            const newStartY = parseInt(document.getElementById('editStartY').value);
+            const newEndX = parseInt(document.getElementById('editEndX').value);
+            const newEndY = parseInt(document.getElementById('editEndY').value);
+            const newWidth = parseInt(document.getElementById('editRoadWidth').value);
+            const newCurvature = parseInt(document.getElementById('editRoadCurvature').value) / 100;
 
-                // 如果删除的是手动道路，也要从manualRoads中删除
+            // 如果是未生成的手动道路，直接更新manualRoads数组
+            if (isNotGenerated && manualIndex >= 0) {
+                manualRoads[manualIndex].start.x = newStartX;
+                manualRoads[manualIndex].start.y = newStartY;
+                manualRoads[manualIndex].end.x = newEndX;
+                manualRoads[manualIndex].end.y = newEndY;
+                manualRoads[manualIndex].width = newWidth;
+                manualRoads[manualIndex].curvature = newCurvature;
+
+                console.log(`已更新未生成的手动道路 #${manualIndex + 1}:`, manualRoads[manualIndex]);
+
+                updateRoadListDisplay();
+                updateAllRoadsDisplay();
+                closeEditRoadDialog();
+
+                alert(`手动道路修改成功！\n\n请点击"生成地图"来查看效果。`);
+                return;
+            }
+
+            // 对于已生成的道路，更新generatedRoads数组
+            if (!isNotGenerated) {
+                road.start.x = newStartX;
+                road.start.y = newStartY;
+                road.end.x = newEndX;
+                road.end.y = newEndY;
+                road.width = newWidth;
+                road.curvature = newCurvature;
+
+                console.log(`已更新${road.type}道路 #${index + 1}:`, road);
+
+                // 如果是手动道路，也要更新manualRoads数组
                 if (road.type === '手动' && road.id.startsWith('manual_')) {
-                    const manualIndex = parseInt(road.id.split('_')[1]);
-                    if (!isNaN(manualIndex) && manualIndex < manualRoads.length) {
-                        manualRoads.splice(manualIndex, 1);
+                    const idx = parseInt(road.id.split('_')[1]);
+                    if (manualRoads[idx]) {
+                        manualRoads[idx].start.x = newStartX;
+                        manualRoads[idx].start.y = newStartY;
+                        manualRoads[idx].end.x = newEndX;
+                        manualRoads[idx].end.y = newEndY;
+                        manualRoads[idx].width = newWidth;
+                        manualRoads[idx].curvature = newCurvature;
                     }
                 }
 
                 updateAllRoadsDisplay();
                 updateRoadListDisplay();
+                closeEditRoadDialog();
+
+                const isManual = road.type === '手动';
+                const message = isManual
+                    ? `手动道路 #${index + 1} 修改成功！\n\n点击"应用修改并重新生成"查看效果。`
+                    : `自动道路 #${index + 1} 修改成功！\n\n如需保留修改，建议先点击"📌 保留"转为手动道路，\n然后点击"应用修改并重新生成"查看效果。`;
+
+                alert(message);
             }
+        }
+
+        function convertToManualRoad(index) {
+            const road = generatedRoads[index];
+            if (!road) {
+                alert('无效的道路索引');
+                return;
+            }
+
+            if (road.type === '手动') {
+                alert('这条道路已经是手动道路了');
+                return;
+            }
+
+            // 创建手动道路副本
+            const manualRoad = {
+                start: { ...road.start },
+                end: { ...road.end },
+                width: road.width,
+                curvature: road.curvature,
+                fromGeneratedRoadId: road.id // 标记来源
+            };
+
+            // 添加到手动道路列表
+            manualRoads.push(manualRoad);
+
+            // 从generatedRoads中删除这条自动道路（因为已经转为手动）
+            generatedRoads.splice(index, 1);
+
+            console.log('已将自动道路转为手动道路:', manualRoad);
+
+            // 更新显示
+            updateAllRoadsDisplay();
+            updateRoadListDisplay();
+
+            // 显示成功提示
+            alert(`已将道路转为手动道路！\n重新生成地图时这条道路将被保留。\n手动道路总数: ${manualRoads.length}`);
+        }
+
+        function deleteRoad(index) {
+            // 首先从generatedRoads中查找
+            let road = generatedRoads[index];
+            let isNotGenerated = false;
+            let manualIndex = -1;
+
+            // 如果在generatedRoads中没找到，可能是未生成的手动道路
+            if (!road) {
+                // 创建一个合并的数组来查找
+                let displayRoads = [...generatedRoads];
+
+                // 添加未生成但已配置的手动道路
+                const generatedManualIds = generatedRoads
+                    .filter(r => r.type === '手动' && r.id.startsWith('manual_'))
+                    .map(r => parseInt(r.id.split('_')[1]));
+
+                manualRoads.forEach((r, idx) => {
+                    if (!generatedManualIds.includes(idx)) {
+                        displayRoads.push({
+                            id: `manual_${idx}`,
+                            type: '手动',
+                            start: { ...r.start },
+                            end: { ...r.end },
+                            width: r.width,
+                            curvature: r.curvature,
+                            fromGeneratedRoadId: r.fromGeneratedRoadId,
+                            isNotGenerated: true,
+                            manualIndex: idx
+                        });
+                    }
+                });
+
+                road = displayRoads[index];
+                isNotGenerated = road.isNotGenerated;
+                manualIndex = road.manualIndex;
+            }
+
+            if (!road) {
+                alert('找不到道路信息');
+                return;
+            }
+
+            const roadDesc = `${road.type}道路 #${index + 1}`;
+            if (!confirm(`确定要删除${roadDesc}吗？`)) {
+                return;
+            }
+
+            // 如果是未生成的手动道路，直接从manualRoads中删除
+            if (isNotGenerated && manualIndex >= 0) {
+                manualRoads.splice(manualIndex, 1);
+                console.log(`已删除未生成的手动道路 #${manualIndex + 1}`);
+
+                updateRoadListDisplay();
+                updateAllRoadsDisplay();
+                return;
+            }
+
+            // 对于已生成的道路，从generatedRoads中删除
+            const deletedRoad = generatedRoads.splice(index, 1)[0];
+            console.log(`已删除道路 #${index + 1}:`, deletedRoad);
+
+            // 如果删除的是手动道路，也要从manualRoads中删除
+            if (deletedRoad.type === '手动') {
+                // 查找并删除对应的手动道路
+                const idx = manualRoads.findIndex(mr => {
+                    // 通过fromGeneratedRoadId或ID匹配
+                    return (deletedRoad.fromGeneratedRoadId && mr.fromGeneratedRoadId === deletedRoad.fromGeneratedRoadId) ||
+                           (deletedRoad.id.startsWith('manual_') && deletedRoad.id === `manual_${manualRoads.indexOf(mr)}`);
+                });
+
+                if (idx !== -1) {
+                    manualRoads.splice(idx, 1);
+                    console.log(`同时从手动道路列表中删除了索引 ${idx}`);
+                }
+            }
+
+            updateAllRoadsDisplay();
+            updateRoadListDisplay();
         }
 
         function applyRoadChanges() {

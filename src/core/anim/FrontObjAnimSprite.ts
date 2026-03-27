@@ -39,7 +39,7 @@ export const createFrontObjAnimSpriteFromFront = async (
   // 使用 box1.png 图集（根据 A.tmj 中的配置）
   console.log("Loading chest textures...");
   const boxTextureUrl = getMapFrontObjIMG(mapName, "frontObj", "png");
-  
+
   const boxTexture = await PIXI.Assets.load(boxTextureUrl);
   // box1.png 是 4 帧的图集，每帧 64x64，间距 10
   // 第 0 帧是关闭状态，第 3 帧是打开状态
@@ -55,12 +55,32 @@ export const createFrontObjAnimSpriteFromFront = async (
     frame: new PIXI.Rectangle(frontObjInfo.x, frontObjInfo.y, frontObjInfo.width, frontObjInfo.height),
   });
   const frontObjSprite = new Sprite(texture);
- 
+
   frontObjSprite.anchor.set(0, 0); // 设置锚点为左上角，与 unit 一致
+
+  // 应用缩放
+  const scale = frontObj.scale ?? 1;
+  frontObjSprite.scale.set(scale, scale);
+
+  // 根据锚点调整位置（考虑缩放）
+  // frontObj.x 和 frontObj.y 已经是容器位置（在编辑器中已经减去了锚点偏移 * scale）
+  // 所以这里只需要直接设置位置
   frontObjSprite.x = frontObj.x;
-  frontObjSprite.y = frontObj.y ; // 
-  frontObjSprite.zIndex=frontObj.y+(frontObjInfo.height-frontObjInfo.occlusionHeight)
+  frontObjSprite.y = frontObj.y;
+
+  // 计算 zIndex（实现遮挡效果）
+  // 使用对象的底部Y坐标加上遮挡高度来计算
+  // 需要考虑缩放对高度的影响
+  const anchor = frontObj.anchor ?? { x: 0, y: 0 };
+  const occlusionHeight = frontObjInfo.occlusionHeight ?? 0;
+  const scaledHeight = frontObjInfo.height * scale;
+  const scaledOcclusionHeight = occlusionHeight * scale;
+  console.log('scaledOcclusionHeight',scaledOcclusionHeight)
+  console.log('anchor.y',anchor.y)
+  const baseY = frontObj.y-(frontObjInfo.height-anchor.y)*scale ; // 锚点的Y坐标（考虑缩放）
+  frontObjSprite.zIndex = baseY + (scaledHeight - scaledOcclusionHeight);
+  console.log('Zindex-测试',frontObjSprite.zIndex)
   frontObjSprite.eventMode='none'
-  console.log('frontObjSprite',frontObjSprite)
+  console.log('frontObjSprite',frontObjSprite, 'scale:', scale, 'anchor:', anchor);
   return frontObjSprite;
 };

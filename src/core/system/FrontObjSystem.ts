@@ -1,5 +1,15 @@
 import { getFrontObjInfoJsonFile } from "@/utils/utils";
 
+interface AnchorPoint {
+  x: number;
+  y: number;
+}
+
+interface BlockSlotPoint {
+  x: number;
+  y: number;
+}
+
 interface FrontObjInfo {
   x: number;
   y: number;
@@ -7,6 +17,9 @@ interface FrontObjInfo {
   occlusionHeight: number;
   width: number;
   height: number;
+  scale?: number; // 添加 scale 属性
+  anchor?: AnchorPoint; // 添加 anchor 属性
+  blockSlot?: BlockSlotPoint[][]; // 添加 blockSlot 属性
 }
 interface FrontObjAssetInfo {
   name: string;
