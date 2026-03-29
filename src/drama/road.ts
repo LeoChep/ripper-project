@@ -50,9 +50,10 @@ class Road extends Drama {
       return;
     }
     CGstart();
-    const lord = UnitSystem.getInstance().getUnitByName("领主");
+    const player = UnitSystem.getInstance().getAllUnits().find((unit) => unit.party ==='player');
 
-    lookOn(lord?.x, lord?.y);
+
+    lookOn(player?.x, player?.y);
 
  
     CGEnd();

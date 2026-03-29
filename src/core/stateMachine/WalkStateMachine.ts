@@ -20,6 +20,7 @@ export class WalkStateMachine extends StateMachine {
   private targetY: number = 0;
   private pauseMove: boolean = false;
   private haveOpportunity: number[] = [];
+  private frameCount: number = 0;
   public callBack = () => {};
   constructor(unit: Unit) {
     super(unit);
@@ -145,7 +146,13 @@ export class WalkStateMachine extends StateMachine {
     }
 
     unit.direction = direction;
-    this.movefunc(unit, nextX, nextY, this.path);
+    this.frameCount++;
+    if (this.frameCount % 1 === 0) {
+          this.movefunc(unit, nextX, nextY, this.path);
+          this.frameCount = 0;
+    }
+
+
   }
   clearHaveOpportunity() {
     this.haveOpportunity = [];
