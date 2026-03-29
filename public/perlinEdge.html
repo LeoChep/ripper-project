@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perlin Edge Generator</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        canvas {
+            border: 1px solid #444;
+            background-color: #2a2a2a;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .info {
+            text-align: center;
+            color: #aaa;
+            font-size: 14px;
+        }
+        .params {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .param-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .param-group label {
+            font-size: 14px;
+            color: #aaa;
+        }
+        .param-group input {
+            width: 80px;
+            padding: 5px;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 4px;
+        }
+        button.perlin-btn {
+            background-color: #2196F3;
+        }
+        button.perlin-btn:hover {
+            background-color: #0b7dda;
+        }
+        button.reset-btn {
+            background-color: #f44336;
+        }
+        button.reset-btn:hover {
+            background-color: #da190b;
+        }
+        button.corner-btn {
+            background-color: #9C27B0;
+        }
+        button.corner-btn:hover {
+            background-color: #7B1FA2;
+        }
+        button.resize-btn {
+            background-color: #FF9800;
+        }
+        button.resize-btn:hover {
+            background-color: #F57C00;
+        }
+        button.draw-btn {
+            background-color: #4CAF50;
+        }
+        button.draw-btn:hover {
+            background-color: #45a049;
+        }
+        button.draw-btn.active {
+            background-color: #2E7D32;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+        .canvas-wrapper {
+            width: 100%;
+            max-width: 1200px;
+            height: 500px;
+            overflow: auto;
+            border: 2px solid #444;
+            background-color: #1e1e1e;
+            margin: 10px 0;
+            position: relative;
+        }
+        .canvas-wrapper canvas {
+            display: block;
+            border: none;
+        }
+        .canvas-info {
+            text-align: center;
+            color: #888;
+            font-size: 12px;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="canvas-container">
+        <h1>Perlin Edge Generator</h1>
+
+        <!-- 画布尺寸控制 -->
+        <div class="params" style="background-color: #2a2a2a; padding: 10px; border-radius: 5px;">
+            <div class="param-group">
+                <label for="canvasWidth">画布宽度:</label>
+                <input type="number" id="canvasWidth" value="1200" step="50" min="300" max="3000">
+            </div>
+            <div class="param-group">
+                <label for="canvasHeight">画布高度:</label>
+                <input type="number" id="canvasHeight" value="600" step="50" min="200" max="2000">
+            </div>
+            <div class="param-group">
+                <label for="shapeWidth">图形宽度:</label>
+                <input type="number" id="shapeWidth" value="1000" step="50" min="100" max="2000">
+            </div>
+            <div class="param-group">
+                <label for="shapeHeight">图形高度:</label>
+                <input type="number" id="shapeHeight" value="100" step="10" min="20" max="500">
+            </div>
+            <button onclick="resizeCanvas()" class="resize-btn">应用尺寸</button>
+        </div>
+
+        <!-- 可滚动画布容器 -->
+        <div class="canvas-wrapper">
+            <canvas id="canvas" width="1200" height="600"></canvas>
+        </div>
+        <div class="canvas-info">
+            画布尺寸: <span id="canvasSizeDisplay">1200 x 600</span> |
+            使用滚动条查看大尺寸图形
+        </div>
+
+        <div class="params">
+            <div class="param-group">
+                <label for="noiseScale">噪声缩放:</label>
+                <input type="number" id="noiseScale" value="0.02" step="0.01" min="0.001" max="0.1">
+            </div>
+            <div class="param-group">
+                <label for="noiseStrength">噪声强度:</label>
+                <input type="number" id="noiseStrength" value="10" step="1" min="1" max="50">
+            </div>
+            <div class="param-group">
+                <label for="noiseSeed">随机种子:</label>
+                <input type="number" id="noiseSeed" value="42" step="1" min="0">
+            </div>
+            <div class="param-group">
+                <label for="distanceDecay">距离衰减:</label>
+                <input type="number" id="distanceDecay" value="0.5" step="0.1" min="0" max="2">
+            </div>
+            <div class="param-group">
+                <label for="gaussianRadius">高斯半径:</label>
+                <input type="number" id="gaussianRadius" value="3" step="1" min="0" max="10">
+            </div>
+            <div class="param-group">
+                <label for="cornerRadius">圆角半径:</label>
+                <input type="number" id="cornerRadius" value="8" step="1" min="0" max="20">
+            </div>
+            <div class="param-group">
+                <label for="sineAmplitude">正弦振幅:</label>
+                <input type="number" id="sineAmplitude" value="3" step="0.5" min="0" max="20">
+            </div>
+            <div class="param-group">
+                <label for="sineFrequency">正弦频率:</label>
+                <input type="number" id="sineFrequency" value="0.1" step="0.01" min="0.01" max="1">
+            </div>
+            <div class="param-group">
+                <label for="sineLayers">正弦层数:</label>
+                <input type="number" id="sineLayers" value="3" step="1" min="1" max="10">
+            </div>
+            <div class="param-group">
+                <label for="noiseSineMix">噪声/正弦:</label>
+                <input type="number" id="noiseSineMix" value="0.7" step="0.1" min="0" max="1">
+            </div>
+            <div class="param-group">
+                <label for="pixelDensity">像素密度:</label>
+                <input type="number" id="pixelDensity" value="1.5" step="0.5" min="0.5" max="5" title="自由绘制时的像素点间距（越小越密集）">
+            </div>
+        </div>
+        <div class="controls">
+            <button onclick="drawShape()">绘制图形</button>
+            <button onclick="drawPoints()">绘制点</button>
+            <button onclick="clearCanvas()">清除画布</button>
+            <button onclick="toggleFreeDraw()" id="freeDrawBtn" class="draw-btn">自由绘制</button>
+            <button onclick="finishFreeDraw()" id="finishDrawBtn" style="display: none; background-color: #8BC34A;">完成绘制</button>
+            <button onclick="applyPerlinNoise()" class="perlin-btn">应用柏林噪声</button>
+            <button onclick="resetShape()" class="reset-btn">重置</button>
+            <button onclick="applyCornerRadius()" class="corner-btn">应用圆角</button>
+        </div>
+        <div class="info">
+            <p>支持大尺寸图形 + 自由绘制 | 柏林噪声 + 多层正弦波细节</p>
+            <p id="pointCount">总点数: 0</p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // 当前图形尺寸
+        let currentShapeWidth = 1000;
+        let currentShapeHeight = 100;
+
+        // 自由绘制模式状态
+        let isFreeDrawMode = false;
+        let isDrawing = false;
+        let freeDrawPoints = [];
+        let tempCanvas = null;
+        let tempCtx = null;
+
+        /**
+         * 切换自由绘制模式
+         */
+        function toggleFreeDraw() {
+            isFreeDrawMode = !isFreeDrawMode;
+            const btn = document.getElementById('freeDrawBtn');
+            const finishBtn = document.getElementById('finishDrawBtn');
+
+            if (isFreeDrawMode) {
+                btn.textContent = '退出绘制';
+                btn.classList.add('active');
+                finishBtn.style.display = 'inline-block';
+                clearCanvas();
+
+                // 创建临时画布用于绘制预览
+                tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                tempCtx = tempCanvas.getContext('2d');
+
+                // 绘制提示信息
+                ctx.fillStyle = '#888';
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('按住鼠标左键绘制图形，点击"完成绘制"闭合路径', canvas.width / 2, 30);
+                ctx.fillText('绘制过程中可以松开鼠标暂停，继续按住继续绘制', canvas.width / 2, 55);
+
+                console.log('已进入自由绘制模式');
+            } else {
+                btn.textContent = '自由绘制';
+                btn.classList.remove('active');
+                finishBtn.style.display = 'none';
+                freeDrawPoints = [];
+                drawShape();
+                console.log('已退出自由绘制模式');
+            }
+        }
+
+        /**
+         * 完成自由绘制
+         */
+        function finishFreeDraw() {
+            if (freeDrawPoints.length < 3) {
+                alert('请至少绘制3个点！');
+                return;
+            }
+
+            // 从UI读取像素密度参数
+            const pixelSpacing = parseFloat(document.getElementById('pixelDensity').value) || 1.5;
+
+            // 将绘制的路径转换为密集的像素点
+            const densePoints = [];
+
+            // 遍历所有绘制节点，在相邻节点之间插值
+            for (let i = 0; i < freeDrawPoints.length; i++) {
+                const currentPoint = freeDrawPoints[i];
+                const nextPoint = freeDrawPoints[(i + 1) % freeDrawPoints.length]; // 循环回到起点
+
+                // 计算两点之间的距离
+                const dx = nextPoint.x - currentPoint.x;
+                const dy = nextPoint.y - currentPoint.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                // 在两点之间插值生成密集点
+                const numPoints = Math.max(1, Math.floor(distance / pixelSpacing));
+
+                for (let j = 0; j < numPoints; j++) {
+                    const t = j / numPoints;
+                    densePoints.push({
+                        x: currentPoint.x + dx * t,
+                        y: currentPoint.y + dy * t
+                    });
+                }
+            }
+
+            // 更新pointsData为密集的像素点
+            pointsData = densePoints;
+            originalPoints = JSON.parse(JSON.stringify(pointsData));
+
+            console.log('自由绘制完成：', {
+                原始节点数: freeDrawPoints.length,
+                生成像素点数: densePoints.length,
+                点密度: '每' + pixelSpacing + '像素一个点',
+                总点数: densePoints.length
+            });
+
+            // 清空临时绘制数据
+            freeDrawPoints = [];
+
+            // 退出绘制模式
+            toggleFreeDraw();
+
+            // 绘制最终图形
+            drawShape();
+        }
+
+        /**
+         * 获取鼠标在画布上的位置
+         */
+        function getMousePos(evt) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            return {
+                x: (evt.clientX - rect.left) * scaleX,
+                y: (evt.clientY - rect.top) * scaleY
+            };
+        }
+
+        /**
+         * 绘制自由绘制的预览
+         */
+        function drawFreeDrawPreview() {
+            // 恢复画布内容
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 读取当前像素密度
+            const pixelDensity = parseFloat(document.getElementById('pixelDensity').value) || 1.5;
+
+            // 绘制提示信息
+            ctx.fillStyle = '#888';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('按住鼠标左键绘制图形，点击"完成绘制"将转换为密集像素点', canvas.width / 2, 20);
+            ctx.fillText('完成绘制后会沿路径每' + pixelDensity + '像素生成一个点，以获得平滑的噪声效果', canvas.width / 2, 45);
+
+            if (freeDrawPoints.length > 0) {
+                // 绘制路径
+                ctx.beginPath();
+                ctx.strokeStyle = '#00ff00';
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                ctx.moveTo(freeDrawPoints[0].x, freeDrawPoints[0].y);
+                for (let i = 1; i < freeDrawPoints.length; i++) {
+                    ctx.lineTo(freeDrawPoints[i].x, freeDrawPoints[i].y);
+                }
+                ctx.stroke();
+
+                // 绘制起点标记
+                ctx.fillStyle = '#00ff00';
+                ctx.beginPath();
+                ctx.arc(freeDrawPoints[0].x, freeDrawPoints[0].y, 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 绘制终点标记
+                if (freeDrawPoints.length > 1) {
+                    ctx.fillStyle = '#ff0000';
+                    ctx.beginPath();
+                    const lastPoint = freeDrawPoints[freeDrawPoints.length - 1];
+                    ctx.arc(lastPoint.x, lastPoint.y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // 计算预估像素点数
+                let totalLength = 0;
+                for (let i = 0; i < freeDrawPoints.length; i++) {
+                    const current = freeDrawPoints[i];
+                    const next = freeDrawPoints[(i + 1) % freeDrawPoints.length];
+                    totalLength += Math.sqrt(
+                        Math.pow(next.x - current.x, 2) +
+                        Math.pow(next.y - current.y, 2)
+                    );
+                }
+                const estimatedPixelPoints = Math.floor(totalLength / pixelDensity);
+
+                // 显示节点数和预估像素点数
+                ctx.fillStyle = '#888';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText('绘制节点数: ' + freeDrawPoints.length + ' | 预计生成像素点: ~' + estimatedPixelPoints, 10, canvas.height - 10);
+            }
+        }
+
+        /**
+         * 鼠标按下事件
+         */
+        canvas.addEventListener('mousedown', function(evt) {
+            if (!isFreeDrawMode) return;
+
+            isDrawing = true;
+            const pos = getMousePos(evt);
+
+            // 添加点（如果是第一个点或距离上一个点足够远）
+            if (freeDrawPoints.length === 0) {
+                freeDrawPoints.push(pos);
+            } else {
+                const lastPoint = freeDrawPoints[freeDrawPoints.length - 1];
+                const dist = Math.sqrt(Math.pow(pos.x - lastPoint.x, 2) + Math.pow(pos.y - lastPoint.y, 2));
+
+                // 只有距离大于5像素才添加新点
+                if (dist > 5) {
+                    freeDrawPoints.push(pos);
+                }
+            }
+
+            drawFreeDrawPreview();
+        });
+
+        /**
+         * 鼠标移动事件
+         */
+        canvas.addEventListener('mousemove', function(evt) {
+            if (!isFreeDrawMode || !isDrawing) return;
+
+            const pos = getMousePos(evt);
+            const lastPoint = freeDrawPoints[freeDrawPoints.length - 1];
+            const dist = Math.sqrt(Math.pow(pos.x - lastPoint.x, 2) + Math.pow(pos.y - lastPoint.y, 2));
+
+            // 添加点（距离大于3像素）
+            if (dist > 3) {
+                freeDrawPoints.push(pos);
+                drawFreeDrawPreview();
+            }
+        });
+
+        /**
+         * 鼠标松开事件
+         */
+        canvas.addEventListener('mouseup', function(evt) {
+            if (!isFreeDrawMode) return;
+            isDrawing = false;
+        });
+
+        /**
+         * 鼠标离开画布事件
+         */
+        canvas.addEventListener('mouseleave', function(evt) {
+            if (!isFreeDrawMode) return;
+            isDrawing = false;
+        });
+
+        /**
+         * 调整画布尺寸
+         */
+        function resizeCanvas() {
+            const newWidth = parseInt(document.getElementById('canvasWidth').value);
+            const newHeight = parseInt(document.getElementById('canvasHeight').value);
+            const newShapeWidth = parseInt(document.getElementById('shapeWidth').value);
+            const newShapeHeight = parseInt(document.getElementById('shapeHeight').value);
+
+            // 如果在自由绘制模式，先退出
+            if (isFreeDrawMode) {
+                toggleFreeDraw();
+            }
+
+            // 更新画布尺寸
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+
+            // 更新临时画布尺寸
+            if (tempCanvas) {
+                tempCanvas.width = newWidth;
+                tempCanvas.height = newHeight;
+            }
+
+            // 更新图形尺寸
+            currentShapeWidth = newShapeWidth;
+            currentShapeHeight = newShapeHeight;
+
+            // 更新显示信息
+            document.getElementById('canvasSizeDisplay').textContent = `${newWidth} x ${newHeight}`;
+
+            // 重新生成图形
+            resetShape();
+
+            console.log('画布尺寸已调整:', { newWidth, newHeight });
+            console.log('图形尺寸已调整:', { newShapeWidth, newShapeHeight });
+        }
+
+        // 生成圆角矩形的点
+        function generateRoundedRectanglePoints(width, height, cornerRadius) {
+            const points = [];
+            const offsetX = (canvas.width - width) / 2;
+            const offsetY = (canvas.height - height) / 2;
+
+            // 确保圆角半径不超过宽度或高度的一半
+            cornerRadius = Math.min(cornerRadius, width / 2, height / 2);
+
+            // 定义四个角的圆心位置
+            const corners = {
+                topLeft: { x: cornerRadius, y: cornerRadius },
+                topRight: { x: width - cornerRadius, y: cornerRadius },
+                bottomRight: { x: width - cornerRadius, y: height - cornerRadius },
+                bottomLeft: { x: cornerRadius, y: height - cornerRadius }
+            };
+
+            // 每个角的圆弧点数（越多越平滑）
+            const arcPoints = Math.max(10, Math.floor(cornerRadius * 2));
+
+            // 1. 顶边（从左圆角到右圆角）
+            for (let x = cornerRadius; x <= width - cornerRadius; x++) {
+                points.push({
+                    x: x + offsetX,
+                    y: 0 + offsetY
+                });
+            }
+
+            // 2. 右上角圆弧（从顶边到右边）
+            for (let i = 0; i <= arcPoints; i++) {
+                const angle = (Math.PI * 1.5) + (Math.PI * 0.5 * i / arcPoints);
+                const x = corners.topRight.x + Math.cos(angle) * cornerRadius;
+                const y = corners.topRight.y + Math.sin(angle) * cornerRadius;
+                points.push({
+                    x: x + offsetX,
+                    y: y + offsetY
+                });
+            }
+
+            // 3. 右边（从上圆角到下圆角）
+            for (let y = cornerRadius; y <= height - cornerRadius; y++) {
+                points.push({
+                    x: width + offsetX,
+                    y: y + offsetY
+                });
+            }
+
+            // 4. 右下角圆弧（从右边到底边）
+            for (let i = 0; i <= arcPoints; i++) {
+                const angle = 0 + (Math.PI * 0.5 * i / arcPoints);
+                const x = corners.bottomRight.x + Math.cos(angle) * cornerRadius;
+                const y = corners.bottomRight.y + Math.sin(angle) * cornerRadius;
+                points.push({
+                    x: x + offsetX,
+                    y: y + offsetY
+                });
+            }
+
+            // 5. 底边（从右圆角到左圆角）
+            for (let x = width - cornerRadius; x >= cornerRadius; x--) {
+                points.push({
+                    x: x + offsetX,
+                    y: height + offsetY
+                });
+            }
+
+            // 6. 左下角圆弧（从底边到左边）
+            for (let i = 0; i <= arcPoints; i++) {
+                const angle = (Math.PI * 0.5) + (Math.PI * 0.5 * i / arcPoints);
+                const x = corners.bottomLeft.x + Math.cos(angle) * cornerRadius;
+                const y = corners.bottomLeft.y + Math.sin(angle) * cornerRadius;
+                points.push({
+                    x: x + offsetX,
+                    y: y + offsetY
+                });
+            }
+
+            // 7. 左边（从下圆角到上圆角）
+            for (let y = height - cornerRadius; y >= cornerRadius; y--) {
+                points.push({
+                    x: 0 + offsetX,
+                    y: y + offsetY
+                });
+            }
+
+            // 8. 左上角圆弧（从左边到顶边）
+            for (let i = 0; i <= arcPoints; i++) {
+                const angle = Math.PI + (Math.PI * 0.5 * i / arcPoints);
+                const x = corners.topLeft.x + Math.cos(angle) * cornerRadius;
+                const y = corners.topLeft.y + Math.sin(angle) * cornerRadius;
+                points.push({
+                    x: x + offsetX,
+                    y: y + offsetY
+                });
+            }
+
+            return points;
+        }
+
+        // 默认 pointsData - 圆角矩形
+        let pointsData = generateRoundedRectanglePoints(currentShapeWidth, currentShapeHeight, 8);
+        let originalPoints = JSON.parse(JSON.stringify(pointsData)); // 保存原始数据用于重置
+
+        // 绘制图形（连接点）
+        function drawShape() {
+            // 如果在自由绘制模式，显示绘制预览
+            if (isFreeDrawMode) {
+                drawFreeDrawPreview();
+                return;
+            }
+
+            clearCanvas();
+            if (pointsData.length === 0) return;
+
+            // 绘制主图形（上方区域）
+            ctx.beginPath();
+            ctx.strokeStyle = '#00ff00';
+            ctx.lineWidth = 2;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+
+            ctx.moveTo(pointsData[0].x, pointsData[0].y);
+            for (let i = 1; i < pointsData.length; i++) {
+                ctx.lineTo(pointsData[i].x, pointsData[i].y);
+            }
+            ctx.closePath();
+            ctx.stroke();
+
+            // 填充半透明背景
+            ctx.fillStyle = 'rgba(0, 255, 0, 0.1)';
+            ctx.fill();
+
+            // 绘制噪声图（下方区域）
+            drawNoiseVisualization();
+
+            updatePointCount();
+        }
+
+        // 绘制点
+        function drawPoints() {
+            // 如果在自由绘制模式，显示绘制预览
+            if (isFreeDrawMode) {
+                drawFreeDrawPreview();
+                return;
+            }
+
+            clearCanvas();
+            if (pointsData.length === 0) return;
+
+            ctx.fillStyle = '#ff0000';
+            const pointSize = 2;
+
+            for (let i = 0; i < pointsData.length; i++) {
+                ctx.beginPath();
+                ctx.arc(pointsData[i].x, pointsData[i].y, pointSize, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // 绘制噪声图
+            drawNoiseVisualization();
+
+            updatePointCount();
+        }
+
+        // 清除画布
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // 绘制噪声图可视化（在画布下方）
+        function drawNoiseVisualization() {
+            const noiseSeed = parseInt(document.getElementById('noiseSeed').value);
+            const noiseScale = parseFloat(document.getElementById('noiseScale').value);
+            const vizHeight = 100; // 噪声图高度
+            const vizY = canvas.height - vizHeight - 15; // 距离底部15px
+            const vizWidth = canvas.width - 40; // 左右各留20px边距
+            const vizX = 20;
+
+            // 绘制背景
+            ctx.fillStyle = 'rgba(30, 30, 30, 0.8)';
+            ctx.fillRect(vizX - 5, vizY - 5, vizWidth + 10, vizHeight + 10);
+
+            // 绘制标题
+            ctx.fillStyle = '#888';
+            ctx.font = '12px Arial';
+            ctx.fillText('噪声图可视化', vizX, vizY - 10);
+
+            // 生成噪声数据并绘制
+            const imageData = ctx.createImageData(vizWidth, vizHeight);
+            const data = imageData.data;
+
+            for (let py = 0; py < vizHeight; py++) {
+                for (let px = 0; px < vizWidth; px++) {
+                    // 将像素坐标映射到噪声坐标
+                    const nx = px * noiseScale * 0.5;
+                    const ny = py * noiseScale * 0.5;
+
+                    // 生成噪声值 (-1 到 1)
+                    const noise = perlinNoise2D(nx, ny, noiseSeed);
+
+                    // 将噪声值映射到颜色 (0-255)
+                    // 负值为蓝色系，正值为绿色系，0为灰色
+                    const value = Math.floor((noise + 1) * 127.5);
+                    const idx = (py * vizWidth + px) * 4;
+
+                    if (noise < 0) {
+                        // 负值：蓝色
+                        data[idx] = 0;           // R
+                        data[idx + 1] = value;   // G
+                        data[idx + 2] = 255;     // B
+                    } else {
+                        // 正值：绿色
+                        data[idx] = 0;           // R
+                        data[idx + 1] = 255;     // G
+                        data[idx + 2] = value;   // B
+                    }
+                    data[idx + 3] = 255;         // A
+                }
+            }
+
+            ctx.putImageData(imageData, vizX, vizY);
+
+            // 绘制边框
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(vizX - 5, vizY - 5, vizWidth + 10, vizHeight + 10);
+
+            // 绘制颜色图例
+            const legendX = vizX + vizWidth + 20;
+            const legendWidth = 15;
+            const legendHeight = vizHeight;
+
+            // 渐变色条
+            const gradient = ctx.createLinearGradient(0, vizY, 0, vizY + legendHeight);
+            gradient.addColorStop(0, '#007fff');   // 蓝色（负值）
+            gradient.addColorStop(0.5, '#808080'); // 灰色（零值）
+            gradient.addColorStop(1, '#00ff80');   // 绿色（正值）
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(legendX, vizY, legendWidth, legendHeight);
+
+            // 图例标签
+            ctx.fillStyle = '#888';
+            ctx.font = '10px Arial';
+            ctx.fillText('+1', legendX + legendWidth + 5, vizY + 10);
+            ctx.fillText('0', legendX + legendWidth + 5, vizY + legendHeight / 2);
+            ctx.fillText('-1', legendX + legendWidth + 5, vizY + legendHeight - 5);
+        }
+
+        // 更新点数显示
+        function updatePointCount() {
+            document.getElementById('pointCount').textContent = `总点数: ${pointsData.length}`;
+        }
+
+        // 页面加载时自动绘制
+        window.onload = function() {
+            drawShape();
+        };
+
+        // 导出 pointsData（方便后续使用 Perlin 噪声修改）
+        function exportPointsData() {
+            console.log('pointsData:', JSON.stringify(pointsData, null, 2));
+            return pointsData;
+        }
+
+        // 修改 pointsData 的接口
+        function setPointsData(newPoints) {
+            pointsData = newPoints;
+            updatePointCount();
+        }
+
+        // ============================================
+        // 柏林噪声实现
+        // ============================================
+
+        /**
+         * Perlin Noise 生成器类
+         * 基于经典 Perlin Noise 算法实现
+         */
+        class PerlinNoise {
+            constructor(seed = 0) {
+                this.seed = seed;
+                this.p = new Array(512);
+                this.permutation = new Array(256);
+
+                // 基于种子初始化排列表
+                this.initPermutation();
+            }
+
+            // 线性同余生成器（用于带种子的随机数）
+            lcgRandom(seed) {
+                return function() {
+                    seed = (seed * 1664525 + 1013904223) % 4294967296;
+                    return seed / 4294967296;
+                };
+            }
+
+            // 初始化排列表
+            initPermutation() {
+                const random = this.lcgRandom(this.seed);
+
+                // 初始化 0-255 的数组
+                for (let i = 0; i < 256; i++) {
+                    this.permutation[i] = i;
+                }
+
+                // Fisher-Yates 洗牌算法
+                for (let i = 255; i > 0; i--) {
+                    const j = Math.floor(random() * (i + 1));
+                    [this.permutation[i], this.permutation[j]] = [this.permutation[j], this.permutation[i]];
+                }
+
+                // 复制两份以避免溢出检查
+                for (let i = 0; i < 512; i++) {
+                    this.p[i] = this.permutation[i % 256];
+                }
+            }
+
+            // 平滑插值函数 (6t^5 - 15t^4 + 10t^3)
+            fade(t) {
+                return t * t * t * (t * (t * 6 - 15) + 10);
+            }
+
+            // 线性插值
+            lerp(t, a, b) {
+                return a + t * (b - a);
+            }
+
+            // 梯度计算
+            grad(hash, x, y) {
+                const h = hash & 3;
+                const u = h < 2 ? x : y;
+                const v = h < 2 ? y : x;
+                return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v);
+            }
+
+            // 2D 噪声函数
+            noise2D(x, y) {
+                const X = Math.floor(x) & 255;
+                const Y = Math.floor(y) & 255;
+
+                x -= Math.floor(x);
+                y -= Math.floor(y);
+
+                const u = this.fade(x);
+                const v = this.fade(y);
+
+                const A = this.p[X] + Y;
+                const B = this.p[X + 1] + Y;
+
+                return this.lerp(v,
+                    this.lerp(u, this.grad(this.p[A], x, y), this.grad(this.p[B], x - 1, y)),
+                    this.lerp(u, this.grad(this.p[A + 1], x, y - 1), this.grad(this.p[B + 1], x - 1, y - 1))
+                );
+            }
+        }
+
+        // 全局噪声生成器缓存
+        const noiseGenerators = new Map();
+
+        /**
+         * 获取或创建噪声生成器
+         * @param {number} seed - 随机种子
+         * @returns {PerlinNoise} - 噪声生成器实例
+         */
+        function getNoiseGenerator(seed) {
+            if (!noiseGenerators.has(seed)) {
+                noiseGenerators.set(seed, new PerlinNoise(seed));
+            }
+            return noiseGenerators.get(seed);
+        }
+
+        /**
+         * 2D 柏林噪声函数（对外接口）
+         * @param {number} x - x 坐标
+         * @param {number} y - y 坐标
+         * @param {number} seed - 随机种子
+         * @returns {number} - 噪声值，通常在 -1 到 1 之间
+         */
+        function perlinNoise2D(x, y, seed) {
+            const generator = getNoiseGenerator(seed);
+            return generator.noise2D(x, y);
+        }
+
+        // ============================================
+        // 应用柏林噪声到图形
+        // ============================================
+
+        /**
+         * 高斯模糊函数 - 用于平滑噪声值
+         * @param {Array} values - 原始值数组
+         * @param {number} radius - 模糊半径
+         * @returns {Array} - 模糊后的值数组
+         */
+        function gaussianBlur(values, radius) {
+            if (radius <= 0) return values;
+
+            const result = new Array(values.length);
+            const len = values.length;
+
+            // 高斯权重计算
+            const sigma = radius / 3;
+            const weights = [];
+            let weightSum = 0;
+
+            for (let i = -radius; i <= radius; i++) {
+                const weight = Math.exp(-(i * i) / (2 * sigma * sigma));
+                weights.push(weight);
+                weightSum += weight;
+            }
+
+            // 归一化权重
+            for (let i = 0; i < weights.length; i++) {
+                weights[i] /= weightSum;
+            }
+
+            // 应用高斯模糊（处理循环边界）
+            for (let i = 0; i < len; i++) {
+                let sum = 0;
+                for (let j = -radius; j <= radius; j++) {
+                    const idx = (i + j + len) % len; // 循环索引
+                    sum += values[idx] * weights[j + radius];
+                }
+                result[i] = sum;
+            }
+
+            return result;
+        }
+
+        /**
+         * 计算点到矩形中心的距离衰减因子
+         * @param {number} x - 点的 x 坐标
+         * @param {number} y - 点的 y 坐标
+         * @param {number} centerX - 中心 x 坐标
+         * @param {number} centerY - 中心 y 坐标
+         * @param {number} decayFactor - 衰减因子
+         * @returns {number} - 衰减系数 (0-1)
+         */
+        function getDistanceDecay(x, y, centerX, centerY, decayFactor) {
+            const dx = x - centerX;
+            const dy = y - centerY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            // 使用指数衰减：exp(-distance * decayFactor)
+            return Math.exp(-distance * decayFactor / 100);
+        }
+
+        /**
+         * 生成多层叠加的正弦波细节
+         * @param {number} index - 点的索引位置
+         * @param {number} amplitude - 基础振幅
+         * @param {number} frequency - 基础频率
+         * @param {number} layers - 叠加层数
+         * @returns {number} - 叠加后的正弦波值
+         */
+        function generateMultiLayerSine(index, amplitude, frequency, layers) {
+            let result = 0;
+
+            for (let layer = 0; layer < layers; layer++) {
+                // 每层的频率和振幅递减
+                const layerFreq = frequency * Math.pow(2, layer);
+                const layerAmp = amplitude / Math.pow(2, layer);
+                // 相位偏移，避免所有波峰对齐
+                const phase = layer * 0.7;
+
+                result += Math.sin(index * layerFreq + phase) * layerAmp;
+            }
+
+            return result;
+        }
+
+        /**
+         * 应用柏林噪声到 pointsData（带距离衰减、高斯模糊和正弦波细节）
+         *
+         * 参数说明：
+         * - noiseScale: 噪声缩放因子，控制噪声的频率（值越小越平滑）
+         * - noiseStrength: 噪声强度，控制变形的幅度（像素值）
+         * - noiseSeed: 随机种子，用于生成可重复的噪声
+         * - distanceDecay: 距离衰减因子，离中心越远噪声越小（0 = 无衰减）
+         * - gaussianRadius: 高斯模糊半径，用于平滑边缘（0 = 无模糊）
+         * - sineAmplitude: 正弦波振幅，控制细节的幅度
+         * - sineFrequency: 正弦波频率，控制细节的密集程度
+         * - sineLayers: 正弦波层数，多层叠加创造更复杂的细节
+         */
+        function applyPerlinNoise() {
+            const noiseScale = parseFloat(document.getElementById('noiseScale').value);
+            const noiseStrength = parseFloat(document.getElementById('noiseStrength').value);
+            const noiseSeed = parseInt(document.getElementById('noiseSeed').value);
+            const distanceDecay = parseFloat(document.getElementById('distanceDecay').value);
+            const gaussianRadius = parseInt(document.getElementById('gaussianRadius').value);
+            const sineAmplitude = parseFloat(document.getElementById('sineAmplitude').value);
+            const sineFrequency = parseFloat(document.getElementById('sineFrequency').value);
+            const sineLayers = parseInt(document.getElementById('sineLayers').value);
+            const noiseSineMix = parseFloat(document.getElementById('noiseSineMix').value);
+
+            console.log('应用柏林噪声和正弦波:', {
+                noiseScale,
+                noiseStrength,
+                noiseSeed,
+                distanceDecay,
+                gaussianRadius,
+                sineAmplitude,
+                sineFrequency,
+                sineLayers,
+                noiseSineMix
+            });
+
+            // 计算矩形中心
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            // 第一步：生成原始噪声值（柏林噪声 + 正弦波）
+            const noiseXValues = [];
+            const noiseYValues = [];
+
+            for (let i = 0; i < pointsData.length; i++) {
+                const point = pointsData[i];
+
+                // 计算柏林噪声值
+                let noiseX = perlinNoise2D(point.x * noiseScale, point.y * noiseScale, noiseSeed);
+                let noiseY = perlinNoise2D(point.x * noiseScale + 1000, point.y * noiseScale + 1000, noiseSeed);
+
+                // 叠加正弦波细节（基于点的索引位置）
+                const sineX = generateMultiLayerSine(i, sineAmplitude, sineFrequency, sineLayers);
+                const sineY = generateMultiLayerSine(i + 100, sineAmplitude, sineFrequency, sineLayers); // +100使Y方向的波不同
+
+                // 根据混合比例混合柏林噪声和正弦波（正弦波值需要归一化）
+                const sineRatio = Math.max(0, Math.min(1, 1 - noiseSineMix)); // 正弦波的比例
+                noiseX = noiseX * noiseSineMix + (sineX / sineAmplitude) * sineRatio;
+                noiseY = noiseY * noiseSineMix + (sineY / sineAmplitude) * sineRatio;
+
+                // 应用距离衰减
+                if (distanceDecay > 0) {
+                    const decay = getDistanceDecay(point.x, point.y, centerX, centerY, distanceDecay);
+                    noiseX *= decay;
+                    noiseY *= decay;
+                }
+
+                noiseXValues.push(noiseX);
+                noiseYValues.push(noiseY);
+            }
+
+            // 第二步：应用高斯模糊平滑噪声
+            const smoothedNoiseX = gaussianBlur(noiseXValues, gaussianRadius);
+            const smoothedNoiseY = gaussianBlur(noiseYValues, gaussianRadius);
+
+            // 第三步：应用平滑后的噪声到点
+            for (let i = 0; i < pointsData.length; i++) {
+                const point = pointsData[i];
+                point.x += smoothedNoiseX[i] * noiseStrength;
+                point.y += smoothedNoiseY[i] * noiseStrength;
+            }
+
+            // 绘制变形后的图形
+            drawShape();
+            console.log('柏林噪声和正弦波应用完成！');
+        }
+
+        /**
+         * 重置为原始圆角矩形
+         */
+        function resetShape() {
+            applyCornerRadius();
+        }
+
+        /**
+         * 应用新的圆角半径
+         */
+        function applyCornerRadius() {
+            const cornerRadius = parseInt(document.getElementById('cornerRadius').value) || 8;
+            pointsData = generateRoundedRectanglePoints(currentShapeWidth, currentShapeHeight, cornerRadius);
+            originalPoints = JSON.parse(JSON.stringify(pointsData)); // 更新原始数据
+            drawShape();
+            console.log('已应用新的圆角半径:', cornerRadius);
+        }
+    </script>
+</body>
+</html>

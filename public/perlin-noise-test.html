@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>柏林噪声测试工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        input {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            grid-column: 1 / -1;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .canvas-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .canvas-wrapper {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .canvas-wrapper h3 {
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            background: white;
+            cursor: crosshair;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .info-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .info-panel h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .info-value {
+            color: #667eea;
+            font-family: monospace;
+            font-size: 1.1em;
+        }
+
+        .gradient-bar {
+            width: 100%;
+            height: 30px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 2px solid #ddd;
+        }
+
+        .table-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .table-controls label {
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .table-controls input {
+            width: 80px;
+        }
+
+        #noiseTable {
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        #noiseTable th,
+        #noiseTable td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        #noiseTable tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        #noiseTable tbody tr:hover {
+            background: #e9ecef;
+        }
+
+        .value-bar {
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .value-bar-container {
+            width: 150px;
+            background: #f0f0f0;
+            height: 8px;
+            border-radius: 4px;
+            padding: 2px;
+            display: inline-block;
+            text-align: left;
+        }
+
+        .stacked-graph-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        #stackedGraphCanvas {
+            display: block;
+            margin: 0 auto;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 柏林噪声测试工具</h1>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="x1">X1 (起始X坐标)</label>
+                <input type="number" id="x1" value="0" step="0.1">
+            </div>
+            <div class="control-group">
+                <label for="y1">Y1 (起始Y坐标)</label>
+                <input type="number" id="y1" value="0" step="0.1">
+            </div>
+            <div class="control-group">
+                <label for="x2">X2 (结束X坐标)</label>
+                <input type="number" id="x2" value="10" step="0.1">
+            </div>
+            <div class="control-group">
+                <label for="y2">Y2 (结束Y坐标)</label>
+                <input type="number" id="y2" value="10" step="0.1">
+            </div>
+            <div class="control-group">
+                <label for="scale">噪声缩放</label>
+                <input type="number" id="scale" value="0.1" step="0.01" min="0.01">
+            </div>
+            <div class="control-group">
+                <label for="octaves">八度叠加层数</label>
+                <input type="number" id="octaves" value="4" min="1" max="8" step="1">
+            </div>
+            <div class="control-group">
+                <label for="persistence">持久度</label>
+                <input type="number" id="persistence" value="0.5" step="0.1" min="0.1" max="1">
+            </div>
+            <button id="generate">🔄 生成噪声图</button>
+        </div>
+
+        <div class="canvas-container">
+            <div class="canvas-wrapper">
+                <h3>1D 噪声曲线 (X固定)</h3>
+                <canvas id="curve1DCanvas" width="800" height="300"></canvas>
+            </div>
+            <div class="canvas-wrapper">
+                <h3>2D 热力图</h3>
+                <canvas id="heatmapCanvas" width="500" height="500"></canvas>
+            </div>
+            <div class="canvas-wrapper">
+                <h3>等高线图</h3>
+                <canvas id="contourCanvas" width="500" height="500"></canvas>
+            </div>
+            <div class="canvas-wrapper full-width">
+                <h3>3D 线框图</h3>
+                <canvas id="wireframeCanvas" width="1000" height="400"></canvas>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <h3>📊 噪声值表格 (固定X = <span id="fixedXValue">0</span>)</h3>
+            <div class="table-controls">
+                <label for="fixedX">固定X值：</label>
+                <input type="number" id="fixedX" value="0" step="0.1" style="width: 100px;">
+                <label for="tableRows">表格行数：</label>
+                <input type="number" id="tableRows" value="20" min="5" max="100" step="1" style="width: 100px;">
+                <button id="generateTable" style="padding: 8px 16px; margin-left: 10px;">生成表格</button>
+            </div>
+            <div id="tableContainer" style="max-height: 400px; overflow-y: auto; margin-top: 15px;">
+                <table id="noiseTable" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #667eea; color: white; position: sticky; top: 0;">
+                            <th style="padding: 12px; border: 1px solid #ddd; text-align: center;">索引</th>
+                            <th style="padding: 12px; border: 1px solid #ddd; text-align: center;">Y坐标</th>
+                            <th style="padding: 12px; border: 1px solid #ddd; text-align: center;">原始噪声值</th>
+                            <th style="padding: 12px; border: 1px solid #ddd; text-align: center;">归一化值 (0-1)</th>
+                            <th style="padding: 12px; border: 1px solid #ddd; text-align: center;">可视化</th>
+                        </tr>
+                    </thead>
+                    <tbody id="noiseTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="stacked-graph-container">
+            <h3>📈 噪声堆叠总集图 (阴影波形)</h3>
+            <canvas id="stackedGraphCanvas" width="1000" height="300"></canvas>
+            <p style="text-align: center; color: #666; margin-top: 10px; font-size: 14px;">
+                将表格中的所有噪声值堆叠形成，左端对齐，黑色线条长度表示噪声值大小
+            </p>
+        </div>
+
+        <div class="info-panel">
+            <h3>📈 2D噪声统计</h3>
+            <div class="gradient-bar" id="gradientBar"></div>
+            <div class="info-item">
+                <span class="info-label">最小值:</span>
+                <span class="info-value" id="minValue">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">最大值:</span>
+                <span class="info-value" id="maxValue">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">平均值:</span>
+                <span class="info-value" id="avgValue">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">当前鼠标位置值:</span>
+                <span class="info-value" id="mouseValue">移动鼠标查看</span>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <h3>📊 噪声值分布</h3>
+            <div class="gradient-bar" id="gradientBar"></div>
+            <div class="info-item">
+                <span class="info-label">最小值:</span>
+                <span class="info-value" id="minValue">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">最大值:</span>
+                <span class="info-value" id="maxValue">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">平均值:</span>
+                <span class="info-value" id="avgValue">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">当前鼠标位置值:</span>
+                <span class="info-value" id="mouseValue">移动鼠标查看</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 改进的柏林噪声实现
+        class PerlinNoise {
+            constructor(seed = Math.random()) {
+                this.seed = seed;
+                this.permutation = this.generatePermutation();
+            }
+
+            generatePermutation() {
+                const perm = [];
+                for (let i = 0; i < 256; i++) {
+                    perm[i] = i;
+                }
+
+                // 使用种子进行洗牌
+                let random = this.seed;
+                for (let i = 255; i > 0; i--) {
+                    random = (random * 16807) % 2147483647;
+                    const j = Math.floor((random / 2147483647) * (i + 1));
+                    [perm[i], perm[j]] = [perm[j], perm[i]];
+                }
+
+                // 复制一份以避免溢出
+                return [...perm, ...perm];
+            }
+
+            fade(t) {
+                return t * t * t * (t * (t * 6 - 15) + 10);
+            }
+
+            lerp(a, b, t) {
+                return a + t * (b - a);
+            }
+
+            grad(hash, x, y) {
+                const h = hash & 3;
+                const u = h < 2 ? x : y;
+                const v = h < 2 ? y : x;
+                return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v);
+            }
+
+            noise(x, y) {
+                const X = Math.floor(x) & 255;
+                const Y = Math.floor(y) & 255;
+
+                x -= Math.floor(x);
+                y -= Math.floor(y);
+
+                const u = this.fade(x);
+                const v = this.fade(y);
+
+                const p = this.permutation;
+                const A = p[X] + Y;
+                const B = p[X + 1] + Y;
+
+                return this.lerp(
+                    this.lerp(this.grad(p[A], x, y), this.grad(p[B], x - 1, y), u),
+                    this.lerp(this.grad(p[A + 1], x, y - 1), this.grad(p[B + 1], x - 1, y - 1), u),
+                    v
+                );
+            }
+
+            // 分形布朗运动 (FBM) - 叠加多层噪声
+            fbm(x, y, octaves = 4, persistence = 0.5) {
+                let total = 0;
+                let frequency = 1;
+                let amplitude = 1;
+                let maxValue = 0;
+
+                for (let i = 0; i < octaves; i++) {
+                    total += this.noise(x * frequency, y * frequency) * amplitude;
+                    maxValue += amplitude;
+                    amplitude *= persistence;
+                    frequency *= 2;
+                }
+
+                return total / maxValue;
+            }
+        }
+
+        // 全局变量
+        const perlin = new PerlinNoise();
+        const heatmapCanvas = document.getElementById('heatmapCanvas');
+        const heatmapCtx = heatmapCanvas.getContext('2d');
+        const contourCanvas = document.getElementById('contourCanvas');
+        const contourCtx = contourCanvas.getContext('2d');
+        const wireframeCanvas = document.getElementById('wireframeCanvas');
+        const wireframeCtx = wireframeCanvas.getContext('2d');
+        const curve1DCanvas = document.getElementById('curve1DCanvas');
+        const curve1DCtx = curve1DCanvas.getContext('2d');
+        const stackedGraphCanvas = document.getElementById('stackedGraphCanvas');
+        const stackedGraphCtx = stackedGraphCanvas.getContext('2d');
+
+        let noiseData = [];
+        let noise1DData = [];
+        let x1, y1, x2, y2, scale, octaves, persistence;
+
+        // HSV转RGB
+        function hsvToRgb(h, s, v) {
+            let r, g, b;
+            const i = Math.floor(h * 6);
+            const f = h * 6 - i;
+            const p = v * (1 - s);
+            const q = v * (1 - f * s);
+            const t = v * (1 - (1 - f) * s);
+
+            switch (i % 6) {
+                case 0: r = v; g = t; b = p; break;
+                case 1: r = q; g = v; b = p; break;
+                case 2: r = p; g = v; b = t; break;
+                case 3: r = p; g = q; b = v; break;
+                case 4: r = t; g = p; b = v; break;
+                case 5: r = v; g = p; b = q; break;
+            }
+
+            return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+        }
+
+        // 归一化值到颜色
+        function valueToColor(value) {
+            // 将噪声值从 [-1, 1] 映射到 [0, 1]
+            const normalized = (value + 1) / 2;
+
+            // 使用蓝色(低值) -> 绿色 -> 黄色 -> 红色(高值)的渐变
+            const h = (1 - normalized) * 240 / 360; // 240°(蓝) 到 0°(红)
+            const s = 0.8;
+            const v = 0.9;
+
+            const [r, g, b] = hsvToRgb(h, s, v);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // 生成噪声数据
+        function generateNoiseData() {
+            x1 = parseFloat(document.getElementById('x1').value);
+            y1 = parseFloat(document.getElementById('y1').value);
+            x2 = parseFloat(document.getElementById('x2').value);
+            y2 = parseFloat(document.getElementById('y2').value);
+            scale = parseFloat(document.getElementById('scale').value);
+            octaves = parseInt(document.getElementById('octaves').value);
+            persistence = parseFloat(document.getElementById('persistence').value);
+
+            const width = heatmapCanvas.width;
+            const height = heatmapCanvas.height;
+            noiseData = [];
+
+            for (let py = 0; py < height; py++) {
+                noiseData[py] = [];
+                for (let px = 0; px < width; px++) {
+                    const nx = x1 + (px / width) * (x2 - x1);
+                    const ny = y1 + (py / height) * (y2 - y1);
+                    const value = perlin.fbm(nx * scale, ny * scale, octaves, persistence);
+                    noiseData[py][px] = value;
+                }
+            }
+
+            // 同时生成1D噪声数据
+            generate1DNoiseData();
+
+            updateStatistics();
+        }
+
+        // 生成1D噪声数据（固定X值）
+        function generate1DNoiseData() {
+            const fixedX = parseFloat(document.getElementById('fixedX').value);
+            document.getElementById('fixedXValue').textContent = fixedX.toFixed(1);
+
+            noise1DData = [];
+            const samples = 200; // 采样点数
+
+            for (let i = 0; i <= samples; i++) {
+                const ny = y1 + (i / samples) * (y2 - y1);
+                const value = perlin.fbm(fixedX * scale, ny * scale, octaves, persistence);
+                noise1DData.push({
+                    index: i,
+                    y: ny,
+                    value: value,
+                    normalized: (value + 1) / 2
+                });
+            }
+        }
+
+        // 绘制1D噪声曲线
+        function draw1DCurve() {
+            const width = curve1DCanvas.width;
+            const height = curve1DCanvas.height;
+            const padding = 40;
+
+            // 清空画布
+            curve1DCtx.fillStyle = 'white';
+            curve1DCtx.fillRect(0, 0, width, height);
+
+            // 绘制网格
+            curve1DCtx.strokeStyle = '#e0e0e0';
+            curve1DCtx.lineWidth = 1;
+
+            // 水平网格线
+            for (let i = 0; i <= 4; i++) {
+                const y = padding + (i / 4) * (height - 2 * padding);
+                curve1DCtx.beginPath();
+                curve1DCtx.moveTo(padding, y);
+                curve1DCtx.lineTo(width - padding, y);
+                curve1DCtx.stroke();
+
+                // 标签
+                const value = 1 - (i / 4) * 2; // 从1到-1
+                curve1DCtx.fillStyle = '#666';
+                curve1DCtx.font = '12px monospace';
+                curve1DCtx.textAlign = 'right';
+                curve1DCtx.fillText(value.toFixed(1), padding - 5, y + 4);
+            }
+
+            // 垂直网格线
+            for (let i = 0; i <= 10; i++) {
+                const x = padding + (i / 10) * (width - 2 * padding);
+                curve1DCtx.beginPath();
+                curve1DCtx.moveTo(x, padding);
+                curve1DCtx.lineTo(x, height - padding);
+                curve1DCtx.stroke();
+            }
+
+            // 绘制零线
+            const zeroY = padding + (height - 2 * padding) / 2;
+            curve1DCtx.strokeStyle = '#999';
+            curve1DCtx.lineWidth = 2;
+            curve1DCtx.beginPath();
+            curve1DCtx.moveTo(padding, zeroY);
+            curve1DCtx.lineTo(width - padding, zeroY);
+            curve1DCtx.stroke();
+
+            // 绘制噪声曲线
+            curve1DCtx.strokeStyle = '#667eea';
+            curve1DCtx.lineWidth = 2;
+            curve1DCtx.beginPath();
+
+            const fixedX = parseFloat(document.getElementById('fixedX').value);
+
+            noise1DData.forEach((point, index) => {
+                const x = padding + (index / (noise1DData.length - 1)) * (width - 2 * padding);
+                const y = padding + (1 - (point.value + 1) / 2) * (height - 2 * padding);
+
+                if (index === 0) {
+                    curve1DCtx.moveTo(x, y);
+                } else {
+                    curve1DCtx.lineTo(x, y);
+                }
+            });
+
+            curve1DCtx.stroke();
+
+            // 绘制数据点
+            curve1DCtx.fillStyle = '#764ba2';
+            noise1DData.forEach((point, index) => {
+                if (index % 20 === 0) { // 每20个点绘制一个
+                    const x = padding + (index / (noise1DData.length - 1)) * (width - 2 * padding);
+                    const y = padding + (1 - (point.value + 1) / 2) * (height - 2 * padding);
+                    curve1DCtx.beginPath();
+                    curve1DCtx.arc(x, y, 3, 0, 2 * Math.PI);
+                    curve1DCtx.fill();
+                }
+            });
+
+            // 标题和轴标签
+            curve1DCtx.fillStyle = '#333';
+            curve1DCtx.font = 'bold 14px Arial';
+            curve1DCtx.textAlign = 'center';
+            curve1DCtx.fillText('Y坐标 →', width / 2, height - 5);
+
+            curve1DCtx.save();
+            curve1DCtx.translate(15, height / 2);
+            curve1DCtx.rotate(-Math.PI / 2);
+            curve1DCtx.fillText('噪声值', 0, 0);
+            curve1DCtx.restore();
+
+            // 固定X值标签
+            curve1DCtx.fillStyle = '#667eea';
+            curve1DCtx.font = 'bold 16px Arial';
+            curve1DCtx.textAlign = 'left';
+            curve1DCtx.fillText(`固定 X = ${fixedX.toFixed(1)}`, padding + 10, padding - 10);
+        }
+
+        // 生成噪声值表格
+        function generateNoiseTable() {
+            const tableRows = parseInt(document.getElementById('tableRows').value);
+            const tbody = document.getElementById('noiseTableBody');
+            tbody.innerHTML = '';
+
+            const step = Math.max(1, Math.floor(noise1DData.length / tableRows));
+
+            for (let i = 0; i < noise1DData.length; i += step) {
+                const point = noise1DData[i];
+                const row = document.createElement('tr');
+
+                // 使用黑色线段，长度基于归一化值，左端对齐
+                const barLength = Math.round(point.normalized * 140); // 最大140px
+                const barWidth = Math.max(2, barLength); // 最小2px
+
+                row.innerHTML = `
+                    <td>${point.index}</td>
+                    <td>${point.y.toFixed(2)}</td>
+                    <td>${point.value.toFixed(4)}</td>
+                    <td>${point.normalized.toFixed(4)}</td>
+                    <td style="text-align: left;">
+                        <div class="value-bar-container">
+                            <div class="value-bar" style="width: ${barWidth}px;"></div>
+                        </div>
+                        <span style="margin-left: 8px; color: #666; font-size: 12px;">${Math.round(point.normalized * 100)}%</span>
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+
+                if (tbody.children.length >= tableRows) break;
+            }
+
+            // 同时绘制堆叠图
+            drawStackedGraph();
+        }
+
+        // 绘制堆叠总集图
+        function drawStackedGraph() {
+            const width = stackedGraphCanvas.width;
+            const height = stackedGraphCanvas.height;
+            const padding = 40;
+
+            // 清空画布
+            stackedGraphCtx.fillStyle = 'white';
+            stackedGraphCtx.fillRect(0, 0, width, height);
+
+            // 绘制背景网格
+            stackedGraphCtx.strokeStyle = '#f0f0f0';
+            stackedGraphCtx.lineWidth = 1;
+
+            // 水平网格线
+            for (let i = 0; i <= 5; i++) {
+                const y = padding + (i / 5) * (height - 2 * padding);
+                stackedGraphCtx.beginPath();
+                stackedGraphCtx.moveTo(padding, y);
+                stackedGraphCtx.lineTo(width - padding, y);
+                stackedGraphCtx.stroke();
+
+                // 标签
+                const value = 1 - (i / 5); // 从1到0
+                stackedGraphCtx.fillStyle = '#999';
+                stackedGraphCtx.font = '11px monospace';
+                stackedGraphCtx.textAlign = 'right';
+                stackedGraphCtx.fillText(value.toFixed(1), padding - 5, y + 4);
+            }
+
+            // 计算线条宽度和间距
+            const totalLines = noise1DData.length;
+            const graphWidth = width - 2 * padding;
+            const lineGap = 1; // 线条之间的间距
+            const lineWidth = Math.max(1, (graphWidth - (totalLines - 1) * lineGap) / totalLines);
+
+            // 绘制堆叠的垂直线条
+            stackedGraphCtx.fillStyle = '#333';
+
+            noise1DData.forEach((point, index) => {
+                const x = padding + index * (lineWidth + lineGap);
+                const barHeight = point.normalized * (height - 2 * padding);
+                const y = height - padding - barHeight;
+
+                // 绘制垂直线条
+                stackedGraphCtx.fillRect(x, y, lineWidth, barHeight);
+            });
+
+            // 绘制边框
+            stackedGraphCtx.strokeStyle = '#ddd';
+            stackedGraphCtx.lineWidth = 2;
+            stackedGraphCtx.strokeRect(padding, padding, width - 2 * padding, height - 2 * padding);
+
+            // 绘制坐标轴标签
+            stackedGraphCtx.fillStyle = '#333';
+            stackedGraphCtx.font = 'bold 14px Arial';
+            stackedGraphCtx.textAlign = 'center';
+            stackedGraphCtx.fillText('Y轴采样点 →', width / 2, height - 5);
+
+            stackedGraphCtx.save();
+            stackedGraphCtx.translate(15, height / 2);
+            stackedGraphCtx.rotate(-Math.PI / 2);
+            stackedGraphCtx.fillText('归一化噪声值', 0, 0);
+            stackedGraphCtx.restore();
+
+            // 添加图例
+            const legendX = width - padding - 100;
+            const legendY = padding + 10;
+
+            stackedGraphCtx.fillStyle = '#333';
+            stackedGraphCtx.fillRect(legendX, legendY, 20, 20);
+            stackedGraphCtx.fillStyle = '#666';
+            stackedGraphCtx.font = '12px Arial';
+            stackedGraphCtx.textAlign = 'left';
+            stackedGraphCtx.fillText('噪声值', legendX + 25, legendY + 15);
+        }
+
+        // 更新统计信息
+        function updateStatistics() {
+            let min = Infinity;
+            let max = -Infinity;
+            let sum = 0;
+            let count = 0;
+
+            for (let y = 0; y < noiseData.length; y++) {
+                for (let x = 0; x < noiseData[y].length; x++) {
+                    const value = noiseData[y][x];
+                    min = Math.min(min, value);
+                    max = Math.max(max, value);
+                    sum += value;
+                    count++;
+                }
+            }
+
+            const avg = sum / count;
+
+            document.getElementById('minValue').textContent = min.toFixed(4);
+            document.getElementById('maxValue').textContent = max.toFixed(4);
+            document.getElementById('avgValue').textContent = avg.toFixed(4);
+
+            // 更新渐变条
+            const gradientBar = document.getElementById('gradientBar');
+            gradientBar.style.background = `linear-gradient(to right,
+                ${valueToColor(min)},
+                ${valueToColor(0)},
+                ${valueToColor(max)})`;
+        }
+
+        // 绘制热力图
+        function drawHeatmap() {
+            const width = heatmapCanvas.width;
+            const height = heatmapCanvas.height;
+            const imageData = heatmapCtx.createImageData(width, height);
+
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const value = noiseData[y][x];
+                    const normalized = (value + 1) / 2;
+
+                    const h = (1 - normalized) * 240 / 360;
+                    const s = 0.8;
+                    const v = 0.9;
+                    const [r, g, b] = hsvToRgb(h, s, v);
+
+                    const index = (y * width + x) * 4;
+                    imageData.data[index] = r;
+                    imageData.data[index + 1] = g;
+                    imageData.data[index + 2] = b;
+                    imageData.data[index + 3] = 255;
+                }
+            }
+
+            heatmapCtx.putImageData(imageData, 0, 0);
+        }
+
+        // 绘制等高线图
+        function drawContour() {
+            const width = contourCanvas.width;
+            const height = contourCanvas.height;
+
+            contourCtx.fillStyle = 'white';
+            contourCtx.fillRect(0, 0, width, height);
+
+            const contourLevels = 20;
+
+            for (let level = 0; level < contourLevels; level++) {
+                const threshold = -1 + (level / contourLevels) * 2;
+                contourCtx.strokeStyle = `hsl(${(level / contourLevels) * 240}, 70%, 50%)`;
+                contourCtx.lineWidth = 1;
+
+                contourCtx.beginPath();
+
+                for (let y = 0; y < height - 1; y++) {
+                    for (let x = 0; x < width - 1; x++) {
+                        const v1 = noiseData[y][x];
+                        const v2 = noiseData[y][x + 1];
+                        const v3 = noiseData[y + 1][x];
+                        const v4 = noiseData[y + 1][x + 1];
+
+                        // 检查边界穿越
+                        const edges = [];
+                        if ((v1 < threshold && v2 >= threshold) || (v1 >= threshold && v2 < threshold)) {
+                            edges.push([x + 0.5, y]);
+                        }
+                        if ((v1 < threshold && v3 >= threshold) || (v1 >= threshold && v3 < threshold)) {
+                            edges.push([x, y + 0.5]);
+                        }
+                        if ((v2 < threshold && v4 >= threshold) || (v2 >= threshold && v4 < threshold)) {
+                            edges.push([x + 1, y + 0.5]);
+                        }
+                        if ((v3 < threshold && v4 >= threshold) || (v3 >= threshold && v4 < threshold)) {
+                            edges.push([x + 0.5, y + 1]);
+                        }
+
+                        // 连接边
+                        if (edges.length >= 2) {
+                            contourCtx.moveTo(edges[0][0], edges[0][1]);
+                            for (let i = 1; i < edges.length; i++) {
+                                contourCtx.lineTo(edges[i][0], edges[i][1]);
+                            }
+                        }
+                    }
+                }
+
+                contourCtx.stroke();
+            }
+        }
+
+        // 绘制3D线框图
+        function drawWireframe() {
+            const width = wireframeCanvas.width;
+            const height = wireframeCanvas.height;
+
+            wireframeCtx.fillStyle = 'white';
+            wireframeCtx.fillRect(0, 0, width, height);
+
+            const step = 10; // 采样步长
+            const scale = 100; // 高度缩放
+
+            // 绘制网格
+            wireframeCtx.strokeStyle = 'rgba(102, 126, 234, 0.3)';
+            wireframeCtx.lineWidth = 1;
+
+            // 绘制X方向的线
+            for (let y = 0; y < heatmapCanvas.height; y += step) {
+                wireframeCtx.beginPath();
+                for (let x = 0; x < heatmapCanvas.width; x += step) {
+                    const px = x;
+                    const py = height / 2 - noiseData[y][x] * scale;
+
+                    if (x === 0) {
+                        wireframeCtx.moveTo(px, py);
+                    } else {
+                        wireframeCtx.lineTo(px, py);
+                    }
+                }
+                wireframeCtx.stroke();
+            }
+
+            // 绘制Y方向的线
+            for (let x = 0; x < heatmapCanvas.width; x += step) {
+                wireframeCtx.beginPath();
+                for (let y = 0; y < heatmapCanvas.height; y += step) {
+                    const px = x;
+                    const py = height / 2 - noiseData[y][x] * scale;
+
+                    if (y === 0) {
+                        wireframeCtx.moveTo(px, py);
+                    } else {
+                        wireframeCtx.lineTo(px, py);
+                    }
+                }
+                wireframeCtx.stroke();
+            }
+        }
+
+        // 生成所有图形
+        function generateAll() {
+            generateNoiseData();
+            draw1DCurve();
+            drawHeatmap();
+            drawContour();
+            drawWireframe();
+            generateNoiseTable();
+            drawStackedGraph();
+        }
+
+        // 鼠标事件处理
+        heatmapCanvas.addEventListener('mousemove', (e) => {
+            const rect = heatmapCanvas.getBoundingClientRect();
+            const x = Math.floor((e.clientX - rect.left) * (heatmapCanvas.width / rect.width));
+            const y = Math.floor((e.clientY - rect.top) * (heatmapCanvas.height / rect.height));
+
+            if (noiseData[y] && noiseData[y][x] !== undefined) {
+                const value = noiseData[y][x];
+                const nx = x1 + (x / heatmapCanvas.width) * (x2 - x1);
+                const ny = y1 + (y / heatmapCanvas.height) * (y2 - y1);
+
+                document.getElementById('mouseValue').textContent =
+                    `坐标(${nx.toFixed(2)}, ${ny.toFixed(2)}): ${value.toFixed(4)}`;
+            }
+        });
+
+        // 事件监听
+        document.getElementById('generate').addEventListener('click', generateAll);
+        document.getElementById('generateTable').addEventListener('click', generateNoiseTable);
+        document.getElementById('fixedX').addEventListener('change', () => {
+            generate1DNoiseData();
+            draw1DCurve();
+            generateNoiseTable();
+            drawStackedGraph();
+        });
+
+        // 输入变化时自动更新
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('change', generateAll);
+        });
+
+        // 初始化
+        generateAll();
+    </script>
+</body>
+</html>

@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>草地地图生成器 - v5（柏林噪声版-图片导出）</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #4ecca3;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .controls {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 350px;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .output {
+            flex: 1;
+            min-width: 700px;
+        }
+        .map-output {
+            background: #0f3460;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .map-canvas-container {
+            background: #000;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            display: inline-block;
+        }
+        canvas {
+            display: block;
+            image-rendering: pixelated;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .control-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #2a3f5f;
+        }
+        .control-section:last-child {
+            border-bottom: none;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #4ecca3;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .control-group {
+            margin-bottom: 12px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #bbb;
+            font-size: 13px;
+        }
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        input[type="range"] {
+            flex: 1;
+            cursor: pointer;
+        }
+        input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            background: #1a1a2e;
+            border: 1px solid #4ecca3;
+            color: #eee;
+            border-radius: 5px;
+            text-align: center;
+        }
+        input[type="color"] {
+            width: 50px;
+            height: 35px;
+            padding: 2px;
+            background: #1a1a2e;
+            border: 1px solid #4ecca3;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .value-display {
+            color: #4ecca3;
+            font-size: 12px;
+            min-width: 45px;
+            text-align: right;
+        }
+        button {
+            background: #4ecca3;
+            color: #1a1a2e;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #45b393;
+        }
+        .button-secondary {
+            background: #3498db;
+            margin-top: 5px;
+        }
+        .button-secondary:hover {
+            background: #2980b9;
+        }
+        .button-success {
+            background: #27ae60;
+        }
+        .button-success:hover {
+            background: #229954;
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background: #0f3460;
+            border-radius: 10px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 5px;
+            border: 2px solid #4ecca3;
+        }
+        .info-panel {
+            background: #1a3a5c;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+        .info-panel h4 {
+            color: #4ecca3;
+            margin-bottom: 10px;
+        }
+        .info-panel p {
+            color: #bbb;
+            margin: 5px 0;
+        }
+        .download-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .download-options button {
+            flex: 1;
+        }
+        .placeholder-text {
+            color: #888;
+            text-align: center;
+            padding: 100px 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌿 草地地图生成器 - v5（柏林噪声版-图片导出）</h1>
+    <p class="subtitle">基于柏林噪声生成随机草地分布图片，支持PNG导出</p>
+
+    <div class="container">
+        <div class="controls">
+            <div class="control-section">
+                <div class="section-title">📏 地图尺寸</div>
+                <div class="control-group">
+                    <label>宽度 (格)</label>
+                    <div class="control-row">
+                        <input type="range" id="mapWidth" min="10" max="100" value="40">
+                        <input type="number" id="mapWidthNum" min="10" max="100" value="40">
+                        <span class="value-display">格</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>高度 (格)</label>
+                    <div class="control-row">
+                        <input type="range" id="mapHeight" min="10" max="100" value="30">
+                        <input type="number" id="mapHeightNum" min="10" max="100" value="30">
+                        <span class="value-display">格</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <div class="section-title">🎲 随机种子</div>
+                <div class="control-group">
+                    <label>种子值 (用于生成固定地图)</label>
+                    <div class="control-row">
+                        <input type="number" id="seed" value="12345" style="width: 100px; flex: 1;">
+                        <button onclick="randomSeed()" style="width: auto; margin: 0;">🎲 随机</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <div class="section-title">⚙️ 柏林噪声参数</div>
+                <div class="control-group">
+                    <label>噪声缩放 (控制草地斑块大小)</label>
+                    <div class="control-row">
+                        <input type="range" id="noiseScale" min="10" max="100" value="30">
+                        <input type="number" id="noiseScaleNum" min="10" max="100" value="30">
+                        <span class="value-display"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>草地阈值 (控制草地密度，越小越密集)</label>
+                    <div class="control-row">
+                        <input type="range" id="grassThreshold" min="0" max="100" value="50">
+                        <input type="number" id="grassThresholdNum" min="0" max="100" value="50">
+                        <span class="value-display">%</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>噪声层数 (1-6，越多越复杂)</label>
+                    <div class="control-row">
+                        <input type="range" id="octaves" min="1" max="6" value="4">
+                        <input type="number" id="octavesNum" min="1" max="6" value="4">
+                        <span class="value-display">层</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>持久度 (0.1-0.7，控制细节程度)</label>
+                    <div class="control-row">
+                        <input type="range" id="persistence" min="1" max="7" value="5">
+                        <input type="number" id="persistenceNum" min="1" max="7" value="5">
+                        <span class="value-display">/10</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <div class="section-title">🖼️ 图片设置</div>
+                <div class="control-group">
+                    <label>每个格子的像素大小</label>
+                    <div class="control-row">
+                        <input type="range" id="cellSize" min="4" max="64" value="16">
+                        <input type="number" id="cellSizeNum" min="4" max="64" value="16">
+                        <span class="value-display">px</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>地面颜色</label>
+                    <div class="control-row">
+                        <input type="color" id="groundColor" value="#f4d03f">
+                        <span class="value-display" id="groundColorText">#f4d03f</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>草地颜色</label>
+                    <div class="control-row">
+                        <input type="color" id="grassColor" value="#27ae60">
+                        <span class="value-display" id="grassColorText">#27ae60</span>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="generateMap()">🎨 生成地图图片</button>
+            <div class="download-options">
+                <button class="button-secondary" onclick="downloadPNG('original')">📥 下载原图</button>
+                <button class="button-success" onclick="downloadPNG('scaled')">📥 下载2x放大</button>
+            </div>
+        </div>
+
+        <div class="output">
+            <div class="map-output" id="mapOutput">
+                <p style="text-align: center; color: #888; padding: 50px;">点击"生成地图"按钮开始生成</p>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-box" id="legendGroundBox" style="background: #f4d03f;"></div>
+                    <span>地面</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" id="legendGrassBox" style="background: #27ae60;"></div>
+                    <span>草地</span>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h4>ℹ️ 地图信息</h4>
+                <p id="mapInfo">尚未生成地图</p>
+                <h4 style="margin-top: 15px;">💡 使用说明</h4>
+                <p>• 调整噪声缩放可改变草地斑块的大小</p>
+                <p>• 调整草地阈值可控制草地的覆盖密度</p>
+                <p>• 噪声层数越多，地图细节越丰富</p>
+                <p>• 使用相同种子可生成相同的地图</p>
+                <p>• 点击下载按钮保存为PNG图片</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 柏林噪声实现 ====================
+        class PerlinNoise {
+            constructor(seed) {
+                this.seed = seed;
+                this.permutation = this.generatePermutation();
+            }
+
+            generatePermutation() {
+                const p = [];
+                for (let i = 0; i < 256; i++) {
+                    p[i] = i;
+                }
+
+                let random = this.seededRandom(this.seed);
+                for (let i = 255; i > 0; i--) {
+                    const j = Math.floor(random() * (i + 1));
+                    [p[i], p[j]] = [p[j], p[i]];
+                }
+
+                return [...p, ...p];
+            }
+
+            seededRandom(seed) {
+                return function() {
+                    seed = (seed * 9301 + 49297) % 233280;
+                    return seed / 233280;
+                };
+            }
+
+            fade(t) {
+                return t * t * t * (t * (t * 6 - 15) + 10);
+            }
+
+            lerp(a, b, t) {
+                return a + t * (b - a);
+            }
+
+            grad(hash, x, y) {
+                const h = hash & 3;
+                const u = h < 2 ? x : y;
+                const v = h < 2 ? y : x;
+                return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
+            }
+
+            noise(x, y) {
+                const X = Math.floor(x) & 255;
+                const Y = Math.floor(y) & 255;
+
+                x -= Math.floor(x);
+                y -= Math.floor(y);
+
+                const u = this.fade(x);
+                const v = this.fade(y);
+
+                const p = this.permutation;
+                const A = p[X] + Y;
+                const B = p[X + 1] + Y;
+
+                return this.lerp(
+                    this.lerp(this.grad(p[A], x, y), this.grad(p[B], x - 1, y), u),
+                    this.lerp(this.grad(p[A + 1], x, y - 1), this.grad(p[B + 1], x - 1, y - 1), u),
+                    v
+                );
+            }
+
+            fbm(x, y, octaves, persistence) {
+                let value = 0;
+                let amplitude = 1;
+                let frequency = 1;
+                let maxValue = 0;
+
+                for (let i = 0; i < octaves; i++) {
+                    value += amplitude * this.noise(x * frequency, y * frequency);
+                    maxValue += amplitude;
+                    amplitude *= persistence;
+                    frequency *= 2;
+                }
+
+                return value / maxValue;
+            }
+        }
+
+        // ==================== 地图生成器（Canvas版）====================
+        class GrassMapGenerator {
+            constructor(width, height, seed, config) {
+                this.width = width;
+                this.height = height;
+                this.seed = seed;
+                this.config = {
+                    noiseScale: config.noiseScale || 30,
+                    grassThreshold: config.grassThreshold || 0.5,
+                    octaves: config.octaves || 4,
+                    persistence: config.persistence || 0.5,
+                    cellSize: config.cellSize || 16,
+                    groundColor: config.groundColor || '#f4d03f',
+                    grassColor: config.grassColor || '#27ae60'
+                };
+
+                this.noise = new PerlinNoise(seed);
+                this.canvas = null;
+                this.ctx = null;
+            }
+
+            generateMapData() {
+                const map = [];
+                const stats = { ground: 0, grass: 0 };
+
+                for (let y = 0; y < this.height; y++) {
+                    const row = [];
+                    for (let x = 0; x < this.width; x++) {
+                        const noiseValue = this.noise.fbm(
+                            x / this.config.noiseScale,
+                            y / this.config.noiseScale,
+                            this.config.octaves,
+                            this.config.persistence
+                        );
+
+                        const normalizedValue = (noiseValue + 1) / 2;
+                        const isGrass = normalizedValue > (1 - this.config.grassThreshold);
+
+                        if (isGrass) {
+                            row.push('grass');
+                            stats.grass++;
+                        } else {
+                            row.push('ground');
+                            stats.ground++;
+                        }
+                    }
+                    map.push(row);
+                }
+
+                return { map, stats };
+            }
+
+            createCanvas() {
+                this.canvas = document.createElement('canvas');
+                this.canvas.width = this.width * this.config.cellSize;
+                this.canvas.height = this.height * this.config.cellSize;
+                this.ctx = this.canvas.getContext('2d');
+
+                return this.canvas;
+            }
+
+            drawMap(mapData) {
+                if (!this.ctx) return;
+
+                const cellSize = this.config.cellSize;
+
+                for (let y = 0; y < this.height; y++) {
+                    for (let x = 0; x < this.width; x++) {
+                        const cellType = mapData[y][x];
+                        const color = cellType === 'grass' ? this.config.grassColor : this.config.groundColor;
+
+                        this.ctx.fillStyle = color;
+                        this.ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+
+                        // 添加轻微的网格效果
+                        this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+                        this.ctx.lineWidth = 1;
+                        this.ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                    }
+                }
+            }
+
+            render() {
+                const { map, stats } = this.generateMapData();
+                this.createCanvas();
+                this.drawMap(map);
+                return { canvas: this.canvas, stats };
+            }
+        }
+
+        // ==================== 界面控制 ====================
+
+        let currentCanvas = null;
+
+        // 同步滑块和数字输入
+        function syncInputs(sliderId, numId, suffix = '') {
+            const slider = document.getElementById(sliderId);
+            const num = document.getElementById(numId);
+            const display = slider.parentElement.querySelector('.value-display');
+
+            slider.oninput = () => {
+                num.value = slider.value;
+                if (display) display.textContent = slider.value + suffix;
+            };
+
+            num.oninput = () => {
+                slider.value = num.value;
+                if (display) display.textContent = num.value + suffix;
+            };
+        }
+
+        // 同步颜色选择器
+        function syncColorInputs(colorId, textId, legendBoxId) {
+            const colorInput = document.getElementById(colorId);
+            const textDisplay = document.getElementById(textId);
+            const legendBox = document.getElementById(legendBoxId);
+
+            colorInput.oninput = () => {
+                textDisplay.textContent = colorInput.value;
+                legendBox.style.background = colorInput.value;
+            };
+        }
+
+        // 初始化所有输入控件
+        syncInputs('mapWidth', 'mapWidthNum', ' 格');
+        syncInputs('mapHeight', 'mapHeightNum', ' 格');
+        syncInputs('noiseScale', 'noiseScaleNum');
+        syncInputs('grassThreshold', 'grassThresholdNum', '%');
+        syncInputs('octaves', 'octavesNum', ' 层');
+        syncInputs('persistence', 'persistenceNum', '/10');
+        syncInputs('cellSize', 'cellSizeNum', 'px');
+
+        syncColorInputs('groundColor', 'groundColorText', 'legendGroundBox');
+        syncColorInputs('grassColor', 'grassColorText', 'legendGrassBox');
+
+        // 随机种子
+        function randomSeed() {
+            const seed = Math.floor(Math.random() * 100000);
+            document.getElementById('seed').value = seed;
+        }
+
+        // 生成地图
+        function generateMap() {
+            const width = parseInt(document.getElementById('mapWidth').value);
+            const height = parseInt(document.getElementById('mapHeight').value);
+            const seed = parseInt(document.getElementById('seed').value);
+            const noiseScale = parseInt(document.getElementById('noiseScale').value);
+            const grassThreshold = parseInt(document.getElementById('grassThreshold').value) / 100;
+            const octaves = parseInt(document.getElementById('octaves').value);
+            const persistence = parseInt(document.getElementById('persistence').value) / 10;
+            const cellSize = parseInt(document.getElementById('cellSize').value);
+            const groundColor = document.getElementById('groundColor').value;
+            const grassColor = document.getElementById('grassColor').value;
+
+            const generator = new GrassMapGenerator(width, height, seed, {
+                noiseScale,
+                grassThreshold,
+                octaves,
+                persistence,
+                cellSize,
+                groundColor,
+                grassColor
+            });
+
+            const { canvas, stats } = generator.render();
+            currentCanvas = canvas;
+            const total = width * height;
+
+            // 更新信息面板
+            const info = `
+                尺寸: ${width} × ${height} = ${total} 格<br>
+                图片尺寸: ${canvas.width} × ${canvas.height} px<br>
+                地面: ${stats.ground} 格 (${(stats.ground / total * 100).toFixed(1)}%)<br>
+                草地: ${stats.grass} 格 (${(stats.grass / total * 100).toFixed(1)}%)<br>
+                种子: ${seed}
+            `;
+            document.getElementById('mapInfo').innerHTML = info;
+
+            // 显示Canvas
+            const container = document.createElement('div');
+            container.className = 'map-canvas-container';
+            container.appendChild(canvas);
+
+            const outputDiv = document.getElementById('mapOutput');
+            outputDiv.innerHTML = '';
+            outputDiv.appendChild(container);
+        }
+
+        // 下载PNG
+        function downloadPNG(scale = 'original') {
+            if (!currentCanvas) {
+                alert('请先生成地图！');
+                return;
+            }
+
+            const seed = document.getElementById('seed').value;
+            let canvas = currentCanvas;
+
+            // 如果需要2x放大
+            if (scale === 'scaled') {
+                canvas = document.createElement('canvas');
+                canvas.width = currentCanvas.width * 2;
+                canvas.height = currentCanvas.height * 2;
+                const ctx = canvas.getContext('2d');
+                ctx.imageSmoothingEnabled = false;
+                ctx.drawImage(currentCanvas, 0, 0, canvas.width, canvas.height);
+            }
+
+            const link = document.createElement('a');
+            link.download = `grass-map-${seed}-${scale}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // 页面加载时自动生成一次
+        window.onload = () => {
+            randomSeed();
+            generateMap();
+        };
+    </script>
+</body>
+</html>

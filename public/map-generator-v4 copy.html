@@ -910,28 +910,6 @@
 
                     <!-- 瓦片配置 -->
                     <div style="background: #0f3460; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
-                        <h5 style="color: #4ecca3; margin: 0 0 12px 0; font-size: 13px;">📁 外部图块集导入</h5>
-                        <div style="background: #1a1a2e; padding: 12px; border-radius: 5px; margin-bottom: 12px;">
-                            <div style="display: flex; gap: 10px; align-items: center;">
-                                <div style="flex: 1;">
-                                    <label style="color: #bbb; font-size: 11px; display: block; margin-bottom: 5px;">
-                                        选择图块集图片文件 (.png)
-                                    </label>
-                                    <input type="file" id="customTilesetInput" accept="image/png"
-                                           style="width: 100%; padding: 5px; background: #0f3460; border: 1px solid #4ecca3;
-                                                  color: #eee; border-radius: 3px; font-size: 11px;"
-                                           onchange="loadCustomTileset(event)">
-                                </div>
-                                <button onclick="resetToDefaultTileset()" style="background: #e74c3c; padding: 10px 15px;
-                                        border-radius: 5px; border: none; color: white; cursor: pointer; font-size: 11px; white-space: nowrap;">
-                                    恢复默认
-                                </button>
-                            </div>
-                            <div id="customTilesetStatus" style="margin-top: 8px; font-size: 10px; color: #888;">
-                                当前使用默认图块集
-                            </div>
-                        </div>
-
                         <h5 style="color: #4ecca3; margin: 0 0 12px 0; font-size: 13px;">🔧 瓦片配置</h5>
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
 
@@ -967,31 +945,6 @@
 
                         </div>
 
-                        <!-- 快捷尺寸选择 -->
-                        <div style="margin-top: 12px;">
-                            <label style="color: #bbb; font-size: 11px; display: block; margin-bottom: 5px;">
-                                快捷尺寸预设
-                            </label>
-                            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                                <button onclick="setTileSize(16, 16)" style="background: #3498db; padding: 6px 12px;
-                                        border-radius: 3px; border: none; color: white; cursor: pointer; font-size: 10px;">
-                                    16×16
-                                </button>
-                                <button onclick="setTileSize(32, 32)" style="background: #3498db; padding: 6px 12px;
-                                        border-radius: 3px; border: none; color: white; cursor: pointer; font-size: 10px;">
-                                    32×32
-                                </button>
-                                <button onclick="setTileSize(48, 48)" style="background: #3498db; padding: 6px 12px;
-                                        border-radius: 3px; border: none; color: white; cursor: pointer; font-size: 10px;">
-                                    48×48
-                                </button>
-                                <button onclick="setTileSize(64, 64)" style="background: #3498db; padding: 6px 12px;
-                                        border-radius: 3px; border: none; color: white; cursor: pointer; font-size: 10px;">
-                                    64×64
-                                </button>
-                            </div>
-                        </div>
-
                         <div style="margin-top: 12px; display: flex; gap: 10px;">
                             <button onclick="applyTilesetConfig()" style="flex: 1; background: #3498db; font-size: 11px;
                                     padding: 8px; border-radius: 5px; border: none; color: white; cursor: pointer;">
@@ -1019,8 +972,6 @@
                                     🌿 草地 (A)
                                 </label>
                                 <div style="display: flex; gap: 8px; align-items: center;">
-                                    <input type="checkbox" id="tileId_A_empty" onchange="toggleTileEmpty('A')"
-                                           style="cursor: pointer;" title="设置为空白（不渲染）">
                                     <input type="number" id="tileId_A" min="0" max="48" value="15"
                                            style="width: 50px; padding: 5px; background: #0f3460; border: 1px solid #4ecca3;
                                                   color: #eee; border-radius: 3px; text-align: center;">
@@ -1049,8 +1000,6 @@
                                     🛤️ 道路 (B)
                                 </label>
                                 <div style="display: flex; gap: 8px; align-items: center;">
-                                    <input type="checkbox" id="tileId_B_empty" onchange="toggleTileEmpty('B')"
-                                           style="cursor: pointer;" title="设置为空白（不渲染）">
                                     <input type="number" id="tileId_B" min="0" max="48" value="6"
                                            style="width: 50px; padding: 5px; background: #0f3460; border: 1px solid #4ecca3;
                                                   color: #eee; border-radius: 3px; text-align: center;">
@@ -1079,8 +1028,6 @@
                                     🌊 河流 (C)
                                 </label>
                                 <div style="display: flex; gap: 8px; align-items: center;">
-                                    <input type="checkbox" id="tileId_C_empty" onchange="toggleTileEmpty('C')"
-                                           style="cursor: pointer;" title="设置为空白（不渲染）">
                                     <input type="number" id="tileId_C" min="0" max="48" value="30"
                                            style="width: 50px; padding: 5px; background: #0f3460; border: 1px solid #4ecca3;
                                                   color: #eee; border-radius: 3px; text-align: center;">
@@ -1109,8 +1056,6 @@
                                     ⛰️ 高坡 (E)
                                 </label>
                                 <div style="display: flex; gap: 8px; align-items: center;">
-                                    <input type="checkbox" id="tileId_E_empty" onchange="toggleTileEmpty('E')"
-                                           style="cursor: pointer;" title="设置为空白（不渲染）">
                                     <input type="number" id="tileId_E" min="0" max="48" value="13"
                                            style="width: 50px; padding: 5px; background: #0f3460; border: 1px solid #4ecca3;
                                                   color: #eee; border-radius: 3px; text-align: center;">
@@ -1139,8 +1084,6 @@
                                     🌲 密林 (F)
                                 </label>
                                 <div style="display: flex; gap: 8px; align-items: center;">
-                                    <input type="checkbox" id="tileId_F_empty" onchange="toggleTileEmpty('F')"
-                                           style="cursor: pointer;" title="设置为空白（不渲染）">
                                     <input type="number" id="tileId_F" min="0" max="48" value="0"
                                            style="width: 50px; padding: 5px; background: #0f3460; border: 1px solid #4ecca3;
                                                   color: #eee; border-radius: 3px; text-align: center;">
@@ -1169,8 +1112,6 @@
                                     🌍 地面 (G)
                                 </label>
                                 <div style="display: flex; gap: 8px; align-items: center;">
-                                    <input type="checkbox" id="tileId_G_empty" onchange="toggleTileEmpty('G')"
-                                           style="cursor: pointer;" title="设置为空白（不渲染）">
                                     <input type="number" id="tileId_G" min="0" max="48" value="7"
                                            style="width: 50px; padding: 5px; background: #0f3460; border: 1px solid #4ecca3;
                                                   color: #eee; border-radius: 3px; text-align: center;">
@@ -1251,16 +1192,8 @@
                             <input type="range" id="grassNoiseIntensity" min="0" max="100" value="50" oninput="updateValue('grassNoiseIntensity')">
                         </div>
                         <div class="setting-item">
-                            <label>草地边缘扩大程度: <span id="grassNoiseExpansionValue">100%</span></label>
-                            <input type="range" id="grassNoiseExpansion" min="0" max="1000" value="100" oninput="updateValue('grassNoiseExpansion')">
-                        </div>
-                        <div class="setting-item">
                             <label>草地边缘噪声频率: <span id="grassNoiseFrequencyValue">30</span></label>
                             <input type="range" id="grassNoiseFrequency" min="10" max="80" value="30" oninput="updateValue('grassNoiseFrequency')">
-                        </div>
-                        <div class="setting-item">
-                            <label>边缘平滑度: <span id="grassEdgeSmoothnessValue">高</span></label>
-                            <input type="range" id="grassEdgeSmoothness" min="1" max="3" value="3" step="1" oninput="updateGrassEdgeSmoothness()">
                         </div>
                     </div>
                 </div>
@@ -3239,7 +3172,6 @@
                 hillMinRadius: { id: 'hillMinRadius', display: 'hillMinRadiusValue' },
                 hillMaxRadius: { id: 'hillMaxRadius', display: 'hillMaxRadiusValue' },
                 grassNoiseIntensity: { id: 'grassNoiseIntensity', display: 'grassNoiseIntensityValue', suffix: '%' },
-                grassNoiseExpansion: { id: 'grassNoiseExpansion', display: 'grassNoiseExpansionValue', suffix: '%' },
                 grassNoiseFrequency: { id: 'grassNoiseFrequency', display: 'grassNoiseFrequencyValue' }
             };
 
@@ -3262,13 +3194,6 @@
                     numberInput.value = value;
                 }
             }
-        }
-
-        function updateGrassEdgeSmoothness() {
-            const value = parseInt(document.getElementById('grassEdgeSmoothness').value);
-            const display = document.getElementById('grassEdgeSmoothnessValue');
-            const labels = ['低', '中', '高'];
-            display.textContent = labels[value - 1] || '中';
         }
 
         function getConfig() {
@@ -4847,128 +4772,6 @@
             applyTilesetConfig();
         }
 
-        // 加载自定义图块集
-        function loadCustomTileset(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            if (!file.type.match('image.*')) {
-                alert('请选择图片文件！');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    // 更新spriteSheets数组
-                    spriteSheets[0] = img;
-                    ASSETS_LOADED[0] = true;
-
-                    // 自动检测建议的瓦片尺寸
-                    const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
-                    const suggestedSize = gcd(img.width, img.height);
-
-                    // 更新状态显示
-                    const statusDiv = document.getElementById('customTilesetStatus');
-                    statusDiv.innerHTML = `
-                        <span style="color: #4ecca3;">✓ 已加载自定义图块集</span><br>
-                        文件名: ${file.name}<br>
-                        尺寸: ${img.width}×${img.height}px<br>
-                        建议瓦片尺寸: ${suggestedSize}×${suggestedSize}px<br>
-                        <span style="color: #f39c12;">⚠ 请根据实际瓦片大小更新下方配置</span>
-                    `;
-
-                    // 自动设置瓦片配置为建议值
-                    document.getElementById('tileWidth').value = suggestedSize;
-                    document.getElementById('tileHeight').value = suggestedSize;
-                    // 计算建议列数
-                    const suggestedColumns = Math.floor(img.width / suggestedSize);
-                    document.getElementById('tileColumns').value = suggestedColumns;
-
-                    // 应用配置
-                    applyTilesetConfig();
-
-                    alert(`✅ 自定义图块集加载成功！\n\n文件: ${file.name}\n尺寸: ${img.width}×${img.height}px\n已自动设置瓦片配置为: ${suggestedSize}×${suggestedSize}px\n\n请根据实际瓦片布局调整配置。`);
-                };
-                img.onerror = function() {
-                    alert('图片加载失败！请确保文件格式正确。');
-                    document.getElementById('customTilesetStatus').innerHTML =
-                        '<span style="color: #e74c3c;">✗ 图片加载失败</span>';
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // 恢复默认图块集
-        function resetToDefaultTileset() {
-            // 重置文件输入
-            document.getElementById('customTilesetInput').value = '';
-
-            // 重新加载默认图块集
-            loadAssets();
-
-            // 更新状态
-            document.getElementById('customTilesetStatus').innerHTML =
-                '<span style="color: #888;">当前使用默认图块集</span>';
-
-            // 重置瓦片配置
-            resetTilesetConfig();
-
-            alert('✅ 已恢复默认图块集！');
-        }
-
-        // 快捷设置瓦片尺寸
-        function setTileSize(width, height) {
-            document.getElementById('tileWidth').value = width;
-            document.getElementById('tileHeight').value = height;
-
-            // 如果有spriteSheets[0]，自动计算建议列数
-            if (spriteSheets[0]) {
-                const img = spriteSheets[0];
-                const suggestedColumns = Math.floor(img.width / width);
-                document.getElementById('tileColumns').value = suggestedColumns;
-            }
-
-            // 应用配置
-            applyTilesetConfig();
-        }
-
-        // 切换图块空白状态
-        function toggleTileEmpty(terrainType) {
-            const checkbox = document.getElementById(`tileId_${terrainType}_empty`);
-            const input = document.getElementById(`tileId_${terrainType}`);
-
-            if (checkbox.checked) {
-                input.disabled = true;
-                input.style.opacity = '0.5';
-                input.style.backgroundColor = '#1a1a2e';
-
-                // 清空预览
-                const preview = document.getElementById(`preview_${terrainType}`);
-                preview.innerHTML = '<span style="font-size: 14px; color: #e74c3c;">空白</span>';
-                preview.style.backgroundColor = '#2a2a2a';
-
-                console.log(`${terrainType} 图块已设置为空白`);
-            } else {
-                input.disabled = false;
-                input.style.opacity = '1';
-                input.style.backgroundColor = '#0f3460';
-
-                // 恢复预览
-                previewTile(0, terrainType);
-
-                console.log(`${terrainType} 图块已恢复正常`);
-            }
-        }
-
-        // 检查图块是否为空
-        function isTileEmpty(terrainType) {
-            const checkbox = document.getElementById(`tileId_${terrainType}_empty`);
-            return checkbox && checkbox.checked;
-        }
-
         // 预览指定ID的图块
         function previewTile(sheetIndex, terrainType) {
             const tileIdInput = document.getElementById(`tileId_${terrainType}`);
@@ -5512,39 +5315,40 @@
             return resultTileId;
         }
 
-        // 计算某个位置是否接近草地边缘（像素级，支持8方向检测）
-        function getGrassEdgeInfo(worldX, worldY, map, mapWidth, mapHeight, tileSize) {
+        // 计算某个位置是否接近草地边缘（像素级）
+        function getGrassEdgeDistance(worldX, worldY, map, mapWidth, mapHeight, tileSize) {
             const tileX = Math.floor(worldX / tileSize);
             const tileY = Math.floor(worldY / tileSize);
 
             // 检查是否越界
             if (tileX < 0 || tileX >= mapWidth || tileY < 0 || tileY >= mapHeight) {
-                return null; // 非草地
+                return -1; // 非草地
             }
 
             const terrainType = map[tileY][tileX];
             if (terrainType !== 'A') {
-                return null; // 非草地
+                return -1; // 非草地
             }
 
             // 计算像素在瓦片内的相对位置
             const localX = worldX % tileSize;
             const localY = worldY % tileSize;
 
-            // 8方向相邻检测
+            // 计算到瓦片边缘的距离
+            const distToLeft = localX;
+            const distToRight = tileSize - localX;
+            const distToTop = localY;
+            const distToBottom = tileSize - localY;
+
+            // 检查相邻瓦片是否有非草地
             const neighbors = [
-                { dx: -1, dy: 0, dir: 'left', dist: localX },
-                { dx: 1, dy: 0, dir: 'right', dist: tileSize - localX },
-                { dx: 0, dy: -1, dir: 'top', dist: localY },
-                { dx: 0, dy: 1, dir: 'bottom', dist: tileSize - localY },
-                { dx: -1, dy: -1, dir: 'top_left', dist: Math.sqrt(localX * localX + localY * localY) },
-                { dx: 1, dy: -1, dir: 'top_right', dist: Math.sqrt((tileSize - localX) ** 2 + localY * localY) },
-                { dx: -1, dy: 1, dir: 'bottom_left', dist: Math.sqrt(localX * localX + (tileSize - localY) ** 2) },
-                { dx: 1, dy: 1, dir: 'bottom_right', dist: Math.sqrt((tileSize - localX) ** 2 + (tileSize - localY) ** 2) }
+                { dx: -1, dy: 0, dist: distToLeft },
+                { dx: 1, dy: 0, dist: distToRight },
+                { dx: 0, dy: -1, dist: distToTop },
+                { dx: 0, dy: 1, dist: distToBottom }
             ];
 
-            let minEdgeDistance = tileSize * 1.5; // 默认为最大距离
-            let edgeDirections = [];
+            let minEdgeDistance = tileSize; // 默认为最大距离（表示远离边缘）
 
             for (const neighbor of neighbors) {
                 const nx = tileX + neighbor.dx;
@@ -5552,28 +5356,16 @@
 
                 // 如果相邻位置越界或者是非草地，则这是边缘
                 if (nx < 0 || nx >= mapWidth || ny < 0 || ny >= mapHeight || map[ny][nx] !== 'A') {
-                    if (neighbor.dist < minEdgeDistance) {
-                        minEdgeDistance = neighbor.dist;
-                        edgeDirections = [neighbor.dir];
-                    } else if (Math.abs(neighbor.dist - minEdgeDistance) < 2) {
-                        edgeDirections.push(neighbor.dir);
-                    }
+                    minEdgeDistance = Math.min(minEdgeDistance, neighbor.dist);
                 }
             }
 
-            return {
-                distance: minEdgeDistance,
-                directions: edgeDirections,
-                tileX,
-                tileY,
-                localX,
-                localY
-            };
+            return minEdgeDistance;
         }
 
-        // 使用噪声对草地边缘进行像素级处理（改进版：更平滑 + 支持斜向瓦片）
+        // 使用噪声对草地边缘进行像素级处理
         function applyGrassNoiseEdge(ctx, sheet, srcTileSize, map, mapWidth, mapHeight, tileSize,
-                                     noiseGen, intensity, expansion, frequency, smoothness) {
+                                     noiseGen, intensity, frequency) {
             const canvasWidth = mapWidth * tileSize;
             const canvasHeight = mapHeight * tileSize;
 
@@ -5584,19 +5376,13 @@
             const tempCtx = tempCanvas.getContext('2d');
             tempCtx.imageSmoothingEnabled = false;
 
-            // 获取草地中心和斜向瓦片ID
+            // 获取草地中心瓦片ID
             const grassTileId = defaultAssetMapping['A']?.tileId || 0;
             const grassPos = getTilePositionById(grassTileId);
             const grassSrcX = Math.floor(grassPos.x * srcTileSize.width);
             const grassSrcY = Math.floor(grassPos.y * srcTileSize.height);
 
-            // 检查是否有斜向瓦片配置
-            const hasDiagonalTiles = edgeConfigs['A'] && (
-                edgeConfigs['A'].diagonal_nw || edgeConfigs['A'].diagonal_ne ||
-                edgeConfigs['A'].diagonal_se || edgeConfigs['A'].diagonal_sw
-            );
-
-            // 先绘制完整地图到临时canvas（检测对角线边缘并使用斜向瓦片）
+            // 先绘制完整地图到临时canvas
             for (let y = 0; y < mapHeight; y++) {
                 for (let x = 0; x < mapWidth; x++) {
                     const terrainType = map[y][x];
@@ -5604,84 +5390,25 @@
                     const destY = Math.floor(y * tileSize);
 
                     if (terrainType === 'G') {
-                        // 绘制地面（检查是否为空）
-                        if (!isTileEmpty('G')) {
-                            const groundTileId = defaultAssetMapping['G']?.tileId || 7;
-                            const groundPos = getTilePositionById(groundTileId);
-                            const groundSrcX = Math.floor(groundPos.x * srcTileSize.width);
-                            const groundSrcY = Math.floor(groundPos.y * srcTileSize.height);
+                        // 绘制地面
+                        const groundTileId = defaultAssetMapping['G']?.tileId || 7;
+                        const groundPos = getTilePositionById(groundTileId);
+                        const groundSrcX = Math.floor(groundPos.x * srcTileSize.width);
+                        const groundSrcY = Math.floor(groundPos.y * srcTileSize.height);
 
-                            tempCtx.drawImage(
-                                sheet,
-                                groundSrcX, groundSrcY, srcTileSize.width, srcTileSize.height,
-                                destX, destY, tileSize, tileSize
-                            );
-                        }
-                    } else if (terrainType === 'A') {
-                        // 草地（检查是否为空）
-                        if (!isTileEmpty('A')) {
-                            // 草地：检查是否需要使用斜向瓦片
-                            let useDiagonalTile = false;
-                            let diagonalTileId = null;
-
-                            if (hasDiagonalTiles) {
-                                // 检查8个邻居
-                                const top = y > 0 ? map[y - 1][x] : 'G';
-                                const bottom = y < mapHeight - 1 ? map[y + 1][x] : 'G';
-                                const left = x > 0 ? map[y][x - 1] : 'G';
-                                const right = x < mapWidth - 1 ? map[y][x + 1] : 'G';
-                                const topLeft = y > 0 && x > 0 ? map[y - 1][x - 1] : 'G';
-                                const topRight = y > 0 && x < mapWidth - 1 ? map[y - 1][x + 1] : 'G';
-                                const bottomLeft = y < mapHeight - 1 && x > 0 ? map[y + 1][x - 1] : 'G';
-                                const bottomRight = y < mapHeight - 1 && x < mapWidth - 1 ? map[y + 1][x + 1] : 'G';
-
-                                // 检测对角线边缘模式
-                                // 左上-右下斜线
-                                if (topLeft !== 'A' && bottomRight !== 'A' && top === 'A' && left === 'A') {
-                                    if (edgeConfigs['A'].diagonal_nw) {
-                                        diagonalTileId = edgeConfigs['A'].diagonal_nw.tileId;
-                                        useDiagonalTile = true;
-                                    }
-                                } else if (bottomRight !== 'A' && topLeft !== 'A' && bottom === 'A' && right === 'A') {
-                                    if (edgeConfigs['A'].diagonal_se) {
-                                        diagonalTileId = edgeConfigs['A'].diagonal_se.tileId;
-                                        useDiagonalTile = true;
-                                    }
-                                }
-                                // 右上-左下斜线
-                                else if (topRight !== 'A' && bottomLeft !== 'A' && top === 'A' && right === 'A') {
-                                    if (edgeConfigs['A'].diagonal_ne) {
-                                        diagonalTileId = edgeConfigs['A'].diagonal_ne.tileId;
-                                        useDiagonalTile = true;
-                                    }
-                                } else if (bottomLeft !== 'A' && topRight !== 'A' && bottom === 'A' && left === 'A') {
-                                    if (edgeConfigs['A'].diagonal_sw) {
-                                        diagonalTileId = edgeConfigs['A'].diagonal_sw.tileId;
-                                        useDiagonalTile = true;
-                                    }
-                                }
-                            }
-
-                            // 绘制草地瓦片
-                            if (useDiagonalTile && diagonalTileId !== null) {
-                                const diagPos = getTilePositionById(diagonalTileId);
-                                const diagSrcX = Math.floor(diagPos.x * srcTileSize.width);
-                                const diagSrcY = Math.floor(diagPos.y * srcTileSize.height);
-
-                                tempCtx.drawImage(
-                                    sheet,
-                                    diagSrcX, diagSrcY, srcTileSize.width, srcTileSize.height,
-                                    destX, destY, tileSize, tileSize
-                                );
-                            } else {
-                                tempCtx.drawImage(
-                                    sheet,
-                                    grassSrcX, grassSrcY, srcTileSize.width, srcTileSize.height,
-                                    destX, destY, tileSize, tileSize
-                                );
-                            }
-                        } // 关闭 if (!isTileEmpty('A'))
-                    } // 关闭 else if (terrainType === 'A')
+                        tempCtx.drawImage(
+                            sheet,
+                            groundSrcX, groundSrcY, srcTileSize.width, srcTileSize.height,
+                            destX, destY, tileSize, tileSize
+                        );
+                    } else {
+                        // 绘制地形层
+                        tempCtx.drawImage(
+                            sheet,
+                            grassSrcX, grassSrcY, srcTileSize.width, srcTileSize.height,
+                            destX, destY, tileSize, tileSize
+                        );
+                    }
                 }
             }
 
@@ -5689,315 +5416,74 @@
             const srcImageData = tempCtx.getImageData(0, 0, canvasWidth, canvasHeight);
             const destImageData = ctx.createImageData(canvasWidth, canvasHeight);
 
-            // 根据平滑度调整参数
-            const edgeThreshold = tileSize * (0.4 + smoothness * 0.1); // 边缘影响范围
-            const maxOffset = tileSize * 0.6 * intensity * expansion; // 最大偏移量（增加基数0.4->0.6，并乘以扩大系数）
-
-            // 使用更平滑的FBM参数（根据平滑度调整）
-            const smoothFrequency = frequency * (1.2 + smoothness * 0.3); // 增加频率以获得更细节的变化
-            const octaves = Math.max(2, 5 - smoothness); // 高平滑度=低octaves，低平滑度=高octaves
-
-            // 草地内部细节噪声参数
-            const detailNoiseScale = 0.15; // 内部细节的噪声强度（较小，创造微妙变化）
-            const detailFrequency = smoothFrequency * 2.5; // 更高的频率，创造更细的纹理
-            const detailOctaves = 3; // 使用较少的octaves保持细节清晰
-
-            // 拐角圆滑化参数
-            const cornerSmoothRadius = tileSize * 0.5; // 拐角平滑半径
-            const cornerSmoothingFactor = 0.7; // 拐角平滑强度（0-1）
+            const edgeThreshold = tileSize * 0.4; // 边缘影响范围
+            const maxOffset = tileSize * 0.5 * intensity; // 最大偏移量
 
             // 逐像素处理
             for (let pixelY = 0; pixelY < canvasHeight; pixelY++) {
                 for (let pixelX = 0; pixelX < canvasWidth; pixelX++) {
                     const destIndex = (pixelY * canvasWidth + pixelX) * 4;
 
-                    // 获取边缘信息
-                    const edgeInfo = getGrassEdgeInfo(pixelX, pixelY, map, mapWidth, mapHeight, tileSize);
+                    // 计算到草地边缘的距离
+                    const edgeDist = getGrassEdgeDistance(pixelX, pixelY, map, mapWidth, mapHeight, tileSize);
 
-                    if (!edgeInfo) {
+                    if (edgeDist < 0) {
                         // 非草地区域，直接复制
-                        destImageData.data[destIndex] = srcImageData.data[destIndex];
-                        destImageData.data[destIndex + 1] = srcImageData.data[destIndex + 1];
-                        destImageData.data[destIndex + 2] = srcImageData.data[destIndex + 2];
-                        destImageData.data[destIndex + 3] = srcImageData.data[destIndex + 3];
-                    } else if (edgeInfo.distance > edgeThreshold) {
-                        // 草地内部：添加细节噪声
-                        // 使用较高频率的噪声创建微小的颜色变化，模拟草叶的随机性
-                        const detailNoise = noiseGen.fbm(pixelX / detailFrequency, pixelY / detailFrequency, detailOctaves);
-
-                        // 归一化到 [-0.5, 0.5] 范围，创造微妙的明暗变化
-                        const brightnessVariation = detailNoise * detailNoiseScale * 0.5;
-
-                        // 获取原始颜色
-                        const r = srcImageData.data[destIndex];
-                        const g = srcImageData.data[destIndex + 1];
-                        const b = srcImageData.data[destIndex + 2];
-                        const a = srcImageData.data[destIndex + 3];
-
-                        // 应用微小的亮度变化（保持色调，只调整明度）
-                        // 使用更微妙的变化，避免明显的斑块
-                        const adjustedBrightness = 1 + brightnessVariation * 0.3; // 减小影响范围到 85%-115%
-                        destImageData.data[destIndex] = Math.max(0, Math.min(255, Math.round(r * adjustedBrightness)));
-                        destImageData.data[destIndex + 1] = Math.max(0, Math.min(255, Math.round(g * adjustedBrightness)));
-                        destImageData.data[destIndex + 2] = Math.max(0, Math.min(255, Math.round(b * adjustedBrightness)));
-                        destImageData.data[destIndex + 3] = a; // 保持alpha通道不变
+                        const srcIndex = destIndex;
+                        destImageData.data[destIndex] = srcImageData.data[srcIndex];
+                        destImageData.data[destIndex + 1] = srcImageData.data[srcIndex + 1];
+                        destImageData.data[destIndex + 2] = srcImageData.data[srcIndex + 2];
+                        destImageData.data[destIndex + 3] = srcImageData.data[srcIndex + 3];
+                    } else if (edgeDist > edgeThreshold) {
+                        // 远离边缘的草地内部，直接复制
+                        const srcIndex = destIndex;
+                        destImageData.data[destIndex] = srcImageData.data[srcIndex];
+                        destImageData.data[destIndex + 1] = srcImageData.data[srcIndex + 1];
+                        destImageData.data[destIndex + 2] = srcImageData.data[srcIndex + 2];
+                        destImageData.data[destIndex + 3] = srcImageData.data[srcIndex + 3];
                     } else {
-                        // 边缘区域：同时应用边缘扩张噪声和内部细节噪声
-                        // 使用平滑的权重函数（三次样条插值）
-                        const normalizedDist = edgeInfo.distance / edgeThreshold;
-                        const smoothWeight = normalizedDist * normalizedDist * (3 - 2 * normalizedDist); // smoothstep
-                        const edgeWeight = 1 - smoothWeight; // 越靠近边缘，edgeWeight越大
-                        const detailWeight = smoothWeight; // 越远离边缘，detailWeight越大
+                        // 边缘区域，应用噪声偏移
+                        // 计算偏移权重（越靠近边缘，偏移越大）
+                        const weight = 1 - (edgeDist / edgeThreshold);
 
-                        // 检测拐角类型
-                        const isCorner = edgeInfo.directions.length >= 2;
-
-                        // 检测是否是外凸角（草地向外突出的拐角）
-                        let isConvexCorner = false;
-                        let convexStrength = 0; // 外凸程度 0-1
-
-                        if (isCorner) {
-                            // 改进的外凸角检测：检查多个对角位置
-                            const tileX = edgeInfo.tileX;
-                            const tileY = edgeInfo.tileY;
-                            const localX = edgeInfo.localX;
-                            const localY = edgeInfo.localY;
-
-                            // 计算当前像素在瓦片中的相对位置（0-1）
-                            const relX = localX / tileSize;
-                            const relY = localY / tileSize;
-
-                            // 检查所有可能的对角邻居
-                            let convexCount = 0;
-                            let totalDiagonalCheck = 0;
-
-                            // 定义要检查的对角偏移
-                            const diagonalChecks = [
-                                { dx: 1, dy: 1, name: 'bottom-right' },    // 右下
-                                { dx: 1, dy: -1, name: 'top-right' },     // 右上
-                                { dx: -1, dy: 1, name: 'bottom-left' },   // 左下
-                                { dx: -1, dy: -1, name: 'top-left' }      // 左上
-                            ];
-
-                            // 根据边缘方向确定需要检查的对角
-                            for (const check of diagonalChecks) {
-                                // 只有当对角方向与边缘方向相关时才检查
-                                let shouldCheck = false;
-
-                                if (edgeInfo.directions.includes('top') && check.dy === -1) shouldCheck = true;
-                                if (edgeInfo.directions.includes('bottom') && check.dy === 1) shouldCheck = true;
-                                if (edgeInfo.directions.includes('left') && check.dx === -1) shouldCheck = true;
-                                if (edgeInfo.directions.includes('right') && check.dx === 1) shouldCheck = true;
-
-                                if (shouldCheck) {
-                                    const diagX = tileX + check.dx;
-                                    const diagY = tileY + check.dy;
-
-                                    if (diagX >= 0 && diagX < mapWidth && diagY >= 0 && diagY < mapHeight) {
-                                        totalDiagonalCheck++;
-                                        if (map[diagY][diagX] === 'A') {
-                                            convexCount++;
-                                        }
-                                    }
-                                }
-                            }
-
-                            // 如果多个对角都是草地，则是外凸角
-                            if (totalDiagonalCheck > 0 && convexCount === totalDiagonalCheck) {
-                                isConvexCorner = true;
-                                convexStrength = Math.min(1, convexCount / totalDiagonalCheck);
-                            }
-                        }
-
-                        // 边缘噪声：用于扩张效果
-                        const edgeNoise1 = noiseGen.fbm(pixelX / smoothFrequency, pixelY / smoothFrequency, octaves);
-                        const edgeNoise2 = noiseGen.fbm((pixelX + 100) / (smoothFrequency * 0.7), (pixelY + 100) / (smoothFrequency * 0.7), 2);
-                        const combinedEdgeNoise = (edgeNoise1 * 0.7 + edgeNoise2 * 0.3);
-
-                        // 内部细节噪声：用于颜色变化
-                        const detailNoise = noiseGen.fbm(pixelX / detailFrequency, pixelY / detailFrequency, detailOctaves);
-                        const brightnessVariation = detailNoise * detailNoiseScale * 0.5;
+                        // 使用世界坐标计算噪声
+                        const noiseValue = noiseGen.fbm(pixelX / frequency, pixelY / frequency, 2);
 
                         // 计算偏移量（使用噪声向外扩张）
-                        let effectiveOffset = maxOffset * edgeWeight;
+                        const offset = Math.abs(noiseValue) * maxOffset * weight;
 
-                        // 在拐角处应用额外的平滑处理
-                        if (isCorner) {
-                            // 拐角处的噪声应该更加平滑，减少尖锐感
-                            const cornerNoise = noiseGen.fbm(pixelX / (smoothFrequency * 0.8), pixelY / (smoothFrequency * 0.8), 2);
-                            const cornerSmoothFactor = 0.5 + 0.5 * ((Math.sin(cornerNoise * Math.PI * 2) + 1) / 2); // 平滑的0-1过渡
+                        // 确定偏移方向：从草地中心向边缘
+                        const tileX = Math.floor(pixelX / tileSize);
+                        const tileY = Math.floor(pixelY / tileSize);
+                        const localX = pixelX % tileSize;
+                        const localY = pixelY % tileSize;
 
-                            // 减少拐角处的偏移量，使边缘更圆滑
-                            effectiveOffset *= (1 - cornerSmoothingFactor * (1 - cornerSmoothFactor) * 0.3);
+                        // 计算从瓦片中心到当前像素的方向
+                        const centerX = tileX * tileSize + tileSize / 2;
+                        const centerY = tileY * tileSize + tileSize / 2;
+                        const dirX = pixelX - centerX;
+                        const dirY = pixelY - centerY;
+                        const len = Math.sqrt(dirX * dirX + dirY * dirY);
 
-                            // 在拐角处使用额外的噪声平滑过渡
-                            const extraSmoothing = cornerSmoothFactor * 0.2;
-                            effectiveOffset *= (1 - extraSmoothing);
-
-                            // 对外凸角应用极强的平滑处理
-                            if (isConvexCorner) {
-                                // 外凸角需要特别平滑，因为它们容易产生尖锐感
-                                effectiveOffset *= 0.25; // 极大减少偏移量（从0.6降到0.25）
-
-                                // 使用多层平滑函数创造超圆滑效果
-                                const convexNoise1 = noiseGen.fbm(
-                                    (pixelX + 200) / (smoothFrequency * 1.2),
-                                    (pixelY + 200) / (smoothFrequency * 1.2),
-                                    2
-                                );
-                                const convexNoise2 = noiseGen.fbm(
-                                    (pixelX + 400) / (smoothFrequency * 0.8),
-                                    (pixelY + 400) / (smoothFrequency * 0.8),
-                                    1
-                                );
-
-                                // 使用更复杂的混合函数创造超平滑过渡
-                                const convexFactor1 = (Math.cos(convexNoise1 * Math.PI) + 1) / 2;
-                                const convexFactor2 = (Math.sin(convexNoise2 * Math.PI * 0.5) + 1) / 2;
-                                const combinedConvexFactor = (convexFactor1 * 0.6 + convexFactor2 * 0.4);
-
-                                effectiveOffset *= (0.15 + combinedConvexFactor * 0.85); // 15%-100%的范围
-
-                                // 根据外凸程度调整平滑度
-                                effectiveOffset *= (1 - convexStrength * 0.4);
-                            }
+                        // 归一化方向并应用偏移
+                        let offsetX, offsetY;
+                        if (len > 0) {
+                            offsetX = (dirX / len) * offset;
+                            offsetY = (dirY / len) * offset;
+                        } else {
+                            offsetX = 0;
+                            offsetY = 0;
                         }
 
-                        const offset = Math.abs(combinedEdgeNoise) * effectiveOffset;
+                        // 采样偏移后的位置
+                        const sampleX = Math.max(0, Math.min(canvasWidth - 1, Math.floor(pixelX + offsetX)));
+                        const sampleY = Math.max(0, Math.min(canvasHeight - 1, Math.floor(pixelY + offsetY)));
+                        const srcIndex = (sampleY * canvasWidth + sampleX) * 4;
 
-                        // 根据边缘方向确定偏移向量
-                        let dirX = 0, dirY = 0;
-
-                        if (edgeInfo.directions.includes('top_left')) {
-                            dirX = -0.707; dirY = -0.707;
-                        } else if (edgeInfo.directions.includes('top_right')) {
-                            dirX = 0.707; dirY = -0.707;
-                        } else if (edgeInfo.directions.includes('bottom_left')) {
-                            dirX = -0.707; dirY = 0.707;
-                        } else if (edgeInfo.directions.includes('bottom_right')) {
-                            dirX = 0.707; dirY = 0.707;
-                        } else if (edgeInfo.directions.includes('left')) {
-                            dirX = -1; dirY = 0;
-                        } else if (edgeInfo.directions.includes('right')) {
-                            dirX = 1; dirY = 0;
-                        } else if (edgeInfo.directions.includes('top')) {
-                            dirX = 0; dirY = -1;
-                        } else if (edgeInfo.directions.includes('bottom')) {
-                            dirX = 0; dirY = 1;
-                        }
-
-                        // 如果没有明确方向，使用从瓦片中心向外的方向
-                        if (dirX === 0 && dirY === 0) {
-                            const centerX = edgeInfo.tileX * tileSize + tileSize / 2;
-                            const centerY = edgeInfo.tileY * tileSize + tileSize / 2;
-                            const tempDirX = pixelX - centerX;
-                            const tempDirY = pixelY - centerY;
-                            const len = Math.sqrt(tempDirX * tempDirX + tempDirY * tempDirY);
-                            if (len > 0) {
-                                dirX = tempDirX / len;
-                                dirY = tempDirY / len;
-                            }
-                        }
-
-                        // 拐角处的方向平滑处理
-                        if (isCorner) {
-                            if (isConvexCorner) {
-                                // 外凸角需要超温和的方向处理，避免任何尖锐突起
-                                const convexAngleSmoothness = 0.15; // 极小的平滑系数，最大程度减少尖锐感
-
-                                // 计算理想的圆角方向（指向45度对角线）
-                                let idealDirX = 0, idealDirY = 0;
-
-                                // 根据边缘组合确定理想的对角方向
-                                if (edgeInfo.directions.includes('top') && edgeInfo.directions.includes('left')) {
-                                    idealDirX = 0.707; idealDirY = 0.707; // 右下45度
-                                } else if (edgeInfo.directions.includes('top') && edgeInfo.directions.includes('right')) {
-                                    idealDirX = -0.707; idealDirY = 0.707; // 左下45度
-                                } else if (edgeInfo.directions.includes('bottom') && edgeInfo.directions.includes('left')) {
-                                    idealDirX = 0.707; idealDirY = -0.707; // 右上45度
-                                } else if (edgeInfo.directions.includes('bottom') && edgeInfo.directions.includes('right')) {
-                                    idealDirX = -0.707; idealDirY = -0.707; // 左上45度
-                                } else {
-                                    // 其他组合，使用平均方向
-                                    idealDirX = dirX * 0.707 + dirY * 0.707;
-                                    idealDirY = dirY * 0.707 + dirX * 0.707;
-                                    const len = Math.sqrt(idealDirX * idealDirX + idealDirY * idealDirY);
-                                    if (len > 0) {
-                                        idealDirX /= len;
-                                        idealDirY /= len;
-                                    }
-                                }
-
-                                // 混合当前方向和理想方向，大幅向理想方向倾斜
-                                dirX = dirX * (1 - convexAngleSmoothness) + idealDirX * convexAngleSmoothness;
-                                dirY = dirY * (1 - convexAngleSmoothness) + idealDirY * convexAngleSmoothness;
-
-                                // 应用额外的"软化"处理，进一步减少任何可能的尖锐度
-                                const softeningFactor = 0.7;
-                                dirX *= softeningFactor;
-                                dirY *= softeningFactor;
-
-                                // 最终归一化
-                                const len = Math.sqrt(dirX * dirX + dirY * dirY);
-                                if (len > 0) {
-                                    dirX /= len;
-                                    dirY /= len;
-                                }
-                            } else {
-                                // 普通拐角的方向平滑处理
-                                const angleSmoothness = 0.4;
-                                dirX *= angleSmoothness;
-                                dirY *= angleSmoothness;
-
-                                // 确保方向向量仍然归一化
-                                const currentLen = Math.sqrt(dirX * dirX + dirY * dirY);
-                                if (currentLen > 0) {
-                                    dirX /= currentLen;
-                                    dirY /= currentLen;
-                                }
-                            }
-                        }
-
-                        // 应用偏移
-                        const offsetX = dirX * offset;
-                        const offsetY = dirY * offset;
-
-                        // 采样偏移后的位置（使用双线性插值以获得更平滑的结果）
-                        const sampleX = Math.max(0, Math.min(canvasWidth - 1, pixelX + offsetX));
-                        const sampleY = Math.max(0, Math.min(canvasHeight - 1, pixelY + offsetY));
-
-                        const x0 = Math.floor(sampleX);
-                        const y0 = Math.floor(sampleY);
-                        const x1 = Math.min(x0 + 1, canvasWidth - 1);
-                        const y1 = Math.min(y0 + 1, canvasHeight - 1);
-
-                        const fx = sampleX - x0;
-                        const fy = sampleY - y0;
-
-                        // 双线性插值
-                        const idx00 = (y0 * canvasWidth + x0) * 4;
-                        const idx10 = (y0 * canvasWidth + x1) * 4;
-                        const idx01 = (y1 * canvasWidth + x0) * 4;
-                        const idx11 = (y1 * canvasWidth + x1) * 4;
-
-                        for (let c = 0; c < 4; c++) {
-                            const v00 = srcImageData.data[idx00 + c];
-                            const v10 = srcImageData.data[idx10 + c];
-                            const v01 = srcImageData.data[idx01 + c];
-                            const v11 = srcImageData.data[idx11 + c];
-
-                            const top = v00 * (1 - fx) + v10 * fx;
-                            const bottom = v01 * (1 - fx) + v11 * fx;
-                            let sampledValue = Math.round(top * (1 - fy) + bottom * fy);
-
-                            // 对颜色通道应用细节噪声（RGB），不影响alpha
-                            if (c < 3) {
-                                const adjustedBrightness = 1 + brightnessVariation * detailWeight * 0.3;
-                                sampledValue = Math.max(0, Math.min(255, Math.round(sampledValue * adjustedBrightness)));
-                            }
-
-                            destImageData.data[destIndex + c] = sampledValue;
-                        }
+                        destImageData.data[destIndex] = srcImageData.data[srcIndex];
+                        destImageData.data[destIndex + 1] = srcImageData.data[srcIndex + 1];
+                        destImageData.data[destIndex + 2] = srcImageData.data[srcIndex + 2];
+                        destImageData.data[destIndex + 3] = srcImageData.data[srcIndex + 3];
                     }
                 }
             }
@@ -6023,9 +5509,7 @@
             const useSmartEdges = document.getElementById('useSmartEdges').checked;
             const useGrassNoiseEdge = document.getElementById('useGrassNoiseEdge').checked;
             const grassNoiseIntensity = parseInt(document.getElementById('grassNoiseIntensity').value) / 100;
-            const grassNoiseExpansion = parseInt(document.getElementById('grassNoiseExpansion').value) / 100;
             const grassNoiseFrequency = parseInt(document.getElementById('grassNoiseFrequency').value);
-            const grassEdgeSmoothness = parseInt(document.getElementById('grassEdgeSmoothness').value);
 
             const map = currentMapData;
             const mapWidth = map[0].length;
@@ -6086,20 +5570,17 @@
 
                         // 如果是草地，绘制草地瓦片
                         if (terrainType !== 'G') {
-                            // 检查草地是否设置为空白
-                            if (!isTileEmpty('A')) {
-                                // 获取草地中心瓦片
-                                const grassTileId = defaultAssetMapping['A']?.tileId || 0;
-                                const grassPos = getTilePositionById(grassTileId);
-                                const grassSrcX = Math.floor(grassPos.x * srcTileSize.width);
-                                const grassSrcY = Math.floor(grassPos.y * srcTileSize.height);
+                            // 获取草地中心瓦片
+                            const grassTileId = defaultAssetMapping['A']?.tileId || 0;
+                            const grassPos = getTilePositionById(grassTileId);
+                            const grassSrcX = Math.floor(grassPos.x * srcTileSize.width);
+                            const grassSrcY = Math.floor(grassPos.y * srcTileSize.height);
 
-                                ctx.drawImage(
-                                    sheet,
-                                    grassSrcX, grassSrcY, srcTileSize.width, srcTileSize.height,
-                                    destX, destY, destSize, destSize
-                                );
-                            }
+                            ctx.drawImage(
+                                sheet,
+                                grassSrcX, grassSrcY, srcTileSize.width, srcTileSize.height,
+                                destX, destY, destSize, destSize
+                            );
                         }
 
                         // 绘制网格
@@ -6113,7 +5594,7 @@
 
                 // 应用像素级噪声边缘处理
                 applyGrassNoiseEdge(ctx, sheet, srcTileSize, map, mapWidth, mapHeight, tileSize,
-                                   noiseGen, grassNoiseIntensity, grassNoiseExpansion, grassNoiseFrequency, grassEdgeSmoothness);
+                                   noiseGen, grassNoiseIntensity, grassNoiseFrequency);
             } else {
                 // 原始渲染流程
                 // 绘制地图
@@ -6127,46 +5608,40 @@
                         const destSize = Math.floor(tileSize);
 
                         // 先绘制地面层（G）作为底层
-                        // 检查地面是否设置为空白
-                        if (!isTileEmpty('G')) {
-                            // 对于所有位置，都绘制G作为背景
-                            const groundTileId = defaultAssetMapping['G']?.tileId || 7;
-                            const groundPos = getTilePositionById(groundTileId);
-                            const groundSrcX = Math.floor(groundPos.x * srcTileSize.width);
-                            const groundSrcY = Math.floor(groundPos.y * srcTileSize.height);
+                        // 对于所有位置，都绘制G作为背景
+                        const groundTileId = defaultAssetMapping['G']?.tileId || 7;
+                        const groundPos = getTilePositionById(groundTileId);
+                        const groundSrcX = Math.floor(groundPos.x * srcTileSize.width);
+                        const groundSrcY = Math.floor(groundPos.y * srcTileSize.height);
 
-                            ctx.drawImage(
-                                sheet,
-                                groundSrcX, groundSrcY, srcTileSize.width, srcTileSize.height,
-                                destX, destY, destSize, destSize
-                            );
-                        }
+                        ctx.drawImage(
+                            sheet,
+                            groundSrcX, groundSrcY, srcTileSize.width, srcTileSize.height,
+                            destX, destY, destSize, destSize
+                        );
 
                         // 如果不是地面类型，再绘制上层地形
                         if (terrainType !== 'G') {
-                            // 检查当前地形是否设置为空白
-                            if (!isTileEmpty(terrainType)) {
-                                // 获取对应的图块ID
-                                let tileId;
-                                if (useSmartEdges) {
-                                    // 使用智能边缘检测
-                                    tileId = getEdgeTile(terrainType, x, y, map);
-                                } else {
-                                    // 直接使用基础图块
-                                    tileId = parseInt(document.getElementById(`tileId_${terrainType}`)?.value) || 0;
-                                }
-
-                                // 从sprite sheet中绘制上层地形
-                                const pos = getTilePositionById(tileId);
-                                const srcX = Math.floor(pos.x * srcTileSize.width);
-                                const srcY = Math.floor(pos.y * srcTileSize.height);
-
-                                ctx.drawImage(
-                                    sheet,
-                                    srcX, srcY, srcTileSize.width, srcTileSize.height,
-                                    destX, destY, destSize, destSize
-                                );
+                            // 获取对应的图块ID
+                            let tileId;
+                            if (useSmartEdges) {
+                                // 使用智能边缘检测
+                                tileId = getEdgeTile(terrainType, x, y, map);
+                            } else {
+                                // 直接使用基础图块
+                                tileId = parseInt(document.getElementById(`tileId_${terrainType}`)?.value) || 0;
                             }
+
+                            // 从sprite sheet中绘制上层地形
+                            const pos = getTilePositionById(tileId);
+                            const srcX = Math.floor(pos.x * srcTileSize.width);
+                            const srcY = Math.floor(pos.y * srcTileSize.height);
+
+                            ctx.drawImage(
+                                sheet,
+                                srcX, srcY, srcTileSize.width, srcTileSize.height,
+                                destX, destY, destSize, destSize
+                            );
                         }
 
                         // 绘制网格

@@ -282,6 +282,45 @@
                 <p v-if="areaSelectPoints.length > 0" style="margin: 10px 0;">
                     当前点数: {{ areaSelectPoints.length }}
                 </p>
+
+                <!-- 前景物多选区域 -->
+                <div style="margin-top: 15px; padding: 10px; background: #1a1a1a; border-radius: 4px; border: 1px solid #444;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #fff;">
+                        选择要填充的前景物 (可多选):
+                    </label>
+                    <div v-if="frontObjTemplates.length === 0" style="font-size: 12px; color: #aaa; margin-bottom: 10px;">
+                        暂无前景物，请先导入前景物
+                    </div>
+                    <div style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;">
+                        <div v-for="(obj, index) in frontObjTemplates"
+                             :key="index"
+                             style="display: flex; align-items: center; margin-bottom: 5px; padding: 5px; background: #2a2a2a; border-radius: 3px;">
+                            <input type="checkbox"
+                                   :id="'frontobj-' + index"
+                                   :value="index"
+                                   v-model="selectedFrontObjIndices"
+                                   style="margin-right: 8px;" />
+                            <label :for="'frontobj-' + index" style="flex: 1; cursor: pointer; display: flex; align-items: center;">
+                                <span :style="{ fontSize: '12px', fontWeight: selectedFrontObjIndices.includes(index) ? 'bold' : 'normal', color: '#fff' }">
+                                    {{ obj.name || '未命名' }}
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                        <button @click="selectAllFrontObjs" class="btn btn-sm" style="flex: 1;">全选</button>
+                        <button @click="clearAllFrontObjs" class="btn btn-sm" style="flex: 1;">清空</button>
+                    </div>
+                    <div style="margin-bottom: 10px; padding: 8px; background: #2a2a2a; border-radius: 3px; border: 1px solid #444;">
+                        <p style="font-size: 11px; margin: 0; color: #ccc; margin-bottom: 5px;">
+                            <strong style="color: #fff;">已选择:</strong> <span style="color: #fff;">{{ selectedFrontObjIndices.length }}</span> 个前景物
+                        </p>
+                        <p v-if="selectedFrontObjIndices.length > 0" style="font-size: 10px; margin: 0; color: #6699ff; line-height: 1.4;">
+                            {{ selectedFrontObjIndices.map(idx => frontObjTemplates[idx]?.name || '未命名').join(', ') }}
+                        </p>
+                    </div>
+                </div>
+
                 <div style="margin-top: 15px;" v-if="areaSelectPoints.length >= 3">
                     <label style="display: block; margin-bottom: 5px;">
                         填充密度: {{ randomFillDensity }}%
@@ -349,12 +388,6 @@
                     <button @click="cancelAreaSelect" class="btn btn-warning" style="width: 100%;">
                         取消
                     </button>
-                </div>
-                <div style="margin-top: 15px; padding: 10px; background: #f0f0f0; border-radius: 4px;">
-                    <p style="font-size: 11px; margin: 0;">
-                        <strong>当前前景物:</strong><br>
-                        {{ selectedFrontObjIndex >= 0 ? frontObjTemplates[selectedFrontObjIndex]?.name || '未选择' : '请先在前景物模式选择' }}
-                    </p>
                 </div>
             </div>
         </div>
@@ -542,6 +575,7 @@ const frontObjTextureUrl = ref<string>('');
 const frontObjImage = ref<HTMLImageElement | null>(null); // 存储原始图片元素用于创建裁剪纹理
 const frontObjTemplates = ref<any[]>([]);
 const selectedFrontObjIndex = ref(-1);
+const selectedFrontObjIndices = ref<number[]>([]); // 区域填充模式选中的多个前景物索引
 const frontObjObjects = ref<any[]>([]);
 
 // 编辑选中前景物的属性
@@ -1690,12 +1724,18 @@ const randomFillArea = () => {
         return;
     }
 
-    if (selectedFrontObjIndex.value === -1 || !frontObjTemplates.value[selectedFrontObjIndex.value]) {
-        alert('请先在前景物模式中选择一个前景物');
-        return;
+    // 检查是否有选中的前景物（优先使用区域选择面板中的多选）
+    let selectedIndices = selectedFrontObjIndices.value;
+    if (selectedIndices.length === 0) {
+        // 如果没有在区域选择面板中选择，则使用前景物模式中的单选
+        if (selectedFrontObjIndex.value === -1 || !frontObjTemplates.value[selectedFrontObjIndex.value]) {
+            alert('请先选择要填充的前景物');
+            return;
+        }
+        selectedIndices = [selectedFrontObjIndex.value];
     }
 
-    const template = frontObjTemplates.value[selectedFrontObjIndex.value];
+    const selectedTemplates = selectedIndices.map(idx => frontObjTemplates.value[idx]);
     const bounds = getPolygonBounds(areaSelectPoints.value);
     const gridXStart = Math.floor(bounds.minX / gridSize);
     const gridYStart = Math.floor(bounds.minY / gridSize);
@@ -1712,76 +1752,93 @@ const randomFillArea = () => {
         return;
     }
 
-    // 收集所有可能的放置位置
-    const candidates: { x: number, y: number }[] = [];
+    // 收集所有可能的放置位置（包含前景物类型）
+    type Candidate = { x: number, y: number, templateIndex: number, anchorX: number, anchorY: number };
+    const candidates: Candidate[] = [];
 
     if (alignToGrid.value) {
         // 模式1：对齐网格中心点
-        const anchor = template.anchor || { x: 0, y: 0 };
+        // 先为所有模板收集有效位置，然后混合选择
+        type PositionWithTemplate = { x: number, y: number, anchorX: number, anchorY: number, templateIndex: number };
 
-        // 首先收集所有符合区域条件的位置
-        const validPositions: { x: number, y: number, anchorX: number, anchorY: number }[] = [];
+        // 为每个选中的前景物类型收集有效位置
+        for (let templateIdx = 0; templateIdx < selectedTemplates.length; templateIdx++) {
+            const template = selectedTemplates[templateIdx];
+            const anchor = template.anchor || { x: 0, y: 0 };
 
-        for (let gx = gridXStart; gx < gridXEnd; gx++) {
-            for (let gy = gridYStart; gy < gridYEnd; gy++) {
-                const centerX = gx * gridSize + gridSize / 2;
-                const centerY = gy * gridSize + gridSize / 2;
+            // 收集此模板的所有符合区域条件的位置
+            const validPositions: PositionWithTemplate[] = [];
 
-                // 使用真实的锚点来计算放置位置
-                // 我们希望锚点在网格中心位置
-                const anchorX = centerX;  // 锚点在网格中心
-                const anchorY = centerY;  // 锚点在网格中心
-                const posX = anchorX - anchor.x;  // 对象X = 锚点X - 锚点偏移
-                const posY = anchorY - anchor.y;  // 对象Y = 锚点Y - 锚点偏移
+            for (let gx = gridXStart; gx < gridXEnd; gx++) {
+                for (let gy = gridYStart; gy < gridYEnd; gy++) {
+                    const centerX = gx * gridSize + gridSize / 2;
+                    const centerY = gy * gridSize + gridSize / 2;
 
-                // 根据填充模式检查是否可以放置
-                let canPlace = false;
-                if (fillMode.value === 1) {
-                    // 模式1：锚点在选区内（内容可超出边界）
-                    canPlace = isPointInPolygon(anchorX, anchorY, areaSelectPoints.value);
-                } else {
-                    // 模式2：整体在选区内（内容不可超出）
-                    canPlace = isRectangleInPolygon(posX, posY, template.width, template.height, areaSelectPoints.value);
+                    // 使用真实的锚点来计算放置位置
+                    // 我们希望锚点在网格中心位置
+                    const anchorX = centerX;  // 锚点在网格中心
+                    const anchorY = centerY;  // 锚点在网格中心
+                    const posX = anchorX - anchor.x;  // 对象X = 锚点X - 锚点偏移
+                    const posY = anchorY - anchor.y;  // 对象Y = 锚点Y - 锚点偏移
+
+                    // 根据填充模式检查是否可以放置
+                    let canPlace = false;
+                    if (fillMode.value === 1) {
+                        // 模式1：锚点在选区内（内容可超出边界）
+                        canPlace = isPointInPolygon(anchorX, anchorY, areaSelectPoints.value);
+                    } else {
+                        // 模式2：整体在选区内（内容不可超出）
+                        canPlace = isRectangleInPolygon(posX, posY, template.width, template.height, areaSelectPoints.value);
+                    }
+
+                    if (canPlace) {
+                        validPositions.push({ x: posX, y: posY, anchorX, anchorY, templateIndex: templateIdx });
+                    }
+                }
+            }
+
+            // 如果没有有效位置，跳过此模板
+            if (validPositions.length === 0) {
+                continue;
+            }
+
+            // 随机打乱此模板的位置
+            const shuffled = validPositions.sort(() => Math.random() - 0.5);
+
+            // 从此模板的位置中尝试添加到候选列表
+            for (const pos of shuffled) {
+                // 检查是否与已有候选点太近（避免重叠）
+                let tooClose = false;
+                for (const existing of candidates) {
+                    const existingTemplate = selectedTemplates[existing.templateIndex];
+                    const existingAnchor = existingTemplate.anchor || { x: 0, y: 0 };
+                    const existingAnchorX = existing.x + existingAnchor.x;
+                    const existingAnchorY = existing.y + existingAnchor.y;
+
+                    const dist = Math.sqrt(Math.pow(pos.anchorX - existingAnchorX, 2) + Math.pow(pos.anchorY - existingAnchorY, 2));
+
+                    // 考虑缩放后的实际尺寸进行重叠检测（取两个前景物中较大的）
+                    const actualScale = enableScaleVariation.value ? Math.max(currentScale.value, maxScale.value) : currentScale.value;
+                    const minSize1 = Math.min(template.width, template.height);
+                    const minSize2 = Math.min(existingTemplate.width, existingTemplate.height);
+                    const scaledThreshold = Math.max(minSize1, minSize2) * 0.8 * actualScale;
+
+                    if (dist < scaledThreshold) {
+                        tooClose = true;
+                        break;
+                    }
                 }
 
-                if (canPlace) {
-                    validPositions.push({ x: posX, y: posY, anchorX, anchorY });
+                if (!tooClose) {
+                    candidates.push({ x: pos.x, y: pos.y, templateIndex: pos.templateIndex, anchorX: pos.anchorX, anchorY: pos.anchorY });
                 }
             }
         }
 
-        // 如果没有有效位置，提前返回
-        if (validPositions.length === 0) {
-            alert('网格对齐模式下没有找到符合条件的放置位置');
-            return;
-        }
-
-        // 从有效位置中随机选择，避免重叠
-        const shuffled = validPositions.sort(() => Math.random() - 0.5);
-        for (const pos of shuffled) {
-            if (candidates.length >= placeCount) break;
-
-            // 检查是否与已有候选点太近（避免重叠）
-            let tooClose = false;
-            for (const existing of candidates) {
-                const existingAnchorX = existing.x + anchor.x;
-                const existingAnchorY = existing.y + anchor.y;
-
-                const dist = Math.sqrt(Math.pow(pos.anchorX - existingAnchorX, 2) + Math.pow(pos.anchorY - existingAnchorY, 2));
-
-                // 考虑缩放后的实际尺寸进行重叠检测
-                const actualScale = enableScaleVariation.value ? Math.max(currentScale.value, maxScale.value) : currentScale.value;
-                const scaledThreshold = Math.min(template.width, template.height) * 0.8 * actualScale;
-
-                if (dist < scaledThreshold) {
-                    tooClose = true;
-                    break;
-                }
-            }
-
-            if (!tooClose) {
-                candidates.push({ x: pos.x, y: pos.y });
-            }
+        // 如果收集的候选点超过需求，随机选择
+        if (candidates.length > placeCount) {
+            candidates.sort(() => Math.random() - 0.5);
+            candidates.length = placeCount;
         }
     } else {
         // 模式2：完全随机放置
@@ -1793,7 +1850,9 @@ const randomFillArea = () => {
         while (foundCount < placeCount && attempts < maxAttempts) {
             attempts++;
 
-            // 在边界框内生成随机点作为锚点位置
+            // 随机选择一个前景物类型
+            const templateIdx = Math.floor(Math.random() * selectedTemplates.length);
+            const template = selectedTemplates[templateIdx];
             const anchor = template.anchor || { x: 0, y: 0 };
             const anchorX = bounds.minX + Math.random() * (bounds.maxX - bounds.minX);
             const anchorY = bounds.minY + Math.random() * (bounds.maxY - bounds.minY);
@@ -1814,20 +1873,20 @@ const randomFillArea = () => {
 
             if (canPlace) {
                 // 检查是否与已有候选点太近（避免重叠）
-                // 基于锚点位置进行距离判断，而不是对象位置
                 let tooClose = false;
                 for (const existing of candidates) {
-                    // 计算两个候选点的锚点位置
-                    const existingAnchorX = existing.x + anchor.x;
-                    const existingAnchorY = existing.y + anchor.y;
-                    const currentAnchorX = posX + anchor.x;
-                    const currentAnchorY = posY + anchor.y;
+                    const existingTemplate = selectedTemplates[existing.templateIndex];
+                    const existingAnchor = existingTemplate.anchor || { x: 0, y: 0 };
+                    const existingAnchorX = existing.x + existingAnchor.x;
+                    const existingAnchorY = existing.y + existingAnchor.y;
 
-                    const dist = Math.sqrt(Math.pow(currentAnchorX - existingAnchorX, 2) + Math.pow(currentAnchorY - existingAnchorY, 2));
+                    const dist = Math.sqrt(Math.pow(anchorX - existingAnchorX, 2) + Math.pow(anchorY - existingAnchorY, 2));
 
                     // 考虑缩放后的实际尺寸进行重叠检测
                     const actualScale = enableScaleVariation.value ? Math.max(currentScale.value, maxScale.value) : currentScale.value;
-                    const scaledThreshold = Math.min(template.width, template.height) * 0.8 * actualScale;
+                    const minSize1 = Math.min(template.width, template.height);
+                    const minSize2 = Math.min(existingTemplate.width, existingTemplate.height);
+                    const scaledThreshold = Math.max(minSize1, minSize2) * 0.8 * actualScale;
 
                     if (dist < scaledThreshold) {
                         tooClose = true;
@@ -1836,7 +1895,7 @@ const randomFillArea = () => {
                 }
 
                 if (!tooClose) {
-                    candidates.push({ x: posX, y: posY });
+                    candidates.push({ x: posX, y: posY, templateIndex: templateIdx, anchorX, anchorY });
                     foundCount++;
                 }
             }
@@ -1855,7 +1914,8 @@ const randomFillArea = () => {
 
     // 放置前景物
     for (const pos of selectedPositions) {
-        // pos 已经是计算好的对象位置（已经考虑了锚点偏移）
+        const template = selectedTemplates[pos.templateIndex];
+
         // 计算随机缩放比例
         let scale = currentScale.value;
         if (enableScaleVariation.value) {
@@ -1911,7 +1971,10 @@ const randomFillArea = () => {
     saveHistory();
     const modeText = fillMode.value === 1 ? '模式1（锚点不超边界）' : '模式2（整体不超边界）';
     const gridText = alignToGrid.value ? '网格对齐' : '完全随机';
-    alert(`已使用${modeText} + ${gridText}放置 ${selectedPositions.length} 个前景物`);
+    const templateText = selectedTemplates.length > 1
+        ? `${selectedTemplates.length}种前景物`
+        : `"${selectedTemplates[0].name}"`;
+    alert(`已使用${modeText} + ${gridText}放置 ${selectedPositions.length} 个${templateText}`);
 };
 
 // 计算点到线段的最短距离
@@ -3568,6 +3631,16 @@ const loadFrontObjJsonFromFile = (file: File): Promise<void> => {
 // 选择前景物模板
 const selectFrontObjTemplate = (index: number) => {
     selectedFrontObjIndex.value = index;
+};
+
+// 全选前景物
+const selectAllFrontObjs = () => {
+    selectedFrontObjIndices.value = frontObjTemplates.value.map((_, index) => index);
+};
+
+// 清空前景物选择
+const clearAllFrontObjs = () => {
+    selectedFrontObjIndices.value = [];
 };
 
 // 放置前景物到地图
