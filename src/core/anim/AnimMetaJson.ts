@@ -11,6 +11,7 @@ interface AnimMetaJsonOptions {
     };
     frameSize: number;
     frameCounts: { [key: string]: number };
+    onlySide?: boolean; // 是否只使用左右朝向
 }
 
 export class AnimMetaJson {
@@ -26,6 +27,7 @@ export class AnimMetaJson {
     };
     frameSize: number;
     frameCounts: { [key: string]: number };
+    onlySide: boolean; // 是否只使用左右朝向
 
     constructor(options: AnimMetaJsonOptions) {
         this.exportTimestamp = options.exportTimestamp;
@@ -34,6 +36,7 @@ export class AnimMetaJson {
         this.customAnimations = options.customAnimations;
         this.frameSize = options.frameSize;
         this.frameCounts = options.frameCounts;
+        this.onlySide = options.onlySide ?? false; // 默认为false
     }
 
     getAllExportedAnimations(): string[] {

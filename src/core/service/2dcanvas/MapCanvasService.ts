@@ -292,6 +292,9 @@ export class MapCanvasService {
       width: animMetaJson.frameSize,
       height: animMetaJson.frameSize,
     });
+
+    // 设置是否只使用左右朝向
+    animSpriteUnit.onlySide = animMetaJson.onlySide;
     if (unit.creature) {
       console.log(
         "单位的视觉大小:",

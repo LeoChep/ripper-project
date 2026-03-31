@@ -30738,6 +30738,47 @@
           "width": 168.33333333333348,
           "x": 381.33333333333326,
           "y": -133.6110954284668
+        },
+        {
+          "height": 297.14285714285717,
+          "id": 1907,
+          "name": "车夫",
+          "properties": [
+            {
+              "name": "frontObjName",
+              "type": "string",
+              "value": "车夫"
+            },
+            {
+              "name": "occlusionHeight",
+              "type": "number",
+              "value": 0
+            },
+            {
+              "name": "anchor",
+              "type": "object",
+              "value": {
+                "x": 0,
+                "y": 0
+              }
+            },
+            {
+              "name": "blockSlot",
+              "type": "array",
+              "value": []
+            },
+            {
+              "name": "scale",
+              "type": "number",
+              "value": 1
+            }
+          ],
+          "rotation": 0,
+          "type": "frontObj",
+          "visible": true,
+          "width": 596.6666739327568,
+          "x": 1304.6000061035156,
+          "y": 856.6666564941406
         }
       ],
       "opacity": 1,
@@ -30798,7 +30839,7 @@
     }
   ],
   "nextlayerid": 6,
-  "nextobjectid": 1907,
+  "nextobjectid": 1909,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.11.2",
