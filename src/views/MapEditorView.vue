@@ -444,6 +444,7 @@ import { getAnimMetaJsonFile, getAnimSpriteImgUrl, getAnimActionSpriteJsonFile }
 import { AnimMetaJson } from '@/core/anim/AnimMetaJson';
 import { UnitAnimSpirite } from '@/core/anim/UnitAnimSprite';
 import * as envSetting from '@/core/envSetting';
+import { UNIT_TYPES, isBigUnit, type UnitTypeName } from '@/core/config/UnitTypes';
 
 // 配置
 const gridSize = envSetting.tileSize
@@ -491,8 +492,8 @@ let currentPreviewUnitType: string = ''; // 当前预览的单位类型（用于
 let wheelListener: ((event: WheelEvent) => void) | null = null;
 
 // 单位相关
-const unitTypes = ['skeleton', 'wolf', 'manFighter', 'skeletonArcher', 'oldCleric', 'dragonCleric', 'bigSkeleton'];
-const selectedUnitType = ref('skeleton');
+const unitTypes = UNIT_TYPES;
+const selectedUnitType = ref<UnitTypeName>('skeleton');
 const unitName = ref('');
 const unitParty = ref('player');
 const unitDirection = ref(2);
@@ -994,7 +995,7 @@ const setMode = (mode: 'unit' | 'wall' | 'door' | 'frontObj' | 'areaSelect' | 's
 };
 
 // 选择单位类型
-const selectUnitType = (type: string) => {
+const selectUnitType = (type: UnitTypeName) => {
     selectedUnitType.value = type;
 };
 
@@ -1084,8 +1085,7 @@ const updatePreview = async (x: number, y: number) => {
         const gridY = Math.floor(y / gridSize) * gridSize;
 
         // 根据单位类型判断大小（参考 MapCanvasService 的逻辑）
-        const isBigUnit = selectedUnitType.value === 'bigSkeleton';
-        const visualSize = isBigUnit ? gridSize * 2 : gridSize;
+        const visualSize = isBigUnit(selectedUnitType.value) ? gridSize * 2 : gridSize;
 
         // 只在单位类型改变时重新加载精灵
         if (selectedUnitType.value !== currentPreviewUnitType) {
@@ -1431,8 +1431,7 @@ const placeUnit = async (x: number, y: number) => {
     }
 
     // 根据单位类型判断大小
-    const isBigUnit = selectedUnitType.value === 'bigSkeleton';
-    const unitGridSize = isBigUnit ? gridSize * 2 : gridSize;
+    const unitGridSize = isBigUnit(selectedUnitType.value) ? gridSize * 2 : gridSize;
 
     const unit = {
         id: nextObjectId++,
@@ -2344,8 +2343,65 @@ const clearSelection = () => {
     selectedContainer.value = null;
 };
 
+// 辅助函数：生成标准的 spritesheet JSON（参考 MapCanvasService）
+const generateStandardSpriteJson = (
+    animName: string,
+    frameCount: number,
+    onlySide: boolean,
+    metaSize: { w: number; h: number }
+): any => {
+    const frames: any = {};
+    const animations: any = {};
+
+    // 定义方向：w(上), a(左), s(下), d(右)
+    // 如果 onlySide 为 true，只使用 a 和 d
+    const directions = onlySide ? ["a", "d"] : ["w", "a", "s", "d"];
+    const directionCount = directions.length;
+
+    // 根据 metaSize 和 frameCount 计算每帧的大小
+    const frameWidth = metaSize.w / frameCount;
+    const frameHeight = metaSize.h / directionCount;
+
+    console.log(
+        `计算帧大小: 宽度=${frameWidth}, 高度=${frameHeight}, 方向数=${directionCount}, 每行帧数=${frameCount}`
+    );
+
+    directions.forEach((dir, dirIndex) => {
+        const animKey = `${animName}_${dir}`;
+        animations[animKey] = [];
+
+        for (let frame = 0; frame < frameCount; frame++) {
+            const fileName = `${animName}_${dir}_${frame}.png`;
+            animations[animKey].push(fileName);
+
+            // 计算帧位置
+            const x = frame * frameWidth;
+            const y = dirIndex * frameHeight;
+
+            frames[fileName] = {
+                frame: { x, y, w: frameWidth, h: frameHeight },
+                rotated: false,
+                trimmed: false,
+                spriteSourceSize: { x: 0, y: 0, w: frameWidth, h: frameHeight },
+                sourceSize: { w: frameWidth, h: frameHeight },
+            };
+        }
+    });
+
+    return {
+        frames,
+        animations,
+        meta: {
+            version: "1.0",
+            format: "RGBA8888",
+            size: metaSize,
+            scale: "1",
+        },
+    };
+};
+
 // 加载单位精灵数据
-const loadUnitSprite = async (unitTypeName: string): Promise<{ textures: PIXI.Texture[], scale: number, visualSize: number, frameSize: number } | null> => {
+const loadUnitSprite = async (unitTypeName: UnitTypeName): Promise<{ textures: PIXI.Texture[], scale: number, visualSize: number, frameSize: number } | null> => {
     // 检查缓存
     if (unitSpriteDataCache.has(unitTypeName)) {
         return unitSpriteDataCache.get(unitTypeName)!;
@@ -2365,11 +2421,32 @@ const loadUnitSprite = async (unitTypeName: string): Promise<{ textures: PIXI.Te
         const firstAnim = 'walk'
         const spriteUrl = getAnimSpriteImgUrl(unitTypeName, firstAnim, 'standard');
         const sheetTexture = await PIXI.Assets.load(spriteUrl);
-        const json: any = await getAnimActionSpriteJsonFile(unitTypeName, firstAnim, 'standard');
+        let json: any = await getAnimActionSpriteJsonFile(unitTypeName, firstAnim, 'standard');
 
-        if (!json || !json.frames) {
-            console.warn(`单位 ${unitTypeName} 的动画数据无效`);
-            return null;
+        // 如果 JSON 不存在或没有 frames 属性，则自动生成（参考 MapCanvasService）
+        if (!json || !json.frames||1 ) {
+            console.log(
+                `单位 ${unitTypeName} 的动画 ${firstAnim} JSON 文件不存在或缺少 frames 属性，自动生成标准 JSON`
+            );
+            const frameCount = animMetaJson.getFrameCount(firstAnim);
+            if (frameCount) {
+                // 尝试从原 JSON 获取 meta.size，否则使用默认值
+                const metaSize = json?.meta?.size || {
+                    w: frameCount * animMetaJson.frameSize,
+                    h: animMetaJson.frameSize * (animMetaJson.onlySide ? 2 : 4),
+                };
+
+                json = generateStandardSpriteJson(
+                    firstAnim,
+                    frameCount,
+                    animMetaJson.onlySide,
+                    metaSize
+                );
+                console.log(`自动生成单位 ${unitTypeName} 动画 ${firstAnim} 的标准 JSON 完成，内容为`, json);
+            } else {
+                console.warn(`无法获取动画 ${firstAnim} 的帧数，跳过`);
+                return null;
+            }
         }
 
         // 创建 spritesheet
@@ -2384,8 +2461,7 @@ const loadUnitSprite = async (unitTypeName: string): Promise<{ textures: PIXI.Te
 
         // 根据单位类型判断大小（参考 MapCanvasService 和 UnitAnimSprite 的逻辑）
         const frameSize = animMetaJson.frameSize || envSetting.tileSize;
-        const isBigUnit = unitTypeName === 'bigSkeleton'; // 可以添加更多大型单位
-        const visualSize = isBigUnit ? envSetting.tileSize * 2 : envSetting.tileSize;
+        const visualSize = isBigUnit(unitTypeName) ? envSetting.tileSize * 2 : envSetting.tileSize;
         // 使用与 UnitAnimSprite 相同的缩放公式
         const scale = (visualSize / frameSize) * envSetting.spriteTile;
 
@@ -2978,7 +3054,7 @@ const parseTMJData = async (tmjData: any) => {
                     if (obj.id > maxId) maxId = obj.id;
 
                     // 获取属性
-                        const unitTypeName = obj.properties?.find((p: any) => p.name === 'unitTypeName')?.value || 'skeleton';
+                        const unitTypeName = (obj.properties?.find((p: any) => p.name === 'unitTypeName')?.value || 'skeleton') as UnitTypeName;
                         const party = obj.properties?.find((p: any) => p.name === 'party')?.value || 'enemy';
                         const directionRaw = obj.properties?.find((p: any) => p.name === 'direction')?.value ?? 2;
                         const friendlyRaw = obj.properties?.find((p: any) => p.name === 'friendly')?.value ?? false;

@@ -297,8 +297,16 @@ export class DramaSystem {
       await this.unHiddenUnit(unit);
     }
   };
+  hiddenUnit=async (unit: Unit) => {
+    unit.isSceneHidden=true;
+  }
   unHiddenUnit = async (unit: Unit) => {
+    if (unit.creature){
+      unit.isSceneHidden=false;
+      return;
+    }
     try {
+      unit.isSceneHidden = false;
       const unitCreature = await UnitSystem.getInstance().createUnitCreature(
         unit.unitTypeName,
         unit

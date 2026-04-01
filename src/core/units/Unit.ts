@@ -58,6 +58,7 @@ export class Unit {
   stateMachinePack: StateMachinePack; // 状态机包
   creature: Creature | undefined; // 可能是 Creature 实例
   direction: number = 0; // 方向，0-3 分别表示上、右、下、左
+  onlySide: boolean = false; // 是否只使用左右方向的动画
   constructor(options: UnitOptions) {
     this.id = options.id;
     this.name = options.name;

@@ -137,6 +137,12 @@ export class UnitAnimSpirite extends Container {
 
   // 可以添加自定义方法
   public update(callback?: any): void {
+    if (this.owner?.isSceneHidden){
+      this.visible=false;
+    }
+    else{
+      this.visible=true;
+    }
     // 如果当前状态与动画状态不一致，则更新渲染状态
     if (this._state !== this._animationState)
       this.children.forEach((child) => {

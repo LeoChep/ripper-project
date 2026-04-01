@@ -1,0 +1,14 @@
+{
+    "frames": {
+        
+    },
+    "meta": {
+        "version": "1.0",
+        "format": "RGBA8888",
+        "size": {
+            "w": 12160,
+            "h": 360
+        },
+        "scale": "1"
+    }
+}

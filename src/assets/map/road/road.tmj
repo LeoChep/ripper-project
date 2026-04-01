@@ -20527,8 +20527,8 @@
           "type": "frontObj",
           "visible": true,
           "width": 94.16667938232422,
-          "x": 1899.2117072005833,
-          "y": 1489.7746941945022
+          "x": 1866.9783697982396,
+          "y": 1672.9079949757522
         },
         {
           "height": 130,
@@ -22618,8 +22618,8 @@
           "type": "frontObj",
           "visible": true,
           "width": 168.33333333333348,
-          "x": 1052.277791341146,
-          "y": 1142.4444783528645
+          "x": 1035.527791341146,
+          "y": 1146.911153157552
         },
         {
           "height": 278.3333333333332,
@@ -30162,8 +30162,8 @@
           "type": "frontObj",
           "visible": true,
           "width": 119.16667938232422,
-          "x": 1249.2452364799603,
-          "y": 1261.8073496291706
+          "x": 1484.8619356987103,
+          "y": 1343.3240122268269
         },
         {
           "height": 57.5,
@@ -30326,8 +30326,8 @@
           "type": "frontObj",
           "visible": true,
           "width": 119.16667938232422,
-          "x": 692.5314032300788,
-          "y": 1575.3170021568562
+          "x": 905.8147284253913,
+          "y": 1666.8836525474812
         },
         {
           "height": 115,
@@ -30367,8 +30367,8 @@
           "type": "frontObj",
           "visible": true,
           "width": 149.16667938232422,
-          "x": 2806.3563691774366,
-          "y": 899.5347467200418
+          "x": 2518.5563203493116,
+          "y": 1091.6013971106668
         },
         {
           "height": 57.5,
@@ -30738,47 +30738,6 @@
           "width": 168.33333333333348,
           "x": 381.33333333333326,
           "y": -133.6110954284668
-        },
-        {
-          "height": 297.14285714285717,
-          "id": 1907,
-          "name": "车夫",
-          "properties": [
-            {
-              "name": "frontObjName",
-              "type": "string",
-              "value": "车夫"
-            },
-            {
-              "name": "occlusionHeight",
-              "type": "number",
-              "value": 0
-            },
-            {
-              "name": "anchor",
-              "type": "object",
-              "value": {
-                "x": 0,
-                "y": 0
-              }
-            },
-            {
-              "name": "blockSlot",
-              "type": "array",
-              "value": []
-            },
-            {
-              "name": "scale",
-              "type": "number",
-              "value": 1
-            }
-          ],
-          "rotation": 0,
-          "type": "frontObj",
-          "visible": true,
-          "width": 596.6666739327568,
-          "x": 1304.6000061035156,
-          "y": 856.6666564941406
         }
       ],
       "opacity": 1,
@@ -30800,8 +30759,8 @@
           "type": "unit",
           "visible": true,
           "width": 90,
-          "x": 1080,
-          "y": 1080,
+          "x": 630,
+          "y": 1170,
           "properties": [
             {
               "name": "unitTypeName",
@@ -30812,6 +30771,82 @@
               "name": "party",
               "type": "string",
               "value": "player"
+            },
+            {
+              "name": "direction",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "friendly",
+              "type": "bool",
+              "value": false
+            },
+            {
+              "name": "isSceneHidden",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "height": 90,
+          "id": 1910,
+          "name": "drawf_rider_house_car_1",
+          "rotation": 0,
+          "type": "unit",
+          "visible": true,
+          "width": 90,
+          "x": 360,
+          "y": 1080,
+          "properties": [
+            {
+              "name": "unitTypeName",
+              "type": "string",
+              "value": "drawf_rider_house_car_1"
+            },
+            {
+              "name": "party",
+              "type": "string",
+              "value": "npc"
+            },
+            {
+              "name": "direction",
+              "type": "int",
+              "value": 1
+            },
+            {
+              "name": "friendly",
+              "type": "bool",
+              "value": true
+            },
+            {
+              "name": "isSceneHidden",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        },
+        {
+          "height": 90,
+          "id": 1911,
+          "name": "兽人A",
+          "rotation": 0,
+          "type": "unit",
+          "visible": true,
+          "width": 90,
+          "x": 1530,
+          "y": 990,
+          "properties": [
+            {
+              "name": "unitTypeName",
+              "type": "string",
+              "value": "orc_robber"
+            },
+            {
+              "name": "party",
+              "type": "string",
+              "value": "orc"
             },
             {
               "name": "direction",
@@ -30827,6 +30862,97 @@
               "name": "isSceneHidden",
               "type": "bool",
               "value": false
+            },
+            {
+              "name": "selectionGroup",
+              "type": "string",
+              "value": "orc1"
+            }
+          ]
+        },
+        {
+          "height": 90,
+          "id": 1913,
+          "name": "兽人B",
+          "rotation": 0,
+          "type": "unit",
+          "visible": true,
+          "width": 90,
+          "x": 1530,
+          "y": 1080,
+          "properties": [
+            {
+              "name": "unitTypeName",
+              "type": "string",
+              "value": "orc_robber"
+            },
+            {
+              "name": "party",
+              "type": "string",
+              "value": "orc"
+            },
+            {
+              "name": "direction",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "friendly",
+              "type": "bool",
+              "value": false
+            },
+            {
+              "name": "isSceneHidden",
+              "type": "bool",
+              "value": false
+            },
+            {
+              "name": "selectionGroup",
+              "type": "string",
+              "value": "orc1"
+            }
+          ]
+        },
+        {
+          "height": 90,
+          "id": 1914,
+          "name": "兽人老大",
+          "rotation": 0,
+          "type": "unit",
+          "visible": true,
+          "width": 90,
+          "x": 1710,
+          "y": 1080,
+          "properties": [
+            {
+              "name": "unitTypeName",
+              "type": "string",
+              "value": "orc_robber"
+            },
+            {
+              "name": "party",
+              "type": "string",
+              "value": "orc"
+            },
+            {
+              "name": "direction",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "friendly",
+              "type": "bool",
+              "value": false
+            },
+            {
+              "name": "isSceneHidden",
+              "type": "bool",
+              "value": false
+            },
+            {
+              "name": "selectionGroup",
+              "type": "string",
+              "value": "orc1"
             }
           ]
         }
@@ -30839,7 +30965,7 @@
     }
   ],
   "nextlayerid": 6,
-  "nextobjectid": 1909,
+  "nextobjectid": 1915,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.11.2",

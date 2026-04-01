@@ -56,6 +56,7 @@ const characters = ref([])
 const hp = ref(0)
 const maxHp = ref(0)
 let characterStore = ref(null);
+
 const show = computed(() => {
     return !useTalkStateStore().talkState.onCg
 });

@@ -171,6 +171,12 @@ export class UnitSystem {
     const hiddenUnits = map.hiddenUnits
     return hiddenUnits;
   }
+  getgetSceneHiddenUnitsByName(name: string): Unit| null {
+ const map = golbalSetting.map;
+    if (!map) return null;
+    const hiddenUnit = map.hiddenUnits.find((unit: Unit) => unit.name === name) || null;
+    return hiddenUnit;
+  }
   getSceneHiddenUnitsBySelectionGroup(selectionGroup: string): Unit[] {
     const map = golbalSetting.map;
     if (!map) return [];

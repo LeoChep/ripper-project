@@ -30,11 +30,11 @@
     "failed": []
   },
   "frameSize": 236,
-  "onlySide":true,
+  "onlySide":false,
   "frameCounts": {
     "spellcast": 7,
     "thrust": 8,
-    "walk": 9,
+    "walk": 8,
     "slash": 6,
     "shoot": 13,
     "hurt": 6,

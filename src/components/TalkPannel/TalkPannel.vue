@@ -140,7 +140,7 @@ const unitSpeak = (unit: Unit, content: string): Promise<void> => {
     talkState.talkState.content = content;
 
     talkState.end = () => {
-      currentUnit.value = null; // 对话结束时清除角色
+     
       resolve();
     };
     const timer = setInterval(() => {
@@ -170,12 +170,21 @@ const enterEnd = (): void => {
   } else {
     // 第二次按 Enter：结束对话，清空内容
     if (!talkState.talkState.isOnChoice) {
-      talkState.end(true);
+  
       talkState.talkState.endFlag = false;
       talkState.talkState.inputingTimer = null;
       talkState.talkState.input = "";
       talkState.talkState.content = "";
+       currentUnit.value = null; // 对话结束时清除角色
+      const resolve=talkState.end;
       talkState.end = () => { };
+
+      setTimeout(() => {
+              
+         resolve(true);
+
+      }, 200);
+    
     } else {
       // 如果在选项状态，不做任何操作
       talkState.end(true);

@@ -280,6 +280,63 @@ export class MapCanvasService {
     return unit;
   };
 
+  // 辅助函数：生成标准的 spritesheet JSON
+  generateStandardSpriteJson = (
+    animName: string,
+    frameCount: number,
+    onlySide: boolean,
+    metaSize: { w: number; h: number }
+  ): any => {
+    const frames: any = {};
+    const animations: any = {};
+
+    // 定义方向：w(上), a(左), s(下), d(右)
+    // 如果 onlySide 为 true，只使用 a 和 d
+    const directions = onlySide ? ["d", "a"] : ["w", "a", "s", "d"];
+    const directionCount = directions.length;
+
+    // 根据 metaSize 和 frameCount 计算每帧的大小
+    const frameWidth = metaSize.w / frameCount;
+    const frameHeight = metaSize.h / directionCount;
+
+    console.log(
+      `计算帧大小: 宽度=${frameWidth}, 高度=${frameHeight}, 方向数=${directionCount}, 每行帧数=${frameCount}`
+    );
+
+    directions.forEach((dir, dirIndex) => {
+      const animKey = `${animName}_${dir}`;
+      animations[animKey] = [];
+
+      for (let frame = 0; frame < frameCount; frame++) {
+        const fileName = `${animName}_${dir}_${frame}.png`;
+        animations[animKey].push(fileName);
+
+        // 计算帧位置
+        const x = frame * frameWidth;
+        const y = dirIndex * frameHeight;
+
+        frames[fileName] = {
+          frame: { x, y, w: frameWidth, h: frameHeight },
+          rotated: false,
+          trimmed: false,
+          spriteSourceSize: { x: 0, y: 0, w: frameWidth, h: frameHeight },
+          sourceSize: { w: frameWidth, h: frameHeight },
+        };
+      }
+    });
+
+    return {
+      frames,
+      animations,
+      meta: {
+        version: "1.0",
+        format: "RGBA8888",
+        size: metaSize,
+        scale: "1",
+      },
+    };
+  };
+
   // 辅助函数：创建动画精灵单位
   createAnimSpriteUnits = async (unit: any) => {
     const unitTypeName = unit.unitTypeName;
@@ -312,7 +369,7 @@ export class MapCanvasService {
         height: envSetting.tileSize,
       };
     }
-    animMetaJson.getAllExportedAnimations().forEach(async (anim) => {
+    for (const anim of animMetaJson.getAllExportedAnimations()) {
       console.log(anim);
       const spriteUrl = getAnimSpriteImgUrl(unitTypeName, anim, "standard");
       const sheetTexture = await PIXI.Assets.load(spriteUrl);
@@ -322,14 +379,41 @@ export class MapCanvasService {
         anim,
         "standard"
       );
-      const json: any = await jsonFetchPromise;
+      let json: any = await jsonFetchPromise;
+
+      // 如果 JSON 不存在或没有 frames 属性，则自动生成
+      if (!json || !json.frames||1) {
+        console.log(
+          `动画 ${anim} 的 JSON 文件不存在或缺少 frames 属性，自动生成标准 JSON`
+        );
+        const frameCount = animMetaJson.getFrameCount(anim);
+        if (frameCount) {
+          // 尝试从原 JSON 获取 meta.size，否则使用默认值
+          const metaSize = json?.meta?.size || {
+            w: frameCount * animMetaJson.frameSize,
+            h: animMetaJson.frameSize * (animMetaJson.onlySide ? 2 : 4),
+          };
+
+          json = this.generateStandardSpriteJson(
+            anim,
+            frameCount,
+            animMetaJson.onlySide,
+            metaSize
+          );
+          console.log(`自动生成动画 ${anim} 的标准 JSON 完成，内容为`, json);
+        } else {
+          console.warn(`无法获取动画 ${anim} 的帧数，跳过`);
+          continue;
+        }
+      }
+
       if (json && json.frames) {
         const spritesheet = new PIXI.Spritesheet(sheetTexture, json as any);
         await spritesheet.parse();
         console.log("创建动画精灵单位 - 加载完成:", anim, spritesheet);
         animSpriteUnit.addAnimationSheet(anim, spritesheet);
       }
-    });
+    }
     // setTimeout(() => {
     //   animSpriteUnit.anims["walk"].renderable = true;
     // }, 6000);

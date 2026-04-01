@@ -37,6 +37,11 @@ const router = createRouter({
       name: "frontEditor",
       component: () => import("../views/FrontObjEditorView.vue"),
     },
+    {
+      path: "/unit-editor",
+      name: "unitEditor",
+      component: () => import("../views/UnitEditorView.vue"),
+    },
   ],
 });
 
