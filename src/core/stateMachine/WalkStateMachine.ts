@@ -21,6 +21,7 @@ export class WalkStateMachine extends StateMachine {
   private pauseMove: boolean = false;
   private haveOpportunity: number[] = [];
   private frameCount: number = 0;
+  private checkOpGrid:{x:number,y:number} | null = null;
   public callBack = () => {};
   constructor(unit: Unit) {
     super(unit);
@@ -64,11 +65,14 @@ export class WalkStateMachine extends StateMachine {
       nextPathPoint.x !== this.currentGrids[0]?.x ||
       nextPathPoint.y !== this.currentGrids[0]?.y
     ) {
+      console.log('nextPathPoint',nextPathPoint,'currentGrids',this.currentGrids)
       haveMoveToNewTile = true;
     }
+
     if (haveMoveToNewTile) {
       this.oldGrids = this.currentGrids;
       this.currentGrids = UnitSystem.getInstance().getUnitGrids(this.owner);
+      
     }
     // const unitX = Math.floor(this.owner.x / tileSize);
     // const unitY = Math.floor(this.owner.y / tileSize);
@@ -110,12 +114,16 @@ export class WalkStateMachine extends StateMachine {
 
     if (haveMoveToNewTile) {
       // 检查是否有单位可以触
-      BattleEvenetSystem.getInstance().handleEvent(
+      if (this.checkOpGrid!==this.oldGrids[0]) {
+          BattleEvenetSystem.getInstance().handleEvent(
         "moveToNewGridEvent",
         this.owner,
         this.oldGrids
       );
+      // this.checkOpGrid = this.oldGrids[0];
       if (this.walkType != "step") this.checkOpportunity(this.oldGrids);
+      }
+    
     }
     //
    // console.log("nextpoint", nextPathPoint);
@@ -143,6 +151,7 @@ export class WalkStateMachine extends StateMachine {
       direction = dy > 0 ? 2 : 3; // 2向下, 3向上
     } else if (dx == 0 && dy == 0) {
       // 如果没有移动，直接返回
+      this.checkOpGrid=null
     }
 
     unit.direction = direction;

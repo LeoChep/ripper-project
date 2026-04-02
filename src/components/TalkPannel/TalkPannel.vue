@@ -355,12 +355,12 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 角色立绘层 - galgame 风格 */
+/* 角色立绘层 - 位于对话框左侧 */
 .character-portrait {
   position: absolute;
-  left: v-bind('appSetting.width / 2 + "px"');
-  top: v-bind('appSetting.height / 2 + "px"');
-  transform: translate(-50%, -50%);
+  left: v-bind('(appSetting.width / 2 - 430) + "px"');
+  top: v-bind('(appSetting.height / 2 + 220) + "px"');
+  transform: translateY(-50%);
   z-index: 9;
   pointer-events: none;
   width: 0;
@@ -369,15 +369,17 @@ onMounted(() => {
 
 .portrait-container {
   position: absolute;
-  left: 50%;
+  left: 0;
   top: 50%;
-  transform: translate(-50%, -70%);
-  width: 400px;
-  height: 500px;
+  transform: translate(-50%, -50%);
+  width: 260px;
+  height: 325px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: visible;
+  z-index: 11;
+  pointer-events: none;
 }
 
 .portrait-container::before {
@@ -422,16 +424,16 @@ onMounted(() => {
   letter-spacing: 2px;
 }
 
-/* 对话框（位于角色头像下方） */
+
 .talk-window-portrait {
   position: absolute;
   top: v-bind('talkWindowTop + "px"');
-  left: v-bind('appSetting.width / 2 + "px"');
+  left: v-bind('(appSetting.width / 2 +50) + "px"');
   transform: translateX(-50%);
   width: auto;
   min-width: 800px;
   max-width: 1200px;
-  min-height: 250px;
+  height: 250px;
   background-image: v-bind('"url(" + testTalkUIImg + ")"');
   background-size: 100% 100%;
   pointer-events: auto;
@@ -452,7 +454,8 @@ onMounted(() => {
   justify-content: center;
   padding: inherit;
   min-height: 40px;
-  flex: 1;
+  max-height: 120px;
+  overflow: hidden;
 }
 
 .talk-content-portrait p {
@@ -479,6 +482,8 @@ onMounted(() => {
   align-items: center;
   border-top: 2px solid rgba(26, 26, 26, 0.2);
   padding-top: 20px;
+  max-height: 80px;
+  overflow-y: auto;
 }
 
 /* 单个选项样式 */
