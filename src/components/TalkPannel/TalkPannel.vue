@@ -430,9 +430,7 @@ onMounted(() => {
   top: v-bind('talkWindowTop + "px"');
   left: v-bind('(appSetting.width / 2 +50) + "px"');
   transform: translateX(-50%);
-  width: auto;
-  min-width: 800px;
-  max-width: 1200px;
+  width: 800px;
   height: 250px;
   background-image: v-bind('"url(" + testTalkUIImg + ")"');
   background-size: 100% 100%;
@@ -450,12 +448,13 @@ onMounted(() => {
   width: 100%;
   text-align: center;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   padding: inherit;
   min-height: 40px;
   max-height: 120px;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .talk-content-portrait p {
@@ -465,8 +464,9 @@ onMounted(() => {
   text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.4);
   line-height: 1.8;
   margin: 0;
-  padding: 0 40px;
-
+  padding: 0 20px;
+  width: 100%;
+  box-sizing: border-box;
   word-wrap: break-word;
   white-space: pre-wrap;
   font-weight: normal;
@@ -484,6 +484,29 @@ onMounted(() => {
   padding-top: 20px;
   max-height: 80px;
   overflow-y: auto;
+}
+
+/* 滚动条样式 */
+.talk-content-portrait::-webkit-scrollbar,
+.portrait-options::-webkit-scrollbar {
+  width: 8px;
+}
+
+.talk-content-portrait::-webkit-scrollbar-track,
+.portrait-options::-webkit-scrollbar-track {
+  background: rgba(26, 26, 26, 0.1);
+  border-radius: 4px;
+}
+
+.talk-content-portrait::-webkit-scrollbar-thumb,
+.portrait-options::-webkit-scrollbar-thumb {
+  background: rgba(26, 26, 26, 0.3);
+  border-radius: 4px;
+}
+
+.talk-content-portrait::-webkit-scrollbar-thumb:hover,
+.portrait-options::-webkit-scrollbar-thumb:hover {
+  background: rgba(26, 26, 26, 0.5);
 }
 
 /* 单个选项样式 */
