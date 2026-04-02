@@ -392,7 +392,7 @@ onMounted(() => {
   background-image: v-bind('"url(" + initAvatarBoxImg + ")"');
   background-size: 100% 100%;
   background-repeat: no-repeat;
-  z-index: 2;
+  z-index: 12;
   pointer-events: none;
 }
 

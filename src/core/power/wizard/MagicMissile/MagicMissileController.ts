@@ -21,6 +21,7 @@ import { toward } from "@/core/anim/UnitAnimSprite";
 import { LightParticle } from "@/core/anim/particle/LightParticle";
 import * as PIXI from "pixi.js";
 import { AbilityValueSystem } from "@/core/system/AbilitiyValueSystem";
+import { ControllerHelper } from "../../../controller/ControllerHelper";
 
 export class MagicMissileController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -65,15 +66,31 @@ export class MagicMissileController extends AbstractPwoerController {
     const promise = new Promise((resolve) => {
       resolveCallback = resolve;
     });
+
+    const controllerFullName = this.powerName + "Controller";
     const selector = BasicSelector.getInstance().selectBasic(
       grids,
       1,
       "red",
       true,
-      () => true
+      () => true,
+      this.selectedCharacter || undefined,
+      controllerFullName
     );
     this.graphics = selector.graphics;
-    this.removeFunction = selector.removeFunction;
+
+    // 使用 ControllerHelper 创建标准的 removeFunction
+    this.removeFunction = ControllerHelper.createRemoveFunction(
+      controllerFullName,
+      this.graphics,
+      () => {
+        this.graphics = null;
+      }
+    );
+
+    // 注册控制器到 ControllerCancelHandler
+    ControllerHelper.registerController(controllerFullName, this);
+
     const result = await selector.promise;
     console.log("icerays", result);
     const selected = result.selected;

@@ -21,6 +21,7 @@ import { segmentsIntersect } from "@/core/utils/MathUtil";
 import type { TiledMap } from "@/core/MapClass";
 import { useAction } from "@/core/system/InitiativeSystem";
 import * as AttackSystem from "@/core/system/AttackSystem";
+import { ControllerHelper } from "../../../controller/ControllerHelper";
 
 export class ChargeAttackController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -130,6 +131,7 @@ export class ChargeAttackController extends AbstractPwoerController {
       canCharge = true;
     };
     // 执行攻击选择逻辑
+    const controllerFullName = this.powerName + "Controller";
     const basicAttackSelector = BasicLineSelector.getInstance().selectBasic(
       grids,
       1,
@@ -143,7 +145,19 @@ export class ChargeAttackController extends AbstractPwoerController {
     );
     MessageTipSystem.getInstance().setMessage("请选择主目标");
     this.graphics = BasicSelector.getInstance().graphics;
-    this.removeFunction = basicAttackSelector.removeFunction;
+
+    // 使用 ControllerHelper 创建标准的 removeFunction
+    this.removeFunction = ControllerHelper.createRemoveFunction(
+      controllerFullName,
+      this.graphics,
+      () => {
+        this.graphics = null;
+      }
+    );
+
+    // 注册控制器到 ControllerCancelHandler
+    ControllerHelper.registerController(controllerFullName, this);
+
     let resolveCallback = (result: any) => {};
     const promise = new Promise((resolve) => {
       resolveCallback = resolve;

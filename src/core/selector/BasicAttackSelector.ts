@@ -117,13 +117,13 @@ export class BasicAttackSelector {
       e.stopPropagation();
 
       if (selector.canCancel && selector.selected.length === 0) {
-      removeGraphics();
-      resolveCallback({ cancel: true });
+        removeGraphics();
+        resolveCallback({ cancel: true });
       } else if (selector.selected.length > 0) {
-      selector.selected.pop();
-      MessageTipSystem.getInstance().setBottomMessage(
-        `已选择 ${this.selected.length}/${this.selecteNum} 个目标`
-      );
+        selector.selected.pop();
+        MessageTipSystem.getInstance().setBottomMessage(
+          `已选择 ${this.selected.length}/${this.selecteNum} 个目标`
+        );
       }
     });
 
@@ -131,14 +131,14 @@ export class BasicAttackSelector {
     const msRemoveG = (e: { stopPropagation: () => void }) => {
       e.stopPropagation();
       if (selector.canCancel && selector.selected.length === 0) {
-      removeGraphics();
-      resolveCallback({ cancel: true });
-      ms?.off("rightdown", msRemoveG);
+        removeGraphics();
+        resolveCallback({ cancel: true });
+        ms?.off("rightdown", msRemoveG);
       } else if (selector.selected.length > 0) {
-      selector.selected.pop();
-      MessageTipSystem.getInstance().setBottomMessage(
-        `已选择 ${this.selected.length}/${this.selecteNum} 个目标`
-      );
+        selector.selected.pop();
+        MessageTipSystem.getInstance().setBottomMessage(
+          `已选择 ${this.selected.length}/${this.selecteNum} 个目标`
+        );
       }
     };
     ms?.on("rightdown", msRemoveG);

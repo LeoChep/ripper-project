@@ -35,8 +35,7 @@ export class MoveSelector {
     },
     unit: Unit,
     canCancel: boolean = true,
-    checkPassiable: (gridX: number, gridY: number) => boolean = () => true,
-    onCancel: () => void = () => {}
+    checkPassiable: (gridX: number, gridY: number) => boolean = () => true
   ): MoveSelector {
     const selector = MoveSelector.getInstance();
     selector.canCancel = canCancel;
@@ -94,7 +93,7 @@ export class MoveSelector {
     // 右键取消选择
     graphics.on("rightdown", (e) => {
       e.stopPropagation();
-        onCancel();
+
       if (selector.canCancel && selector.selected.length === 0) {
         removeGraphics();
         resolveCallback({ cancel: true });
@@ -109,7 +108,7 @@ export class MoveSelector {
     const ms = golbalSetting.mapContainer;
     const msRemoveG = (e: { stopPropagation: () => void }) => {
       if (e.stopPropagation)
-      e.stopPropagation();
+        e.stopPropagation();
       if (selector.canCancel) {
         removeGraphics();
         resolveCallback({ cancel: true });

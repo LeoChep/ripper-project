@@ -30,6 +30,7 @@ import { BuffSystem } from "@/core/system/BuffSystem";
 import { OrbmastersIncendiaryDetonation } from "@/core/power/wizard/OrbmastersIncendiaryDetonation/OrbmastersIncendiaryDetonation";
 import { OrbmastersIncendiaryDetonationDamageEvent } from "@/core/power/wizard/OrbmastersIncendiaryDetonation/OrbmastersIncendiaryDetonationDamageEvent";
 import { BlastSelector } from "@/core/selector/BlastSelector";
+import { ControllerHelper } from "../../../controller/ControllerHelper";
 
 export class OrbmastersIncendiaryDetonationController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -64,16 +65,32 @@ export class OrbmastersIncendiaryDetonationController extends AbstractPwoerContr
     const promise = new Promise((resolve) => {
       resolveCallback = resolve;
     });
+
+    const controllerFullName = this.powerName + "Controller";
     const selector = BrustSelector.getInstance().selectBasic(
       grids,
       1,
       1,
       "yellow",
       "red",
-
       true,
       () => true
     );
+
+    this.graphics = selector.graphics;
+
+    // 使用 ControllerHelper 创建标准的 removeFunction
+    this.removeFunction = ControllerHelper.createRemoveFunction(
+      controllerFullName,
+      this.graphics,
+      () => {
+        this.graphics = null;
+      }
+    );
+
+    // 注册控制器到 ControllerCancelHandler
+    ControllerHelper.registerController(controllerFullName, this);
+
     // const selector = BlastSelector.getInstance().selectBlast(
     //   [{ x, y }],
     //   3,

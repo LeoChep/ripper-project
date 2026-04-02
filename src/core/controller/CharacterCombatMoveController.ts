@@ -1,7 +1,6 @@
 import { ModifierSystem } from './../system/ModifierSystem';
 import * as PIXI from "pixi.js";
 import { Unit } from "../units/Unit";
-import { MessageTipSystem } from "../system/MessageTipSystem";
 import * as UnitMoveSystem from "../system/UnitMoveSystem";
 
 import { generateWays } from "../utils/PathfinderUtil";
@@ -11,9 +10,9 @@ import { useInitiativeStore } from "@/stores/initiativeStore";
 import * as envSetting from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
-import { endTurn } from "../system/InitiativeSystem";
 import { MoveSelector } from "../selector/MoveSeletor";
 import { tileSize } from '../envSetting';
+import { ControllerHelper } from "./ControllerHelper";
 
 type Rlayer = {
   basicLayer: PIXI.IRenderLayer;
@@ -84,7 +83,6 @@ export class CharCombatMoveController {
       },
     });
     // 绘制可移动范围
-    let isCancel=false;
     const selector = MoveSelector.getInstance().selectBasic(
       path,
       unit,
@@ -93,14 +91,21 @@ export class CharCombatMoveController {
         if (!path[`${gridx},${gridy}`]) {
           return false;
         } else return true;
-      },
-      ()=>{
-        isCancel=true;
       }
     );
 
     this.graphics = selector.graphics;
-    this.removeFunction = selector.removeFunction;
+
+    // 使用 ControllerHelper 创建标准的 removeFunction 并注册控制器
+    this.removeFunction = ControllerHelper.createRemoveFunction(
+      "moveController",
+      this.graphics,
+      () => {
+        this.graphics = null;
+      }
+    );
+    ControllerHelper.registerController("moveController", this);
+
     const result = await selector.promise;
 
     if (result.cancel !== true) {
@@ -128,17 +133,9 @@ export class CharCombatMoveController {
           walkMachine.onDivideWalk = false;
         }
       }
-    } else if (isCancel) {
-      const useConfirm = await MessageTipSystem.getInstance().confirm("是否结束回合？");
-      if (!useConfirm) {
-        
-        return;
-      }
-
-      this.removeFunction = () => {};
-      endTurn(unit);
     }
-    return selector.promise;
+
+    return result;
   };
   removeFunction = (args?: any) => {};
   // 添加你的方法和属性

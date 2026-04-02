@@ -8,6 +8,7 @@ import { useStandAction } from "@/core/system/InitiativeSystem";
 import { BasicAttackSelector } from "@/core/selector/BasicAttackSelector";
 
 import type { FederatedPointerEvent } from "pixi.js";
+import { ControllerHelper } from "../../../controller/ControllerHelper";
 
 export class LungingStrikeController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -41,6 +42,8 @@ export class LungingStrikeController extends AbstractPwoerController {
       range: attack.range,
       color: "red",
     });
+
+    this.graphics = basicAttackSelector.graphics;
     this.removeFunction = basicAttackSelector.removeFunction;
     let resolveCallback = (result: any) => {};
     const promise = new Promise((resolve) => {

@@ -9,6 +9,7 @@ import * as envSetting from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import type { WalkStateMachine } from "../stateMachine/WalkStateMachine";
 import { tileSize } from "../envSetting";
+import { ControllerCancelHandler, CancelReason } from "../utils/ControllerCancelHandler";
 
 export class CharCombatStepController {
   public static isUse: boolean = false;
@@ -133,11 +134,7 @@ export class CharCombatStepController {
         typeof unit.initiative.moveActionNumber === "number"
       ) {
         unit.initiative.moveActionNumber = unit.initiative.moveActionNumber - 1;
-        useInitiativeStore().updateActionNumbers(
-          unit.initiative.standerActionNumber,
-          unit.initiative.minorActionNumber,
-          unit.initiative.moveActionNumber,
-        );
+    
         console.log(`剩余移动次数: ${unit.initiative.moveActionNumber}`);
         if (result.least > 0) {
           walkMachine.leastDivideSpeed = result.least;
@@ -150,24 +147,61 @@ export class CharCombatStepController {
     });
 
     // 右键取消选择
-    graphics.on("rightdown", (e) => {
+    graphics.on("rightdown", async (e) => {
       e.stopPropagation();
       console.log("rightdown on graphics");
+
+      const handler = ControllerCancelHandler.getInstance();
+      const context = {
+        fromController: "stepController",
+        toController: "moveController",
+        reason: CancelReason.USER_CANCEL,
+        unit: unit
+      };
+
+      const decision = await handler.handleCancel(context);
+
       removeGraphics();
       this.graphics = null;
-      resolveCallback({ cancel: true });
+
+      if (decision.shouldEndTurn) {
+        resolveCallback({ cancel: true, shouldEndTurn: true });
+      } else if (decision.shouldSwitchToMove) {
+        resolveCallback({ cancel: true, shouldEndTurn: false, switchToMove: true });
+      } else {
+        resolveCallback({ cancel: true });
+      }
     });
 
     // 右键区域外取消
     const ms = golbalSetting.mapContainer;
-    const msRemoveG = (e: { stopPropagation: () => void }) => {
+    const msRemoveG = async (e: { stopPropagation: () => void }) => {
       if (e?.stopPropagation) {
         e.stopPropagation();
       }
       console.log("rightdown outside graphics");
+
+      const handler = ControllerCancelHandler.getInstance();
+      const context = {
+        fromController: "stepController",
+        toController: "moveController",
+        reason: CancelReason.USER_CANCEL,
+        unit: unit
+      };
+
+      const decision = await handler.handleCancel(context);
+
       removeGraphics();
       this.graphics = null;
-      resolveCallback({ cancel: true });
+
+      if (decision.shouldEndTurn) {
+        resolveCallback({ cancel: true, shouldEndTurn: true });
+      } else if (decision.shouldSwitchToMove) {
+        resolveCallback({ cancel: true, shouldEndTurn: false, switchToMove: true });
+      } else {
+        resolveCallback({ cancel: true });
+      }
+
       ms?.off("rightdown", msRemoveG);
     };
     ms?.on("rightdown", msRemoveG);

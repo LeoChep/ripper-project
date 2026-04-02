@@ -15,6 +15,8 @@ import { WeaponSystem } from "../system/WeaponSystem";
 import { CharCombatStepController } from "./CharacterCombatStepController";
 import { CharacterCombatDelayControlle } from "./CharacterCombatDelayControlle";
 import { CharacterCombatStandController } from "./CharacterCombatStandController";
+import { ControllerCancelHandler } from "../utils/ControllerCancelHandler";
+import { ControllerHelper } from "./ControllerHelper";
 export class CharacterCombatController {
   public inUse: boolean = false;
   public static instance: CharacterCombatController | null = null;
@@ -43,13 +45,10 @@ export class CharacterCombatController {
     ) {
       return;
     }
-    const cancelInfo = {
-      from: "moveConrotller",
-      cancel: true,
-    };
-    CharCombatAttackController.instense?.removeFunction(cancelInfo);
-    CharCombatStepController.instense?.removeFunction(cancelInfo);
-    this.powerController?.removeFunction(cancelInfo);
+
+    // 启动新控制器前，取消所有其他控制器的显示
+    ControllerCancelHandler.getInstance().cancelAllControllers();
+
     let moveController = CharCombatMoveController.instense;
     if (!moveController) {
       moveController = new CharCombatMoveController();
@@ -57,21 +56,11 @@ export class CharacterCombatController {
     }
     moveController.selectedCharacter = this.selectedCharacter;
     const move = moveController.moveSelect();
-    move.then((result) => {
+    move.then(async (result) => {
       console.log("moveSelect result", result);
-      if (result?.cancel === false) {
-        this.setUnDelay();
-        if (walkMachine.onDivideWalk === true) {
-          setTimeout(() => {
-            this.useMoveController();
-          }, 50);
-        }
-      } else if (!result) {
-        console.log("moveSelect result", result);
-        setTimeout(() => {
-          this.useMoveController();
-        }, 50);
-      }
+
+      // 使用 ControllerHelper 处理移动控制器结果
+      await ControllerHelper.handleMoveControllerResult(result, this.selectedCharacter, this);
     });
   }
   preCheck() {
@@ -107,14 +96,10 @@ export class CharacterCombatController {
     if (!InitiativeSystem.checkActionUseful(this.selectedCharacter, "move")) {
       return;
     }
-    const cancelInfo = {
-      from: "standController",
-      cancel: true,
-    };
-    console.log("useStandController cancelInfo", cancelInfo);
-    CharCombatAttackController.instense?.removeFunction(cancelInfo);
-    CharCombatStepController.instense?.removeFunction(cancelInfo);
-    this.powerController?.removeFunction(cancelInfo);
+
+    // 启动新控制器前，取消所有其他控制器的显示
+    ControllerCancelHandler.getInstance().cancelAllControllers();
+
     let standController = CharacterCombatStandController.getInstance();
     standController.selectedCharacter = this.selectedCharacter;
     console.log("useStandController selectedCharacter", this.selectedCharacter);
@@ -140,13 +125,10 @@ export class CharacterCombatController {
     ) {
       return;
     }
-    const cancelInfo = {
-      from: power.name + "Controller",
-      cancel: true,
-    };
-    CharCombatAttackController.instense?.removeFunction(cancelInfo);
-    CharCombatMoveController.instense?.removeFunction(cancelInfo);
-    this.powerController?.removeFunction(cancelInfo);
+
+    // 启动新控制器前，取消所有其他控制器的显示
+    ControllerCancelHandler.getInstance().cancelAllControllers();
+
     const powerController = await PowerSystem.getInstance().getController(
       power.name
     );
@@ -160,17 +142,12 @@ export class CharacterCombatController {
     this.inUsePower = true;
     powerController.doSelect().then((result) => {
       console.log("powerController result", result);
-      if (!result.cancel && InitiativeSystem.isInBattle()) {
-        this.resetDivideWalk();
-        powerController.use();
-        this.setUnDelay();
-      }
-      this.inUsePower = false;
-      setTimeout(() => {
-        if (!result.from && InitiativeSystem.isInBattle()) {
-          this.useMoveController();
-        }
-      }, 90);
+
+      // 使用 ControllerHelper 处理标准控制器结果
+      ControllerHelper.handleStandardControllerResult(result, this, {
+        value: this.inUsePower,
+        set: (v: boolean) => { this.inUsePower = v; }
+      });
     });
   }
   useAttackController() {
@@ -182,14 +159,9 @@ export class CharacterCombatController {
     ) {
       return;
     }
-    const cancelInfo = {
-      from: "atkController",
-      cancel: true,
-    };
-    CharCombatAttackController.instense?.removeFunction(cancelInfo);
-    CharCombatMoveController.instense?.removeFunction(cancelInfo);
-    CharCombatStepController.instense?.removeFunction(cancelInfo);
-    this.powerController?.removeFunction(cancelInfo);
+
+    // 启动新控制器前，取消所有其他控制器的显示
+    ControllerCancelHandler.getInstance().cancelAllControllers();
 
     let atkController = CharCombatAttackController.instense;
     if (!atkController) {
@@ -205,16 +177,9 @@ export class CharacterCombatController {
 
     atkController.attackSelect().then((result) => {
       console.log("attackSelect result", result);
-      if (!result.cancel && InitiativeSystem.isInBattle()) {
-        this.resetDivideWalk();
-        this.setUnDelay();
-      }
 
-      setTimeout(() => {
-        if (!result.from && InitiativeSystem.isInBattle()) {
-          this.useMoveController();
-        }
-      }, 90);
+      // 使用 ControllerHelper 处理标准控制器结果
+      ControllerHelper.handleStandardControllerResult(result, this);
     });
   }
   useStepController() {
@@ -224,15 +189,9 @@ export class CharacterCombatController {
     if (!InitiativeSystem.checkActionUseful(this.selectedCharacter, "move")) {
       return;
     }
-    const cancelInfo = {
-      from: "stepController",
-      cancel: true,
-    };
-    CharCombatStepController.instense?.removeFunction(cancelInfo);
-    CharCombatAttackController.instense?.removeFunction(cancelInfo);
-    CharCombatMoveController.instense?.removeFunction(cancelInfo);
-    CharCombatStepController.instense?.removeFunction(cancelInfo);
-    this.powerController?.removeFunction(cancelInfo);
+
+    // 启动新控制器前，取消所有其他控制器的显示
+    ControllerCancelHandler.getInstance().cancelAllControllers();
 
     let controller = CharCombatStepController.instense;
     if (!controller) {
@@ -243,16 +202,9 @@ export class CharacterCombatController {
 
     controller.moveSelect().then((result) => {
       console.log("attackSelect result", result);
-      if (!result.cancel && InitiativeSystem.isInBattle()) {
-        this.resetDivideWalk();
-        this.setUnDelay();
-      }
 
-      setTimeout(() => {
-        if (!result.from && InitiativeSystem.isInBattle()) {
-          this.useMoveController();
-        }
-      }, 90);
+      // 使用 ControllerHelper 处理标准控制器结果
+      ControllerHelper.handleStandardControllerResult(result, this);
     });
   }
   useDelayController() {
@@ -265,15 +217,9 @@ export class CharacterCombatController {
     // if (!InitiativeSystem.checkActionUseful(this.selectedCharacter, "move")) {
     //   return;
     // }
-    const cancelInfo = {
-      from: "delayController",
-      cancel: true,
-    };
-    CharCombatStepController.instense?.removeFunction(cancelInfo);
-    CharCombatAttackController.instense?.removeFunction(cancelInfo);
-    CharCombatMoveController.instense?.removeFunction(cancelInfo);
-    CharCombatStepController.instense?.removeFunction(cancelInfo);
-    this.powerController?.removeFunction(cancelInfo);
+
+    // 启动新控制器前，取消所有其他控制器的显示
+    ControllerCancelHandler.getInstance().cancelAllControllers();
 
     let controller = CharacterCombatDelayControlle.instense;
     if (!controller) {

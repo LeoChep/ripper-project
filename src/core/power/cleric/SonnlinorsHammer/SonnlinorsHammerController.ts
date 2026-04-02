@@ -11,6 +11,7 @@ import type { FederatedPointerEvent } from "pixi.js";
 import { SonnlinorsHammerDamageDown } from "@/core/power/cleric/SonnlinorsHammer/SonnlinorsHammerDamageDown";
 import { BuffSystem } from "@/core/system/BuffSystem";
 import { EndTurnRemoveBuffEvent } from "@/core/event/EndTurnRemoveBuffEvent";
+import { ControllerHelper } from "../../../controller/ControllerHelper";
 
 export class SonnlinorsHammerController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -44,6 +45,8 @@ export class SonnlinorsHammerController extends AbstractPwoerController {
       range: attack.range,
       color: "red",
     });
+
+    this.graphics = basicAttackSelector.graphics;
     this.removeFunction = basicAttackSelector.removeFunction;
     let resolveCallback = (result: any) => {};
     const promise = new Promise((resolve) => {

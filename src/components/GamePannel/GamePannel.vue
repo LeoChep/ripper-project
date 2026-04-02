@@ -105,15 +105,28 @@ onMounted(async () => {
 
   //初始化玩家角色
 
-  // 单位状态机更新循环
-  setInterval(() => {
-    const units = golbalSetting.map?.sprites;
-    // console.log("单位状态机更新循环", units, golbalSetting);
-    if (!units) return;
-    units.forEach((unit) => {
-      unit.stateMachinePack.doAction();
-    });
-  }, 1000 / 30); // 每秒30帧
+  // 单位状态机更新循环（优化：使用 requestAnimationFrame）
+  let lastUpdateTime = 0;
+  const UPDATE_INTERVAL = 50; // 20fps instead of 30fps，降低频率以优化性能
+
+  const gameLoop = (timestamp: number) => {
+    if (timestamp - lastUpdateTime >= UPDATE_INTERVAL) {
+      const units = golbalSetting.map?.sprites;
+      // console.log("单位状态机更新循环", units, golbalSetting);
+      if (!units) {
+        requestAnimationFrame(gameLoop);
+        return;
+      }
+      units.forEach((unit) => {
+        unit.stateMachinePack.doAction();
+      });
+      lastUpdateTime = timestamp;
+    }
+    requestAnimationFrame(gameLoop);
+  };
+
+  // 启动游戏循环
+  requestAnimationFrame(gameLoop);
 
   // 检查是否需要从存档加载
   const loadSlot = route.query.loadSlot;

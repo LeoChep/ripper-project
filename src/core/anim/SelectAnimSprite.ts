@@ -10,6 +10,8 @@ export class SelectAnimSprite extends Container {
   private borderThickness: number = 3;
   private unitWidth: number;
   private unitHeight: number;
+  private _isDirty: boolean = false; // 脏标志，用于优化渲染
+  private _lastAlpha: number = -1; // 缓存上次的 alpha 值
 
   constructor(width: number = tileSize, height: number = tileSize) {
     super();
@@ -79,13 +81,23 @@ export class SelectAnimSprite extends Container {
   }
 
   select() {
-    this.selected = true;
-    this.animationTime = 0;
+    if (!this.selected) {
+      this.selected = true;
+      this.animationTime = 0;
+      this._isDirty = true;
+      this.borderGraphics.alpha = 1; // 立即显示
+      this.fillGraphics.alpha = 0.1;
+    }
   }
 
   deselect() {
-    this.selected = false;
-    this.animationTime = 0;
+    if (this.selected) {
+      this.selected = false;
+      this.animationTime = 0;
+      this._isDirty = true;
+      this.borderGraphics.alpha = 0; // 立即隐藏
+      this.fillGraphics.alpha = 0;
+    }
   }
 
   isSelected(): boolean {
@@ -94,19 +106,21 @@ export class SelectAnimSprite extends Container {
 
   // 更新动画（需要在游戏循环中调用）
   update(delta: number = 1) {
-    if (this.selected) {
-      this.animationTime += this.animationSpeed * delta;
+    // 早期退出：未选中时不进行任何计算
+    if (!this.selected) {
+      return;
+    }
 
-      // 呼吸效果：alpha 在 0.6 到 1.0 之间变化
-      const pulse = Math.sin(this.animationTime) * 0.2 + 0.8;
+    this.animationTime += this.animationSpeed * delta;
+
+    // 呼吸效果：alpha 在 0.6 到 1.0 之间变化
+    const pulse = Math.sin(this.animationTime) * 0.2 + 0.8;
+
+    // 只在 alpha 值显著变化时才重绘（优化性能）
+    if (Math.abs(pulse - this._lastAlpha) > 0.01) {
+      this._lastAlpha = pulse;
       this.updateBorder(pulse);
-
-      // 填充也跟随呼吸
       this.fillGraphics.alpha = pulse * 0.15;
-    } else {
-      // 未选中时保持静态
-      this.fillGraphics.alpha = 0;
-      this.borderGraphics.alpha = 0;
     }
   }
 }

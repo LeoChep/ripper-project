@@ -5,10 +5,12 @@ import * as PIXI from "pixi.js";
 import * as envSetting from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import { MessageTipSystem } from "../system/MessageTipSystem";
+
 export class BasicSelector {
   public graphics: PIXI.Graphics | null = null;
   public removeFunction: (input: any) => void = () => {};
   public promise: Promise<any> | null = null;
+
   static getInstance(): BasicSelector {
     if (BasicSelector.instance) {
       return BasicSelector.instance;
@@ -16,10 +18,12 @@ export class BasicSelector {
     BasicSelector.instance = new BasicSelector();
     return BasicSelector.instance;
   }
+
   public canCancel: boolean = true;
   public selected: { x: number; y: number }[] = [];
   public selecteNum: number = 0;
   private static instance: BasicSelector | null = null;
+
   // 选择基本攻击
   public selectBasic(
     grids: {
@@ -38,23 +42,28 @@ export class BasicSelector {
     selector.canCancel = canCancel;
     selector.selected = [];
     selector.selecteNum = selectNum;
+
     MessageTipSystem.getInstance().setBottomMessage(
       `已选择 ${this.selected.length}/${this.selecteNum} 个目标`
     );
+
     // 选择逻辑
     const path = grids;
     console.log("path", path);
     this.drawGrids(path, color);
+
     selector.promise = Promise.resolve({});
     let resolveCallback: (arg0: any) => void = () => {};
     const promise = new Promise<any>((resolve) => {
       resolveCallback = resolve;
     });
+
     const graphics = selector.graphics;
     if (!graphics) {
       console.warn("Graphics not found in BasicSelector.");
       return selector;
     }
+
     const removeGraphics = () => {
       MessageTipSystem.getInstance().clearBottomMessage();
       MessageTipSystem.getInstance().clearMessage();
@@ -95,12 +104,13 @@ export class BasicSelector {
         });
       }
     });
-    // 点击其他地方移除移动范围
 
+    // 点击其他地方移除移动范围
     selector.removeFunction = (input: any) => {
       removeGraphics();
       resolveCallback(input);
     };
+
     // 右键取消选择
     graphics.on("rightdown", (e) => {
       e.stopPropagation();
@@ -115,7 +125,8 @@ export class BasicSelector {
         );
       }
     });
-    //右键区域外
+
+    // 右键区域外
     const ms = golbalSetting.mapContainer;
     const msRemoveG = (e: { stopPropagation: () => void }) => {
       e.stopPropagation();
@@ -131,9 +142,11 @@ export class BasicSelector {
       }
     };
     ms?.on("rightdown", msRemoveG);
+
     selector.promise = promise;
     return selector;
   }
+
   drawGrids = (
     grids: { [key: string]: { x: number; y: number; step: number } | null },
     color: string
@@ -142,6 +155,7 @@ export class BasicSelector {
     this.graphics = graphics;
     graphics.alpha = 0.4;
     graphics.zIndex = envSetting.zIndexSetting.spriteZIndex;
+
     // 绘制可移动范围
     graphics.clear();
     if (grids) {
@@ -153,6 +167,7 @@ export class BasicSelector {
         graphics.fill({ color: color });
       });
     }
+
     // path 是一个以 "x,y" 为 key 的对象，记录每个格子的前驱节点
     graphics.eventMode = "static";
     const container = golbalSetting.spriteContainer;
@@ -164,14 +179,18 @@ export class BasicSelector {
       console.warn("Sprite layer not found in global settings.");
       return this;
     }
+
     golbalSetting.rlayers.spriteLayer.attach(graphics);
     container.addChild(graphics);
+
     return this;
   };
+
   getXY = (x: number, y: number): { x: number; y: number } => {
     const resultX = Math.floor(x / tileSize);
     const resultY = Math.floor(y / tileSize);
     return { x: resultX, y: resultY };
   };
+
   // 生成可移动范围
 }

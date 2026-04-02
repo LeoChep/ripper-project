@@ -32,6 +32,7 @@ import { OrbmastersIncendiaryDetonation } from "@/core/power/wizard/OrbmastersIn
 import { OrbmastersIncendiaryDetonationDamageEvent } from "@/core/power/wizard/OrbmastersIncendiaryDetonation/OrbmastersIncendiaryDetonationDamageEvent";
 import { BlastSelector } from "@/core/selector/BlastSelector";
 import { DivineGlowAttackBonusUp } from "@/core/power/cleric/DivineGlow/DivineGlowAttackBonusUp";
+import { ControllerHelper } from "../../../controller/ControllerHelper";
 
 export class DivineGlowController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -61,6 +62,7 @@ export class DivineGlowController extends AbstractPwoerController {
       resolveCallback = resolve;
     });
 
+    const controllerFullName = this.powerName + "Controller";
     const selector = BlastSelector.getInstance().selectBlast(
       [{ x, y }],
       3,
@@ -70,7 +72,19 @@ export class DivineGlowController extends AbstractPwoerController {
       true
     );
     this.graphics = selector.graphics;
-    this.removeFunction = selector.removeFunction;
+
+    // 使用 ControllerHelper 创建标准的 removeFunction
+    this.removeFunction = ControllerHelper.createRemoveFunction(
+      controllerFullName,
+      this.graphics,
+      () => {
+        this.graphics = null;
+      }
+    );
+
+    // 注册控制器到 ControllerCancelHandler
+    ControllerHelper.registerController(controllerFullName, this);
+
     const result = await selector.promise;
 
     if (result.cancel !== true) {

@@ -12,6 +12,7 @@ import { HearteningStrikeAimBuff } from "@/core/power/cleric/HearteningStrike/He
 import { BuffSystem } from "@/core/system/BuffSystem";
 import { HearteningStrikeAimEvent } from "@/core/power/cleric/HearteningStrike/HearteningStrikeAimEvent";
 import { HearteningStrikeTimerEvent } from "@/core/power/cleric/HearteningStrike/HearteningStrikeTimerEvent";
+import { ControllerHelper } from "../../../controller/ControllerHelper";
 
 export class HearteningStrikeController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -37,12 +38,25 @@ export class HearteningStrikeController extends AbstractPwoerController {
     };
     const attack = AttackSystem.createAttack(attackParams);
     // 执行攻击选择逻辑
+    const controllerFullName = this.powerName + "Controller";
     const basicAttackSelector = BasicAttackSelector.getInstance().selectBasic({
       unit: unit,
       range: attack.range,
       color: "red",
     });
-    this.removeFunction = basicAttackSelector.removeFunction;
+
+    // 使用 ControllerHelper 创建标准的 removeFunction
+    this.removeFunction = ControllerHelper.createRemoveFunction(
+      controllerFullName,
+      basicAttackSelector.graphics,
+      () => {
+        this.graphics = null;
+      }
+    );
+
+    // 注册控制器到 ControllerCancelHandler
+    ControllerHelper.registerController(controllerFullName, this);
+
     let resolveCallback = (result: any) => {};
     const promise = new Promise((resolve) => {
       resolveCallback = resolve;

@@ -3,6 +3,8 @@ import { useAction } from "@/core/system/InitiativeSystem";
 import type { Unit } from "@/core/units/Unit";
 
 import * as PIXI from "pixi.js";
+import { BasicSelector } from "../selector/BasicSelector";
+import { ControllerHelper } from "./ControllerHelper";
 
 export abstract class AbstractPwoerController {
   static isUse: boolean;
@@ -13,6 +15,46 @@ export abstract class AbstractPwoerController {
   graphics: PIXI.Graphics | null = null;
 
   abstract doSelect: () => Promise<any>;
+
+  /**
+   * 使用 BasicSelector 进行选择的辅助方法
+   * 自动传递 unit 和 controllerName 参数
+   * 自动使用 ControllerHelper 创建 removeFunction
+   */
+  protected selectWithBasicSelector(
+    grids: { [key: string]: { x: number; y: number; step: number } | null },
+    selectNum: number,
+    color: string,
+    canCancel: boolean = true,
+    checkPassiable: (gridX: number, gridY: number) => boolean = () => true
+  ) {
+    const controllerFullName = this.powerName + "Controller";
+    const selector = BasicSelector.getInstance().selectBasic(
+      grids,
+      selectNum,
+      color,
+      canCancel,
+      checkPassiable,
+
+    );
+    this.graphics = selector.graphics;
+
+    // 使用 ControllerHelper 创建标准的 removeFunction
+    this.removeFunction = ControllerHelper.createRemoveFunction(
+      controllerFullName,
+      this.graphics,
+      () => {
+        // 额外的清理：重置 graphics
+        this.graphics = null;
+      }
+    );
+
+    // 注册控制器到 ControllerCancelHandler
+    ControllerHelper.registerController(controllerFullName, this);
+
+    return selector;
+  }
+
   preFix = () => {
     const unit = this.selectedCharacter;
     if (unit === null) {

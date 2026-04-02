@@ -27,6 +27,7 @@ import { ShiftAnim } from "@/core/anim/ShiftAnim";
 import { MessageTipSystem } from "@/core/system/MessageTipSystem";
 import { ShiftSelector } from "@/core/selector/ShiftSelector";
 import { ShiftSystem } from "@/core/system/ShiftSystem";
+import { ControllerHelper } from "../../../controller/ControllerHelper";
 
 export class FreezingBurstController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -61,19 +62,32 @@ export class FreezingBurstController extends AbstractPwoerController {
     const promise = new Promise((resolve) => {
       resolveCallback = resolve;
     });
+
+    const controllerFullName = this.powerName + "Controller";
     const selector = BrustSelector.getInstance().selectBasic(
       grids,
       1,
       1,
       "yellow",
       "red",
-
       true,
       () => true
     );
 
     this.graphics = selector.graphics;
-    this.removeFunction = selector.removeFunction;
+
+    // 使用 ControllerHelper 创建标准的 removeFunction
+    this.removeFunction = ControllerHelper.createRemoveFunction(
+      controllerFullName,
+      this.graphics,
+      () => {
+        this.graphics = null;
+      }
+    );
+
+    // 注册控制器到 ControllerCancelHandler
+    ControllerHelper.registerController(controllerFullName, this);
+
     const result = await selector.promise;
 
     if (result.cancel !== true) {

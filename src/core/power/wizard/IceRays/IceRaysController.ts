@@ -25,6 +25,7 @@ import { EndTurnRemoveBuffEvent } from "@/core/event/EndTurnRemoveBuffEvent";
 import { ModifierSystem } from "@/core/system/ModifierSystem";
 import { AbilityValueSystem } from "@/core/system/AbilitiyValueSystem";
 import { BattleEvenetSystem } from "@/core/system/BattleEventSystem";
+import { ControllerHelper } from "../../../controller/ControllerHelper";
 
 export class IceRaysController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -60,15 +61,31 @@ export class IceRaysController extends AbstractPwoerController {
     const promise = new Promise((resolve) => {
       resolveCallback = resolve;
     });
+
+    const controllerFullName = this.powerName + "Controller";
     const selector = BasicSelector.getInstance().selectBasic(
       grids,
       2,
       "red",
       true,
-      () => true
+      () => true,
+      this.selectedCharacter || undefined,
+      controllerFullName
     );
     this.graphics = selector.graphics;
-    this.removeFunction = selector.removeFunction;
+
+    // 使用 ControllerHelper 创建标准的 removeFunction
+    this.removeFunction = ControllerHelper.createRemoveFunction(
+      controllerFullName,
+      this.graphics,
+      () => {
+        this.graphics = null;
+      }
+    );
+
+    // 注册控制器到 ControllerCancelHandler
+    ControllerHelper.registerController(controllerFullName, this);
+
     const result = await selector.promise;
     console.log("icerays", result);
     const selected = result.selected;

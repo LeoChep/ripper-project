@@ -21,6 +21,7 @@ import { tileSize } from "@/core/envSetting";
 import { getBrustRange } from "@/core/utils/MathUtil";
 import { WeaponOfDivineProtectionAreaEffect } from "@/core/power/cleric/WeaponOfDivineProtection/WeaponOfDivineProtectionAreaEffect";
 import { UnitSystem } from "@/core/system/UnitSystem";
+import { ControllerHelper } from "../../../controller/ControllerHelper";
 
 export class WeaponOfDivineProtectionController extends AbstractPwoerController {
   public static isUse: boolean = false;
@@ -54,6 +55,8 @@ export class WeaponOfDivineProtectionController extends AbstractPwoerController 
       range: attack.range,
       color: "red",
     });
+
+    this.graphics = basicAttackSelector.graphics;
     this.removeFunction = basicAttackSelector.removeFunction;
     let resolveCallback = (result: any) => {};
     const promise = new Promise((resolve) => {
