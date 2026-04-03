@@ -30,6 +30,8 @@ export class CharCombatMoveController {
   public static instense = null as CharCombatMoveController | null;
   sizeGraphics: PIXI.Graphics | null = null;
   graphics: PIXI.Graphics | null = null;
+  private isRegistered: boolean = false; // 标记是否已注册
+
   constructor() {
     // 初始化逻辑
   }
@@ -104,7 +106,12 @@ export class CharCombatMoveController {
         this.graphics = null;
       }
     );
-    ControllerHelper.registerController("moveController", this);
+
+    // 只在第一次注册控制器，避免重复注册
+    if (!this.isRegistered) {
+      ControllerHelper.registerController("moveController", this);
+      this.isRegistered = true;
+    }
 
     const result = await selector.promise;
 
@@ -119,11 +126,7 @@ export class CharCombatMoveController {
         typeof unit.initiative.moveActionNumber === "number"
       ) {
         unit.initiative.moveActionNumber = unit.initiative.moveActionNumber - 1;
-        useInitiativeStore().updateActionNumbers(
-          unit.initiative.standerActionNumber,
-          unit.initiative.minorActionNumber,
-          unit.initiative.moveActionNumber
-        );
+
         console.log(`剩余移动次数: ${unit.initiative.moveActionNumber}`);
         if (result.least > 0) {
           walkMachine.leastDivideSpeed = result.least;

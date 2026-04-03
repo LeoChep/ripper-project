@@ -32,7 +32,7 @@ export class CharacterCombatController {
     // 初始化属性
   }
   powerController: AbstractPwoerController | null = null;
-  useMoveController() {
+  useMoveController(skipCancel: boolean = false) {
     if (!this.preCheck() || !this.selectedCharacter) {
       return;
     }
@@ -46,8 +46,10 @@ export class CharacterCombatController {
       return;
     }
 
-    // 启动新控制器前，取消所有其他控制器的显示
-    ControllerCancelHandler.getInstance().cancelAllControllers();
+    // 启动新控制器前，取消所有其他控制器的显示（除非是分次移动）
+    if (!skipCancel) {
+      ControllerCancelHandler.getInstance().cancelAllControllers();
+    }
 
     let moveController = CharCombatMoveController.instense;
     if (!moveController) {

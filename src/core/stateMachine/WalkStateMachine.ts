@@ -21,7 +21,7 @@ export class WalkStateMachine extends StateMachine {
   private pauseMove: boolean = false;
   private haveOpportunity: number[] = [];
   private frameCount: number = 0;
-  private checkOpGrid:{x:number,y:number} | null = null;
+  private checkOpGrid: { x: number; y: number } | null = null;
   public callBack = () => {};
   constructor(unit: Unit) {
     super(unit);
@@ -44,12 +44,11 @@ export class WalkStateMachine extends StateMachine {
   public doAction() {
     if (this.path.length === 0) {
       //console.warn("没有路径可供移动");
-      this.callBack(); // 调用回调函数
-      this.callBack = () => {};
+      // 不要在这里调用 callBack，因为已经在 movefunc 中调用过了
       return;
     }
     if (this.pauseMove) {
-    //  console.log("移动已暂停");
+      //  console.log("移动已暂停");
       return;
     }
     const nextPathPoint = this.path[0];
@@ -65,14 +64,18 @@ export class WalkStateMachine extends StateMachine {
       nextPathPoint.x !== this.currentGrids[0]?.x ||
       nextPathPoint.y !== this.currentGrids[0]?.y
     ) {
-      console.log('nextPathPoint',nextPathPoint,'currentGrids',this.currentGrids)
+      console.log(
+        "nextPathPoint",
+        nextPathPoint,
+        "currentGrids",
+        this.currentGrids
+      );
       haveMoveToNewTile = true;
     }
 
     if (haveMoveToNewTile) {
       this.oldGrids = this.currentGrids;
       this.currentGrids = UnitSystem.getInstance().getUnitGrids(this.owner);
-      
     }
     // const unitX = Math.floor(this.owner.x / tileSize);
     // const unitY = Math.floor(this.owner.y / tileSize);
@@ -114,19 +117,18 @@ export class WalkStateMachine extends StateMachine {
 
     if (haveMoveToNewTile) {
       // 检查是否有单位可以触
-      if (this.checkOpGrid!==this.oldGrids[0]) {
-          BattleEvenetSystem.getInstance().handleEvent(
-        "moveToNewGridEvent",
-        this.owner,
-        this.oldGrids
-      );
-      // this.checkOpGrid = this.oldGrids[0];
-      if (this.walkType != "step") this.checkOpportunity(this.oldGrids);
+      if (this.checkOpGrid !== this.oldGrids[0]) {
+        BattleEvenetSystem.getInstance().handleEvent(
+          "moveToNewGridEvent",
+          this.owner,
+          this.oldGrids
+        );
+        this.checkOpGrid = this.oldGrids[0];
+        if (this.walkType != "step") this.checkOpportunity(this.oldGrids);
       }
-    
     }
     //
-   // console.log("nextpoint", nextPathPoint);
+    // console.log("nextpoint", nextPathPoint);
     const unit = this.owner;
     const spriteUnit = this.owner.animUnit;
 
@@ -143,6 +145,8 @@ export class WalkStateMachine extends StateMachine {
     //设置朝向
     if (Math.abs(dx) < 7 && Math.abs(dy) < 7) {
       // 如果没有移动，直接返回
+         this.checkOpGrid = null;
+        //  alert("已经到达目标点附近，停止移动");
     } else if (Math.abs(dx) >= Math.abs(dy) - 1) {
       // 水平移动
       direction = dx > 0 ? 0 : 1; // 0向右, 1向左
@@ -151,17 +155,16 @@ export class WalkStateMachine extends StateMachine {
       direction = dy > 0 ? 2 : 3; // 2向下, 3向上
     } else if (dx == 0 && dy == 0) {
       // 如果没有移动，直接返回
-      this.checkOpGrid=null
+   
     }
 
     unit.direction = direction;
     this.frameCount++;
+
     if (this.frameCount % 1 === 0) {
-          this.movefunc(unit, nextX, nextY, this.path);
-          this.frameCount = 0;
+      this.movefunc(unit, nextX, nextY, this.path);
+      this.frameCount = 0;
     }
-
-
   }
   clearHaveOpportunity() {
     this.haveOpportunity = [];
@@ -188,6 +191,7 @@ export class WalkStateMachine extends StateMachine {
         distance === 0 ? 0 : (dx / distance) * Math.min(step, Math.abs(dx));
       const stepY =
         distance === 0 ? 0 : (dy / distance) * Math.min(step, Math.abs(dy));
+
       // 更新动画精灵的位置
       spriteUnit.x += stepX;
       spriteUnit.y += stepY;
@@ -243,7 +247,7 @@ export class WalkStateMachine extends StateMachine {
         }
         this.path = []; // 清空路径
         this.owner.state = "idle"; // 设置单位状态为闲置
-        
+
         this.callBack(); // 调用回调函数
         this.callBack = () => {};
       }
@@ -277,6 +281,6 @@ export class WalkStateMachine extends StateMachine {
     }
   };
   public stop(): void {
-      this.path = [];
+    this.path = [];
   }
 }

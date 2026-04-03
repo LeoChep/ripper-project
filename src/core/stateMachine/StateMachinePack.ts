@@ -23,7 +23,7 @@ export class StateMachinePack {
     this.machines.clear();
   }
   public doAction(): void {
-    const name = this.owner.state;
+    let name = this.owner.state;
     const machine = this.getMachine(name);
     const animUnit = this.owner.animUnit;
     if (animUnit) {

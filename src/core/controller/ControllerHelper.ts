@@ -265,8 +265,11 @@ export class ControllerHelper {
       combatController.setUnDelay();
       const walkMachine = unit.stateMachinePack.getMachine("walk");
       if (walkMachine?.onDivideWalk === true) {
+        // 分次移动时，跳过 cancelAllControllers 以避免卡顿
         setTimeout(() => {
-          combatController.useMoveController();
+          if (InitiativeSystem.isInBattle()) {
+            combatController.useMoveController(true);
+          }
         }, 50);
       }
     } else if (!result) {
