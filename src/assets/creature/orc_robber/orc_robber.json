@@ -68,7 +68,7 @@
       "name": "战斗盾牌",
       "type": "Melee",
       "action": "武器",
-      "range": 1,
+      "range": 2,
       "attackBonus": 12,
       "bonus": 1,
       "proficiency": 2,
