@@ -8,6 +8,7 @@ import { ActionAI } from "./actions/ActionAI";
 import { ProneRecoveryAI } from "./actions/ProneRecoveryAI";
 import { AttackPositionAI } from "./actions/AttackPositionAI";
 import { AttackAI } from "./actions/AttackAI";
+import { FarAwayAttackPositionAI } from "./actions/FarAwayAttackPositionAI";
 
 /**
  * 行为树节点类型
@@ -15,6 +16,8 @@ import { AttackAI } from "./actions/AttackAI";
 interface BehaviorNode {
   actionAI: ActionAI;
   enabled: boolean;
+  /** 优先级（可在注册时覆盖） */
+  priority: number;
 }
 
 /**
@@ -34,14 +37,29 @@ export class NormalAI implements AIInterface {
   }
 
   private setupDefaultActions(): void {
-    this.registerAction(new ProneRecoveryAI());   // 优先级100 - 倒地起身
-    this.registerAction(new AttackAI());          // 优先级60 - 攻击
-    this.registerAction(new AttackPositionAI());  // 优先级50 - 移动到攻击位置
+    // 在注册时指定优先级，优先级越高越先执行
+    this.registerAction(new ProneRecoveryAI(), { priority: 100 });      // 倒地起身
+    this.registerAction(new AttackAI(), { priority: 60 });             // 攻击
+    this.registerAction(new AttackPositionAI(), { priority: 50 });     // 移动到攻击位置
+    // this.registerAction(new FarAwayAttackPositionAI(), { priority: 45 }); // 远程攻击位置（风筝）
   }
 
-  registerAction(actionAI: ActionAI, enabled: boolean = true): void {
-    this.actionNodes.push({ actionAI, enabled });
-    this.actionNodes.sort((a, b) => b.actionAI.priority - a.actionAI.priority);
+  /**
+   * 注册一个动作AI
+   * @param actionAI 动作AI实例
+   * @param options 配置选项
+   */
+  registerAction(
+    actionAI: ActionAI,
+    options: { enabled?: boolean; priority?: number } = {}
+  ): void {
+    const { enabled = true, priority } = options;
+    this.actionNodes.push({
+      actionAI,
+      enabled,
+      priority: priority ?? actionAI.priority, // 使用传入的优先级或默认优先级
+    });
+    this.actionNodes.sort((a, b) => b.priority - a.priority);
   }
 
   setActionEnabled(name: string, enabled: boolean): void {
