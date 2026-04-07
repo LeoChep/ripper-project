@@ -22,3 +22,6 @@ export const appSetting = {
 export const interactionSetting = {
     doorClickIntervalMs: 250
 };
+
+// 2.5D 渲染开关
+export const is25dEnabled = true;

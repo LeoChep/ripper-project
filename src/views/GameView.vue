@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import GamePannel from "@/components/GamePannel/GamePannel.vue";
+import pMap from "@/components/pMap/pMap.vue";
 import { useInitiativeStore } from "@/stores/initiativeStore";
 import { onMounted } from "vue";
 import { useRoute } from "vue-router";

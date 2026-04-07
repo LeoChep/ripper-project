@@ -52,7 +52,7 @@ class Road extends Drama {
       .getAllUnits()
       .find((unit) => unit.party === "player");
     const orcBoss = UnitSystem.getInstance().getUnitByName("兽人老大");
-    lookOn(orcBoss!.x - 500, orcBoss?.y);
+   // lookOn(orcBoss!.x - 500, orcBoss?.y);
     await DramaSystem.getInstance().hiddenUnit(player!);
     await unitSpeak("兽人A", "老大，我们在这里真的能打劫到人吗？");
     await unitSpeak(
@@ -87,7 +87,7 @@ class Road extends Drama {
         "drawf_rider_house_car_1"
       );
     drawf_rider_house_car_1!.direction = 0;
-    lookOn(drawf_rider_house_car_1!.x + 500, drawf_rider_house_car_1?.y);
+    //lookOn(drawf_rider_house_car_1!.x + 500, drawf_rider_house_car_1?.y);
     await unHiddenUnit(drawf_rider_house_car_1!);
 
     await unitSpeak(

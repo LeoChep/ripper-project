@@ -210,8 +210,8 @@ export class MapCanvasService {
     // drawGrid(golbalSetting.app, rlayers);
   };
 
-  // 辅助函数：绘制地图
-  drawMap = async (mapView: any, container: any, rlayers: any) => {
+  // 辅助函数：绘制地图（2D）
+  drawMap2D = async (mapView: any, container: any, rlayers: any) => {
     if (golbalSetting.mapContainer) {
       golbalSetting.mapContainer.children.forEach((child: any) => {
         golbalSetting.mapContainer!.removeChild(child);
@@ -250,6 +250,100 @@ export class MapCanvasService {
     ms.label = "map";
     if (golbalSetting.mapContainer) {
       golbalSetting.mapContainer.addChild(ms);
+    }
+  };
+
+  // 辅助函数：绘制地图（2.5D）
+  drawMap25D = async (_mapView: any, _container: any, _rlayers: any) => {
+    // TODO: 实现 2.5D 渲染逻辑
+       if (golbalSetting.mapContainer) {
+      golbalSetting.mapContainer.children.forEach((child: any) => {
+        golbalSetting.mapContainer!.removeChild(child);
+        child.destroy();
+      });
+    }
+
+    // 先初始化战争迷雾系统并绘制初始遮罩
+    if (golbalSetting.map && golbalSetting.rootContainer && golbalSetting.app) {
+      FogSystem.initFog(
+        golbalSetting.map,
+        golbalSetting.rootContainer,
+        golbalSetting.app
+      );
+
+      // 立即计算并绘制一次迷雾，确保在地图显示前遮罩已经存在
+      // const visibilityData = FogSystem.instanse.caculteVersionByPlayers();
+      // if (visibilityData) {
+      //   FogSystem.instanse.makeFogOfWar(visibilityData);
+      // }
+    }
+    // 启动自动绘制循环
+
+    // 等待一帧，确保遮罩已经渲染
+
+    await new Promise((resolve) => FogSystem.instanse.autoDraw(resolve));
+    FogSystem.instanse.refreshSpatialGrid(true);
+    // document.addEventListener('keydown', (e) => {
+    //   if (e.key === 'F') {
+    //     FogSystem.instanse.testStopFlag=true;
+    //   }})
+    // 再绘制地图
+
+    // 等待 canvas 元素可用
+    const canvas = await new Promise<HTMLCanvasElement>((resolve) => {
+      const checkCanvas = () => {
+        const el = document.getElementById('viewport-canvas') as HTMLCanvasElement;
+        if (el && el.width > 0 && el.height > 0) {
+          console.log('Canvas found:', el.width, 'x', el.height);
+          resolve(el);
+        } else {
+          console.log('Waiting for canvas...');
+          requestAnimationFrame(checkCanvas);
+        }
+      };
+      checkCanvas();
+    });
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('Failed to get 2d context');
+      return;
+    }
+
+    // 2. 只创建一次纹理（PixiJS v8 官方写法）
+    const dynamicTexture = PIXI.Texture.from(canvas);
+
+    // 3. 只创建一次 Sprite
+    const dynamicSprite = new PIXI.Sprite(dynamicTexture);
+
+    // 设置精灵大小以匹配 canvas
+    dynamicSprite.width = canvas.width;
+    dynamicSprite.height = canvas.height;
+
+    dynamicSprite.eventMode = "static";
+    dynamicSprite.zIndex = envSetting.zIndexSetting.mapZindex;
+    dynamicSprite.label = "map";
+    if (golbalSetting.mapContainer) {
+      golbalSetting.mapContainer.addChild(dynamicSprite);
+    }
+
+    const drawPixelContent = () => {
+      // 1. 清空 Canvas
+
+      // ==================== 关键：官方稳定更新 ====================
+      // ✅ PixiJS v8 官方推荐，零报错，只更新数据
+      dynamicTexture.source.update();
+    };
+
+    golbalSetting!.app!.ticker.add(drawPixelContent);
+  };
+
+  // 辅助函数：绘制地图（根据开关选择渲染方式）
+  drawMap = async (mapView: any, container: any, rlayers: any) => {
+    if (envSetting.is25dEnabled) {
+      await this.drawMap25D(mapView, container, rlayers);
+    } else {
+      await this.drawMap2D(mapView, container, rlayers);
     }
   };
   // 辅助函数：生成动画精灵

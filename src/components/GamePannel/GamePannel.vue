@@ -3,7 +3,7 @@
   <!-- <img :src="hitURL"> -->
   <InitBar></InitBar>
   <TurnAnnouncement ref="turnAnnouncementRef" />
-
+  <canvas id="rendering-canvas"></canvas>
   <CreatureInfo
     :creature="(selectedCreature as any)"
     :unit="(selectedUnit as any)"
@@ -80,7 +80,11 @@ const creatureInfoPage = ref("basic"); // 添加页面状态
 onMounted(async () => {
   const app = new PIXI.Application();
   await app.init(appSetting);
-
+  const renderingCanvas = document.getElementById("rendering-canvas");
+  const canvas = renderingCanvas as HTMLCanvasElement;
+  let ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = "#FF0000";
+  ctx.fillRect(0, 0, 1000, 1000);
   const gamePannel = document.getElementById("game-pannel");
   if (gamePannel) {
     gamePannel.appendChild(app.canvas);
