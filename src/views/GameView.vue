@@ -23,6 +23,7 @@ onMounted(() => {
 <template>
   <main @contextmenu.prevent>
     <GamePannel></GamePannel>
+    <pMap></pMap>
   </main>
 </template>
 

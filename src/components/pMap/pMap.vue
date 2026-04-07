@@ -32,8 +32,12 @@ withDefaults(defineProps<Props>(), {
 }
 
 .left-panel {
-  display: flex;
-  flex-direction: column;
+
+  position:fixed;
+  left: 0px;
+  top: 0px;
+  z-index: 999;
+
   gap: 16px;
 }
 </style>
