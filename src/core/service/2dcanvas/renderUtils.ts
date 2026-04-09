@@ -221,7 +221,7 @@ export function screenToWorld(
   screenHeight: number,
   camera: CameraParams
 ): { x: number; y: number } | null {
-  const DEBUG = true;
+  const DEBUG = false;
 
   const invWidth = 1 / screenWidth;
   const invHeight = 1 / screenHeight;
@@ -300,7 +300,7 @@ export function worldToScreen(
   screenHeight: number,
   camera: CameraParams
 ): { x: number; y: number } | null {
-  const DEBUG = true;
+  const DEBUG = false;
 
   // 世界坐标点（假设 Z=0 在地面上）
   const worldZ = 0;
@@ -334,7 +334,7 @@ export function worldToScreen(
 
   if (DEBUG) {
     console.log('[worldToScreen DEBUG] NDC坐标:', `ndcX=${ndcX.toFixed(4)}, ndcY=${ndcY.toFixed(4)}`);
-    console.log('[worldToScreen DEBUG] tanHalfFov=', camera.tanHalfFov.toFixed(4), 'aspect=', camera.aspect.toFixed(4));
+    console.log('[worldToScreen DEBUG] tanHalfFov=', camera.tanHalfFov.toFixed(4), 'aspect=', camera.aspect);
   }
 
   // 检查是否在视锥体内

@@ -128,10 +128,10 @@ onMounted(() => {
   // 立即执行一次
   pollActionNumbers();
   const checkIsInBattle = () => {
-    console.log("ActionBar检查战斗状态...",initiativeCursor);
+    //console.log("ActionBar检查战斗状态...",initiativeCursor);
     if (InitSystem?.initiativeCursor?.inBattle) {
     isInBattle.value = initiativeCursor.inBattle;
-    console.log("ActionBar检测到战斗状态:", isInBattle.value);
+    //console.log("ActionBar检测到战斗状态:", isInBattle.value);
     }
 1
   };

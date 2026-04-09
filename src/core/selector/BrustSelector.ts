@@ -1,12 +1,11 @@
-import { tileSize } from "./../envSetting";
-
 import { generateWays } from "../utils/PathfinderUtil";
 import * as PIXI from "pixi.js";
-import * as envSetting from "../envSetting";
+import { zIndexSetting, tileSize } from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import { MessageTipSystem } from "../system/MessageTipSystem";
 import { checkPassiable } from "../system/AttackSystem";
 import type { Unit } from "../units/Unit";
+import { GridDrawer } from "./GridDrawer";
 
 export class BrustSelector {
   public graphics: PIXI.Graphics | null = null;
@@ -213,45 +212,16 @@ export class BrustSelector {
       return;
     }
 
-    this.brustGraphics.zIndex = envSetting.zIndexSetting.spriteZIndex;
+    this.brustGraphics.zIndex = zIndexSetting.spriteZIndex;
   };
   drawGrids = (
     grids: { [key: string]: { x: number; y: number; step: number } | null },
     color: string
   ) => {
-    const graphics = new PIXI.Graphics();
-    graphics.alpha = 0.4;
-    graphics.zIndex = envSetting.zIndexSetting.spriteZIndex;
-    // 绘制可移动范围
-    graphics.clear();
-    if (grids) {
-      Object.keys(grids).forEach((key) => {
-        const [x, y] = key.split(",").map(Number);
-        const drawX = x * tileSize;
-        const drawY = y * tileSize;
-        graphics.rect(drawX, drawY, tileSize, tileSize);
-        graphics.fill({ color: color });
-      });
-    }
-    // path 是一个以 "x,y" 为 key 的对象，记录每个格子的前驱节点
-
-    const container = golbalSetting.spriteContainer;
-    if (!container) {
-      console.warn("Map container not found.");
-      return graphics;
-    }
-    if (!golbalSetting.rlayers.spriteLayer) {
-      console.warn("Sprite layer not found in global settings.");
-      return graphics;
-    }
-    golbalSetting.rlayers.spriteLayer.attach(graphics);
-    container.addChild(graphics);
-    return graphics;
+    return GridDrawer.drawGrids(grids, color);
   };
   getXY = (x: number, y: number): { x: number; y: number } => {
-    const resultX = Math.floor(x / tileSize);
-    const resultY = Math.floor(y / tileSize);
-    return { x: resultX, y: resultY };
+    return GridDrawer.pixelToGrid(x, y);
   };
   // 生成可移动范围
 }

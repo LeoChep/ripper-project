@@ -68,6 +68,7 @@ import { FogSystem } from "@/core/system/NewFogSystem";
 import { MapCanvasService } from "@/core/service/2dcanvas/MapCanvasService";
 import { Creature } from "@/core/units/Creature";
 import { initializeGuideGame } from "@/core/initializeGuideGame/initializeGuideGame";
+import { cameraManager, CameraManager } from "@/core/service/2dcanvas/cameraTool";
 
 const appSetting = envSetting.appSetting;
 const route = useRoute();
@@ -375,10 +376,12 @@ const addListenKeyboard = () => {
 
     console.log("keydown", event.key);
     if (event.key === "s" && container) {
-      container.y -= 64;
+      //container.y -= 64;
 
       if (envSetting.is25dEnabled && mapContainer) {
-        mapContainer.y += 64; // 保持粘贴在原位
+      //  mapContainer.y += 64; // 保持粘贴在原位
+        CameraManager.getInstance().getCamera().moveMovement(0,64,0);
+        CameraManager.getInstance().notify();
       }
       FogSystem.instanse.refreshSpatialGrid(true);
     }
@@ -387,10 +390,12 @@ const addListenKeyboard = () => {
   document.addEventListener("keydown", (event) => {
     const container = golbalSetting.rootContainer;
     if (event.key === "a" && container) {
-      container.x += 64;
+      //container.x += 64;
       if (envSetting.is25dEnabled && mapContainer) {
-        mapContainer.x -= 64; // 保持粘贴在原位
-      }
+        //mapContainer.x -= 64; // 保持粘贴在原位
+        CameraManager.getInstance().getCamera().moveMovement(-64,0,0);
+         CameraManager.getInstance().notify();
+       }
       FogSystem.instanse.refreshSpatialGrid(true);
     }
   });
@@ -398,9 +403,11 @@ const addListenKeyboard = () => {
   document.addEventListener("keydown", (event) => {
     const container = golbalSetting.rootContainer;
     if (event.key === "d" && container) {
-      container.x -= 64;
+      //container.x -= 64;
       if (envSetting.is25dEnabled && mapContainer) {
-        mapContainer.x += 64; // 保持粘贴在原位
+      //  mapContainer.x += 64; // 保持粘贴在原位
+        CameraManager.getInstance().getCamera().moveMovement(64,0,0);
+        CameraManager.getInstance().notify();
       }
       FogSystem.instanse.refreshSpatialGrid(true);
     }
@@ -409,9 +416,11 @@ const addListenKeyboard = () => {
   document.addEventListener("keydown", (event) => {
     const container = golbalSetting.rootContainer;
     if (event.key === "w" && container) {
-      container.y += 64;
+    //  container.y += 64;
       if (envSetting.is25dEnabled && mapContainer) {
-        mapContainer.y -= 64; // 保持粘贴在原位
+      //  mapContainer.y -= 64; // 保持粘贴在原位
+        CameraManager.getInstance().getCamera().moveMovement(0,-64,0);
+        CameraManager.getInstance().notify();
       }
       FogSystem.instanse.refreshSpatialGrid(true);
     }

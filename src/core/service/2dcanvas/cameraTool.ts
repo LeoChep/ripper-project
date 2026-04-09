@@ -1,3 +1,6 @@
+import { appSetting } from "@/core/envSetting";
+import { screenToWorld, worldToScreen, type CameraParams } from "./renderUtils";
+
 /**
  * 3D 点类型
  */
@@ -88,8 +91,8 @@ export class PerspectiveCamera {
 
   constructor(config: Partial<PerspectiveCameraConfig> = {}) {
     this.config = {
-      position: { x: 0, y: 0, z: 100 },
-      pitch: 60,      // 向下看45度
+      position: { x: 0, y: 0, z: 500 },
+      pitch: 45,      // 向下看45度
       yaw: 0,         // 朝向Y轴负方向（前方）
       fov: 60,
       near: 1,
@@ -152,7 +155,12 @@ export class PerspectiveCamera {
     const right = this.getRight();
     return forward.cross(right).normalize();
   }
-
+  moveMovement(x:number,y:number,z:number): void {
+    const vec3=Vec3.fromPoint3(this.config.position);
+    const newPos = vec3.add(Vec3.create(x, y, z));
+    this.setPosition(newPos.toPoint3());
+  
+  }
   /**
    * 计算视锥体在给定距离处的高度和宽度
    */
@@ -229,9 +237,80 @@ export class PerspectiveCamera {
 export class CameraManager {
   private static instance: CameraManager;
   private camera: PerspectiveCamera;
+  private cameraParams: CameraParams;
+  public getCameraParams(): CameraParams {
+    this.cameraParams = this.bulidCameraParams();
+    return this.cameraParams;
+  }
+  public bulidCameraParams(): CameraParams {
+    const forward = this.camera.getForward();
+    const right = this.camera.getRight();
+    const up = this.camera.getUp();
+    const pos = this.camera.getPosition();
+    const config = this.camera.getConfig();
+
+    return {
+      posX: pos.x,
+      posY: pos.y,
+      posZ: pos.z,
+      forwardX: forward.x,
+      forwardY: forward.y,
+      forwardZ: forward.z,
+      rightX: right.x,
+      rightY: right.y,
+      rightZ: right.z,
+      upX: up.x,
+      upY: up.y,
+      upZ: up.z,
+      tanHalfFov: Math.tan((config.fov * Math.PI) / 180 / 2),
+      aspect: appSetting.width / appSetting.height,
+      far: config.far,
+    };
+  } 
+  private scaleXSheet:number[] =[]
+  private scaleYSheet:number[] =[]
+  getScaleXByScreenY(screenY:number):number{
+    if (screenY<0||screenY>=this.scaleXSheet.length) {
+      return 1;
+    }
+    return this.scaleXSheet[Math.floor(screenY)];
+  }
+  getScaleYByScreenY(screenY:number):number{
+    if (screenY<0||screenY>=this.scaleYSheet.length) {
+      return 1;
+    }
+    return this.scaleYSheet[Math.floor(screenY)];
+  }
 
   private constructor() {
     this.camera = new PerspectiveCamera();
+    this.cameraParams = this.bulidCameraParams()
+    for (let i=0;i<appSetting.height;i++){
+      const worldPos = screenToWorld(appSetting.width/2,i,appSetting.width,appSetting.height,this.cameraParams)
+      if (!worldPos) {this.scaleXSheet.push(0);
+        continue;
+      }
+      const worldPos2 ={x:worldPos!.x+100,y:worldPos!.y}
+      const screenPos = worldToScreen(worldPos2.x,worldPos2.y,appSetting.width,appSetting.height,this.cameraParams)
+      if (screenPos) { const scale=(screenPos.x-appSetting.width/2)/100;
+        this.scaleXSheet.push(scale);
+      }else{this.scaleXSheet.push(0)}
+     
+    }
+    console.log('CameraManager scaleXSheet:', this.scaleXSheet);
+    for (let i=0;i<appSetting.height;i++){
+      const worldPos = screenToWorld(appSetting.width/2,i,appSetting.width,appSetting.height,this.cameraParams)
+      if (!worldPos) {this.scaleYSheet.push(0);
+        continue;
+      }
+      const worldPos2 ={x:worldPos!.x,y:worldPos!.y+100}
+      const screenPos = worldToScreen(worldPos2.x,worldPos2.y,appSetting.width,appSetting.height,this.cameraParams)
+      if (screenPos) { const scale=(screenPos.y-i)/100;
+        this.scaleYSheet.push(scale);
+      }else{this.scaleYSheet.push(0)}
+     
+    }
+    console.log('CameraManager scaleYSheet:', this.scaleYSheet);
   }
 
   static getInstance(): CameraManager {
@@ -261,7 +340,7 @@ export class CameraManager {
     return () => this.listeners.delete(callback);
   }
 
-  private notify(): void {
+  public notify(): void {
     this.listeners.forEach(cb => cb());
   }
 }

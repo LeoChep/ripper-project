@@ -59,8 +59,8 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { cameraManager } from '@/core/service/2dcanvas/cameraTool';
 
-const position = ref({ x: 0, y: 0, z: 100 });
-const pitch = ref(45);
+const position = ref({ x: 0, y: 0, z: 200 });
+const pitch = ref(30);
 const yaw = ref(0);
 const fov = ref(60);
 const near = ref(1);

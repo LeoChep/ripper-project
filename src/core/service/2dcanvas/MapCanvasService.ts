@@ -18,6 +18,7 @@ import type { Creature } from "@/core/units/Creature";
 import { createFrontObjAnimSpriteFromFront } from "@/core/anim/FrontObjAnimSprite";
 import { MapContainer } from "@/core/anim/MapContainer";
 import { DramaSystem } from "@/core/system/DramaSystem";
+import { frustumCullService } from "./FrustumCullService";
 
 export class MapCanvasService {
   constructor() {}
@@ -281,8 +282,8 @@ export class MapCanvasService {
 
     // 等待一帧，确保遮罩已经渲染
 
-    await new Promise((resolve) => FogSystem.instanse.autoDraw(resolve));
-    FogSystem.instanse.refreshSpatialGrid(true);
+    // await new Promise((resolve) => FogSystem.instanse.autoDraw(resolve));
+    // FogSystem.instanse.refreshSpatialGrid(true);
     // document.addEventListener('keydown', (e) => {
     //   if (e.key === 'F') {
     //     FogSystem.instanse.testStopFlag=true;
@@ -303,6 +304,10 @@ export class MapCanvasService {
       };
       checkCanvas();
     });
+
+    // 设置视窗大小到裁剪服务
+    frustumCullService.setViewportSize(canvas.width, canvas.height);
+    console.log('[FrustumCull] 视窗大小已设置:', canvas.width, 'x', canvas.height);
 
     const ctx = canvas.getContext('2d');
     if (!ctx) {

@@ -109,25 +109,25 @@ function handleKeydown(e: KeyboardEvent) {
 console.log('Forward:', forward, 'Right:', right, 'ForwardFlat:', forwardFlat, 'RightFlat:', rightFlat);
   const currentPos = camera.getPosition();
   let newPos = { ...currentPos };
-
-  switch (key) {
-    case 'w':  // 前进
-      //newPos.x +=  moveSpeed;
-      newPos.y -=  moveSpeed;
-      break;
-    case 's':  // 后退
+  
+  // switch (key) {
+  //   case 'w':  // 前进
+  //     //newPos.x +=  moveSpeed;
+  //     newPos.y -=  moveSpeed;
+  //     break;
+  //   case 's':  // 后退
    
-      newPos.y +=  moveSpeed;
-      break;
-    case 'a':  // 左移
-      newPos.x -=  moveSpeed;
+  //     newPos.y +=  moveSpeed;
+  //     break;
+  //   case 'a':  // 左移
+  //     newPos.x -=  moveSpeed;
 
-      break;
-    case 'd':  // 右移
-      newPos.x +=  moveSpeed;
+  //     break;
+  //   case 'd':  // 右移
+  //     newPos.x +=  moveSpeed;
      
-      break;
-  }
+  //     break;
+  // }
 
   cameraManager.setConfig({ position: newPos });
 }

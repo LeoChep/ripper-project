@@ -1,14 +1,13 @@
 
 
-import { tileSize } from "./../envSetting";
 import { generateWays } from "../utils/PathfinderUtil";
 import * as PIXI from "pixi.js";
-import * as envSetting from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import { MessageTipSystem } from "../system/MessageTipSystem";
 import type { Unit } from "../units/Unit";
 import { UnitSystem } from "../system/UnitSystem";
 import * as AttackSystem from "../system/AttackSystem";
+import { GridDrawer } from "./GridDrawer";
 export class BasicAttackSelector {
   public graphics: PIXI.Graphics | null = null;
   public removeFunction: (input: any) => void = () => {};
@@ -60,6 +59,7 @@ export class BasicAttackSelector {
     const path = generateWays({ start: grids, range: range, checkFunction:
       (x,y,...args)=>{return AttackSystem.checkPassiable(unit,x,y)} });
     this.drawGrids(path, color);
+    console.log("attackpath", path, "grids", grids,color);
     selector.promise = Promise.resolve({});
     let resolveCallback: (arg0: any) => void = () => {};
     const promise = new Promise<any>((resolve) => {
@@ -149,40 +149,14 @@ export class BasicAttackSelector {
     grids: { [key: string]: { x: number; y: number; step: number } | null },
     color: string
   ) => {
-    const graphics = new PIXI.Graphics();
-    this.graphics = graphics;
-    graphics.alpha = 0.4;
-    graphics.zIndex = envSetting.zIndexSetting.spriteZIndex;
-    // 绘制可移动范围
-    graphics.clear();
-    if (grids) {
-      Object.keys(grids).forEach((key) => {
-        const [x, y] = key.split(",").map(Number);
-        const drawX = x * tileSize;
-        const drawY = y * tileSize;
-        graphics.rect(drawX, drawY, tileSize, tileSize);
-        graphics.fill({ color: color });
-      });
-    }
-    // path 是一个以 "x,y" 为 key 的对象，记录每个格子的前驱节点
-    graphics.eventMode = "static";
-    const container = golbalSetting.spriteContainer;
-    if (!container) {
-      console.warn("Map container not found.");
-      return this;
-    }
-    if (!golbalSetting.rlayers.spriteLayer) {
-      console.warn("Sprite layer not found in global settings.");
-      return this;
-    }
-    golbalSetting.rlayers.spriteLayer.attach(graphics);
-    container.addChild(graphics);
+    this.graphics = GridDrawer.drawGrids(grids, color, {
+      layerName: "spriteLayer",
+    });
+    this.graphics.eventMode = "static";
     return this;
   };
   getXY = (x: number, y: number): { x: number; y: number } => {
-    const resultX = Math.floor(x / tileSize);
-    const resultY = Math.floor(y / tileSize);
-    return { x: resultX, y: resultY };
+    return GridDrawer.pixelToGrid(x, y);
   };
   // 生成可移动范围
 }

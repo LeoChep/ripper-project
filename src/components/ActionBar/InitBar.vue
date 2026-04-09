@@ -151,8 +151,8 @@ const lastUnitId = ref<number | null>(null);
 setInterval(() => {
 
   const currentUnitId = InitSystem.getPointAtUnit()?.id ;
-  console.log("Current Unit ID:", currentUnitId);
-  console.log("Units in Initiative:", InitSystem.getPointAtUnit()?.id);
+  //console.log("Current Unit ID:", currentUnitId);
+  //console.log("Units in Initiative:", InitSystem.getPointAtUnit()?.id);
   const unit = UnitSystem.getInstance().getUnitById(currentUnitId?.toString() || '');
   for (const u of units.value) {
     if (u.state === 'dead') {

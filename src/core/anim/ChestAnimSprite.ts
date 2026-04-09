@@ -9,6 +9,8 @@ import { CharacterOutCombatController } from "../controller/CharacterOutCombatCo
 import { CharacterController } from "../controller/CharacterController";
 import { MessageTipSystem } from "../system/MessageTipSystem";
 import { tileSize } from "../envSetting";
+import { frustumCullService } from "@/core/service/2dcanvas/FrustumCullService";
+import * as envSetting from "../envSetting";
 
 export class ChestAnimSprite extends Container {
   // 宝箱的状态，true 表示打开，false 表示关闭
@@ -180,6 +182,22 @@ export class ChestAnimSprite extends Container {
   }
 
   public update(callback: any) {
+    // 2.5D模式下：检查是否在视窗内（视锥体裁剪）
+    if (envSetting.is25dEnabled) {
+      const centerX = this.x + tileSize / 2;
+      const centerY = this.y + tileSize / 2;
+
+      // 检查是否在视窗内
+      const inViewport = frustumCullService.isRectInViewport(
+        centerX,
+        centerY,
+        tileSize,
+        tileSize
+      );
+
+      this.visible = inViewport;
+    }
+
     if (callback) {
       callback();
     }

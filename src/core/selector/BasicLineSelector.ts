@@ -1,10 +1,10 @@
 
-import { tileSize } from "../envSetting";
 import { generateWays } from "../utils/PathfinderUtil";
 import * as PIXI from "pixi.js";
-import * as envSetting from "../envSetting";
+import { zIndexSetting, tileSize } from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import { MessageTipSystem } from "../system/MessageTipSystem";
+import { GridDrawer } from "./GridDrawer";
 export type ScanData = {
   x: number;
   y: number;
@@ -245,7 +245,7 @@ export class BasicLineSelector {
     }
 
     this.previewLine = new PIXI.Graphics();
-    this.previewLine.zIndex = envSetting.zIndexSetting.tipZIndex + 1;
+    this.previewLine.zIndex = zIndexSetting.tipZIndex + 1;
     this.previewLine.eventMode = "none";
     const container = golbalSetting.spriteContainer;
     if (container && golbalSetting.rlayers.spriteLayer) {
@@ -401,41 +401,13 @@ export class BasicLineSelector {
     grids: { [key: string]: { x: number; y: number; step: number } | null },
     color: string
   ) => {
-    const graphics = new PIXI.Graphics();
-    this.graphics = graphics;
-    graphics.eventMode = "static";
-    graphics.alpha = 0.4;
-    graphics.zIndex = envSetting.zIndexSetting.spriteZIndex;
-
-    graphics.clear();
-    if (grids) {
-      Object.keys(grids).forEach((key) => {
-        const [x, y] = key.split(",").map(Number);
-        const drawX = x * tileSize;
-        const drawY = y * tileSize;
-        graphics.rect(drawX, drawY, tileSize, tileSize);
-        graphics.fill({ color: color });
-      });
-    }
-
-    // graphics.eventMode = "static";
-    const container = golbalSetting.spriteContainer;
-    if (!container) {
-      console.warn("Map container not found.");
-      return this;
-    }
-    if (!golbalSetting.rlayers.spriteLayer) {
-      console.warn("Sprite layer not found in global settings.");
-      return this;
-    }
-    golbalSetting.rlayers.spriteLayer.attach(graphics);
-    container.addChild(graphics);
+    this.graphics = GridDrawer.drawGrids(grids, color, {
+      eventMode: "static",
+    });
     return this;
   };
 
   getXY = (x: number, y: number): { x: number; y: number } => {
-    const resultX = Math.floor(x / tileSize);
-    const resultY = Math.floor(y / tileSize);
-    return { x: resultX, y: resultY };
+    return GridDrawer.pixelToGrid(x, y);
   };
 }

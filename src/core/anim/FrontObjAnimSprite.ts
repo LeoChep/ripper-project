@@ -3,6 +3,8 @@ import { FrontObj } from "./../units/FrontObj";
 import { Sprite } from "pixi.js";
 import * as PIXI from "pixi.js";
 import { FrontObjSystem } from "../system/FrontObjSystem";
+import { frustumCullService } from "@/core/service/2dcanvas/FrustumCullService";
+import * as envSetting from "../envSetting";
 export class FrontObjAnimSprite extends Sprite {
   // 宝箱的状态，true 表示打开，false 表示关闭
   private _isOpen: boolean = false;
@@ -20,12 +22,40 @@ export class FrontObjAnimSprite extends Sprite {
     this.callback = cb;
   }
 
+  // 物体的尺寸（用于视锥体裁剪）
+  public cullWidth: number = 0;
+  public cullHeight: number = 0;
+
   constructor(frontObj: FrontObj) {
     super();
     this.owner = frontObj;
 
-    // 创建提示文本
-    
+    // 设置渲染钩子
+    this.onRender = () => {
+      this.updateVisibility();
+    };
+  }
+
+  /**
+   * 更新可见性（视锥体裁剪）
+   */
+  private updateVisibility(): void {
+    // 2.5D模式下：检查是否在视窗内（视锥体裁剪）
+    if (envSetting.is25dEnabled) {
+      // 获取物体的中心点位置
+      const centerX = this.x + this.cullWidth / 2;
+      const centerY = this.y + this.cullHeight / 2;
+
+      // 检查是否在视窗内
+      const inViewport = frustumCullService.isRectInViewport(
+        centerX,
+        centerY,
+        this.cullWidth || this.width,
+        this.cullHeight || this.height
+      );
+
+      this.visible = inViewport;
+    }
   }
 }
 
@@ -54,7 +84,7 @@ export const createFrontObjAnimSpriteFromFront = async (
     source: boxTexture.source,
     frame: new PIXI.Rectangle(frontObjInfo.x, frontObjInfo.y, frontObjInfo.width, frontObjInfo.height),
   });
-  const frontObjSprite = new Sprite(texture);
+  const frontObjSprite = new FrontObjAnimSprite(frontObj);
 
   frontObjSprite.anchor.set(0, 0); // 设置锚点为左上角，与 unit 一致
 
@@ -80,6 +110,11 @@ export const createFrontObjAnimSpriteFromFront = async (
   const baseY = frontObj.y-(frontObjInfo.height-anchor.y)*scale ; // 锚点的Y坐标（考虑缩放）
   frontObjSprite.zIndex = baseY + (scaledHeight - scaledOcclusionHeight);
   console.log('Zindex-测试',frontObjSprite.zIndex)
+
+  // 设置视锥体裁剪尺寸（使用纹理的显示尺寸）
+  frontObjSprite.cullWidth = frontObjInfo.width * scale;
+  frontObjSprite.cullHeight = frontObjInfo.height * scale;
+
   frontObjSprite.eventMode='none'
   console.log('frontObjSprite',frontObjSprite, 'scale:', scale, 'anchor:', anchor);
   return frontObjSprite;

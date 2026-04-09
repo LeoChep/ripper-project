@@ -4,6 +4,11 @@ import type { Unit } from "../units/Unit";
 import { spriteTile, tileSize, zIndexSetting } from "../envSetting";
 import type { BuffInterface } from "../buff/BuffInterface";
 import { getStatusEffectsIconUrl } from "@/utils/utils";
+import { frustumCullService } from "@/core/service/2dcanvas/FrustumCullService";
+import * as envSetting from "../envSetting";
+import { screenToWorld, worldToScreen } from "../service/2dcanvas/renderUtils";
+import { CameraManager } from "../service/2dcanvas/cameraTool";
+import { updateUnitPositionOnRender } from "@/core/composables/useWorldPoints";
 
 const lineIconLimit = 4;
 export class UnitAnimSpirite extends Container {
@@ -25,6 +30,9 @@ export class UnitAnimSpirite extends Container {
     width: tileSize,
     height: tileSize,
   };
+
+  // 存储2.5D模式下的原始缩放比例
+  private baseScale25D: { x: number; y: number } | null = null;
 
   public getFrameSize(): { width: number; height: number } {
     return this.frameSize;
@@ -137,11 +145,100 @@ export class UnitAnimSpirite extends Container {
 
   // 可以添加自定义方法
   public update(callback?: any): void {
-    if (this.owner?.isSceneHidden){
-      this.visible=false;
+    // 渲染跟踪：更新单位位置到世界点
+    if (this.owner && this.owner.state !== 'dead') {
+      updateUnitPositionOnRender(
+        this.owner.id,
+        this.owner.x,
+        this.owner.y,
+        this.owner.name || String(this.owner.id)
+      );
     }
-    else{
-      this.visible=true;
+
+    // 2.5D模式下：检查是否在视窗内（视锥体裁剪）和距离缩放
+    if (envSetting.is25dEnabled) {
+      // 获取单位的中心点位置
+      const centerX = this.owner!.x
+      const centerY = this.owner!.y ;
+
+      const cameraParams = CameraManager.getInstance().getCameraParams();
+      const screenPos = worldToScreen(
+        centerX,
+        centerY,
+        envSetting.appSetting.width,
+        envSetting.appSetting.height,
+        cameraParams
+      );
+      //console.log('cameraParams', cameraParams);
+//       if (screenPos) {
+// const worldpoint2=screenToWorld(screenPos!.x,screenPos!.y,envSetting.appSetting.width,envSetting.appSetting.height,cameraParams)
+//       console.log(`单位 ${this.owner?.name} 的世界坐标: (${worldpoint2?.x}, ${worldpoint2?.y})`);
+//         if(worldpoint2?.x!==centerX||worldpoint2?.y!==centerY){
+//         //  console.warn(`单位 ${this.owner?.name} 的屏幕坐标转换回世界坐标不匹配！原世界坐标: (${centerX}, ${centerY}), 转换回的世界坐标: (${worldpoint2?.x}, ${worldpoint2?.y})`);
+//         }
+//     }
+      
+
+      // 检查是否在视窗内
+      const inViewport = frustumCullService.isRectInViewport(
+        centerX,
+        centerY,
+        this.visisualSize.width ?? tileSize,
+        this.visisualSize.height ?? tileSize
+      );
+
+      if (!inViewport || !screenPos) {
+        this.visible = false;
+        return; // 不在视窗内，直接返回不进行后续渲染
+      }
+
+  
+
+      // 透视投影原理：缩放比例与深度成反比
+      // 使用近裁剪面距离作为基准（在近裁剪面处缩放为100%）
+
+      const scaleX = CameraManager.getInstance().getScaleXByScreenY(
+        screenPos.y
+      );
+      const scaleY = CameraManager.getInstance().getScaleYByScreenY(
+        screenPos.y
+      );
+
+      // 保存原始缩放比例（首次进入2.5D模式时）
+      if (this.baseScale25D === null) {
+        this.baseScale25D = { x: this.scale.x, y: this.scale.y };
+      }
+
+      // 应用新的缩放比例
+      const baseX = this.baseScale25D?.x ?? this.scale.x;
+      const baseY = this.baseScale25D?.y ?? this.scale.y;
+      this.scale.set(baseX * scaleY, baseY * scaleY);
+      // this.scale.set(1,1);
+      // 将单位中心对齐到屏幕坐标位置（考虑单位视觉大小）
+
+      this.x = screenPos.x+tileSize*scaleX/2
+      this.y = screenPos.y + tileSize*scaleY/2; // 根据缩放调整y位置，使单位脚部贴地
+      this.visible = true;
+    } else {
+      // 非2.5D模式，恢复原始缩放比例
+      if (this.baseScale25D !== null) {
+        this.scale.set(this.baseScale25D.x, this.baseScale25D.y);
+        this.baseScale25D = null;
+      }
+      // 恢复原始位置
+      if (this.owner) {
+        this.x =
+          Math.round(this.owner.x / envSetting.tileSize) * envSetting.tileSize;
+        this.y =
+          Math.round(this.owner.y / envSetting.tileSize) * envSetting.tileSize;
+      }
+    }
+
+    // 原有的场景隐藏逻辑
+    if (this.owner?.isSceneHidden) {
+      this.visible = false;
+    } else {
+      this.visible = true;
     }
     // 如果当前状态与动画状态不一致，则更新渲染状态
     if (this._state !== this._animationState)
@@ -167,16 +264,16 @@ export class UnitAnimSpirite extends Container {
     if (this.anims[this._state] && this.animsSheet[this._state])
       if (
         this._state !== this._animationState ||
-        this.direction !==diretionAfter
+        this.direction !== diretionAfter
       ) {
         //调整位置
-        this.anims[this._state].x =
-          0 -
-          (this.anims[this._state].width - (this.visisualSize.width ?? 0)) / 2;
-        this.anims[this._state].y =
-          0 -
-          (this.anims[this._state].height - (this.visisualSize.height ?? 0)) /
-            2;
+        // this.anims[this._state].x =
+        //   0 -
+        //   (this.anims[this._state].width - (this.visisualSize.width ?? 0)) / 2;
+        // this.anims[this._state].y =
+        //   0 -
+        //   (this.anims[this._state].height - (this.visisualSize.height ?? 0)) /
+        //     2;
 
         if (diretionAfter != null) {
           this.direction = diretionAfter;
@@ -236,11 +333,15 @@ export class UnitAnimSpirite extends Container {
     if (this._onlySide) {
       if (direction === 2 || direction === 3) {
         // 如果是上下方向，使用当前已存储的左右方向，默认为右(0)
-        direction = this?._direction ; // 保持当前左右方向不变
-        console.log(`单位 ${this.owner?.name} 只使用左右朝向，保持当前方向: ${direction}`);
+        direction = this?._direction; // 保持当前左右方向不变
+        console.log(
+          `单位 ${this.owner?.name} 只使用左右朝向，保持当前方向: ${direction}`
+        );
       }
     }
-    console.log(`计算单位 ${this.owner?.name} 的动画朝向: ${direction} (onlySide: ${this._onlySide})`);
+    // console.log(
+    //   `计算单位 ${this.owner?.name} 的动画朝向: ${direction} (onlySide: ${this._onlySide})`
+    // );
     return direction;
   }
   public getWASDDirection(): string {
@@ -279,7 +380,30 @@ export class UnitAnimSpirite extends Container {
     // };
     console.log("添加动画:", name, animation);
     animation.renderable = false; // 默认不渲染
+
+    // 为动画精灵添加锚点调试红点
+    this.addAnchorDotToAnimation(animation);
   }
+
+  /**
+   * 为动画精灵添加锚点调试红点
+   * 红点添加到动画精灵上，位置在 (0, 0) 即锚点位置
+   */
+  private addAnchorDotToAnimation(animSprite: PIXI.AnimatedSprite): void {
+    const debugDot = new PIXI.Graphics();
+    // 画红色圆点
+    debugDot.circle(0, 0, 10);
+    debugDot.fill({ color: 0xff0000, alpha: 1 });
+    // 十字线
+    debugDot.moveTo(-30, 0);
+    debugDot.lineTo(30, 0);
+    debugDot.moveTo(0, -30);
+    debugDot.lineTo(0, 30);
+    debugDot.stroke({ width: 3, color: 0xff0000, alpha: 1 });
+
+    animSprite.addChild(debugDot);
+  }
+
   public addAnimationSheet(name: string, spritesheet: PIXI.Spritesheet): void {
     this.animsSheet[name] = spritesheet;
     const animKeys = Object.keys(spritesheet.animations);
@@ -297,9 +421,9 @@ export class UnitAnimSpirite extends Container {
     // play the animation on a loop
     // animSprite.play();
     animSprite.label = name;
-    animSprite.anchor.set(0, 0.3); // 设置锚点为左上角，避免偏移
+    animSprite.anchor.set(0.5, 1); // 设置锚点为左上角，避免偏移
     this.addAnimation(name, animSprite);
-
+   
     // this.anims['walk'].renderable = true;
   }
   public async addIcon(buff: BuffInterface) {

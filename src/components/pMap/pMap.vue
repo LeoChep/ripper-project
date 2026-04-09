@@ -4,7 +4,7 @@
       <MapThumbnail :img-src="imgSrc" />
       <CameraControl />
     </div>
-    <ViewportCanvas :width="1200" :height="900" />
+    <ViewportCanvas :width="width" :height="height" />
   </div>
 </template>
 
@@ -12,7 +12,10 @@
 import MapThumbnail from './MapThumbnail.vue';
 import CameraControl from './CameraControl.vue';
 import ViewportCanvas from './ViewportCanvas.vue';
+import { appSetting } from '@/core/envSetting';
 
+const width=appSetting.width;
+const height=appSetting.height;
 interface Props {
   imgSrc?: string;
 }

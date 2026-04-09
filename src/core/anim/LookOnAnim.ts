@@ -2,6 +2,7 @@ import { golbalSetting } from "../golbalSetting";
 import * as envSetting from "../envSetting";
 
 export const lookOn=(x?:number,y?:number)=>{
+    if (envSetting.is25dEnabled){return}
     if (x===undefined||y===undefined) {
         return;}
     const rootContainer = golbalSetting.rootContainer;

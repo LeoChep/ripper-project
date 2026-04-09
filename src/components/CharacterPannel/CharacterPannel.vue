@@ -93,7 +93,7 @@ onMounted(() => {
     const updataCharacters = () => {
         characters.value = []
         const nChartacters = golbalSetting.playerRoles;
-        console.log('角色列表更新:', nChartacters)
+        //console.log('角色列表更新:', nChartacters)
         nChartacters.forEach(character => {
             characters.value.push(character);
 
@@ -101,7 +101,7 @@ onMounted(() => {
     };
     setInterval(() => {
         updataCharacters();
-        console.log('角色id:', characterStore.value.selectedCharacterId);
+        //console.log('角色id:', characterStore.value.selectedCharacterId);
         if (characters.value.length > 0) {
             if (!selectedCharacter.value) {
                 CharacterController.curser = characters.value[0].id;

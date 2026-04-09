@@ -9,6 +9,8 @@ import { CharacterOutCombatController } from "../controller/CharacterOutCombatCo
 import { CharacterController } from "../controller/CharacterController";
 import { FogSystem } from "../system/NewFogSystem";
 import { interactionSetting, tileSize } from "../envSetting";
+import { frustumCullService } from "@/core/service/2dcanvas/FrustumCullService";
+import * as envSetting from "../envSetting";
 export class DoorAnimSprite extends Container {
   // 门的状态，true 表示打开，false 表示关闭
   private _isOpen: boolean = false;
@@ -190,6 +192,22 @@ export class DoorAnimSprite extends Container {
   }
 
   update(callback: any) {
+    // 2.5D模式下：检查是否在视窗内（视锥体裁剪）
+    if (envSetting.is25dEnabled) {
+      const centerX = this.x;
+      const centerY = this.y;
+
+      // 检查是否在视窗内
+      const inViewport = frustumCullService.isRectInViewport(
+        centerX,
+        centerY,
+        tileSize,
+        tileSize
+      );
+
+      this.visible = inViewport;
+    }
+
     if (this.openedDoor) {
       this.openedDoor.renderable = false;
     }

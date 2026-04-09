@@ -15,6 +15,7 @@
         </button>
         <button @click="resetTestRect">重置</button>
       </div>
+      <WorldPointPanel></WorldPointPanel>
     </div>
     <div class="viewport-canvas">
       <canvas ref="canvasRef" :width="width" :height="height" @click="handleClick"  id="viewport-canvas"></canvas>
@@ -29,6 +30,8 @@ import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { cameraManager } from '@/core/service/2dcanvas/cameraTool';
 import { TerrainRenderer, buildCameraParams, screenToWorld, worldToScreen, type CameraParams } from '@/core/service/2dcanvas/renderUtils';
 import { getMapAssetFile } from '@/utils/utils';
+import { useWorldPoints } from '@/core/composables/useWorldPoints';
+import WorldPointPanel from './WorldPointPanel.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -45,6 +48,9 @@ const canvasRef = ref<HTMLCanvasElement>();
 const worldPos = ref<{ x: number; y: number } | null>(null);
 const groundImage = new Image();
 groundImage.src = getMapAssetFile('road');
+
+// 使用世界点管理
+const { allGroups } = useWorldPoints();
 
 
 // 测试矩形的世界坐标（四个角）
@@ -145,6 +151,9 @@ function render() {
   if (drawTestRect.value) {
     drawTestRectOnCanvas(ctx, camParams);
   }
+
+  // 绘制外部世界点组
+  drawWorldPointGroups(ctx, camParams);
 }
 
 /**
@@ -203,6 +212,83 @@ function drawTestRectOnCanvas(ctx: CanvasRenderingContext2D, camParams: CameraPa
       ctx.fillText(coordText, p.x + 8, p.y + 8);
     } else {
       console.log(`[TestRect] 角点 ${labels[i]} 世界坐标 (${testRect.value[i].x}, ${testRect.value[i].y}) 在视锥体外`);
+    }
+  }
+}
+
+/**
+ * 绘制世界点组
+ */
+function drawWorldPointGroups(ctx: CanvasRenderingContext2D, camParams: CameraParams) {
+  // 按组绘制点
+  for (const group of allGroups.value) {
+    if (!group.visible || group.points.length === 0) continue;
+
+    const color = group.color;
+    const screenPoints: Array<{ x: number; y: number } | null> = [];
+
+    // 将所有点转换为屏幕坐标
+    for (const point of group.points) {
+      const screenPos = worldToScreen(point.x, point.y, props.width, props.height, camParams);
+      screenPoints.push(screenPos);
+      console.log(`[WorldPointGroup] ${group.name} 点 (${point.x}, ${point.y}) -> 屏幕坐标:`, screenPos);
+      console.log(`[WorldPointGroup] 当前相机参数:`, camParams);
+    }
+
+    // 如果有多个点，绘制连线
+    if (screenPoints.length > 1) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+
+      for (let i = 0; i < screenPoints.length; i++) {
+        const p = screenPoints[i];
+        const nextIndex = (i + 1) % screenPoints.length;
+        const nextP = screenPoints[nextIndex];
+
+        if (p && nextP) {
+          if (i === 0) {
+            ctx.moveTo(p.x, p.y);
+          }
+          ctx.lineTo(nextP.x, nextP.y);
+        }
+      }
+      ctx.stroke();
+    }
+
+    // 绘制每个点
+    for (let i = 0; i < screenPoints.length; i++) {
+      const p = screenPoints[i];
+      const point = group.points[i];
+
+      if (p) {
+        // 绘制点
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 绘制边框
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // 绘制标签和坐标
+        const label = point.label || `P${i}`;
+        const coordText = `(${point.x.toFixed(0)}, ${point.y.toFixed(0)})`;
+
+        ctx.fillStyle = '#fff';
+        ctx.font = '11px sans-serif';
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+
+        const yOffset = -10;
+        ctx.strokeText(label, p.x + 8, p.y + yOffset);
+        ctx.fillText(label, p.x + 8, p.y + yOffset);
+
+        ctx.strokeText(coordText, p.x + 8, p.y + yOffset + 14);
+        ctx.fillText(coordText, p.x + 8, p.y + yOffset + 14);
+      }
     }
   }
 }
@@ -295,6 +381,11 @@ onUnmounted(() => {
 watch(() => [props.width, props.height], () => {
   render();
 });
+
+// 监听世界点组变化，自动重绘
+watch(allGroups, () => {
+  render();
+}, { deep: true });
 </script>
 
 <style scoped>
