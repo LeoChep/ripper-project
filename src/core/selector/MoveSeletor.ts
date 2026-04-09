@@ -22,7 +22,7 @@ export class MoveSelector {
   public selecteNum: number = 1;
   public sizeGraphics: PIXI.Graphics | null = null;
   private static instance: MoveSelector | null = null;
-  // 选择基本攻击
+
   public selectBasic(
     path: {
       [key: string]: {

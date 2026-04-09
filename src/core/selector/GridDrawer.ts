@@ -5,6 +5,42 @@ import { cameraManager } from "../service/2dcanvas/cameraTool";
 import { worldToScreen } from "../service/2dcanvas/renderUtils";
 
 /**
+ * 将颜色数值转换为 darker 版本（边框用）
+ * @param colorNumber 颜色数值（如 0xff0000）
+ * @param factor 变暗因子，0-1 之间，默认 0.7
+ * @returns 变暗后的颜色数值
+ */
+function darkenColor(colorNumber: number, factor: number = 0.7): number {
+  const r = ((colorNumber >> 16) & 0xff) * factor;
+  const g = ((colorNumber >> 8) & 0xff) * factor;
+  const b = (colorNumber & 0xff) * factor;
+  return (Math.floor(r) << 16) | (Math.floor(g) << 8) | Math.floor(b);
+}
+
+/**
+ * 将颜色字符串转换为数值
+ * @param color 颜色（字符串或数值）
+ * @returns 颜色数值
+ */
+function colorToNumber(color: string | number): number {
+  if (typeof color === "number") {
+    return color;
+  }
+  // 处理十六进制字符串
+  if (color.startsWith("#")) {
+    return parseInt(color.slice(1), 16);
+  }
+  // 处理 rgb/hsl 等其他格式，使用临时 canvas 转换
+  const tempCanvas = document.createElement("canvas");
+  const tempCtx = tempCanvas.getContext("2d");
+  if (tempCtx) {
+    tempCtx.fillStyle = color;
+    return parseInt(tempCtx.fillStyle.slice(1), 16);
+  }
+  return 0x000000;
+}
+
+/**
  * 格子绘制配置选项
  */
 export interface GridDrawOptions {
@@ -105,12 +141,17 @@ export class DynamicGridGraphics extends PIXI.Graphics {
     color: string | number
   ): void {
     // 格子四个角的世界坐标
+    console.log(`Drawing grid cell at (${gridX}, ${gridY}) with color ${color}`);
     const worldCorners = [
       { x: gridX * tileSize, y: gridY * tileSize }, // 左上
       { x: (gridX + 1) * tileSize, y: gridY * tileSize }, // 右上
       { x: (gridX + 1) * tileSize, y: (gridY + 1) * tileSize }, // 右下
       { x: gridX * tileSize, y: (gridY + 1) * tileSize }, // 左下
     ];
+
+    // 计算边框颜色（变暗版本）
+    const colorNumber = colorToNumber(color);
+    const borderColor = darkenColor(colorNumber, 0.6);
 
     if (is25dEnabled) {
       // 2.5D 模式：应用透视变换
@@ -132,8 +173,13 @@ export class DynamicGridGraphics extends PIXI.Graphics {
 
       // 如果四个角都在可见范围内，绘制多边形
       if (screenCorners.length === 4) {
+        // 先绘制填充
         graphics.poly(screenCorners.flatMap((p) => [p.x, p.y]));
         graphics.fill({ color });
+
+        // 再绘制边框
+        graphics.poly(screenCorners.flatMap((p) => [p.x, p.y]));
+        graphics.stroke({ width: 2, color: borderColor });
         return;
       }
     }
@@ -141,6 +187,8 @@ export class DynamicGridGraphics extends PIXI.Graphics {
     // 2D 模式或变换失败：使用普通矩形
     graphics.rect(worldCorners[0].x, worldCorners[0].y, tileSize, tileSize);
     graphics.fill({ color });
+    graphics.rect(worldCorners[0].x, worldCorners[0].y, tileSize, tileSize);
+    graphics.stroke({ width: 2, color: borderColor });
   }
 
   /**
@@ -254,6 +302,10 @@ export class GridDrawer {
       { x: gridX * tileSize, y: (gridY + 1) * tileSize }, // 左下
     ];
 
+    // 计算边框颜色（变暗版本）
+    const colorNumber = colorToNumber(color);
+    const borderColor = darkenColor(colorNumber, 0.6);
+
     if (is25dEnabled) {
       // 2.5D 模式：应用透视变换
       const cameraParams = cameraManager.getCameraParams();
@@ -274,8 +326,13 @@ export class GridDrawer {
 
       // 如果四个角都在可见范围内，绘制多边形
       if (screenCorners.length === 4) {
+        // 先绘制填充
         graphics.poly(screenCorners.flatMap((p) => [p.x, p.y]));
         graphics.fill({ color });
+
+        // 再绘制边框
+        graphics.poly(screenCorners.flatMap((p) => [p.x, p.y]));
+        graphics.stroke({ width: 2, color: borderColor });
         return;
       }
     }
@@ -283,6 +340,8 @@ export class GridDrawer {
     // 2D 模式或变换失败：使用普通矩形
     graphics.rect(worldCorners[0].x, worldCorners[0].y, tileSize, tileSize);
     graphics.fill({ color });
+    graphics.rect(worldCorners[0].x, worldCorners[0].y, tileSize, tileSize);
+    graphics.stroke({ width: 2, color: borderColor });
   }
 
   /**

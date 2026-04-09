@@ -58,7 +58,7 @@ export class CharCombatMoveController {
     }
 
 
-    const spriteUnit = unit.animUnit;
+    const spriteUnit = unit;
     console.log("spriteUnits", unit);
     if (!spriteUnit) {
       return Promise.resolve({});
