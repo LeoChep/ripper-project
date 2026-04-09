@@ -5,7 +5,7 @@ export const zIndexSetting={
     tipZIndex: 200
 }
 export const tileSize = 90 ; // 格子大小
-export const spriteTile=2;
+export const spriteTile=2.2;
 export const walkSpped=25;
 export const pannelHeight=150;
 

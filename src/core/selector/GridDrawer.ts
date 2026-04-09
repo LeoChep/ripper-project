@@ -1,8 +1,13 @@
 import * as PIXI from "pixi.js";
-import { tileSize, zIndexSetting, is25dEnabled } from "../envSetting";
+import {
+  tileSize,
+  zIndexSetting,
+  is25dEnabled,
+  appSetting,
+} from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import { cameraManager } from "../service/2dcanvas/cameraTool";
-import { worldToScreen } from "../service/2dcanvas/renderUtils";
+import { worldToScreen, screenToWorld } from "../service/2dcanvas/renderUtils";
 
 /**
  * 将颜色数值转换为 darker 版本（边框用）
@@ -114,7 +119,10 @@ export class DynamicGridGraphics extends PIXI.Graphics {
 
     // 在 2.5D 模式下订阅相机变化
     setInterval(() => {
-      this.redraw();
+      if (this) {
+        this.redraw();
+      }
+      
     }, 100);
   }
 
@@ -122,6 +130,7 @@ export class DynamicGridGraphics extends PIXI.Graphics {
    * 重新绘制格子
    */
   private redraw(): void {
+    if (this.destroyed) return;
     this.clear();
     if (this.grids) {
       Object.keys(this.grids).forEach((key) => {
@@ -141,7 +150,9 @@ export class DynamicGridGraphics extends PIXI.Graphics {
     color: string | number
   ): void {
     // 格子四个角的世界坐标
-    console.log(`Drawing grid cell at (${gridX}, ${gridY}) with color ${color}`);
+    console.log(
+      `Drawing grid cell at (${gridX}, ${gridY}) with color ${color}`
+    );
     const worldCorners = [
       { x: gridX * tileSize, y: gridY * tileSize }, // 左上
       { x: (gridX + 1) * tileSize, y: gridY * tileSize }, // 右上
@@ -162,8 +173,8 @@ export class DynamicGridGraphics extends PIXI.Graphics {
         const screenPos = worldToScreen(
           corner.x,
           corner.y,
-          1700,
-          800,
+          appSetting.width,
+          appSetting.height,
           cameraParams
         );
         if (screenPos) {
@@ -507,9 +518,170 @@ export class GridDrawer {
    * @returns 格子坐标
    */
   static getGridFromEvent(event: any): GridCoord {
-    const { x, y } = event.data.global;
-    const relative = GridDrawer.getRelativePosition(x, y);
+    // PIXI v8+ 使用 event.global 而不是 event.data.global
+    const global = event.global || event.data?.global;
+    return GridDrawer.screenToGrid(global.x, global.y);
+  }
+
+  /**
+   * 将屏幕坐标转换为格子坐标（自动处理 2.5D 模式）
+   * @param screenX 屏幕 x 坐标
+   * @param screenY 屏幕 y 坐标
+   * @returns 格子坐标
+   */
+  static screenToGrid(screenX: number, screenY: number): GridCoord {
+    // 先获取相对于 rootContainer 的坐标
+    const relative = GridDrawer.getRelativePosition(screenX, screenY);
+
+    if (is25dEnabled) {
+      // 2.5D 模式：使用 screenToWorld 转换
+      const cameraParams = cameraManager.getCameraParams();
+      const worldPos = screenToWorld(
+        relative.x,
+        relative.y,
+        1700,
+        800,
+        cameraParams
+      );
+      if (worldPos) {
+        return {
+          x: Math.floor(worldPos.x / tileSize),
+          y: Math.floor(worldPos.y / tileSize),
+        };
+      }
+    }
+
+    // 2D 模式或转换失败：直接使用像素坐标
     return GridDrawer.pixelToGrid(relative.x, relative.y);
+  }
+
+  /**
+   * 创建悬停格子 Graphics（用于指针悬停高亮）
+   * @param gridX 格子 x 坐标
+   * @param gridY 格子 y 坐标
+   * @param color 填充颜色
+   * @param options 绘制选项
+   * @returns DynamicGridGraphics 对象（自动随相机更新）
+   */
+  static createHoverGraphics(
+    gridX: number,
+    gridY: number,
+    color: string | number,
+    options: GridDrawOptions = {}
+  ): PIXI.Graphics {
+    const grids: GridsMap = {};
+    grids[`${gridX},${gridY}`] = { x: gridX, y: gridY, step: 0 };
+
+    const {
+      alpha = 0.5,
+      zIndex = zIndexSetting.spriteZIndex + 2,
+      eventMode = "none",
+      layerName = "selectLayer",
+      autoAttach = true,
+      dynamicUpdate = is25dEnabled,
+    } = options;
+    console.log(`Creating hover graphics at (${gridX}, ${gridY}) with color ${color}`);
+    return new DynamicGridGraphics(grids, color, {
+      alpha,
+      zIndex,
+      eventMode,
+      layerName,
+      autoAttach,
+      dynamicUpdate,
+    });
+  }
+
+  /**
+   * 创建尺寸格子 Graphics（用于大单位）
+   * @param gridX 起始格子 x 坐标
+   * @param gridY 起始格子 y 坐标
+   * @param size 单位大小（1=1x1, 2=2x2）
+   * @param color 填充颜色
+   * @param options 绘制选项
+   * @returns DynamicGridGraphics 对象（自动随相机更新）
+   */
+  static createSizeGraphics(
+    gridX: number,
+    gridY: number,
+    size: number,
+    color: string | number,
+    options: GridDrawOptions = {}
+  ): PIXI.Graphics {
+    const grids: GridsMap = {};
+    for (let dx = 0; dx < size; dx++) {
+      for (let dy = 0; dy < size; dy++) {
+        grids[`${gridX + dx},${gridY + dy}`] = {
+          x: gridX + dx,
+          y: gridY + dy,
+          step: 0,
+        };
+      }
+    }
+
+    const {
+      alpha = 0.5,
+      zIndex = 2,
+      eventMode = "none",
+      layerName = "spriteLayer", // 使用 selectLayer 而不是 spriteLayer
+      autoAttach = true,
+      dynamicUpdate = is25dEnabled,
+    } = options;
+    console.log(`Creating size graphics at (${gridX}, ${gridY}) with size ${size} and color ${color}`);
+    return this.drawGrids(grids, color, {
+      alpha,
+      zIndex,
+      eventMode,
+      layerName,
+      autoAttach,
+      dynamicUpdate,
+    });
+    
+  }
+
+  /**
+   * 更新悬停格子位置
+   * @param hoverGraphics 悬停 Graphics 对象
+   * @param gridX 新的格子 x 坐标
+   * @param gridY 新的格子 y 坐标
+   */
+  static updateHoverGraphics(
+    hoverGraphics: PIXI.Graphics | null,
+    gridX: number,
+    gridY: number
+  ): void {
+    if (hoverGraphics instanceof DynamicGridGraphics) {
+      const grids: GridsMap = {};
+      grids[`${gridX},${gridY}`] = { x: gridX, y: gridY, step: 0 };
+      hoverGraphics.updateGrids(grids);
+    }
+  }
+
+  /**
+   * 更新尺寸格子位置
+   * @param sizeGraphics 尺寸 Graphics 对象
+   * @param gridX 新的格子 x 坐标
+   * @param gridY 新的格子 y 坐标
+   * @param size 单位大小
+   */
+  static updateSizeGraphics(
+    sizeGraphics: PIXI.Graphics | null,
+    gridX: number,
+    gridY: number,
+    size: number
+  ): void {
+    if (sizeGraphics instanceof DynamicGridGraphics) {
+      const grids: GridsMap = {};
+      for (let dx = 0; dx < size; dx++) {
+        for (let dy = 0; dy < size; dy++) {
+          grids[`${gridX + dx},${gridY + dy}`] = {
+            x: gridX + dx,
+            y: gridY + dy,
+            step: 0,
+          };
+        }
+      }
+      sizeGraphics.updateGrids(grids);
+    }
   }
 
   /**

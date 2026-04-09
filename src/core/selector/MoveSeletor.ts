@@ -50,21 +50,24 @@ export class MoveSelector {
       return selector;
     }
     selector.graphics?.on("pointermove", (e) => {
-      if (!golbalSetting.rootContainer) {
-        return;
+      const targetXY = GridDrawer.screenToGrid(e.global.x, e.global.y);
+
+      // 移除旧的悬停 Graphics
+      if (this.sizeGraphics) {
+        GridDrawer.removeGraphics(this.sizeGraphics);
+        this.sizeGraphics = null;
       }
-      const x = e.data.global.x - golbalSetting.rootContainer?.x;
-      const y = e.data.global.y - golbalSetting.rootContainer?.y;
-      const targetXY = this.getXY(x, y);
-      if (this.sizeGraphics?.parent) {
-        this.sizeGraphics.clear();
-        this.sizeGraphics.parent.removeChild(this.sizeGraphics);
-        this.sizeGraphics.destroy();
-      }
+
+      // 检查是否重叠并绘制
       if (!UnitSystem.getInstance().checkOverlapAt(unit, targetXY.x, targetXY.y)) {
-        this.sizeGraphics = this.drawSizeGrids(targetXY, unit, "blue");
-      } else {
-        // this.sizeGraphics = this.drawSizeGrids(targetXY, unit, "red");
+        const size = unit.creature?.size === "big" ? 2 : 1;
+        this.sizeGraphics = GridDrawer.createSizeGraphics(
+          targetXY.x,
+          targetXY.y,
+          size,
+          0x4488ff,
+          { alpha: 0.5 }
+        );
       }
     });
     // 点击其他地方移除移动范围
@@ -75,10 +78,11 @@ export class MoveSelector {
         graphics.parent.removeChild(graphics);
         selector.removeFunction = () => {};
       }
-      if (selector.sizeGraphics && selector.sizeGraphics.parent) {
-        selector.sizeGraphics.parent.removeChild(selector.sizeGraphics);
+      // 使用 GridDrawer 移除 sizeGraphics
+      if (selector.sizeGraphics) {
+        GridDrawer.removeGraphics(selector.sizeGraphics);
+        selector.sizeGraphics = null;
       }
-      selector.removeFunction = () => {};
     };
     let resolveCallback: (arg0: any) => void = () => {};
     const promise = new Promise<any>((resolve) => {
@@ -118,31 +122,23 @@ export class MoveSelector {
     graphics.on("click", (e) => {
       console.log("click");
       e.stopPropagation();
-      if (!golbalSetting.rootContainer) {
-        return;
-      }
-      const x = e.data.global.x - golbalSetting.rootContainer?.x;
-      const y = e.data.global.y - golbalSetting.rootContainer?.y;
-      const xy = this.getXY(x, y);
+
+      // 使用 GridDrawer.screenToGrid 获取格子坐标
+      const xy = GridDrawer.screenToGrid(e.global.x, e.global.y);
       console.log("点击位置:", xy, UnitSystem.getInstance().checkOverlapAt(unit, xy.x, xy.y));
-      if (!checkPassiable(xy.x, xy.y)|| UnitSystem.getInstance().checkOverlapAt(unit, xy.x, xy.y)) {
+
+      if (!checkPassiable(xy.x, xy.y) || UnitSystem.getInstance().checkOverlapAt(unit, xy.x, xy.y)) {
         console.warn("点击位置不可用");
         return;
       }
+
       if (this.selected.length < this.selecteNum) {
-        if (!golbalSetting.rootContainer) {
-          return;
-        }
-        const x = e.data.global.x - golbalSetting.rootContainer?.x;
-        const y = e.data.global.y - golbalSetting.rootContainer?.y;
-        const xy = this.getXY(x, y);
         this.selected.push(xy);
-       
       }
+
       if (this.selected.length >= this.selecteNum) {
         // 选择完成
         removeGraphics();
-       // MessageTipSystem.getInstance().clearBottomMessage();
         resolveCallback({
           cancel: false,
           event: e,
@@ -188,37 +184,9 @@ export class MoveSelector {
       gridsMap[grid] = { x, y, step: 0 };
     }
     this.graphics = GridDrawer.drawGrids(gridsMap, 0x66ccff, {
-      zIndex: zIndexSetting.spriteZIndex + 1,
+      zIndex: 0,
     });
     return this.graphics;
-  };
-  drawSizeGrids = (
-    target: { x: number; y: number },
-    unit: Unit,
-    color: string
-  ) => {
-    const size = unit.creature ? unit.creature.size : undefined;
-    const grids = [];
-    let range = 1; // 默认范围为0，可根据需要调整
-    if (size === "big") {
-      range = 2;
-    }
-
-    for (let dx = 0; dx < range; dx++) {
-      for (let dy = 0; dy < range; dy++) {
-        grids.push({
-          x: target.x + dx,
-          y: target.y + dy,
-        });
-      }
-    }
-    return GridDrawer.drawGridList(grids, color, {
-      zIndex: zIndexSetting.spriteZIndex + 1,
-      eventMode: "none",
-    });
-  };
-  getXY = (x: number, y: number): { x: number; y: number } => {
-    return GridDrawer.pixelToGrid(x, y);
   };
   // 生成可移动范围
 }
