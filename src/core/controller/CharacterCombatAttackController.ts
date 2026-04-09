@@ -12,12 +12,15 @@ import { useStandAction } from "../system/InitiativeSystem";
 
 import { CharacterController } from "./CharacterController";
 import * as AttackSystem from "@/core/system/AttackSystem";
+import { ControllerHelper } from "./ControllerHelper";
 
 export class CharCombatAttackController {
   public static isUse: boolean = false;
   selectedCharacter: Unit | null = null;
   public static instense = null as CharCombatAttackController | null;
   graphics: PIXI.Graphics | null = null;
+  private isRegistered: boolean = false; // 标记是否已注册
+
   constructor() {
     // 初始化逻辑
   }
@@ -64,7 +67,23 @@ export class CharCombatAttackController {
       color: "red",
     });
     MessageTipSystem.getInstance().setMessage("请选择攻击目标");
-    this.removeFunction = basicAttackSelector.removeFunction;
+
+    // 使用 ControllerHelper 创建标准的 removeFunction 并注册控制器
+    this.removeFunction = ControllerHelper.createRemoveFunction(
+      "attackController",
+      basicAttackSelector.graphics,
+      () => {
+        this.graphics = null;
+      },
+      () => basicAttackSelector.cleanup() // 选择器完整清理
+    );
+
+    // 只在第一次注册控制器，避免重复注册
+    if (!this.isRegistered) {
+      ControllerHelper.registerController("attackController", this);
+      this.isRegistered = true;
+    }
+
     let resolveCallback = (result: any) => {};
     const promise = new Promise((resolve) => {
       resolveCallback = resolve;

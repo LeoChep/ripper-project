@@ -1,11 +1,11 @@
 import { tileSize } from "./../envSetting";
-
 import { generateWays } from "../utils/PathfinderUtil";
 import * as PIXI from "pixi.js";
 import * as envSetting from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import { MessageTipSystem } from "../system/MessageTipSystem";
 import { checkPassiable } from "../system/AttackSystem";
+import { GridDrawer } from "../utils/GridDrawer";
 import type { Unit } from "../units/Unit";
 
 export class BrustSelector {
@@ -26,6 +26,19 @@ export class BrustSelector {
   public brustGraphics: PIXI.Graphics | null = null;
   public brustGridSet: Set<{ x: number; y: number; step: number }> = new Set();
   private static instance: BrustSelector | null = null;
+  private gridDrawer: GridDrawer = new GridDrawer();
+
+  /**
+   * 清理所有选择器相关的图形
+   * 用于切换控制器时确保没有残留图形
+   */
+  public cleanup(): void {
+    this.gridDrawer.clearAndRemove();
+    this.graphics = null;
+    this.brustGraphics = null;
+    this.selected = [];
+  }
+
   // 选择基本攻击
   public selectBasic(
     grids: {
@@ -61,7 +74,13 @@ export class BrustSelector {
       console.warn("Graphics not found in BasicSelector.");
       return selector;
     }
-    selector.graphics?.on("pointermove", (e) => {
+    // 保存 graphics 的引用，用于检查是否已被清理
+    const graphicsRef = graphics;
+    graphics.on("pointermove", (e) => {
+      // 检查 selector 的 graphics 是否还存在（用于判断是否被清理）
+      if (selector.graphics !== graphicsRef) {
+        return; // 如果不匹配，说明已经被清理，不再处理
+      }
       if (!golbalSetting.rootContainer) {
         return;
       }
@@ -167,15 +186,8 @@ export class BrustSelector {
     color: string,
     range: number
   ) => {
-    if (this.brustGraphics) {
-      this.brustGraphics.clear();
-      this.brustGraphics.destroy();
-      if (this.brustGraphics.parent) {
-        this.brustGraphics.parent.removeChild(this.brustGraphics);
-      }
-    }
+    // GridDrawer 会自动清理旧的 brustGraphics
     console.log("Creating new brustGraphics");
-    this.brustGraphics = new PIXI.Graphics();
 
     const { x, y } = targetXY;
 
@@ -188,11 +200,10 @@ export class BrustSelector {
         preX: number,
         preY: number
       ) => {
-        // If you have a unit context, replace `null` with the actual unit
         return checkPassiable(
-          { x: x*tileSize , y: y*tileSize  } as Unit,
+          { x: x * tileSize, y: y * tileSize } as Unit,
           gridX,
-          gridY ,
+          gridY,
         );
       },
     });
@@ -207,51 +218,22 @@ export class BrustSelector {
     brustGridSet.add({ x: x, y: y, step: 0 });
     this.brustGridSet.clear();
     this.brustGridSet = brustGridSet;
-    this.brustGraphics = this.drawGrids(brustGridsWay, color);
-    this.brustGraphics.eventMode = "none";
-    if (!golbalSetting.rlayers.selectLayer || !golbalSetting.spriteContainer) {
-      return;
-    }
 
-    this.brustGraphics.zIndex = envSetting.zIndexSetting.spriteZIndex;
+    // 使用 gridDrawer 的悬停功能
+    this.brustGraphics = this.gridDrawer.showHoverGrids(brustGridsWay, {
+      color,
+    });
   };
+
   drawGrids = (
     grids: { [key: string]: { x: number; y: number; step: number } | null },
     color: string
   ) => {
-    const graphics = new PIXI.Graphics();
-    graphics.alpha = 0.4;
-    graphics.zIndex = envSetting.zIndexSetting.spriteZIndex;
-    // 绘制可移动范围
-    graphics.clear();
-    if (grids) {
-      Object.keys(grids).forEach((key) => {
-        const [x, y] = key.split(",").map(Number);
-        const drawX = x * tileSize;
-        const drawY = y * tileSize;
-        graphics.rect(drawX, drawY, tileSize, tileSize);
-        graphics.fill({ color: color });
-      });
-    }
-    // path 是一个以 "x,y" 为 key 的对象，记录每个格子的前驱节点
-
-    const container = golbalSetting.spriteContainer;
-    if (!container) {
-      console.warn("Map container not found.");
-      return graphics;
-    }
-    if (!golbalSetting.rlayers.spriteLayer) {
-      console.warn("Sprite layer not found in global settings.");
-      return graphics;
-    }
-    golbalSetting.rlayers.spriteLayer.attach(graphics);
-    container.addChild(graphics);
-    return graphics;
+    return this.gridDrawer.drawGrids(grids, { color });
   };
+
   getXY = (x: number, y: number): { x: number; y: number } => {
-    const resultX = Math.floor(x / tileSize);
-    const resultY = Math.floor(y / tileSize);
-    return { x: resultX, y: resultY };
+    return GridDrawer.getXY(x, y);
   };
   // 生成可移动范围
 }

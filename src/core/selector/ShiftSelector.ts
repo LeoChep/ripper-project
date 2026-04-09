@@ -1,11 +1,11 @@
 import { tileSize } from "../envSetting";
-
 import { generateWays } from "../utils/PathfinderUtil";
 import * as PIXI from "pixi.js";
 import * as envSetting from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import { MessageTipSystem } from "../system/MessageTipSystem";
 import { checkPassiable } from "../system/AttackSystem";
+import { GridDrawer } from "../utils/GridDrawer";
 import type { Unit } from "../units/Unit";
 import { UnitSystem } from "../system/UnitSystem";
 
@@ -27,6 +27,18 @@ export class ShiftSelector {
   public selecteNum: number = 0;
   public shiftRange: number = 0;
   private static instance: ShiftSelector | null = null;
+  private gridDrawer: GridDrawer = new GridDrawer();
+
+  /**
+   * 清理所有选择器相关的图形
+   * 用于切换控制器时确保没有残留图形
+   */
+  public cleanup(): void {
+    this.gridDrawer.clearAndRemove();
+    this.graphics = null;
+    this.shiftGraphics = null;
+    this.selected = [];
+  }
 
   public selectBasic(
     grids: {
@@ -63,7 +75,12 @@ export class ShiftSelector {
       console.warn("Graphics not found in BasicSelector.");
       return selector;
     }
-    selector.graphics?.on("pointermove", (e) => {
+    // 保存 pointermove 事件处理函数的引用，以便后续移除
+    const pointerMoveHandler = (e: any) => {
+      // 检查 selector 的 graphics 是否还存在（用于判断是否被清理）
+      if (selector.graphics !== graphics) {
+        return; // 如果不匹配，说明已经被清理，不再处理
+      }
       if (!golbalSetting.rootContainer) {
         return;
       }
@@ -72,7 +89,8 @@ export class ShiftSelector {
       const targetXY = this.getXY(x, y);
       console.log("pointermove", targetXY);
       this.drawShiftRange(targetXY, shiftColor, shiftUnit);
-    });
+    };
+    graphics.on("pointermove", pointerMoveHandler);
     // 点击其他地方移除移动范围
     const removeGraphics = () => {
       MessageTipSystem.getInstance().clearBottomMessage();
@@ -169,15 +187,7 @@ export class ShiftSelector {
     color: string,
     unit: Unit
   ) => {
-    if (this.shiftGraphics) {
-      this.shiftGraphics.clear();
-      this.shiftGraphics.destroy();
-      if (this.shiftGraphics.parent) {
-        this.shiftGraphics.parent.removeChild(this.shiftGraphics);
-      }
-    }
     console.log("Creating new shiftGraphics");
-    this.shiftGraphics = new PIXI.Graphics();
 
     const { x, y } = targetXY;
 
@@ -191,56 +201,26 @@ export class ShiftSelector {
     for (let grid of grids) {
       this.shiftGridSet.add(grid);
     }
-    const sizeWay: { [key: string]: { x: number; y: number; step: number } } =
-      {};
+    const sizeWay: { [key: string]: { x: number; y: number; step: number } } = {};
     for (let grid of this.shiftGridSet) {
       sizeWay[`${grid.x},${grid.y}`] = { x: grid.x, y: grid.y, step: 0 };
     }
-    this.shiftGraphics = this.drawGrids(sizeWay, color);
-    this.shiftGraphics.eventMode = "none";
-    if (!golbalSetting.rlayers.selectLayer || !golbalSetting.spriteContainer) {
-      return;
-    }
 
-    this.shiftGraphics.zIndex = envSetting.zIndexSetting.spriteZIndex;
+    // 使用 gridDrawer 的悬停功能
+    this.shiftGraphics = this.gridDrawer.showHoverGrids(sizeWay, {
+      color,
+    });
   };
+
   drawGrids = (
     grids: { [key: string]: { x: number; y: number; step: number } | null },
     color: string
   ) => {
-    const graphics = new PIXI.Graphics();
-    graphics.alpha = 0.4;
-    graphics.zIndex = envSetting.zIndexSetting.spriteZIndex;
-    // 绘制可移动范围
-    graphics.clear();
-    if (grids) {
-      Object.keys(grids).forEach((key) => {
-        const [x, y] = key.split(",").map(Number);
-        const drawX = x * tileSize;
-        const drawY = y * tileSize;
-        graphics.rect(drawX, drawY, tileSize, tileSize);
-        graphics.fill({ color: color });
-      });
-    }
-    // path 是一个以 "x,y" 为 key 的对象，记录每个格子的前驱节点
-
-    const container = golbalSetting.spriteContainer;
-    if (!container) {
-      console.warn("Map container not found.");
-      return graphics;
-    }
-    if (!golbalSetting.rlayers.spriteLayer) {
-      console.warn("Sprite layer not found in global settings.");
-      return graphics;
-    }
-    golbalSetting.rlayers.spriteLayer.attach(graphics);
-    container.addChild(graphics);
-    return graphics;
+    return this.gridDrawer.drawGrids(grids, { color });
   };
+
   getXY = (x: number, y: number): { x: number; y: number } => {
-    const resultX = Math.floor(x / tileSize);
-    const resultY = Math.floor(y / tileSize);
-    return { x: resultX, y: resultY };
+    return GridDrawer.getXY(x, y);
   };
   // 生成可移动范围
 }

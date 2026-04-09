@@ -1,8 +1,8 @@
-import { tileSize } from "../envSetting";
 import * as PIXI from "pixi.js";
 import * as envSetting from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import { MessageTipSystem } from "../system/MessageTipSystem";
+import { GridDrawer } from "../utils/GridDrawer";
 
 export class BlastSelector {
   public graphics: PIXI.Graphics | null = null;
@@ -17,11 +17,27 @@ export class BlastSelector {
   public blastGraphics: PIXI.Graphics | null = null;
   public blastGridSet: Set<{ x: number; y: number; step: number }> = new Set();
   public hoverGraphics: PIXI.Graphics | null = null;
+  private gridDrawer: GridDrawer = new GridDrawer();
 
   static getInstance(): BlastSelector {
     if (BlastSelector.instance) return BlastSelector.instance;
     BlastSelector.instance = new BlastSelector();
     return BlastSelector.instance;
+  }
+
+  /**
+   * 清理所有选择器相关的图形
+   * 用于切换控制器时确保没有残留图形
+   */
+  public cleanup(): void {
+    this.gridDrawer.clearAndRemove();
+    this.graphics = null;
+    this.hoverGraphics = null;
+    this.selected = [];
+    if (this.blastGraphics && this.blastGraphics.parent) {
+      this.blastGraphics.parent.removeChild(this.blastGraphics);
+    }
+    this.blastGraphics = null;
   }
 
   /**
@@ -130,11 +146,9 @@ export class BlastSelector {
     color: string,
     checkPassiable: (gridX: number, gridY: number) => boolean
   ) {
-    const graphics = new PIXI.Graphics();
-    graphics.alpha = 0.4;
-    graphics.zIndex = envSetting.zIndexSetting.spriteZIndex;
-    graphics.clear();
     this.blastGridSet.clear();
+    const grids: { x: number; y: number }[] = [];
+
     startGrids.forEach((start) => {
       const dirs = [
         { dx: 1, dy: 0 },
@@ -143,7 +157,6 @@ export class BlastSelector {
         { dx: 0, dy: -1 },
       ];
       dirs.forEach((dir) => {
-        let area: { x: number; y: number }[] = [];
         for (let i = 0; i < blastRange; i++) {
           for (let j = 0; j < blastRange; j++) {
             let tx, ty;
@@ -156,25 +169,13 @@ export class BlastSelector {
             }
             if (tx === start.x && ty === start.y) continue;
             if (!checkPassiable(tx, ty)) continue;
-            area.push({ x: tx, y: ty });
-
-            graphics.rect(tx * tileSize, ty * tileSize, tileSize, tileSize);
-            graphics.fill({ color });
+            grids.push({ x: tx, y: ty });
           }
         }
       });
     });
-    const container = golbalSetting.spriteContainer;
-    if (!container) {
-      console.warn("Map container not found.");
-      return graphics;
-    }
-    if (!golbalSetting.rlayers.spriteLayer) {
-      console.warn("Sprite layer not found in global settings.");
-      return graphics;
-    }
-    golbalSetting.rlayers.spriteLayer.attach(graphics);
-    container.addChild(graphics);
+
+    const graphics = this.gridDrawer.drawGrids(grids, { color });
     return graphics;
   }
 
@@ -218,52 +219,37 @@ export class BlastSelector {
   }
 
   drawHoverArea(area: { x: number; y: number }[], color: string) {
-    if (this.hoverGraphics) {
-      this.hoverGraphics.clear();
-      this.hoverGraphics.destroy();
-      if (this.hoverGraphics.parent) {
-        this.hoverGraphics.parent.removeChild(this.hoverGraphics);
-      }
+    if (!area.length) {
+      // 如果没有区域，清理现有的 hoverGraphics
+      this.gridDrawer.hideHoverGrids();
+      this.hoverGraphics = null;
+      return;
     }
-    if (!area.length) return;
-    this.hoverGraphics = new PIXI.Graphics();
-    this.hoverGraphics.eventMode = "none";
-    this.hoverGraphics.alpha = 0.5;
-    this.hoverGraphics.zIndex = envSetting.zIndexSetting.spriteZIndex + 1;
+
     this.blastGridSet.clear();
     area.forEach((g) => {
-      this.hoverGraphics!.rect(
-        g.x * tileSize,
-        g.y * tileSize,
-        tileSize,
-        tileSize
-      );
-      this.hoverGraphics!.fill({ color });
       this.blastGridSet.add({ x: g.x, y: g.y, step: 0 });
     });
-    const container = golbalSetting.spriteContainer;
-    if (!container) return;
-    if (!golbalSetting.rlayers.spriteLayer) return;
-    golbalSetting.rlayers.spriteLayer.attach(this.hoverGraphics);
-    container.addChild(this.hoverGraphics);
+
+    // 使用 gridDrawer 的悬停功能
+    this.hoverGraphics = this.gridDrawer.showHoverGrids(area, {
+      color,
+      alpha: 0.5,
+      zIndex: envSetting.zIndexSetting.spriteZIndex + 1,
+    });
   }
 
   getXY(x: number, y: number): { x: number; y: number } {
-    return { x: Math.floor(x / tileSize), y: Math.floor(y / tileSize) };
+    return GridDrawer.getXY(x, y);
   }
 
   removeGraphics() {
     MessageTipSystem.getInstance().clearBottomMessage();
     MessageTipSystem.getInstance().clearMessage();
-    if (this.graphics && this.graphics.parent) {
-      this.graphics.parent.removeChild(this.graphics);
-    }
-    if (this.blastGraphics && this.blastGraphics.parent) {
-      this.blastGraphics.parent.removeChild(this.blastGraphics);
-    }
-    if (this.hoverGraphics && this.hoverGraphics.parent) {
-      this.hoverGraphics.parent.removeChild(this.hoverGraphics);
-    }
+    // 使用 GridDrawer 的 clearAndRemove 方法
+    this.gridDrawer.clearAndRemove();
+    this.graphics = null;
+    this.hoverGraphics = null;
     this.removeFunction = () => {};
   }
 }

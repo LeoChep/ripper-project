@@ -24,23 +24,30 @@ export class ControllerHelper {
    * 创建标准的 removeFunction
    *
    * @param controllerName 控制器名称
-   * @param graphics 图形对象（用于清理）
+   * @param graphics 图形对象（用于清理，已弃用，请使用selectorCleanup）
    * @param extraCleanup 额外的清理函数（可选）
+   * @param selectorCleanup 选择器的完整清理方法（可选）
    * @returns removeFunction
    */
   static createRemoveFunction(
     controllerName: string,
     graphics: { parent?: any; destroy?: () => void } | null,
-    extraCleanup?: () => void
+    extraCleanup?: () => void,
+    selectorCleanup?: () => void
   ): (args?: any) => void {
     return (args?: any) => {
-      // 清理图形
-      if (graphics) {
-        if (graphics.parent) {
-          graphics.parent.removeChild(graphics);
-        }
-        if (typeof graphics.destroy === 'function') {
-          graphics.destroy();
+      // 优先使用选择器的完整清理方法
+      if (selectorCleanup) {
+        selectorCleanup();
+      } else {
+        // 清理图形（旧方式，向后兼容）
+        if (graphics) {
+          if (graphics.parent) {
+            graphics.parent.removeChild(graphics);
+          }
+          if (typeof graphics.destroy === 'function') {
+            graphics.destroy();
+          }
         }
       }
 
@@ -98,9 +105,10 @@ export class ControllerHelper {
     controllerName: string,
     instance: { removeFunction: (args?: any) => void }
   ): void {
+    // 使用 getter 函数来确保每次调用时都使用最新的 removeFunction
     ControllerCancelHandler.getInstance().registerController(
       controllerName,
-      (args: any) => instance.removeFunction(args)
+      (args: any) => instance.removeFunction(args) // 每次调用时都会获取最新的 removeFunction
     );
   }
 

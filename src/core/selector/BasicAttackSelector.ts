@@ -1,11 +1,10 @@
 
 
-import { tileSize } from "./../envSetting";
 import { generateWays } from "../utils/PathfinderUtil";
 import * as PIXI from "pixi.js";
-import * as envSetting from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import { MessageTipSystem } from "../system/MessageTipSystem";
+import { GridDrawer } from "../utils/GridDrawer";
 import type { Unit } from "../units/Unit";
 import { UnitSystem } from "../system/UnitSystem";
 import * as AttackSystem from "../system/AttackSystem";
@@ -24,6 +23,18 @@ export class BasicAttackSelector {
   public selected: { x: number; y: number }[] = [];
   public selecteNum: number = 0;
   private static instance: BasicAttackSelector | null = null;
+  private gridDrawer: GridDrawer = new GridDrawer();
+
+  /**
+   * 清理所有选择器相关的图形
+   * 用于切换控制器时确保没有残留图形
+   */
+  public cleanup(): void {
+    this.gridDrawer.clearAndRemove();
+    this.graphics = null;
+    this.selected = [];
+  }
+
   // 选择基本攻击
   public selectBasic(options: {
     unit?: Unit,
@@ -59,6 +70,7 @@ export class BasicAttackSelector {
     const size=unit.creature?.size;
     const path = generateWays({ start: grids, range: range, checkFunction:
       (x,y,...args)=>{return AttackSystem.checkPassiable(unit,x,y)} });
+    console.log("生成的攻击范围格子:", path);
     this.drawGrids(path, color);
     selector.promise = Promise.resolve({});
     let resolveCallback: (arg0: any) => void = () => {};
@@ -70,6 +82,26 @@ export class BasicAttackSelector {
       console.warn("Graphics not found in BasicSelector.");
       return selector;
     }
+
+    // 保存 graphics 的引用，用于检查是否已被清理
+    const graphicsRef = graphics;
+    // 添加悬停效果
+    graphics.on("pointermove", (e) => {
+      // 检查 selector 的 graphics 是否还存在（用于判断是否被清理）
+      if (selector.graphics !== graphicsRef) {
+        return; // 如果不匹配，说明已经被清理，不再处理
+      }
+      if (!golbalSetting.rootContainer) {
+        return;
+      }
+      let { x, y } = e.data.global;
+      x -= golbalSetting.rootContainer.x;
+      y -= golbalSetting.rootContainer.y;
+      const hoverXY = this.getXY(x, y);
+      // 显示悬停格子高亮
+      this.showHover(hoverXY, path);
+    });
+
     const removeGraphics = () => {
       MessageTipSystem.getInstance().clearBottomMessage();
       MessageTipSystem.getInstance().clearMessage();
@@ -149,40 +181,31 @@ export class BasicAttackSelector {
     grids: { [key: string]: { x: number; y: number; step: number } | null },
     color: string
   ) => {
-    const graphics = new PIXI.Graphics();
-    this.graphics = graphics;
-    graphics.alpha = 0.4;
-    graphics.zIndex = envSetting.zIndexSetting.spriteZIndex;
-    // 绘制可移动范围
-    graphics.clear();
-    if (grids) {
-      Object.keys(grids).forEach((key) => {
-        const [x, y] = key.split(",").map(Number);
-        const drawX = x * tileSize;
-        const drawY = y * tileSize;
-        graphics.rect(drawX, drawY, tileSize, tileSize);
-        graphics.fill({ color: color });
-      });
-    }
-    // path 是一个以 "x,y" 为 key 的对象，记录每个格子的前驱节点
-    graphics.eventMode = "static";
-    const container = golbalSetting.spriteContainer;
-    if (!container) {
-      console.warn("Map container not found.");
-      return this;
-    }
-    if (!golbalSetting.rlayers.spriteLayer) {
-      console.warn("Sprite layer not found in global settings.");
-      return this;
-    }
-    golbalSetting.rlayers.spriteLayer.attach(graphics);
-    container.addChild(graphics);
+    this.graphics = this.gridDrawer.drawGrids(grids, { color });
     return this;
   };
+
   getXY = (x: number, y: number): { x: number; y: number } => {
-    const resultX = Math.floor(x / tileSize);
-    const resultY = Math.floor(y / tileSize);
-    return { x: resultX, y: resultY };
+    return GridDrawer.getXY(x, y);
   };
+
+  /**
+   * 显示悬停格子高亮
+   */
+  private showHover(hoverXY: { x: number; y: number }, validGrids: { [key: string]: { x: number; y: number; step: number } | null }): void {
+    // 检查悬停位置是否在有效范围内
+    const key = `${hoverXY.x},${hoverXY.y}`;
+    if (validGrids[key]) {
+      // 显示悬停格子
+      this.gridDrawer.showHoverGrids([{ x: hoverXY.x, y: hoverXY.y }], {
+        color: "#ff6666",
+        alpha: 0.6,
+      });
+    } else {
+      // 不在有效范围内，隐藏悬停
+      this.gridDrawer.hideHoverGrids();
+    }
+  }
+
   // 生成可移动范围
 }

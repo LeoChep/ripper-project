@@ -1,9 +1,7 @@
-import { tileSize } from "./../envSetting";
-
 import * as PIXI from "pixi.js";
-import * as envSetting from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import { MessageTipSystem } from "../system/MessageTipSystem";
+import { GridDrawer } from "../utils/GridDrawer";
 
 import type { Unit } from "../units/Unit";
 import { UnitSystem } from "../system/UnitSystem";
@@ -24,6 +22,19 @@ export class MoveSelector {
   public selecteNum: number = 1;
   public sizeGraphics: PIXI.Graphics | null = null;
   private static instance: MoveSelector | null = null;
+  private gridDrawer: GridDrawer = new GridDrawer();
+
+  /**
+   * 清理所有选择器相关的图形
+   * 用于切换控制器时确保没有残留图形
+   */
+  public cleanup(): void {
+    this.gridDrawer.clearAndRemove(); // 也会清理悬停格子
+    this.graphics = null;
+    this.sizeGraphics = null;
+    this.selected = [];
+  }
+
   // 选择基本攻击
   public selectBasic(
     path: {
@@ -51,22 +62,25 @@ export class MoveSelector {
       console.warn("Graphics not found in BasicSelector.");
       return selector;
     }
-    selector.graphics?.on("pointermove", (e) => {
+    // 保存 graphics 的引用，用于检查是否已被清理
+    const graphicsRef = graphics;
+    graphics.on("pointermove", (e) => {
+      // 检查 selector 的 graphics 是否还存在（用于判断是否被清理）
+      if (selector.graphics !== graphicsRef) {
+        return; // 如果不匹配，说明已经被清理，不再处理
+      }
       if (!golbalSetting.rootContainer) {
         return;
       }
       const x = e.data.global.x - golbalSetting.rootContainer?.x;
       const y = e.data.global.y - golbalSetting.rootContainer?.y;
       const targetXY = this.getXY(x, y);
-      if (this.sizeGraphics?.parent) {
-        this.sizeGraphics.clear();
-        this.sizeGraphics.parent.removeChild(this.sizeGraphics);
-        this.sizeGraphics.destroy();
-      }
       if (!UnitSystem.getInstance().checkOverlapAt(unit, targetXY.x, targetXY.y)) {
-        this.sizeGraphics = this.drawSizeGrids(targetXY, unit, "blue");
+        this.drawSizeGrids(targetXY, unit, "blue");
       } else {
-        // this.sizeGraphics = this.drawSizeGrids(targetXY, unit, "red");
+        // 隐藏悬停格子
+        this.gridDrawer.hideHoverGrids();
+        this.sizeGraphics = null;
       }
     });
     // 点击其他地方移除移动范围
@@ -159,75 +173,52 @@ export class MoveSelector {
     path: { [x: string]: { x: number; y: number; step: number } | null },
     unit: Unit
   ) => {
-    const graphics = new PIXI.Graphics();
-    graphics.alpha = 0.4;
-    graphics.zIndex = envSetting.zIndexSetting.spriteZIndex + 1;
+    // 计算所有需要绘制的格子（考虑单位大小）
     const grids = new Set<string>();
     if (path) {
       Object.keys(path).forEach((key) => {
         const [x, y] = key.split(",").map(Number);
         grids.add(`${x},${y}`);
-        const size = unit.creature ? unit.creature.size : undefined;
-        // 构建范围数组
-        const rangeArrA = [];
-        let range = 1; // 默认范围为0，可根据需要调整
+        const size = unit.creature?.size;
+        let range = 1;
         if (size === "big") {
           range = 2;
         }
         for (let dx = 0; dx < range; dx++) {
           for (let dy = 0; dy < range; dy++) {
-            rangeArrA.push({
-              x: x + dx,
-              y: y + dy,
-            });
+            grids.add(`${x + dx},${y + dy}`);
           }
-        }
-        for (const grid of rangeArrA) {
-          grids.add(`${grid.x},${grid.y}`);
         }
       });
     }
+
+    // 转换为GridDrawer支持的格式
+    const gridArray: { x: number; y: number }[] = [];
     for (const grid of grids) {
       const [x, y] = grid.split(",").map(Number);
-      const drawX = x * tileSize;
-      const drawY = y * tileSize;
-      graphics.rect(drawX, drawY, tileSize, tileSize);
-      graphics.fill({ color: 0x66ccff });
+      gridArray.push({ x, y });
     }
 
-    graphics.eventMode = "static";
-    // if (FogSystem.instanse.mask)
-    //   graphics.setMask({ mask: FogSystem.instanse.mask });
-    const container = golbalSetting.spriteContainer;
-    if (!container) {
-      console.warn("Map container not found.");
-      return graphics;
-    }
-    if (!golbalSetting.rlayers.spriteLayer) {
-      console.warn("Sprite layer not found in global settings.");
-      return graphics;
-    }
-    golbalSetting.rlayers.spriteLayer.attach(graphics);
-    container.addChild(graphics);
-    this.graphics = graphics;
-    return graphics;
+    this.graphics = this.gridDrawer.drawGrids(gridArray, {
+      color: 0x66ccff,
+      zIndex: 21,
+    });
+    return this.graphics;
   };
+
   drawSizeGrids = (
     target: { x: number; y: number },
     unit: Unit,
     color: string
   ) => {
-    const graphics = new PIXI.Graphics();
-    graphics.alpha = 0.4;
-    graphics.zIndex = envSetting.zIndexSetting.spriteZIndex + 1;
-    // 绘制可移动范围
-    const size = unit.creature ? unit.creature.size : undefined;
-    const grids = [];
-    let range = 1; // 默认范围为0，可根据需要调整
+    // 计算单位占用的格子
+    const size = unit.creature?.size;
+    let range = 1;
     if (size === "big") {
       range = 2;
     }
 
+    const grids: { x: number; y: number }[] = [];
     for (let dx = 0; dx < range; dx++) {
       for (let dy = 0; dy < range; dy++) {
         grids.push({
@@ -237,34 +228,16 @@ export class MoveSelector {
       }
     }
 
-    if (grids) {
-      grids.forEach((grid) => {
-        const drawX = grid.x * tileSize;
-        const drawY = grid.y * tileSize;
-        graphics.rect(drawX, drawY, tileSize, tileSize);
-        graphics.fill({ color: color });
-      });
-    }
-    graphics.eventMode = "none";
-    // path 是一个以 "x,y" 为 key 的对象，记录每个格子的前驱节点
-
-    const container = golbalSetting.spriteContainer;
-    if (!container) {
-      console.warn("Map container not found.");
-      return graphics;
-    }
-    if (!golbalSetting.rlayers.spriteLayer) {
-      console.warn("Sprite layer not found in global settings.");
-      return graphics;
-    }
-    golbalSetting.rlayers.spriteLayer.attach(graphics);
-    container.addChild(graphics);
-    return graphics;
+    // 使用 gridDrawer 的悬停功能
+    this.sizeGraphics = this.gridDrawer.showHoverGrids(grids, {
+      color,
+      zIndex: 21,
+    });
+    return this.sizeGraphics;
   };
+
   getXY = (x: number, y: number): { x: number; y: number } => {
-    const resultX = Math.floor(x / tileSize);
-    const resultY = Math.floor(y / tileSize);
-    return { x: resultX, y: resultY };
+    return GridDrawer.getXY(x, y);
   };
   // 生成可移动范围
 }

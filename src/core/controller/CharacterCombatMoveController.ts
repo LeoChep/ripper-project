@@ -104,7 +104,8 @@ export class CharCombatMoveController {
       this.graphics,
       () => {
         this.graphics = null;
-      }
+      },
+      () => selector.cleanup() // 选择器完整清理
     );
 
     // 只在第一次注册控制器，避免重复注册

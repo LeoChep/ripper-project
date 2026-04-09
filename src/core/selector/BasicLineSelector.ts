@@ -5,6 +5,7 @@ import * as PIXI from "pixi.js";
 import * as envSetting from "../envSetting";
 import { golbalSetting } from "../golbalSetting";
 import { MessageTipSystem } from "../system/MessageTipSystem";
+import { GridDrawer } from "../utils/GridDrawer";
 export type ScanData = {
   x: number;
   y: number;
@@ -30,6 +31,7 @@ export class BasicLineSelector {
   private previewLine: PIXI.Graphics | null = null;
   private startPosition: { x: number; y: number } | null = null;
   private oldXY: { x: number; y: number } = { x: 0, y: 0 }; //防抖
+  private gridDrawer: GridDrawer = new GridDrawer();
 
   static getInstance(): BasicLineSelector {
     if (BasicLineSelector.instance) {
@@ -46,6 +48,18 @@ export class BasicLineSelector {
     [key: string]: { x: number; y: number; step: number } | null;
   } = {};
   private static instance: BasicLineSelector | null = null;
+
+  /**
+   * 清理所有选择器相关的图形
+   * 用于切换控制器时确保没有残留图形
+   */
+  public cleanup(): void {
+    this.gridDrawer.clearAndRemove();
+    this.removePreviewLine();
+    this.graphics = null;
+    this.previewLine = null;
+    this.selected = [];
+  }
 
   public selectBasic(
     grids: {
@@ -176,6 +190,14 @@ export class BasicLineSelector {
     };
     const scanInPIXIEventInGraphics = (e: { x: number; y: number }) => {
       scanInPIXI(e.x, e.y, true);
+      // 添加悬停格子效果
+      let { x, y } = e;
+      if (golbalSetting.rootContainer) {
+        x -= golbalSetting.rootContainer.x;
+        y -= golbalSetting.rootContainer.y;
+      }
+      const hoverXY = this.getXY(x, y);
+      this.showHoverLine(hoverXY, path, checkPassiable, color);
     };
     ms?.on("pointermove", scanInPIXIEvent);
     graphics.on("pointermove", scanInPIXIEventInGraphics);
@@ -401,41 +423,34 @@ export class BasicLineSelector {
     grids: { [key: string]: { x: number; y: number; step: number } | null },
     color: string
   ) => {
-    const graphics = new PIXI.Graphics();
-    this.graphics = graphics;
-    graphics.eventMode = "static";
-    graphics.alpha = 0.4;
-    graphics.zIndex = envSetting.zIndexSetting.spriteZIndex;
-
-    graphics.clear();
-    if (grids) {
-      Object.keys(grids).forEach((key) => {
-        const [x, y] = key.split(",").map(Number);
-        const drawX = x * tileSize;
-        const drawY = y * tileSize;
-        graphics.rect(drawX, drawY, tileSize, tileSize);
-        graphics.fill({ color: color });
-      });
-    }
-
-    // graphics.eventMode = "static";
-    const container = golbalSetting.spriteContainer;
-    if (!container) {
-      console.warn("Map container not found.");
-      return this;
-    }
-    if (!golbalSetting.rlayers.spriteLayer) {
-      console.warn("Sprite layer not found in global settings.");
-      return this;
-    }
-    golbalSetting.rlayers.spriteLayer.attach(graphics);
-    container.addChild(graphics);
+    this.graphics = this.gridDrawer.drawGrids(grids, { color });
     return this;
   };
 
   getXY = (x: number, y: number): { x: number; y: number } => {
-    const resultX = Math.floor(x / tileSize);
-    const resultY = Math.floor(y / tileSize);
-    return { x: resultX, y: resultY };
+    return GridDrawer.getXY(x, y);
   };
+
+  /**
+   * 显示悬停格子高亮（线条选择器版本）
+   */
+  private showHoverLine(
+    hoverXY: { x: number; y: number },
+    validGrids: { [key: string]: { x: number; y: number; step: number } | null },
+    checkPassiable: (gridX: number, gridY: number) => boolean,
+    color: string
+  ): void {
+    // 检查悬停位置是否在有效范围内
+    const key = `${hoverXY.x},${hoverXY.y}`;
+    if (validGrids[key] && checkPassiable(hoverXY.x, hoverXY.y)) {
+      // 显示悬停格子
+      this.gridDrawer.showHoverGrids([{ x: hoverXY.x, y: hoverXY.y }], {
+        color: color,
+        alpha: 0.6,
+      });
+    } else {
+      // 不在有效范围内，隐藏悬停
+      this.gridDrawer.hideHoverGrids();
+    }
+  }
 }

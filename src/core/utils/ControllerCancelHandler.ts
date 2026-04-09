@@ -4,6 +4,13 @@ import type { Unit } from "../units/Unit";
 import { CharCombatMoveController } from "../controller/CharacterCombatMoveController";
 import { CharCombatAttackController } from "../controller/CharacterCombatAttackController";
 import { CharCombatStepController } from "../controller/CharacterCombatStepController";
+import { BasicSelector } from "../selector/BasicSelector";
+import { MoveSelector } from "../selector/MoveSeletor";
+import { BasicAttackSelector } from "../selector/BasicAttackSelector";
+import { BasicLineSelector } from "../selector/BasicLineSelector";
+import { BrustSelector } from "../selector/BrustSelector";
+import { ShiftSelector } from "../selector/ShiftSelector";
+import { BlastSelector } from "../selector/BlastSelector";
 
 /**
  * 控制器取消原因枚举
@@ -127,6 +134,9 @@ export class ControllerCancelHandler {
       return;
     }
 
+    // 清理所有选择器图形
+    this.cleanupAllSelectors();
+
     const cancelInfo = {
       from: "system",
       cancel: true,
@@ -146,6 +156,24 @@ export class ControllerCancelHandler {
       });
     } finally {
       this.isNotifying = false;
+    }
+  }
+
+  /**
+   * 清理所有选择器的图形
+   * 确保切换控制器时没有残留的选择器图形
+   */
+  private cleanupAllSelectors(): void {
+    try {
+      BasicSelector.getInstance().cleanup();
+      MoveSelector.getInstance().cleanup();
+      BasicAttackSelector.getInstance().cleanup();
+      BasicLineSelector.getInstance().cleanup();
+      BrustSelector.getInstance().cleanup();
+      ShiftSelector.getInstance().cleanup();
+      BlastSelector.getInstance().cleanup();
+    } catch (error) {
+      console.error("Error cleaning up selectors:", error);
     }
   }
 
