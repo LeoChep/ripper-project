@@ -23,7 +23,6 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { cameraManager, type Point3, Vec3 } from '@/core/service/2dcanvas/cameraTool';
 import { getMapAssetFile } from '@/utils/utils';
-
 interface Props {
   imgSrc?: string;
 }
@@ -31,7 +30,6 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   imgSrc: 'road'
 });
-
 const imgRef = ref<HTMLImageElement>();
 const imgNaturalWidth = ref(0);
 const imgNaturalHeight = ref(0);
@@ -58,9 +56,9 @@ const displayedHeight = computed(() => imgNaturalHeight.value * scale.value);
 const offsetX = computed(() => (containerSize - displayedWidth.value) / 2);
 const offsetY = computed(() => (containerSize - displayedHeight.value) / 2);
 
-// 世界坐标 Y 转换为屏幕坐标（翻转 Y 轴：世界 Y 越大越"前"，屏幕 Y 越大越"下"）
+
 const worldToScreenY = (worldY: number) => {
-  return imgNaturalHeight.value * scale.value - worldY * scale.value + offsetY.value;
+  return  worldY * scale.value + offsetY.value;
 };
 
 // 世界坐标 X 转换为屏幕坐标
@@ -108,26 +106,26 @@ function handleKeydown(e: KeyboardEvent) {
   // 只在水平面（XY平面）上移动
   const forwardFlat = Vec3.create(forward.x, forward.y, 0).normalize();
   const rightFlat = Vec3.create(right.x, right.y, 0).normalize();
-
+console.log('Forward:', forward, 'Right:', right, 'ForwardFlat:', forwardFlat, 'RightFlat:', rightFlat);
   const currentPos = camera.getPosition();
   let newPos = { ...currentPos };
 
   switch (key) {
     case 'w':  // 前进
-      newPos.x -= forwardFlat.x * moveSpeed;
-      newPos.y -= forwardFlat.y * moveSpeed;
+      //newPos.x +=  moveSpeed;
+      newPos.y -=  moveSpeed;
       break;
     case 's':  // 后退
-      newPos.x += forwardFlat.x * moveSpeed;
-      newPos.y += forwardFlat.y * moveSpeed;
+   
+      newPos.y +=  moveSpeed;
       break;
     case 'a':  // 左移
-      newPos.x -= rightFlat.x * moveSpeed;
-      newPos.y -= rightFlat.y * moveSpeed;
+      newPos.x -=  moveSpeed;
+
       break;
     case 'd':  // 右移
-      newPos.x += rightFlat.x * moveSpeed;
-      newPos.y += rightFlat.y * moveSpeed;
+      newPos.x +=  moveSpeed;
+     
       break;
   }
 

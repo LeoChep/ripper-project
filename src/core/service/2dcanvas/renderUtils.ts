@@ -91,7 +91,7 @@ export class TerrainRenderer {
 
       for (let dx = 0; dx < width; dx++) {
         // NDC 坐标
-        const ndcX = (dx * invWidth * 2 - 1) * aspect;
+        const ndcX = (1-dx * invWidth * 2 ) * aspect;
         const ndcY = ndcYBase;
 
         // 相机空间射线
@@ -143,7 +143,7 @@ export class TerrainRenderer {
 
         // 图像坐标
         const hitX = worldX;
-        const hitY = srcHeight - 1 - worldY;
+        const hitY =  worldY;
 
         // 边界检查
         if (hitX < 0 || hitX >= srcWidth || hitY < 0 || hitY >= srcHeight) {
@@ -203,6 +203,156 @@ export class TerrainRenderer {
     const data = new Uint8ClampedArray(this.dstData);
     return new ImageData(data, this.dstWidth, this.dstHeight);
   }
+}
+
+/**
+ * 屏幕坐标转世界坐标
+ * @param screenX 屏幕X坐标
+ * @param screenY 屏幕Y坐标
+ * @param screenWidth 屏幕宽度
+ * @param screenHeight 屏幕高度
+ * @param camera 相机参数
+ * @returns 世界坐标，射线向上时返回 null
+ */
+export function screenToWorld(
+  screenX: number,
+  screenY: number,
+  screenWidth: number,
+  screenHeight: number,
+  camera: CameraParams
+): { x: number; y: number } | null {
+  const DEBUG = true;
+
+  const invWidth = 1 / screenWidth;
+  const invHeight = 1 / screenHeight;
+
+  // NDC 坐标
+  const ndcX = (1-screenX * invWidth * 2 ) * camera.aspect;
+  const ndcY = 1 - screenY * invHeight * 2;
+
+  if (DEBUG) {
+    console.log('[screenToWorld DEBUG] 输入屏幕坐标:', `(${screenX.toFixed(2)}, ${screenY.toFixed(2)})`);
+    console.log('[screenToWorld DEBUG] NDC坐标:', `ndcX=${ndcX.toFixed(4)}, ndcY=${ndcY.toFixed(4)}`);
+  }
+
+  // 相机空间射线
+  const rayCamX = ndcX * camera.tanHalfFov;
+  const rayCamY = -ndcY * camera.tanHalfFov;
+
+  if (DEBUG) {
+    console.log('[screenToWorld DEBUG] 相机空间射线:', `rayCamX=${rayCamX.toFixed(4)}, rayCamY=${rayCamY.toFixed(4)}`);
+  }
+
+  // 归一化
+  const lenSq = rayCamX * rayCamX + rayCamY * rayCamY + 1;
+  const invLen = 1 / Math.sqrt(lenSq);
+  const normX = rayCamX * invLen;
+  const normY = rayCamY * invLen;
+  const normZ = -invLen;
+
+  // 世界空间射线 Z 分量
+  const rayDirZ = normX * camera.rightZ + normY * camera.forwardZ + normZ * camera.upZ;
+
+  if (Math.abs(rayDirZ) < 0.0001) {
+    if (DEBUG) console.log('[screenToWorld DEBUG] ❌ 射线与地面平行');
+    return null; // 射线与地面平行
+  }
+
+  const t = -camera.posZ / rayDirZ;
+  if (t < 0) {
+    if (DEBUG) console.log('[screenToWorld DEBUG] ❌ 地面在相机后面');
+    return null; // 地面在相机后面
+  }
+
+  if (DEBUG) {
+    console.log('[screenToWorld DEBUG] t参数:', t.toFixed(4));
+  }
+
+  // 世界坐标交点
+  const worldDirX = normX * camera.rightX + normY * camera.forwardX + normZ * camera.upX;
+  const worldDirY = normX * camera.rightY + normY * camera.forwardY + normZ * camera.upY;
+
+  const result = {
+    x: camera.posX + worldDirX * t,
+    y: camera.posY + worldDirY * t,
+  };
+
+  if (DEBUG) {
+    console.log('[screenToWorld DEBUG] 输出世界坐标:', `(${result.x.toFixed(2)}, ${result.y.toFixed(2)})`);
+  }
+
+  return result;
+}
+
+/**
+ * 世界坐标转屏幕坐标
+ * @param worldX 世界X坐标
+ * @param worldY 世界Y坐标
+ * @param screenWidth 屏幕宽度
+ * @param screenHeight 屏幕高度
+ * @param camera 相机参数
+ * @returns 屏幕坐标，点在相机后面或视锥体外时返回 null
+ */
+export function worldToScreen(
+  worldX: number,
+  worldY: number,
+  screenWidth: number,
+  screenHeight: number,
+  camera: CameraParams
+): { x: number; y: number } | null {
+  const DEBUG = true;
+
+  // 世界坐标点（假设 Z=0 在地面上）
+  const worldZ = 0;
+
+  // 世界坐标相对于相机的向量
+  const dx = worldX - camera.posX;
+  const dy = worldY - camera.posY;
+  const dz = worldZ - camera.posZ;
+
+  // 变换到相机空间（使用视图矩阵的逆，即相机的 right/forward/up 作为基向量）
+  // 相机空间：X=right, Y=forward, Z=up (注意这里的 up 是正 Z 方向)
+  const camX = dx * camera.rightX + dy * camera.rightY + dz * camera.rightZ;
+  const camY = dx * camera.forwardX + dy * camera.forwardY + dz * camera.forwardZ;
+  const camZ = dx * camera.upX + dy * camera.upY + dz * camera.upZ;
+
+  if (DEBUG) {
+    console.log('[worldToScreen DEBUG] 输入世界坐标:', `(${worldX.toFixed(2)}, ${worldY.toFixed(2)})`);
+    console.log('[worldToScreen DEBUG] 相机位置:', `(${camera.posX.toFixed(2)}, ${camera.posY.toFixed(2)}, ${camera.posZ.toFixed(2)})`);
+    console.log('[worldToScreen DEBUG] 相机空间坐标:', `camX=${camX.toFixed(2)}, camY=${camY.toFixed(2)}, camZ=${camZ.toFixed(2)}`);
+  }
+
+  // 检查点是否在相机前面（camZ < 0，因为相机看向 -Z 方向）
+  if (camZ >= 0) {
+    if (DEBUG) console.log('[worldToScreen DEBUG] ❌ 点在相机后面');
+    return null; // 点在相机后面
+  }
+
+  // 透视投影到 NDC（归一化设备坐标）
+  const ndcX = camX / (-camZ * camera.tanHalfFov);
+  const ndcY = -camY / (-camZ * camera.tanHalfFov);
+
+  if (DEBUG) {
+    console.log('[worldToScreen DEBUG] NDC坐标:', `ndcX=${ndcX.toFixed(4)}, ndcY=${ndcY.toFixed(4)}`);
+    console.log('[worldToScreen DEBUG] tanHalfFov=', camera.tanHalfFov.toFixed(4), 'aspect=', camera.aspect.toFixed(4));
+  }
+
+  // 检查是否在视锥体内
+  // if (Math.abs(ndcX) > 1 || Math.abs(ndcY) > 1) {
+  //   if (DEBUG) console.log('[worldToScreen DEBUG] ❌ 点在视锥体外');
+  //   return null; // 点在视锥体外
+  // }
+
+  // NDC 转换到屏幕坐标
+  // 屏幕坐标：左上为原点 (0,0)，X 右正，Y 下正
+  const screenX = (1 - ndcX / camera.aspect) * screenWidth / 2;
+  const screenY = (1 - ndcY) * screenHeight / 2;
+
+  if (DEBUG) {
+    console.log('[worldToScreen DEBUG] 输出屏幕坐标:', `(${screenX.toFixed(2)}, ${screenY.toFixed(2)})`);
+  }
+
+  return { x: screenX, y: screenY };
 }
 
 /**

@@ -89,9 +89,9 @@ export class PerspectiveCamera {
   constructor(config: Partial<PerspectiveCameraConfig> = {}) {
     this.config = {
       position: { x: 0, y: 0, z: 100 },
-      pitch: 50,      // 向下看45度
+      pitch: 60,      // 向下看45度
       yaw: 0,         // 朝向Y轴负方向（前方）
-      fov: 100,
+      fov: 60,
       near: 1,
       far: 1000,
       ...config,
@@ -126,8 +126,8 @@ export class PerspectiveCamera {
 
     // 欧拉角旋转：先绕Z轴，再绕旋转后的X轴
     // 默认朝向 (0, -1, 0)
-    const x = -Math.sin(yawRad) * Math.cos(pitchRad);
-    const y = -Math.cos(yawRad) * Math.cos(pitchRad);
+    const x = Math.sin(yawRad) * Math.cos(pitchRad);
+    const y = Math.cos(yawRad) * Math.cos(pitchRad);
     const z = Math.sin(pitchRad);
 
     return Vec3.create(x, y, z).normalize();
@@ -138,6 +138,7 @@ export class PerspectiveCamera {
    */
   getRight(): Vec3 {
     const forward = this.getForward();
+  
     // 世界向上是 Z 轴
     const worldUp = Vec3.create(0, 0, 1);
     return worldUp.cross(forward).normalize();

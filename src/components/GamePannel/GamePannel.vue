@@ -368,12 +368,18 @@ const loadGameState = async (
 };
 
 const addListenKeyboard = () => {
+  const mapContainer = golbalSetting.mapContainer;
   //监听键盘S键
   document.addEventListener("keydown", (event) => {
     const container = golbalSetting.rootContainer;
+
     console.log("keydown", event.key);
     if (event.key === "s" && container) {
       container.y -= 64;
+
+      if (envSetting.is25dEnabled && mapContainer) {
+        mapContainer.y += 64; // 保持粘贴在原位
+      }
       FogSystem.instanse.refreshSpatialGrid(true);
     }
   });
@@ -382,6 +388,9 @@ const addListenKeyboard = () => {
     const container = golbalSetting.rootContainer;
     if (event.key === "a" && container) {
       container.x += 64;
+      if (envSetting.is25dEnabled && mapContainer) {
+        mapContainer.x -= 64; // 保持粘贴在原位
+      }
       FogSystem.instanse.refreshSpatialGrid(true);
     }
   });
@@ -390,6 +399,9 @@ const addListenKeyboard = () => {
     const container = golbalSetting.rootContainer;
     if (event.key === "d" && container) {
       container.x -= 64;
+      if (envSetting.is25dEnabled && mapContainer) {
+        mapContainer.x += 64; // 保持粘贴在原位
+      }
       FogSystem.instanse.refreshSpatialGrid(true);
     }
   });
@@ -398,6 +410,9 @@ const addListenKeyboard = () => {
     const container = golbalSetting.rootContainer;
     if (event.key === "w" && container) {
       container.y += 64;
+      if (envSetting.is25dEnabled && mapContainer) {
+        mapContainer.y -= 64; // 保持粘贴在原位
+      }
       FogSystem.instanse.refreshSpatialGrid(true);
     }
   });
