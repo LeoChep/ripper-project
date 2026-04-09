@@ -18,6 +18,8 @@ export interface GridDrawOptions {
   layerName?: keyof typeof golbalSetting.rlayers;
   /** 是否自动添加到容器，默认 true */
   autoAttach?: boolean;
+  /** 是否随相机实时更新（仅在 2.5D 模式下有效），默认 false */
+  dynamicUpdate?: boolean;
 }
 
 /**
@@ -51,17 +53,50 @@ export interface Point2D {
 }
 
 /**
- * GridDrawer - 公共格子绘制工具类
- *
- * 封装所有 selector 中共同的格子绘制逻辑，提供统一的绘制接口。
+ * 动态格子 Graphics - 随相机移动自动更新
  */
-export class GridDrawer {
+export class DynamicGridGraphics extends PIXI.Graphics {
+  private grids: GridsMap;
+  private color: string | number;
+  private unsubscribe?: () => void;
+
+  constructor(
+    grids: GridsMap,
+    color: string | number,
+    options: GridDrawOptions
+  ) {
+    super();
+    this.grids = grids;
+    this.color = color;
+
+    this.alpha = options.alpha ?? 0.4;
+    this.zIndex = options.zIndex ?? 0;
+    this.eventMode = options.eventMode ?? "static";
+
+    // 初始绘制
+    this.redraw();
+
+    // 在 2.5D 模式下订阅相机变化
+    setInterval(() => {
+      this.redraw();
+    }, 100);
+  }
+
   /**
-   * 绘制单个格子（支持 2.5D 透视变换）
-   * @param graphics PIXI.Graphics 对象
-   * @param gridX 格子 x 坐标
-   * @param gridY 格子 y 坐标
-   * @param color 填充颜色
+   * 重新绘制格子
+   */
+  private redraw(): void {
+    this.clear();
+    if (this.grids) {
+      Object.keys(this.grids).forEach((key) => {
+        const [x, y] = key.split(",").map(Number);
+        DynamicGridGraphics.drawGridCell(this, x, y, this.color);
+      });
+    }
+  }
+
+  /**
+   * 绘制单个格子（静态方法，供内部使用）
    */
   private static drawGridCell(
     graphics: PIXI.Graphics,
@@ -71,10 +106,10 @@ export class GridDrawer {
   ): void {
     // 格子四个角的世界坐标
     const worldCorners = [
-      { x: gridX * tileSize, y: gridY * tileSize },           // 左上
-      { x: (gridX + 1) * tileSize, y: gridY * tileSize },     // 右上
+      { x: gridX * tileSize, y: gridY * tileSize }, // 左上
+      { x: (gridX + 1) * tileSize, y: gridY * tileSize }, // 右上
       { x: (gridX + 1) * tileSize, y: (gridY + 1) * tileSize }, // 右下
-      { x: gridX * tileSize, y: (gridY + 1) * tileSize },     // 左下
+      { x: gridX * tileSize, y: (gridY + 1) * tileSize }, // 左下
     ];
 
     if (is25dEnabled) {
@@ -83,7 +118,13 @@ export class GridDrawer {
       const screenCorners: Point2D[] = [];
 
       for (const corner of worldCorners) {
-        const screenPos = worldToScreen(corner.x, corner.y, 1700, 800, cameraParams);
+        const screenPos = worldToScreen(
+          corner.x,
+          corner.y,
+          1700,
+          800,
+          cameraParams
+        );
         if (screenPos) {
           screenCorners.push(screenPos);
         }
@@ -103,6 +144,44 @@ export class GridDrawer {
   }
 
   /**
+   * 更新格子数据
+   */
+  updateGrids(grids: GridsMap): void {
+    this.grids = grids;
+    this.redraw();
+  }
+
+  /**
+   * 更新颜色
+   */
+  updateColor(color: string | number): void {
+    this.color = color;
+    this.redraw();
+  }
+
+  /**
+   * 销毁时取消订阅
+   */
+  destroy(options?: {
+    children?: boolean;
+    texture?: boolean;
+    baseTexture?: boolean;
+  }): void {
+    if (this.unsubscribe) {
+      this.unsubscribe();
+      this.unsubscribe = undefined;
+    }
+    super.destroy(options);
+  }
+}
+
+/**
+ * GridDrawer - 公共格子绘制工具类
+ *
+ * 封装所有 selector 中共同的格子绘制逻辑，提供统一的绘制接口。
+ */
+export class GridDrawer {
+  /**
    * 绘制格子集合
    * @param grids 格子集合，key 为 "x,y" 字符串
    * @param color 填充颜色（支持颜色名、十六进制、数字格式）
@@ -115,15 +194,36 @@ export class GridDrawer {
     options: GridDrawOptions = {}
   ): PIXI.Graphics {
     const {
-      alpha = 0.4,
-      eventMode = "static",
       layerName = "spriteLayer",
       autoAttach = true,
+      dynamicUpdate = is25dEnabled, // 2.5D 模式下默认启用动态更新
     } = options;
+
+    // 如果需要动态更新，使用 DynamicGridGraphics
+    const graphics = dynamicUpdate
+      ? new DynamicGridGraphics(grids, color, options)
+      : GridDrawer.createStaticGraphics(grids, color, options);
+
+    if (autoAttach) {
+      GridDrawer.attachToLayer(graphics, layerName);
+    }
+
+    return graphics;
+  }
+
+  /**
+   * 创建静态 Graphics（不支持自动更新）
+   */
+  private static createStaticGraphics(
+    grids: GridsMap,
+    color: string | number,
+    options: GridDrawOptions
+  ): PIXI.Graphics {
+    const { alpha = 0.4, zIndex = 0, eventMode = "static" } = options;
 
     const graphics = new PIXI.Graphics();
     graphics.alpha = alpha;
-    graphics.zIndex = 0;
+    graphics.zIndex = zIndex;
     graphics.eventMode = eventMode;
 
     graphics.clear();
@@ -134,11 +234,55 @@ export class GridDrawer {
       });
     }
 
-    if (autoAttach) {
-      GridDrawer.attachToLayer(graphics, layerName);
+    return graphics;
+  }
+
+  /**
+   * 绘制单个格子（静态方法，供内部使用）
+   */
+  private static drawGridCell(
+    graphics: PIXI.Graphics,
+    gridX: number,
+    gridY: number,
+    color: string | number
+  ): void {
+    // 格子四个角的世界坐标
+    const worldCorners = [
+      { x: gridX * tileSize, y: gridY * tileSize }, // 左上
+      { x: (gridX + 1) * tileSize, y: gridY * tileSize }, // 右上
+      { x: (gridX + 1) * tileSize, y: (gridY + 1) * tileSize }, // 右下
+      { x: gridX * tileSize, y: (gridY + 1) * tileSize }, // 左下
+    ];
+
+    if (is25dEnabled) {
+      // 2.5D 模式：应用透视变换
+      const cameraParams = cameraManager.getCameraParams();
+      const screenCorners: Point2D[] = [];
+
+      for (const corner of worldCorners) {
+        const screenPos = worldToScreen(
+          corner.x,
+          corner.y,
+          1700,
+          800,
+          cameraParams
+        );
+        if (screenPos) {
+          screenCorners.push(screenPos);
+        }
+      }
+
+      // 如果四个角都在可见范围内，绘制多边形
+      if (screenCorners.length === 4) {
+        graphics.poly(screenCorners.flatMap((p) => [p.x, p.y]));
+        graphics.fill({ color });
+        return;
+      }
     }
 
-    return graphics;
+    // 2D 模式或变换失败：使用普通矩形
+    graphics.rect(worldCorners[0].x, worldCorners[0].y, tileSize, tileSize);
+    graphics.fill({ color });
   }
 
   /**
@@ -269,7 +413,10 @@ export class GridDrawer {
    * @param gridY 格子 y 坐标
    * @returns 像素坐标（中心点）
    */
-  static gridToPixelCenter(gridX: number, gridY: number): { x: number; y: number } {
+  static gridToPixelCenter(
+    gridX: number,
+    gridY: number
+  ): { x: number; y: number } {
     return {
       x: gridX * tileSize + tileSize / 2,
       y: gridY * tileSize + tileSize / 2,
@@ -282,7 +429,10 @@ export class GridDrawer {
    * @param globalY 全局 y 坐标
    * @returns 相对坐标
    */
-  static getRelativePosition(globalX: number, globalY: number): { x: number; y: number } {
+  static getRelativePosition(
+    globalX: number,
+    globalY: number
+  ): { x: number; y: number } {
     let x = globalX;
     let y = globalY;
     if (golbalSetting.rootContainer) {
