@@ -43,13 +43,17 @@ export abstract class ItemController {
   /**
    * 消耗道具（减少堆叠数）
    */
-  consume(): void {
-    if (this.item) {
-      this.item.removeStack(1);
+  async consume(): Promise<void> {
+    if (this.item!.stackCount > 0) {
+      console.log("consume 1");
+      //这里会造成大量的性能浪费
+      // if (this!.item) this.item.removeStack(1);
     }
     if (this.item!.stackCount <= 0) {
-        if (this.item)
+      if (this.item) {
+        console.log("consume removeItem");
         this.user?.removeItem(this.item?.uid);
+      }
     }
   }
 

@@ -3,7 +3,7 @@ import { generateWays } from "../utils/PathfinderUtil";
 import * as PIXI from "pixi.js";
 import { golbalSetting } from "../golbalSetting";
 import { MessageTipSystem } from "../system/MessageTipSystem";
-import { GridDrawer } from "../utils/GridDrawer";
+import { GridDrawer, type GridInput } from "../utils/GridDrawer";
 
 export class BasicSelector {
   public graphics: PIXI.Graphics | null = null;
@@ -36,13 +36,7 @@ export class BasicSelector {
 
   // 选择基本攻击
   public selectBasic(
-    grids: {
-      [key: string]: {
-        x: number;
-        y: number;
-        step: number;
-      } | null;
-    },
+    grids: GridInput,
     selectNum: number,
     color: string,
     canCancel: boolean = true,
@@ -95,6 +89,8 @@ export class BasicSelector {
     const removeGraphics = () => {
       MessageTipSystem.getInstance().clearBottomMessage();
       MessageTipSystem.getInstance().clearMessage();
+      // 清理悬停图形
+      this.gridDrawer.hideHoverGrids();
       if (graphics.parent) {
         graphics.parent.removeChild(graphics);
         selector.removeFunction = () => {};
@@ -176,7 +172,7 @@ export class BasicSelector {
   }
 
   drawGrids = (
-    grids: { [key: string]: { x: number; y: number; step: number } | null },
+    grids: GridInput,
     color: string
   ) => {
     this.graphics = this.gridDrawer.drawGrids(grids, { color });
@@ -192,13 +188,12 @@ export class BasicSelector {
    */
   private showHover(
     hoverXY: { x: number; y: number },
-    validGrids: { [key: string]: { x: number; y: number; step: number } | null },
+    validGrids: GridInput,
     checkPassiable: (gridX: number, gridY: number) => boolean,
     color: string
   ): void {
     // 检查悬停位置是否在有效范围内
-    const key = `${hoverXY.x},${hoverXY.y}`;
-    if (validGrids[key] && checkPassiable(hoverXY.x, hoverXY.y)) {
+    if (this.isGridValid(hoverXY, validGrids) && checkPassiable(hoverXY.x, hoverXY.y)) {
       // 显示悬停格子
       this.gridDrawer.showHoverGrids([{ x: hoverXY.x, y: hoverXY.y }], {
         color: color,
@@ -208,6 +203,26 @@ export class BasicSelector {
       // 不在有效范围内，隐藏悬停
       this.gridDrawer.hideHoverGrids();
     }
+  }
+
+  /**
+   * 检查格子是否在有效格子系统内
+   */
+  private isGridValid(grid: { x: number; y: number }, validGrids: GridInput): boolean {
+    if (Array.isArray(validGrids)) {
+      return validGrids.some(g => g.x === grid.x && g.y === grid.y);
+    }
+    if (validGrids instanceof Set) {
+      for (const g of validGrids) {
+        if (g.x === grid.x && g.y === grid.y) {
+          return true;
+        }
+      }
+      return false;
+    }
+    // 对象格式 { "x,y": {x, y, step} | null }
+    const key = `${grid.x},${grid.y}`;
+    return validGrids[key] !== null && validGrids[key] !== undefined;
   }
 
   // 生成可移动范围

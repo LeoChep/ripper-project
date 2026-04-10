@@ -208,6 +208,32 @@ export class UnitSystem {
     loadTraits(unit, unitCreature);
     loadPowers(unit, unitCreature);
 
+    // 创建背包道具
+    if (json.inventory && Array.isArray(json.inventory)) {
+      await this.createInventoryFromJson(unit, json.inventory);
+    }
+
     return creature;
+  }
+
+  /**
+   * 根据 JSON 配置创建背包道具
+   * @param unit 单位
+   * @param inventoryData 道具数据数组
+   */
+  private async createInventoryFromJson(unit: Unit, inventoryData: any[]): Promise<void> {
+    const { ItemFactory } = await import("@/core/item/ItemFactory");
+
+    for (const itemData of inventoryData) {
+      try {
+        const item = ItemFactory.getInstance().createFromOptions(itemData);
+        if (item) {
+          unit.addItem(item);
+          console.log(`[UnitSystem] 为 ${unit.name} 添加道具: ${item.name} x${item.stackCount}`);
+        }
+      } catch (error) {
+        console.error(`[UnitSystem] 创建道具失败:`, itemData, error);
+      }
+    }
   }
 }

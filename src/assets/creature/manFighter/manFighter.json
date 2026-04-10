@@ -50,6 +50,13 @@
     }
   },
   "equipment": [],
+  "inventory": [
+    {
+      "name": "治疗药水",
+      "basedItem": "HealWater",
+      "stackCount": 3
+    }
+  ],
   "weapons": [
     {
       "name": "长剑",

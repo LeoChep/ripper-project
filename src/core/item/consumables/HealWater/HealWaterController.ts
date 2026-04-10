@@ -2,10 +2,14 @@ import { golbalSetting } from "@/core/golbalSetting";
 import { UnitSystem } from "@/core/system/UnitSystem";
 import { MessageTipSystem } from "@/core/system/MessageTipSystem";
 import { BasicAttackSelector } from "@/core/selector/BasicAttackSelector";
+import { ControllerCancelHandler } from "@/core/utils/ControllerCancelHandler";
 import type { Unit } from "@/core/units/Unit";
 import type { Item } from "../../Item";
 import type { HealWater } from "./HealWater";
 import { ItemController } from "../../base/ItemController";
+import { BasicSelector } from "@/core/selector/BasicSelector";
+import { ControllerHelper } from "@/core/controller/ControllerHelper";
+import * as PIXI from "pixi.js";
 
 /**
  * 治疗药水控制器
@@ -15,6 +19,9 @@ export class HealWaterController extends ItemController {
   item: HealWater | null = null;
   user: Unit | null = null;
   target: Unit | null = null;
+  graphics: PIXI.Graphics | null = null;
+  private isRegistered: boolean = false; // 标记是否已注册
+  removeFunction = (args?: any) => {};
 
   /**
    * 设置道具实例
@@ -84,25 +91,52 @@ export class HealWaterController extends ItemController {
       return { cancel: true };
     }
 
+    // 清理所有其他控制器的显示
+    ControllerCancelHandler.getInstance().cancelAllControllers();
+
     const healWater = this.item as HealWater;
     const range = healWater.getRange();
     const userUnit = this.user!;
 
     // 选择目标
-    const selector = BasicAttackSelector.getInstance().selectBasic({
-      unit: userUnit,
-      range: range, // 使用范围（默认1格）
-      color: "green", // 绿色表示治疗
-      selectNum: 1,
-    });
+    const grids=UnitSystem.getInstance().getGridsArround(userUnit);
+    const sized=UnitSystem.getInstance().getUnitGrids(userUnit);
+    for (let grid of sized){
+      grids.push(grid)
+    }
+    const selector = BasicSelector.getInstance().selectBasic(
+      grids,
+      1,
+      "green",
+      true
+    );
+
+    // 使用 ControllerHelper 创建标准的 removeFunction 并注册控制器
+    this.removeFunction = ControllerHelper.createRemoveFunction(
+      "healWaterController",
+      selector.graphics,
+      () => {
+        this.graphics = null;
+      },
+      () => selector.cleanup() // 选择器完整清理
+    );
+
+    // 只在第一次注册控制器，避免重复注册
+    if (!this.isRegistered) {
+      ControllerHelper.registerController("healWaterController", this);
+      this.isRegistered = true;
+    }
+
+    // 保存 graphics 引用
+    this.graphics = selector.graphics;
 
     const result = await selector.promise;
     if (result.cancel) {
       console.warn("取消使用治疗药水");
       return { cancel: true };
     }
-
-    // 从选中的格子获取目标单位
+    // console.log('开始引用使用逻辑')
+    // // 从选中的格子获取目标单位
     let targetUnit: Unit | null = null;
     if (result.selected && result.selected.length > 0) {
       const selectedGrid = result.selected[0];
@@ -139,18 +173,20 @@ export class HealWaterController extends ItemController {
     const actualHeal = creature.hp - oldHp;
 
     console.log(
-      `${this.user!.creature?.name} 对 ${creature.name} 使用治疗药水，恢复了 ${actualHeal} 点生命值`,
+      `${this.user!.creature?.name} 对 ${
+        creature.name
+      } 使用治疗药水，恢复了 ${actualHeal} 点生命值`
     );
 
     // 显示治疗消息
     MessageTipSystem.getInstance().setMessageQuickly(
-      `${creature.name} 恢复了 ${actualHeal} 点生命值`,
+      `${creature.name} 恢复了 ${actualHeal} 点生命值`
     );
 
     // 如果目标已经满血，提示
     if (oldHp === creature.hp) {
       MessageTipSystem.getInstance().setMessageQuickly(
-        `${creature.name} 的生命值已满`,
+        `${creature.name} 的生命值已满`
       );
     }
   }

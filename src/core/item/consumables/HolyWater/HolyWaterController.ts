@@ -6,6 +6,7 @@ import { generateWays } from "@/core/utils/PathfinderUtil";
 import { UnitSystem } from "@/core/system/UnitSystem";
 import { MessageTipSystem } from "@/core/system/MessageTipSystem";
 import { BasicAttackSelector } from "@/core/selector/BasicAttackSelector";
+import { ControllerCancelHandler } from "@/core/utils/ControllerCancelHandler";
 import type { Unit } from "@/core/units/Unit";
 import type { Item } from "../../Item";
 import { ItemController } from "../../base/ItemController";
@@ -106,6 +107,9 @@ export class HolyWaterController extends ItemController {
       console.warn("无法使用圣水");
       return { cancel: true };
     }
+
+    // 清理所有其他控制器的显示
+    ControllerCancelHandler.getInstance().cancelAllControllers();
 
     // 选择目标
     const selector = BasicAttackSelector.getInstance().selectBasic({
