@@ -1,0 +1,148 @@
+{
+  "name": "魅魔",
+  "nameEn": "Succubus",
+  "level": 9,
+  "role": "控制",
+  "xp": 400,
+  "size": "中型",
+  "type": "类人生物（魔鬼，变形生物）",
+  "origin": "星界",
+  "hp": 90,
+  "maxHp": 90,
+  "bloodied": 45,
+  "ac": 23,
+  "fortitude": 19,
+  "reflex": 21,
+  "will": 23,
+  "speed": 6,
+  "fly": 6,
+  "initiative": 8,
+  "senses": "黑暗视觉",
+  "immunities": [],
+  "resistances": [
+    {
+      "type": "火焰",
+      "value": 10
+    }
+  ],
+  "vulnerabilities": [],
+  "alignment": "邪恶",
+  "languages": [
+    "通用语",
+    "天界语"
+  ],
+  "skills": [
+    "先攻 +8",
+    "侦查 +8",
+    "唬骗 +15",
+    "交涉 +15",
+    "洞察 +13"
+  ],
+  "abilities": {
+    "STR": {
+      "value": 11,
+      "modifier": 4
+    },
+    "DEX": {
+      "value": 18,
+      "modifier": 8
+    },
+    "CON": {
+      "value": 10,
+      "modifier": 4
+    },
+    "INT": {
+      "value": 15,
+      "modifier": 6
+    },
+    "WIS": {
+      "value": 19,
+      "modifier": 8
+    },
+    "CHA": {
+      "value": 22,
+      "modifier": 10
+    }
+  },
+  "equipment": [],
+  "weapons": [
+    {
+      "name": "堕落之触",
+      "type": "Melee",
+      "action": "基本近战",
+      "range": 1,
+      "proficiency": 3,
+      "bonus": 14,
+      "target": "ac",
+      "weapon": "3d6+6",
+      "damage": "3d6+6",
+      "effect": "",
+      "missEffect": null
+    }
+  ],
+  "powers": [
+    {
+      "name": "基本近战：堕落之触",
+      "displayName": "基本近战：堕落之触",
+      "useType": "atwill",
+      "actionType": "standard",
+      "range": "近战 1",
+      "target": "一个生物",
+      "description": "攻击：近战 1（一个生物）+14vs.AC\n命中：3d6+6 伤害。",
+      "damage": "3d6+6",
+      "attackBonus": "+14 vs. AC",
+      "missEffect": null
+    },
+    {
+      "name": "魅惑之吻",
+      "displayName": "魅惑之吻",
+      "useType": "atwill",
+      "actionType": "standard",
+      "range": "近战 1",
+      "target": "一个生物",
+      "description": "攻击：近战 1（一个生物）+12vs.意志\n命中：目标不能攻击该魅魔。该效果持续直到该魅魔或它的一个盟友攻击目标、该魅魔生命值降到 0、或该魅魔再次使用该威能。如果目标在遭遇结束时仍受魅惑之吻的效果影响，则该效果在该魅魔没能再次亲吻该目标的 24 小时内继续持续。",
+      "damage": null,
+      "attackBonus": "+12 vs. 意志",
+      "missEffect": null
+    },
+    {
+      "name": "支配",
+      "displayName": "支配",
+      "useType": "atwill",
+      "actionType": "standard",
+      "range": "射程 5",
+      "target": "一个生物",
+      "description": "攻击：射程 5（一个生物）+12vs.意志\n命中：目标受控直到该魅魔下回合结束。",
+      "damage": null,
+      "attackBonus": "+12 vs. 意志",
+      "missEffect": null
+    },
+    {
+      "name": "改变形态",
+      "displayName": "改变形态",
+      "useType": "atwill",
+      "actionType": "minor",
+      "range": "自身",
+      "target": "自身",
+      "description": "效果：该魅魔改变其物理形态为一个中型类人生物直到它再次使用改变形态或直到它生命值降到 0。要变成一个特定个体的形态，该魅魔必须见过该个体。其他生物可以通过一次 DC30 的洞察检定来识破这个形态是伪装的。",
+      "damage": null,
+      "attackBonus": null,
+      "missEffect": null
+    },
+    {
+      "name": "忠诚伴侣",
+      "displayName": "忠诚伴侣",
+      "useType": "atwill",
+      "actionType": "immediate",
+      "range": "邻接",
+      "target": "受魅惑之吻影响的生物",
+      "description": "触发：在该魅魔邻接一个受其魅惑之吻影响的生物的情况下一次近战或远程攻击指定该魅魔为目标。\n效果（直觉打断）：触发的攻击的目标改为那个被该魅魔的魅惑之吻影响的生物。",
+      "damage": null,
+      "attackBonus": null,
+      "missEffect": null
+    }
+  ],
+  "traits": [],
+  "feats": [],
+  "notes": []
+}

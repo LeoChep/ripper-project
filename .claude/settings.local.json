@@ -8,7 +8,8 @@
       "mcp__zai-mcp-server__extract_text_from_screenshot",
       "Bash(node -c public/map-generator-v4.html)",
       "Bash(start public/perlin-noise-test.html)",
-      "Bash(node -c map-generator-v4.html)"
+      "Bash(node -c map-generator-v4.html)",
+      "Bash(node:*)"
     ]
   }
 }

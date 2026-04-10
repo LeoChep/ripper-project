@@ -1,0 +1,37 @@
+# DEATH_KNIGHT Sprite Asset Placeholder
+
+This file serves as a placeholder for the actual sprite sheet asset.
+
+## Required Asset
+- **File**: sprite.png
+- **Location**: D:/workplace/gameDemo/ripper-project/src/assets/creature/DEATH_KNIGHT/sprite.png
+- **Format**: PNG sprite sheet with animation frames
+
+## Sprite Sheet Specifications
+- **Frame Size**: 128x128 pixels per frame
+- **Total Frames**: 36 frames minimum (6 idle + 8 walk + 8 run + 5 attack + 3 hurt + 6 death)
+- **Format**: Horizontal or vertical sprite sheet
+- **Background**: Transparent
+
+## Animation Frame Layout
+Based on anim/character.json:
+- Frames 0-5: Idle animation (standing, breathing, weapon ready)
+- Frames 6-13: Walk animation (4-step cycle)
+- Frames 14-21: Run animation (faster movement cycle)
+- Frames 22-26: Attack animation (weapon swing strike)
+- Frames 27-29: Hurt animation (taking damage reaction)
+- Frames 30-35: Death animation (falling down)
+
+## Character Design Notes
+- Death Knight: Armored undead warrior with dark corruption
+- Equipment: Plate armor, heavy shield, soul blade (dark energy sword)
+- Color Scheme: Dark armor with glowing necrotic blue/green energy
+- Size: Medium (occupies 1x1 grid square)
+
+## Asset Generation
+This sprite sheet can be created using:
+- Manual pixel art or vector illustration
+- AI generation tools (ComfyUI workflows available in comfyui_workflows/)
+- 3D rendering with sprite sheet output
+
+When the actual sprite.png is created, replace this placeholder file.

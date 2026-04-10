@@ -1,0 +1,101 @@
+{
+  "name": "独眼巨人打击者",
+  "nameEn": "Cyclops Crusher",
+  "level": 14,
+  "role": "蛮战",
+  "xp": 1000,
+  "size": "中型",
+  "type": "类人生物",
+  "origin": "",
+  "hp": 171,
+  "maxHp": 171,
+  "bloodied": 85,
+  "ac": 26,
+  "fortitude": 27,
+  "reflex": 26,
+  "will": 25,
+  "speed": 8,
+  "fly": null,
+  "initiative": 12,
+  "senses": "侦查 +16",
+  "immunities": [],
+  "resistances": [],
+  "alignment": "无",
+  "languages": [
+    "精灵语"
+  ],
+  "skills": [
+    "侦查 +16",
+    "运动+18"
+  ],
+  "abilities": {
+    "STR": {
+      "value": 23,
+      "modifier": 13
+    },
+    "DEX": {
+      "value": 20,
+      "modifier": 12
+    },
+    "CON": {
+      "value": 21,
+      "modifier": 12
+    },
+    "INT": {
+      "value": 10,
+      "modifier": 7
+    },
+    "WIS": {
+      "value": 19,
+      "modifier": 11
+    },
+    "CHA": {
+      "value": 11,
+      "modifier": 7
+    }
+  },
+  "equipment": [
+    "鳞甲",
+    "巨木棒"
+  ],
+  "weapons": [
+    {
+      "name": "尖刺巨木棒",
+      "type": "Melee",
+      "action": "武器",
+      "range": 1,
+      "proficiency": 3,
+      "bonus": 19,
+      "target": "ac",
+      "weapon": "3d12+8",
+      "damage": "3d12+8",
+      "effect": "",
+      "missEffect": null
+    }
+  ],
+  "powers": [
+    {
+      "name": "基本近战：尖刺巨木棒",
+      "displayName": "基本近战：尖刺巨木棒",
+      "useType": "atwill",
+      "actionType": "standard",
+      "range": "近程冲击 2",
+      "target": "一个生物",
+      "description": "攻击：近战 2（一个生物）+19vs.AC\n命中：3d12+8 伤害。 \n近程：震地粉碎（武器）·充能 5,6 \n攻击：近程冲击 2（范围内所有敌人）+19vs.AC\n命中：5d12+12 伤害，且目标倒地。",
+      "damage": "3d12+8",
+      "attackBonus": "+19 vs. AC",
+      "missEffect": null
+    }
+  ],
+  "traits": [
+    {
+      "name": "真视",
+      "displayName": "真视",
+      "description": "该独眼巨人可以看到隐形的生物和物件。",
+      "icon": "",
+      "type": "passive"
+    }
+  ],
+  "feats": [],
+  "notes": []
+}

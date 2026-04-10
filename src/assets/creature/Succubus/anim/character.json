@@ -1,0 +1,88 @@
+{
+  "version": "1.0",
+  "creature": {
+    "name": "魅魔",
+    "nameEn": "Succubus",
+    "size": "中型",
+    "frameWidth": 64,
+    "frameHeight": 64,
+    "anchor": {
+      "x": 32,
+      "y": 56
+    }
+  },
+  "animations": [
+    {
+      "name": "idle",
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "fps": 6,
+      "loop": true
+    },
+    {
+      "name": "walk",
+      "frames": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "fps": 8,
+      "loop": true
+    },
+    {
+      "name": "run",
+      "frames": [
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "fps": 10,
+      "loop": true
+    },
+    {
+      "name": "attack",
+      "frames": [
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "fps": 12,
+      "loop": false
+    },
+    {
+      "name": "hurt",
+      "frames": [
+        21,
+        22,
+        23
+      ],
+      "fps": 8,
+      "loop": false
+    },
+    {
+      "name": "death",
+      "frames": [
+        24,
+        25,
+        26,
+        27,
+        28,
+        29
+      ],
+      "fps": 6,
+      "loop": false
+    }
+  ]
+}

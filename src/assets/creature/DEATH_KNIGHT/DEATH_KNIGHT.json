@@ -1,0 +1,192 @@
+{
+  "name": "死亡骑士",
+  "nameEn": "Death Knight",
+  "level": 17,
+  "role": "精英 护卫",
+  "xp": 3200,
+  "size": "中型",
+  "type": "类人生物（不死生物）",
+  "origin": "自然界",
+  "hp": 324,
+  "maxHp": 324,
+  "bloodied": 162,
+  "ac": 33,
+  "fortitude": 31,
+  "reflex": 27,
+  "will": 29,
+  "speed": 5,
+  "fly": null,
+  "initiative": 11,
+  "senses": "黑暗视觉",
+  "immunities": [
+    "疾病",
+    "毒素"
+  ],
+  "resistances": [
+    {
+      "type": "黯蚀",
+      "value": 10
+    }
+  ],
+  "vulnerabilities": [
+    {
+      "type": "光耀",
+      "value": 10
+    }
+  ],
+  "alignment": "邪恶",
+  "languages": [
+    "通用语"
+  ],
+  "skills": [
+    "先攻 +11",
+    "侦查 +8"
+  ],
+  "abilities": {
+    "STR": {
+      "value": 20,
+      "modifier": 13
+    },
+    "DEX": {
+      "value": 12,
+      "modifier": 19
+    },
+    "CON": {
+      "value": 18,
+      "modifier": 12
+    },
+    "INT": {
+      "value": 13,
+      "modifier": 9
+    },
+    "WIS": {
+      "value": 11,
+      "modifier": 8
+    },
+    "CHA": {
+      "value": 14,
+      "modifier": 10
+    }
+  },
+  "equipment": [
+    "板甲",
+    "重盾",
+    "灵魂之刃"
+  ],
+  "weapons": [
+    {
+      "name": "灵魂之刃",
+      "type": "Melee",
+      "action": "武器",
+      "range": 1,
+      "proficiency": 3,
+      "bonus": 22,
+      "target": "ac",
+      "weapon": "3d8+12",
+      "damage": "3d8+12",
+      "effect": "该死亡骑士标记目标直到该死亡骑士下回合结束。",
+      "missEffect": null
+    }
+  ],
+  "powers": [
+    {
+      "name": "基本近战：灵魂之刃",
+      "displayName": "基本近战：灵魂之刃",
+      "useType": "atwill",
+      "actionType": "standard",
+      "range": "近战 1",
+      "target": "一个生物",
+      "description": "攻击：近战 1（一个生物）+22vs.AC\n命中：3d8+12 黯蚀伤害。\n效果：该死亡骑士标记目标直到该死亡骑士下回合结束。",
+      "damage": "3d8+12",
+      "attackBonus": "+22 vs. AC",
+      "missEffect": null
+    },
+    {
+      "name": "控位打击",
+      "displayName": "控位打击",
+      "useType": "atwill",
+      "actionType": "standard",
+      "range": "近战 1",
+      "target": "一或两个生物",
+      "description": "前提：该死亡骑士必须持用灵魂之刃。\n攻击：近战 1（一或两个生物）+22vs.AC\n命中：3d8+12 黯蚀伤害，且目标迟缓直到该死亡骑士下回合结束。\n效果：该死亡骑士标记目标直到该死亡骑士下回合结束。",
+      "damage": "3d8+12",
+      "attackBonus": "+22 vs. AC",
+      "missEffect": null
+    },
+    {
+      "name": "邪炎",
+      "displayName": "邪炎",
+      "useType": "recharge",
+      "recharge": [5, 6],
+      "actionType": "standard",
+      "range": "近程爆发 2",
+      "target": "范围内所有活体生物",
+      "description": "攻击：近程爆发 2（范围内所有活体生物）+20vs.反射\n命中：6d8+12 火焰和黯蚀伤害。\n效果：范围内每个不死生物盟友的近战攻击造成 2d6 额外火焰伤害直到该死亡骑士下回合结束。",
+      "damage": "6d8+12",
+      "attackBonus": "+20 vs. 反射",
+      "missEffect": null
+    },
+    {
+      "name": "勇士挑战",
+      "displayName": "勇士挑战",
+      "useType": "encounter",
+      "actionType": "standard",
+      "range": "近战 1",
+      "target": "一个或两个生物",
+      "description": "前提：该死亡骑士必须持用灵魂之刃。\n攻击：近战 1（一个或两个生物）+22vs.AC\n命中：4d8+19 黯蚀伤害，且该死亡骑士推动目标最多 2 格。该死亡骑士标记目标两格内的所有敌人直到该死亡骑士下回合结束。",
+      "damage": "4d8+19",
+      "attackBonus": "+22 vs. AC",
+      "missEffect": null
+    },
+    {
+      "name": "战斗挑战",
+      "displayName": "战斗挑战",
+      "useType": "atwill",
+      "actionType": "opportunity",
+      "range": "近战 1",
+      "target": "一个邻接且被标记的敌人",
+      "description": "触发：一个邻接且被该死亡骑士标记的敌人快步或进行目标不包括它的攻击。\n效果（借机动作）：该死亡骑士对触发的敌人使用灵魂之刃攻击。",
+      "damage": "3d8+12",
+      "attackBonus": "+22 vs. AC",
+      "missEffect": null
+    },
+    {
+      "name": "愤怒",
+      "displayName": "愤怒",
+      "useType": "atwill",
+      "actionType": "immediate",
+      "range": "自身",
+      "target": "自身",
+      "description": "触发：该死亡骑士因一个效果而被标记、迟缓、定身、晕眩或震慑。\n效果（借机动作）：该死亡骑士进行一次豁免以终止触发的效果，即使该效果正常情况下不能通过豁免终止。",
+      "damage": null,
+      "attackBonus": null,
+      "missEffect": null
+    }
+  ],
+  "traits": [
+    {
+      "name": "灵气：统帅亡灵",
+      "displayName": "灵气：统帅亡灵",
+      "description": "灵气 10。等级 17 或更低的不死生物盟友在该灵气内时攻击骰获得+2 威能加值。",
+      "icon": "",
+      "type": "aura",
+      "range": 10
+    },
+    {
+      "name": "光耀易伤",
+      "displayName": "光耀易伤",
+      "description": "易伤：10 光耀。豁免+2",
+      "icon": "",
+      "type": "passive"
+    },
+    {
+      "name": "行动点",
+      "displayName": "行动点",
+      "description": "行动点 1",
+      "icon": "",
+      "type": "passive"
+    }
+  ],
+  "feats": [],
+  "notes": []
+}

@@ -1,0 +1,28 @@
+{
+  "name": "slash",
+  "displayName": "攻击",
+  "frames": [
+    {
+      "index": 16,
+      "duration": 83
+    },
+    {
+      "index": 17,
+      "duration": 83
+    },
+    {
+      "index": 18,
+      "duration": 83
+    },
+    {
+      "index": 19,
+      "duration": 83
+    },
+    {
+      "index": 20,
+      "duration": 83
+    }
+  ],
+  "loop": false,
+  "priority": 3
+}

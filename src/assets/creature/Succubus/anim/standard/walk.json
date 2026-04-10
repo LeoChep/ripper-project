@@ -1,0 +1,32 @@
+{
+  "name": "walk",
+  "displayName": "行走",
+  "frames": [
+    {
+      "index": 4,
+      "duration": 125
+    },
+    {
+      "index": 5,
+      "duration": 125
+    },
+    {
+      "index": 6,
+      "duration": 125
+    },
+    {
+      "index": 7,
+      "duration": 125
+    },
+    {
+      "index": 8,
+      "duration": 125
+    },
+    {
+      "index": 9,
+      "duration": 125
+    }
+  ],
+  "loop": true,
+  "priority": 1
+}

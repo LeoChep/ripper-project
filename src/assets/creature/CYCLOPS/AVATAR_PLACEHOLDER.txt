@@ -1,0 +1,28 @@
+AVATAR PLACEHOLDER
+==================
+
+This file serves as a placeholder for the creature's avatar image.
+
+REQUIREMENTS:
+- File name: avatar.png
+- Recommended size: 256x256 pixels or larger
+- Format: PNG with transparency
+- Content: Portrait or full-body view of the Cyclops
+
+The avatar is used for:
+- UI portraits during combat
+- Character selection screens
+- Dialogue and cutscene displays
+
+TO ADD THE AVATAR:
+1. Create or obtain a Cyclops avatar image
+2. Save it as "avatar.png" in the CYCLOPS folder (this directory)
+3. Delete this placeholder file
+
+Recommended sources:
+- AI generation tools (Midjourney, DALL-E, Stable Diffusion)
+- Stock asset websites (OpenGameArt, itch.io)
+- Custom artwork by team members
+
+Image prompts for AI generation:
+"A fantasy RPG cyclops giant, one-eyed monster, muscular build, carrying a massive wooden club, rocky terrain background, digital art style, isometric view, game sprite"
