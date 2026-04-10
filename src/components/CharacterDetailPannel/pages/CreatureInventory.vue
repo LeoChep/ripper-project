@@ -204,6 +204,7 @@ import { ItemType, ItemRarity } from '@/core/item/ItemInterface';
 import { MessageTipSystem } from '@/core/system/MessageTipSystem';
 import { golbalSetting } from '@/core/golbalSetting';
 import { getUnitAvatar } from '@/utils/utils';
+import { ItemSystem } from '@/core/item';
 
 const props = defineProps<{
   unit: Unit | null;
@@ -360,8 +361,8 @@ const useItem = async (item: Item) => {
   console.log('使用道具:', item.name);
   
   // 使用道具
-   item.use(props.unit);
-  
+  ItemSystem.getInstance().useItem(item, props.unit);
+
   // 使用后自动关闭背包界面
   emit('close');
 };

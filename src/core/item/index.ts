@@ -18,6 +18,9 @@ export type { SerializedItemData } from './ItemSerializer';
 // 注册表
 export { ItemRegistry } from './ItemRegistry';
 
+// 工厂
+export { ItemFactory } from './ItemFactory';
+
 // 消耗品
 export { HolyWater } from './consumables/HolyWater/HolyWater';
 export { HolyWaterController } from './consumables/HolyWater/HolyWaterController';

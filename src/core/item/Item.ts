@@ -1,11 +1,25 @@
-import { ItemSystem } from "../system/ItemSystem";
-import { UuidUtil } from "../utils/UuidUtil";
 import type { ItemInterface, ItemOptions } from "./ItemInterface";
 import { ItemType, ItemRarity } from "./ItemInterface";
-import { ItemRegistry } from "./ItemRegistry";
+
+import { UuidUtil } from "../utils/UuidUtil";
 
 /**
  * 道具类
+ *
+ * @example 使用工厂创建道具
+ * ```ts
+ * import { ItemFactory } from './ItemFactory';
+ *
+ * // 方式1：使用默认 Item 类
+ * const item = ItemFactory.getInstance().create({
+ *   name: 'Iron Sword',
+ *   type: ItemType.WEAPON,
+ *   description: 'A simple iron sword'
+ * });
+ *
+ * // 方式2：基于注册的类创建
+ * const potion = ItemFactory.getInstance().createFrom('HealthPotion');
+ * ```
  */
 export class Item implements ItemInterface {
   uid: string;
@@ -112,11 +126,7 @@ export class Item implements ItemInterface {
       console.warn(`道具 ${this.name} 不能使用`);
       return;
     }
-    console.log(`使用道具: ${this.name}`);
-    // 动态导入ItemSystem以避免循环依赖
-    // const { ItemSystem } = await import("../system/ItemSystem");
-    const itemSystem = ItemSystem.getInstance();
-    await itemSystem.useItem(this, user, target);
+
   }
 
   /**
@@ -141,46 +151,5 @@ export class Item implements ItemInterface {
    */
   getDisplayInfo(): string {
     return `${this.name} (${this.stackCount}/${this.maxStack}) - ${this.description}`;
-  }
-
-  /**
-   * 静态工厂方法：根据选项创建道具
-   * 如果 options.basedItem 指定了基类物品标识，会使用对应的基类创建
-   * 否则使用 Item 类创建
-   * @param options 道具选项
-   * @returns 道具实例
-   */
-  static create(options: ItemOptions): Item {
-    return ItemRegistry.getInstance().createFromOptions(options);
-  }
-
-  /**
-   * 静态工厂方法：根据基类物品标识创建道具
-   * @param basedItem 基类物品标识
-   * @param options 额外的道具选项（会覆盖默认值）
-   * @returns 道具实例，如果未找到对应的类则抛出错误
-   */
-  static createFrom(
-    basedItem: string,
-    options?: Partial<ItemOptions>
-  ): Item {
-    const item = ItemRegistry.getInstance().createItem(basedItem, options);
-    if (!item) {
-      throw new Error(`未找到基类物品: ${basedItem}`);
-    }
-    return item;
-  }
-
-  /**
-   * 静态工厂方法：根据基类物品标识创建道具（安全版本，返回 null）
-   * @param basedItem 基类物品标识
-   * @param options 额外的道具选项（会覆盖默认值）
-   * @returns 道具实例，如果未找到对应的类则返回 null
-   */
-  static createFromSafe(
-    basedItem: string,
-    options?: Partial<ItemOptions>
-  ): Item | null {
-    return ItemRegistry.getInstance().createItem(basedItem, options);
   }
 }
