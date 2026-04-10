@@ -2,6 +2,7 @@ import { ItemSystem } from "../system/ItemSystem";
 import { UuidUtil } from "../utils/UuidUtil";
 import type { ItemInterface, ItemOptions } from "./ItemInterface";
 import { ItemType, ItemRarity } from "./ItemInterface";
+import { ItemRegistry } from "./ItemRegistry";
 
 /**
  * 道具类
@@ -140,5 +141,46 @@ export class Item implements ItemInterface {
    */
   getDisplayInfo(): string {
     return `${this.name} (${this.stackCount}/${this.maxStack}) - ${this.description}`;
+  }
+
+  /**
+   * 静态工厂方法：根据选项创建道具
+   * 如果 options.basedItem 指定了基类物品标识，会使用对应的基类创建
+   * 否则使用 Item 类创建
+   * @param options 道具选项
+   * @returns 道具实例
+   */
+  static create(options: ItemOptions): Item {
+    return ItemRegistry.getInstance().createFromOptions(options);
+  }
+
+  /**
+   * 静态工厂方法：根据基类物品标识创建道具
+   * @param basedItem 基类物品标识
+   * @param options 额外的道具选项（会覆盖默认值）
+   * @returns 道具实例，如果未找到对应的类则抛出错误
+   */
+  static createFrom(
+    basedItem: string,
+    options?: Partial<ItemOptions>
+  ): Item {
+    const item = ItemRegistry.getInstance().createItem(basedItem, options);
+    if (!item) {
+      throw new Error(`未找到基类物品: ${basedItem}`);
+    }
+    return item;
+  }
+
+  /**
+   * 静态工厂方法：根据基类物品标识创建道具（安全版本，返回 null）
+   * @param basedItem 基类物品标识
+   * @param options 额外的道具选项（会覆盖默认值）
+   * @returns 道具实例，如果未找到对应的类则返回 null
+   */
+  static createFromSafe(
+    basedItem: string,
+    options?: Partial<ItemOptions>
+  ): Item | null {
+    return ItemRegistry.getInstance().createItem(basedItem, options);
   }
 }

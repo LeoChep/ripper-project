@@ -41,6 +41,34 @@ export interface ItemInterface {
 }
 
 /**
+ * 道具类构造函数类型
+ * 使用字符串字面量避免循环引用
+ */
+export type ItemClassConstructor = new (options?: Partial<ItemOptions>) => {
+  uid: string;
+  name: string;
+  description: string;
+  type: ItemType;
+  rarity: ItemRarity;
+  icon?: string;
+  maxStack: number;
+  stackCount: number;
+  weight: number;
+  value: number;
+  canUse: boolean;
+  canEquip: boolean;
+  properties?: Record<string, any>;
+  addStack(amount: number): boolean;
+  removeStack(amount: number): boolean;
+  canStackWith(other: any): boolean;
+  clone(): any;
+  use(user: any, target?: any): Promise<void>;
+  getTotalWeight(): number;
+  getTotalValue(): number;
+  getDisplayInfo(): string;
+};
+
+/**
  * 道具构造选项
  */
 export interface ItemOptions {
@@ -57,4 +85,10 @@ export interface ItemOptions {
   canUse?: boolean;
   canEquip?: boolean;
   properties?: Record<string, any>;
+  /**
+   * 基类物品标识
+   * 如果指定，系统会查找对应的基类物品类来创建实例
+   * 例如: "HolyWater" 会使用 HolyWater 类创建
+   */
+  basedItem?: string;
 }

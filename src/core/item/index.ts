@@ -6,7 +6,7 @@
 // 核心类和接口
 export { Item } from './Item';
 export { ItemType, ItemRarity } from './ItemInterface';
-export type { ItemInterface, ItemOptions } from './ItemInterface';
+export type { ItemInterface, ItemOptions, ItemClassConstructor } from './ItemInterface';
 
 // 控制器基类
 export { ItemController } from './base/ItemController';
@@ -15,9 +15,14 @@ export { ItemController } from './base/ItemController';
 export { ItemSerializer } from './ItemSerializer';
 export type { SerializedItemData } from './ItemSerializer';
 
+// 注册表
+export { ItemRegistry } from './ItemRegistry';
+
 // 消耗品
 export { HolyWater } from './consumables/HolyWater/HolyWater';
 export { HolyWaterController } from './consumables/HolyWater/HolyWaterController';
+export { HealWater } from './consumables/HealWater/HealWater';
+export { HealWaterController } from './consumables/HealWater/HealWaterController';
 
 // 系统
 export { ItemSystem } from '../system/ItemSystem';

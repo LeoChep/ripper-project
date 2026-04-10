@@ -1,6 +1,7 @@
-import { ItemType } from "../item";
+import { ItemType, type ItemOptions, type ItemClassConstructor } from "../item";
 import type { ItemController } from "../item/base/ItemController";
 import { Item } from "../item/Item";
+import { ItemRegistry } from "../item/ItemRegistry";
 import type { Unit } from "../units/Unit";
 
 /**
@@ -105,11 +106,11 @@ export class ItemSystem {
         return import("../item/consumables/HolyWater/HolyWaterController").then(
           (module) => module.HolyWaterController,
         );
+      case "治疗药水":
+        return import("../item/consumables/HealWater/HealWaterController").then(
+          (module) => module.HealWaterController,
+        );
       // 在这里添加更多道具控制器的映射
-      // case "治疗药水":
-      //   return import("../item/consumables/HealingPotion/HealingPotionController").then(
-      //     (module) => module.HealingPotionController
-      //   );
       default:
         return Promise.resolve(null);
     }
@@ -117,44 +118,27 @@ export class ItemSystem {
 
   /**
    * 根据道具名称获取对应的 Item 类
-   * 使用动态导入来按需加载道具类
+   * 使用 ItemRegistry 来查找道具类
+   * @deprecated 使用 ItemRegistry.getInstance().getItemClass() 代替
    */
-  getItemClass(itemName: string): Promise<typeof Item | null> {
-    switch (itemName) {
-      case "Holy_Water":
-        // case "圣水":
-        return import("../item/consumables/HolyWater/HolyWater").then(
-          (module) => module.HolyWater,
-        );
-      // case "Light_Sword":
-      // case "光明之剑":
-      //   return import("../item/weapons/LightSword/LightSword").then(
-      //     (module) => module.LightSword,
-      //   );
-      // 在这里添加更多道具类的映射
-      // case "HealingPotion":
-      // case "治疗药水":
-      //   return import("../item/consumables/HealingPotion/HealingPotion").then(
-      //     (module) => module.HealingPotion,
-      //   );
-      default:
-        console.warn(`未找到道具类: ${itemName}`);
-        return Promise.resolve(null);
-    }
+  getItemClass(itemName: string): ItemClassConstructor | null {
+    const ItemClass = ItemRegistry.getInstance().getItemClass(itemName);
+    return ItemClass || null;
   }
 
   /**
    * 根据道具名称创建道具实例
+   * 使用 ItemRegistry 来创建道具
    * @param itemName 道具名称
+   * @param options 额外的道具选项
    * @returns 道具实例或 null
    */
-  async createItem(itemName: string): Promise<Item | null> {
-    const ItemClass = await this.getItemClass(itemName);
-    if (!ItemClass) {
+  createItem(itemName: string, options?: Partial<ItemOptions>): Item | null {
+    const item = ItemRegistry.getInstance().createItem(itemName, options);
+    if (!item) {
       console.warn(`无法创建道具: ${itemName}`);
-      return null;
     }
-    return new ItemClass({} as any);
+    return item;
   }
 
   /**
