@@ -56,8 +56,8 @@
             <div class="item-description">{{ item.description }}</div>
             
             <div class="item-footer">
-              <span class="item-weight">⚖️ {{ item.getTotalWeight().toFixed(1) }}</span>
-              <span class="item-value">💰 {{ item.getTotalValue() }}</span>
+              <span class="item-weight">⚖️ {{ item.totalWeight.toFixed(1) }}</span>
+              <span class="item-value">💰 {{ item.totalValue }}</span>
             </div>
           </div>
 
@@ -120,11 +120,11 @@
           </div>
           <div class="detail-row">
             <span class="detail-label">重量:</span>
-            <span class="detail-value">{{ selectedItem.weight }} (总: {{ selectedItem.getTotalWeight() }})</span>
+            <span class="detail-value">{{ selectedItem.weight }} (总: {{ selectedItem.totalWeight }})</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">价值:</span>
-            <span class="detail-value">{{ selectedItem.value }} (总: {{ selectedItem.getTotalValue() }})</span>
+            <span class="detail-value">{{ selectedItem.value }} (总: {{ selectedItem.totalValue }})</span>
           </div>
           
           <div class="detail-description">
@@ -167,20 +167,20 @@
         </div>
 
         <div class="target-list">
-          <div 
-            v-for="target in availableTargets" 
+          <div
+            v-for="target in availableTargets"
             :key="target.id"
             class="target-card"
             @click="confirmGive(target)"
           >
             <div class="target-avatar">
-              <img v-if="target.creature?.avatar" :src="getUnitAvatar(target.unitTypeName)" :alt="target.name" />
+              <img v-if="target.creature" :src="getUnitAvatar(target.unitTypeName)" :alt="target.name" />
               <div v-else class="default-avatar">👤</div>
             </div>
             <div class="target-info">
               <h4>{{ target.name }}</h4>
               <p class="target-stats">
-                <span>背包: {{ target.inventory.length }} 种道具</span>
+                <span>背包: {{ target.inventory?.length || 0 }} 种道具</span>
               </p>
             </div>
           </div>
@@ -196,7 +196,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import type { Creature } from '@/core/units/Creature';
 import type { Unit } from '@/core/units/Unit';
 import type { Item } from '@/core/item/Item';
@@ -205,6 +205,25 @@ import { MessageTipSystem } from '@/core/system/MessageTipSystem';
 import { golbalSetting } from '@/core/golbalSetting';
 import { getUnitAvatar } from '@/utils/utils';
 import { ItemSystem } from '@/core/item';
+
+// 道具信息接口（用于UI显示）
+interface ItemInfo {
+  uid: string;
+  name: string;
+  description: string;
+  type: ItemType;
+  rarity: ItemRarity;
+  icon?: string;
+  stackCount: number;
+  maxStack: number;
+  weight: number;
+  value: number;
+  totalWeight: number;
+  totalValue: number;
+  canUse: boolean;
+  canEquip: boolean;
+  properties?: Record<string, any>;
+}
 
 const props = defineProps<{
   unit: Unit | null;
@@ -215,41 +234,58 @@ const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
-const selectedItem = ref<Item | null>(null);
-const giveTargetItem = ref<Item | null>(null);
+const selectedItem = ref<ItemInfo | null>(null);
+const giveTargetItem = ref<ItemInfo | null>(null);
 const giveStackAmount = ref<number>(1);
 
-// 获取背包
-const inventory = computed(() => {
-  return props.unit?.inventory || [];
-});
+// 静态数据 - 不使用响应式
+const inventory = ref<ItemInfo[]>([]);
+const totalItems = ref(0);
+const totalWeight = ref(0);
+const totalValue = ref(0);
 
-// 计算统计数据
-const totalItems = computed(() => {
-  return inventory.value.reduce((sum, item) => {
-    return sum + (item?.stackCount || 0);
-  }, 0);
-});
+/**
+ * 手动刷新背包数据
+ * 不依赖 Vue 响应式，避免性能问题
+ */
+const updateFunc = () => {
+  if (!props.unit) return;
 
-const totalWeight = computed(() => {
-  return inventory.value.reduce((sum, item) => {
-    if (item && typeof item.getTotalWeight === 'function') {
-      return sum + item.getTotalWeight();
-    }
-    // 如果方法不存在，手动计算
-    return sum + ((item?.weight || 0) * (item?.stackCount || 1));
-  }, 0);
-});
+  const items: ItemInfo[] = [];
+  let totalCount = 0;
+  let totalW = 0;
+  let totalV = 0;
 
-const totalValue = computed(() => {
-  return inventory.value.reduce((sum, item) => {
-    if (item && typeof item.getTotalValue === 'function') {
-      return sum + item.getTotalValue();
-    }
-    // 如果方法不存在，手动计算
-    return sum + ((item?.value || 0) * (item?.stackCount || 1));
-  }, 0);
-});
+  for (const item of props.unit.inventory) {
+    if (!item) continue;
+    const itemInfo: ItemInfo = {
+      uid: item.uid,
+      name: item.name,
+      description: item.description,
+      type: item.type,
+      rarity: item.rarity,
+      icon: item.icon,
+      stackCount: item.stackCount,
+      maxStack: item.maxStack,
+      weight: item.weight,
+      value: item.value,
+      totalWeight: item.getTotalWeight(),
+      totalValue: item.getTotalValue(),
+      canUse: item.canUse,
+      canEquip: item.canEquip,
+      properties: item.properties,
+    };
+    items.push(itemInfo);
+    totalCount += item.stackCount;
+    totalW += itemInfo.totalWeight;
+    totalV += itemInfo.totalValue;
+  }
+
+  inventory.value = items;
+  totalItems.value = totalCount;
+  totalWeight.value = totalW;
+  totalValue.value = totalV;
+};
 
 // 获取道具图标
 const getItemIcon = (type: ItemType): string => {
@@ -290,104 +326,144 @@ const getRarityLabel = (rarity: ItemRarity): string => {
 };
 
 // 获取可用的目标单位（队伍中的其他玩家角色）
-const availableTargets = computed(() => {
-  if (!props.unit) return [];
-  
+const availableTargets = ref<Unit[]>([]);
+
+const updateAvailableTargets = () => {
+  if (!props.unit) {
+    availableTargets.value = [];
+    return;
+  }
+
   const map = golbalSetting.map;
-  if (!map || !map.sprites) return [];
-  
+  if (!map || !map.sprites) {
+    availableTargets.value = [];
+    return;
+  }
+
   // 获取所有玩家单位，排除自己
-  return map.sprites.filter((unit: Unit) => 
-    unit.party === 'player' && 
+  availableTargets.value = map.sprites.filter((unit: Unit) =>
+    unit.party === 'player' &&
     unit.id !== props.unit?.id &&
     unit.state !== 'dead'
   );
+};
+
+// 组件挂载时初始化
+onMounted(() => {
+  updateFunc();
+  updateAvailableTargets();
+  // 设置背包更新回调
+  ItemSystem.getInstance().setUpdateInventoryFunc(() => {
+    updateFunc();
+    updateAvailableTargets();
+  });
 });
 
+// 组件卸载时清理
+onUnmounted(() => {
+  // 清除背包更新回调
+  ItemSystem.getInstance().setUpdateInventoryFunc(null);
+});
+
+/**
+ * 通过 uid 从原始背包中查找 Item 对象
+ */
+const findOriginalItem = (uid: string): Item | null => {
+  if (!props.unit) return null;
+  return props.unit.inventory.find(item => item?.uid === uid) || null;
+};
+
 // 选择道具
-const selectItem = (item: Item) => {
-  selectedItem.value = item;
+const selectItem = (itemInfo: ItemInfo) => {
+  selectedItem.value = itemInfo;
 };
 
 // 开始给予道具
-const giveItem = (item: Item) => {
-  giveTargetItem.value = item;
-  giveStackAmount.value = item.stackCount;
+const giveItem = (itemInfo: ItemInfo) => {
+  giveTargetItem.value = itemInfo;
+  giveStackAmount.value = itemInfo.stackCount;
 };
 
 // 确认给予道具
-const confirmGive = async (target: Unit) => {
+const confirmGive = async (target: any) => {
   if (!giveTargetItem.value || !props.unit) return;
-  
-  const item = giveTargetItem.value;
-  const amount = item.maxStack > 1 ? giveStackAmount.value : item.stackCount;
-  
+
+  const itemInfo = giveTargetItem.value;
+  const amount = itemInfo.maxStack > 1 ? giveStackAmount.value : itemInfo.stackCount;
+
   // 验证数量
-  if (amount <= 0 || amount > item.stackCount) {
+  if (amount <= 0 || amount > itemInfo.stackCount) {
     MessageTipSystem.getInstance().setMessageQuickly('给予数量无效');
     return;
   }
-  
+
   // 从当前单位移除道具
-  const removedItem = props.unit.removeItem(item.uid, amount);
+  const removedItem = props.unit.removeItem(itemInfo.uid, amount);
   if (!removedItem) {
     MessageTipSystem.getInstance().setMessageQuickly('移除道具失败');
     return;
   }
-  
+
   // 添加到目标单位
   const success = target.addItem(removedItem);
   if (success) {
     MessageTipSystem.getInstance().setMessageQuickly(
-      `已将 ${item.name} x${amount} 给予 ${target.name}`
+      `已将 ${itemInfo.name} x${amount} 给予 ${target.name}`
     );
-    console.log(`道具转移: ${item.name} x${amount} 从 ${props.unit.name} 到 ${target.name}`);
+    console.log(`道具转移: ${itemInfo.name} x${amount} 从 ${props.unit.name} 到 ${target.name}`);
   } else {
     // 如果添加失败，把道具还回去
     props.unit.addItem(removedItem);
     MessageTipSystem.getInstance().setMessageQuickly('目标背包已满或添加失败');
   }
-  
+
   // 关闭弹窗
   giveTargetItem.value = null;
 };
 
 // 使用道具
-const useItem = async (item: Item) => {
-  if (!item.canUse || !props.unit) {
+const useItem = async (itemInfo: ItemInfo) => {
+  if (!itemInfo.canUse || !props.unit) {
     return;
   }
-  
-  console.log('使用道具:', item.name);
-  
+
+  // 查找原始 Item 对象
+  const originalItem = findOriginalItem(itemInfo.uid);
+  if (!originalItem) {
+    MessageTipSystem.getInstance().setMessageQuickly('道具不存在');
+    return;
+  }
+
+  console.log('使用道具:', itemInfo.name);
+
   // 使用道具
-  ItemSystem.getInstance().useItem(item, props.unit);
+  ItemSystem.getInstance().useItem(originalItem, props.unit);
 
   // 使用后自动关闭背包界面
   emit('close');
 };
 
 // 装备道具
-const equipItem = (item: Item) => {
-  if (!item.canEquip) {
+const equipItem = (itemInfo: ItemInfo) => {
+  if (!itemInfo.canEquip) {
     return;
   }
-  
-  console.log('装备道具:', item.name);
+
+  console.log('装备道具:', itemInfo.name);
   // 这里可以添加实际的装备逻辑
-  alert(`装备了 ${item.name} (功能待实现)`);
+  alert(`装备了 ${itemInfo.name} (功能待实现)`);
 };
 
 // 丢弃道具
-const dropItem = async (item: Item) => {
+const dropItem = async (itemInfo: ItemInfo) => {
   if (!props.unit) {
     return;
   }
-  
-  const confirmed = await MessageTipSystem.getInstance().confirm(`确定要丢弃 ${item.name} (x${item.stackCount}) 吗？`);
+
+  const confirmed = await MessageTipSystem.getInstance().confirm(`确定要丢弃 ${itemInfo.name} (x${itemInfo.stackCount}) 吗？`);
   if (confirmed) {
-    props.unit.removeItem(item.uid);
-    console.log('丢弃道具:', item.name);
+    props.unit.removeItem(itemInfo.uid);
+    console.log('丢弃道具:', itemInfo.name);
   }
 };
 </script>

@@ -1,5 +1,6 @@
 import type { Unit } from "@/core/units/Unit";
 import type { Item } from "../Item";
+import { ItemSystem } from "@/core/system/ItemSystem";
 
 /**
  * 道具控制器抽象基类
@@ -46,8 +47,7 @@ export abstract class ItemController {
   async consume(): Promise<void> {
     if (this.item!.stackCount > 0) {
       console.log("consume 1");
-      //这里会造成大量的性能浪费
-      // if (this!.item) this.item.removeStack(1);
+      if (this!.item) this.item.removeStack(1);
     }
     if (this.item!.stackCount <= 0) {
       if (this.item) {
@@ -55,6 +55,8 @@ export abstract class ItemController {
         this.user?.removeItem(this.item?.uid);
       }
     }
+    // 触发背包UI更新
+    ItemSystem.getInstance().updateInventory();
   }
 
   /**

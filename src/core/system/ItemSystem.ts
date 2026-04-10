@@ -11,6 +11,8 @@ import type { Unit } from "../units/Unit";
 export class ItemSystem {
   private static instance: ItemSystem | null = null;
   private itemControllerPack: Map<string, ItemController> = new Map();
+  /** 背包UI更新回调函数 */
+  private updateInventoryFunc: (() => void) | null = null;
 
   static getInstance(): ItemSystem {
     if (!ItemSystem.instance) {
@@ -146,5 +148,23 @@ export class ItemSystem {
    */
   clearCache(): void {
     this.itemControllerPack.clear();
+  }
+
+  /**
+   * 设置背包UI更新回调函数
+   * @param func 更新回调函数
+   */
+  setUpdateInventoryFunc(func: (() => void) | null): void {
+    this.updateInventoryFunc = func;
+  }
+
+  /**
+   * 触发背包UI更新
+   * 在道具消耗后调用此方法通知UI刷新
+   */
+  updateInventory(): void {
+    if (this.updateInventoryFunc) {
+      this.updateInventoryFunc();
+    }
   }
 }
