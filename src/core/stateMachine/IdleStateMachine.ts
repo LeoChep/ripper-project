@@ -42,7 +42,7 @@ export class IdleStateMachineIdleStateMachine extends StateMachine {
   public doAction() {
    
     const spriteUnit = this.owner.animUnit;
-    console.log("IdleStateMachine执行doAction，单位位置:", this.owner,spriteUnit);
+    // console.log("IdleStateMachine执行doAction，单位位置:", this.owner,spriteUnit);
     if (!spriteUnit) {
       console.error("动画精灵不存在");
       return;

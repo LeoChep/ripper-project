@@ -100,7 +100,7 @@ export class FogSystem {
       .join("|");
     if (this.gridCache) {
       if (this.gridCache.playerPositions === playerPositionsKey) {
-        console.log("run: 玩家位置未变化，使用缓存的可视多边形");
+        // console.log("run: 玩家位置未变化，使用缓存的可视多边形");
         return false;
       }
     }
@@ -310,7 +310,7 @@ export class FogSystem {
         resolve(isReRender);
       });
       Promise.all([timePromise, versionCaculatePromise]).then((value) => {
-        console.log("autoDraw: 计算版本和时间都完成了，准备打孔", value);
+        // console.log("autoDraw: 计算版本和时间都完成了，准备打孔", value);
         const visiblePoints = value[1] as boolean;
         if (visiblePoints) {
           //打孔

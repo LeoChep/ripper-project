@@ -237,10 +237,10 @@ export class UnitAnimSpirite extends Container {
       if (direction === 2 || direction === 3) {
         // 如果是上下方向，使用当前已存储的左右方向，默认为右(0)
         direction = this?._direction ; // 保持当前左右方向不变
-        console.log(`单位 ${this.owner?.name} 只使用左右朝向，保持当前方向: ${direction}`);
+        // console.log(`单位 ${this.owner?.name} 只使用左右朝向，保持当前方向: ${direction}`);
       }
     }
-    console.log(`计算单位 ${this.owner?.name} 的动画朝向: ${direction} (onlySide: ${this._onlySide})`);
+    // console.log(`计算单位 ${this.owner?.name} 的动画朝向: ${direction} (onlySide: ${this._onlySide})`);
     return direction;
   }
   public getWASDDirection(): string {
