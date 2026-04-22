@@ -13,6 +13,8 @@ export class ItemSystem {
   private itemControllerPack: Map<string, ItemController> = new Map();
   /** 背包UI更新回调函数 */
   private updateInventoryFunc: (() => void) | null = null;
+  /** 增量更新回调函数 - 只更新单个道具 */
+  private updateSingleItemFunc: ((itemUid: string) => void) | null = null;
 
   static getInstance(): ItemSystem {
     if (!ItemSystem.instance) {
@@ -159,12 +161,30 @@ export class ItemSystem {
   }
 
   /**
+   * 设置单个道具增量更新回调函数
+   * @param func 增量更新回调函数
+   */
+  setUpdateSingleItemFunc(func: ((itemUid: string) => void) | null): void {
+    this.updateSingleItemFunc = func;
+  }
+
+  /**
    * 触发背包UI更新
    * 在道具消耗后调用此方法通知UI刷新
    */
   updateInventory(): void {
     if (this.updateInventoryFunc) {
       this.updateInventoryFunc();
+    }
+  }
+
+  /**
+   * 触发单个道具的增量更新
+   * @param itemUid 道具的 uid
+   */
+  updateSingleItem(itemUid: string): void {
+    if (this.updateSingleItemFunc) {
+      this.updateSingleItemFunc(itemUid);
     }
   }
 }

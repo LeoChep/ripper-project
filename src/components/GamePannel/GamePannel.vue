@@ -38,7 +38,7 @@ import TalkPannel from "../TalkPannel/TalkPannel.vue";
 import SaveLoadDialog from "../SaveLoadDialog/SaveLoadDialog.vue";
 import ChestLootDialog from "../ChestLootDialog/ChestLootDialog.vue";
 import { MessageTipSystem } from "@/core/system/MessageTipSystem";
-import { ref, onMounted } from "vue";
+import { ref, shallowRef, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import {
   getAnimActionSpriteJsonFile,
@@ -74,8 +74,8 @@ const route = useRoute();
 
 // 测试功能开关：控制是否显示格子行列号
 const showGridNumbers = ref(false);
-const selectedCreature = ref(null as Creature | null);
-const selectedUnit = ref(null as Unit | null);
+const selectedCreature = shallowRef(null as Creature | null);
+const selectedUnit = shallowRef(null as Unit | null);
 const creatureInfoPage = ref("basic"); // 添加页面状态
 onMounted(async () => {
   const app = new PIXI.Application();

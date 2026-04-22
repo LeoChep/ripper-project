@@ -55,8 +55,10 @@ export abstract class ItemController {
         this.user?.removeItem(this.item?.uid);
       }
     }
-    // 触发背包UI更新
-    ItemSystem.getInstance().updateInventory();
+    // 触发增量背包UI更新 - 只更新变化的道具
+    if (this.item) {
+      ItemSystem.getInstance().updateSingleItem(this.item.uid);
+    }
   }
 
   /**

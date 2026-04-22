@@ -196,7 +196,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, shallowRef, onMounted, onUnmounted } from 'vue';
 import type { Creature } from '@/core/units/Creature';
 import type { Unit } from '@/core/units/Unit';
 import type { Item } from '@/core/item/Item';
@@ -238,23 +238,80 @@ const selectedItem = ref<ItemInfo | null>(null);
 const giveTargetItem = ref<ItemInfo | null>(null);
 const giveStackAmount = ref<number>(1);
 
-// 静态数据 - 不使用响应式
-const inventory = ref<ItemInfo[]>([]);
-const totalItems = ref(0);
-const totalWeight = ref(0);
-const totalValue = ref(0);
+// 静态数据 - 使用 shallowRef 避免深度响应式
+const inventory = shallowRef<ItemInfo[]>([]);
+const totalItems = shallowRef(0);
+const totalWeight = shallowRef(0);
+const totalValue = shallowRef(0);
+
+// 道具变更追踪 - 用于增量更新
+const itemChanges = shallowRef<Set<string>>(new Set());
+// 道具信息缓存 - 按 uid 索引
+const itemCache = new Map<string, ItemInfo>();
 
 /**
- * 手动刷新背包数据
- * 不依赖 Vue 响应式，避免性能问题
+ * 增量更新单个道具
+ * 只更新发生变化的道具，不重新渲染整个列表
  */
-const updateFunc = () => {
+const updateSingleItem = (uid: string): void => {
   if (!props.unit) return;
 
+  const item = props.unit.inventory.find(i => i?.uid === uid);
+  if (!item) {
+    // 道具已被移除，从缓存中删除
+    itemCache.delete(uid);
+    itemChanges.value.add(uid);
+    return;
+  }
+
+  const newInfo: ItemInfo = {
+    uid: item.uid,
+    name: item.name,
+    description: item.description,
+    type: item.type,
+    rarity: item.rarity,
+    icon: item.icon,
+    stackCount: item.stackCount,
+    maxStack: item.maxStack,
+    weight: item.weight,
+    value: item.value,
+    totalWeight: item.getTotalWeight(),
+    totalValue: item.getTotalValue(),
+    canUse: item.canUse,
+    canEquip: item.canEquip,
+    properties: item.properties,
+  };
+
+  const oldInfo = itemCache.get(uid);
+
+  // 检查是否真的发生了变化
+  let hasChanged = !oldInfo;
+  if (oldInfo) {
+    hasChanged =
+      oldInfo.stackCount !== newInfo.stackCount ||
+      oldInfo.totalWeight !== newInfo.totalWeight ||
+      oldInfo.totalValue !== newInfo.totalValue;
+  }
+
+  if (hasChanged) {
+    itemCache.set(uid, newInfo);
+    itemChanges.value.add(uid);
+  }
+};
+
+/**
+ * 完全刷新背包数据
+ * 仅在初始化或道具数量变化时调用
+ */
+const fullUpdate = () => {
+  if (!props.unit) return;
+
+  itemCache.clear();
   const items: ItemInfo[] = [];
   let totalCount = 0;
   let totalW = 0;
   let totalV = 0;
+  const changedUids = new Set<string>();
 
   for (const item of props.unit.inventory) {
     if (!item) continue;
@@ -276,6 +333,8 @@ const updateFunc = () => {
       properties: item.properties,
     };
     items.push(itemInfo);
+    itemCache.set(item.uid, itemInfo);
+    changedUids.add(item.uid);
     totalCount += item.stackCount;
     totalW += itemInfo.totalWeight;
     totalV += itemInfo.totalValue;
@@ -285,6 +344,102 @@ const updateFunc = () => {
   totalItems.value = totalCount;
   totalWeight.value = totalW;
   totalValue.value = totalV;
+  itemChanges.value = changedUids;
+};
+
+/**
+ * 应用增量更新
+ * 将缓存的变更同步到 inventory 数组
+ */
+const applyIncrementalUpdate = () => {
+  if (itemChanges.value.size === 0) return;
+
+  const currentList = [...inventory.value];
+  let needsRebuild = false;
+  let totalW = 0;
+  let totalV = 0;
+  let totalCount = 0;
+
+  // 检查是否有道具被移除
+  const currentUids = new Set(currentList.map(i => i.uid));
+  for (const uid of currentUids) {
+    if (!itemCache.has(uid)) {
+      needsRebuild = true;
+      break;
+    }
+  }
+
+  // 检查是否有新道具
+  for (const uid of itemCache.keys()) {
+    if (!currentUids.has(uid)) {
+      needsRebuild = true;
+      break;
+    }
+  }
+
+  if (needsRebuild) {
+    // 道具列表结构变化，需要重建
+    inventory.value = Array.from(itemCache.values());
+  } else {
+    // 只更新变化的道具
+    for (const uid of itemChanges.value) {
+      const itemInfo = itemCache.get(uid);
+      if (!itemInfo) continue;
+
+      const index = currentList.findIndex(i => i.uid === uid);
+      if (index !== -1) {
+        currentList[index] = itemInfo;
+      }
+    }
+    inventory.value = currentList;
+  }
+
+  // 重新计算统计
+  for (const item of inventory.value) {
+    totalCount += item.stackCount;
+    totalW += item.totalWeight;
+    totalV += item.totalValue;
+  }
+
+  totalItems.value = totalCount;
+  totalWeight.value = totalW;
+  totalValue.value = totalV;
+
+  // 清空变更集合
+  itemChanges.value.clear();
+};
+
+/**
+ * 手动刷新背包数据（智能更新）
+ * 自动判断是完全刷新还是增量更新
+ */
+let lastInventoryLength = -1;
+const updateFunc = () => {
+  if (!props.unit) return;
+
+  const currentLength = props.unit.inventory.length;
+
+  // 道具数量变化，执行完全刷新
+  if (currentLength !== lastInventoryLength) {
+    lastInventoryLength = currentLength;
+    fullUpdate();
+    return;
+  }
+
+  // 道具数量没变，检查每个道具是否有变化
+  let hasChanges = false;
+  for (const item of props.unit.inventory) {
+    if (!item) continue;
+    const cached = itemCache.get(item.uid);
+    if (!cached || cached.stackCount !== item.stackCount) {
+      updateSingleItem(item.uid);
+      hasChanges = true;
+    }
+  }
+
+  if (hasChanges) {
+    applyIncrementalUpdate();
+  }
 };
 
 // 获取道具图标
@@ -326,7 +481,7 @@ const getRarityLabel = (rarity: ItemRarity): string => {
 };
 
 // 获取可用的目标单位（队伍中的其他玩家角色）
-const availableTargets = ref<Unit[]>([]);
+const availableTargets = shallowRef<Unit[]>([]);
 
 const updateAvailableTargets = () => {
   if (!props.unit) {
@@ -357,12 +512,19 @@ onMounted(() => {
     updateFunc();
     updateAvailableTargets();
   });
+  // 设置单个道具增量更新回调
+  ItemSystem.getInstance().setUpdateSingleItemFunc((itemUid: string) => {
+    updateSingleItem(itemUid);
+    applyIncrementalUpdate();
+  });
 });
 
 // 组件卸载时清理
 onUnmounted(() => {
   // 清除背包更新回调
   ItemSystem.getInstance().setUpdateInventoryFunc(null);
+  // 清除单个道具增量更新回调
+  ItemSystem.getInstance().setUpdateSingleItemFunc(null);
 });
 
 /**
@@ -417,6 +579,10 @@ const confirmGive = async (target: any) => {
     MessageTipSystem.getInstance().setMessageQuickly('目标背包已满或添加失败');
   }
 
+  // 道具转移后触发完全刷新
+  fullUpdate();
+  updateAvailableTargets();
+
   // 关闭弹窗
   giveTargetItem.value = null;
 };
@@ -464,6 +630,8 @@ const dropItem = async (itemInfo: ItemInfo) => {
   if (confirmed) {
     props.unit.removeItem(itemInfo.uid);
     console.log('丢弃道具:', itemInfo.name);
+    // 道具移除后触发完全刷新
+    fullUpdate();
   }
 };
 </script>
