@@ -1,0 +1,125 @@
+{
+  "name": "黑色剑士",
+  "nameEn": "Black Swordsman",
+  "level": 6,
+  "role": "精英士兵",
+  "xp": 250,
+  "size": "中型",
+  "type": "类人生物",
+  "origin": "",
+  "hp": 108,
+  "maxHp": 108,
+  "bloodied": 54,
+  "ac": 20,
+  "fortitude": 18,
+  "reflex": 16,
+  "will": 17,
+  "speed": 6,
+  "fly": null,
+  "initiative": 7,
+  "senses": "",
+  "immunities": [],
+  "resistances": [],
+  "alignment": "邪恶中立",
+  "languages": [
+    "通用语"
+  ],
+  "skills": [
+    "特技+11",
+    "察觉+10"
+  ],
+  "abilities": {
+    "STR": {
+      "value": 18,
+      "modifier": 7
+    },
+    "DEX": {
+      "value": 16,
+      "modifier": 6
+    },
+    "CON": {
+      "value": 14,
+      "modifier": 5
+    },
+    "INT": {
+      "value": 10,
+      "modifier": 3
+    },
+    "WIS": {
+      "value": 12,
+      "modifier": 4
+    },
+    "CHA": {
+      "value": 10,
+      "modifier": 3
+    }
+  },
+  "equipment": [
+    "黑钢长剑",
+    "黑暗皮甲"
+  ],
+  "weapons": [
+    {
+      "name": "黑钢长剑",
+      "type": "Melee",
+      "action": "武器",
+      "range": 1,
+      "proficiency": 3,
+      "bonus": 10,
+      "target": "ac",
+      "weapon": "2d8+4",
+      "damage": "2d8+4",
+      "effect": "",
+      "missEffect": null
+    }
+  ],
+  "powers": [
+    {
+      "name": "基本近战：黑钢长剑",
+      "displayName": "基本近战：黑钢长剑",
+      "useType": "atwill",
+      "actionType": "standard",
+      "range": "近战 1",
+      "target": "一个生物",
+      "description": "攻击：近战 1（一个生物）+10vs.AC\n命中：2d8+4 伤害。",
+      "damage": "2d8+4",
+      "attackBonus": "+10 vs. AC",
+      "missEffect": null
+    },
+    {
+      "name": "暗影斩",
+      "displayName": "暗影斩",
+      "useType": "encounter",
+      "actionType": "standard",
+      "range": "近战 1",
+      "target": "一个生物",
+      "description": "攻击：近战 1（一个生物）+10vs.反射\n命中：3d8+4 暗影伤害，且目标受到-2减值到所有防御值直到该黑色剑士的下一回合结束。",
+      "damage": "3d8+4",
+      "attackBonus": "+10 vs. Reflex",
+      "missEffect": null
+    },
+    {
+      "name": "黑暗斗篷",
+      "displayName": "黑暗斗篷",
+      "useType": "atwill",
+      "actionType": "minor",
+      "range": "个人",
+      "target": "自身",
+      "description": "效果：该黑色剑士获得隐蔽直到其下一回合开始。如果该黑色剑士已经隐蔽，则改为隐形。",
+      "damage": null,
+      "attackBonus": null,
+      "missEffect": null
+    }
+  ],
+  "traits": [
+    {
+      "name": "暗影护盾",
+      "displayName": "暗影护盾",
+      "description": "该黑色剑士在对抗光属性攻击时防御值+2。在受到光属性伤害时，可以作为自由动作获得伤害值+5的临时生命值。",
+      "icon": "",
+      "type": "passive"
+    }
+  ],
+  "feats": [],
+  "notes": []
+}
